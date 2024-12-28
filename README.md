@@ -1,15 +1,10 @@
 # Python Project Template
 
-This is a template for creating Python projects. It includes a basic project structure, configuration files, and setup scripts to help you get started quickly.
+This is a project to unify and analyse data from different ICU data sources.
 
 ## Features
 
-- 📁 Pre-configured with `poetry` for dependency management
-- 🪛 Linting with `ruff`
-- 🔧 Type checking with `mypy`
-- 🧪 Testing with `pytest`
-- 📝 Pre-commit hooks for code quality
-- 📦 Uses `dev container` for development setup
+- TODO
 
 ## Getting Started
 
