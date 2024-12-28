@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "project_name"  # TODO
+description = "Template for python project"  # TODO
+version = "1.0.0"
+license = "MIT"
+authors = ["Paul-B98 <115164840+Paul-B98@users.noreply.github.com>"]
+readme = "README.md"
+homepage = "https://github.com/Paul-B98/python-project-template"  # TODO
+repository = "https://github.com/Paul-B98/python-project-template"  # TODO
+documentation = "https://github.com/Paul-B98/python-project-template"  # TODO
+keywords = ["shopware", "api", "client"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.urls]
+Changelog = "https://github.com/Paul-B98/python-project-template"  # TODO
+Bugtracker = "https://github.com/Paul-B98/python-project-template"  # TODO
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.14.0"
+pytest = "^8.0.2"
+coverage = "^7.6.10"
+pytest-cov = "^6.0.0"
+ruff = "^0.8.4"
+pytest-asyncio = "^0.25.0"
+pytest-recording = "^0.13.1"
+pytest-random-order = "^1.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+strict_optional = true
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "*_test.py"]
+filterwarnings = ["ignore::DeprecationWarning"]
+asyncio_mode = "auto"
+addopts = [
+    "--cov",
+    "--cov-branch",
+    "--cov=src",
+    "--cov-report=xml",
+    "--import-mode=importlib",
+    "--random-order",
+]

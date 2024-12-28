@@ -1,0 +1,46 @@
+{
+	"name": "Python project",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "project",
+	"workspaceFolder": "/workspaces",
+	"remoteUser": "vscode",
+	"postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+	"postStartCommand": "bash .devcontainer/scripts/post-start.sh",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.mypy-type-checker",
+				"tamasfe.even-better-toml",
+				"charliermarsh.ruff",
+				"ryanluker.vscode-coverage-gutters",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"ms-vsliveshare.vsliveshare",
+				"GitHub.vscode-pull-request-github",
+				"github.vscode-github-actions"
+			],
+			"settings": {
+				"[python]": {
+					"editor.defaultFormatter": "charliermarsh.ruff",
+					"editor.codeActionsOnSave": {
+						"source.fixAll": true,
+						"source.organizeImports": true
+					},
+					"files.eol": "\n"
+				},
+				"mypy-type-checker.importStrategy": "fromEnvironment",
+				"mypy-type-checker.args": [
+					"--config-file=${workspaceFolder}/pyproject.toml"
+				],
+				"python.analysis.typeCheckingMode": "basic",
+				"coverage-gutters.coverageBaseDir": "/workspaces/src",
+				"coverage-gutters.coverageFileNames": [
+					"coverage.xml"
+				]
+			}
+		}
+	},
+	"forwardPorts": [],
+	"initializeCommand": "bash .devcontainer/scripts/initialize.sh"
+}

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  project:
+    container_name: project  # TODO change this to your project name
+    init: true
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    environment:
+      - no_proxy="127.0.0.1,localhost"
+      - NO_PROXY="127.0.0.1,localhost"
+    volumes:
+      - ..:/workspaces:cached
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity

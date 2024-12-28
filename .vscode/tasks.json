@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "run pre-commit",
+            "type": "shell",
+            "command": "pre-commit run --all-files",
+            "problemMatcher": []
+        },
+        {
+            "label": "update pre-commit",
+            "type": "shell",
+            "command": "pre-commit autoupdate",
+            "problemMatcher": []
+        }
+    ]
+}
