@@ -18,7 +18,8 @@
 				"GitHub.copilot-chat",
 				"ms-vsliveshare.vsliveshare",
 				"GitHub.vscode-pull-request-github",
-				"github.vscode-github-actions"
+				"github.vscode-github-actions",
+				"ms-toolsai.jupyter"
 			],
 			"settings": {
 				"[python]": {

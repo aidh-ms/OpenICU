@@ -21,6 +21,15 @@ Bugtracker = "https://github.com/aidh-ms/OpenICU/issues"
 
 [tool.poetry.dependencies]
 python = "^3.13"
+sqlalchemy = "^2.0.36"
+psycopg = {extras = ["binary"], version = "^3.2.3"}
+pandera = {extras = ["strategies"], version = "^0.22.0"}
+pandas = "^2.2.3"
+pandas-stubs = "^2.2.3.241126"
+pydantic = "^2.10.4"
+pyyaml = "^6.0.2"
+types-pyyaml = "^6.0.12.20241221"
+pyarrow = "^18.1.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.14.0"
@@ -31,6 +40,7 @@ ruff = "^0.8.4"
 pytest-asyncio = "^0.25.0"
 pytest-recording = "^0.13.1"
 pytest-random-order = "^1.1.1"
+jupyterlab = "^4.3.4"
 
 [build-system]
 requires = ["poetry-core"]
