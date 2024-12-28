@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "project_name"  # TODO
-description = "Template for python project"  # TODO
+name = "open_icu"
+description = "This is a project to unify and analyse data from different ICU data sources."
 version = "1.0.0"
 license = "MIT"
-authors = ["Paul-B98 <115164840+Paul-B98@users.noreply.github.com>"]
+authors = ["ADIH MS"]
 readme = "README.md"
-homepage = "https://github.com/Paul-B98/python-project-template"  # TODO
-repository = "https://github.com/Paul-B98/python-project-template"  # TODO
-documentation = "https://github.com/Paul-B98/python-project-template"  # TODO
+homepage = "https://github.com/aidh-ms/OpenICU"
+repository = "https://github.com/aidh-ms/OpenICU"
+documentation = "https://github.com/aidh-ms/OpenICU"
 keywords = ["shopware", "api", "client"]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -16,8 +16,8 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-Changelog = "https://github.com/Paul-B98/python-project-template"  # TODO
-Bugtracker = "https://github.com/Paul-B98/python-project-template"  # TODO
+Changelog = "https://github.com/aidh-ms/OpenICU/releases"
+Bugtracker = "https://github.com/aidh-ms/OpenICU/issues"
 
 [tool.poetry.dependencies]
 python = "^3.13"

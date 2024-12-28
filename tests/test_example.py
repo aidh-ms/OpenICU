@@ -1,4 +1,4 @@
-from project_name.main import run
+from open_icu.main import run
 
 
 def test_placeholder() -> None:
