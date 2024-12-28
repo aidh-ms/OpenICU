@@ -1,7 +1,7 @@
 {
-	"name": "Python project",
+	"name": "OpenICU",
 	"dockerComposeFile": "docker-compose.yml",
-	"service": "project",
+	"service": "openicu",
 	"workspaceFolder": "/workspaces",
 	"remoteUser": "vscode",
 	"postCreateCommand": "bash .devcontainer/scripts/post-create.sh",

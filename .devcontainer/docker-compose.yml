@@ -1,8 +1,10 @@
 version: '3.8'
 
 services:
-  project:
-    container_name: project  # TODO change this to your project name
+  openicu:
+    container_name: openicu
+    extra_hosts:
+      - host.docker.internal:host-gateway
     init: true
     build:
       context: ..
