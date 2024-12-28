@@ -8,7 +8,7 @@ readme = "README.md"
 homepage = "https://github.com/aidh-ms/OpenICU"
 repository = "https://github.com/aidh-ms/OpenICU"
 documentation = "https://github.com/aidh-ms/OpenICU"
-keywords = ["shopware", "api", "client"]
+keywords = ["Data", "ICU", "Healthcare", "Analysis"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
