@@ -28,7 +28,7 @@ pandas = "^2.2.3"
 pandas-stubs = "^2.2.3.241126"
 pydantic = "^2.10.4"
 pyyaml = "^6.0.2"
-types-pyyaml = "^6.0.12.20241221"
+types-pyyaml = "^6.0.12.20241230"
 pyarrow = "^18.1.0"
 
 [tool.poetry.group.dev.dependencies]
