@@ -1,0 +1,6 @@
+name: eicu
+connection: postgresql+psycopg://paul@host.docker.internal:5433/eicu
+
+sample:
+  table: eicu_crd.patient
+  field: patienthealthsystemstayid

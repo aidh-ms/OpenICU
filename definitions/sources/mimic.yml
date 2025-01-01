@@ -1,0 +1,6 @@
+name: mimic
+connection: postgresql+psycopg://paul@host.docker.internal:5433/mimiciv
+
+sample:
+  table: mimiciv_icu.icustays
+  field: subject_id
