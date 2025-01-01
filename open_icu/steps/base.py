@@ -1,18 +1,64 @@
+from __future__ import annotations
+
 from abc import ABC
+from pathlib import Path
+from typing import Iterator, TypeVar
+
+import yaml
+from pydantic import BaseModel
+
+from open_icu.types.base import SubjectData
+
+T = TypeVar("T", bound=BaseModel)
 
 
 class BaseStep(ABC):
-    def pre_process(self) -> None:
+    def __init__(self, config_path: Path | None = None, parent: BaseStep | None = None) -> None:
+        self._parent = parent
+        self._config_path = config_path
+
+    def __rrshift__(self, other: BaseStep) -> BaseStep:
+        self._parent = other
+        return self
+
+    def __call__(self) -> Iterator[SubjectData]:
+        if self._parent is None:
+            raise StopIteration
+
+        for subject_data in self._parent():
+            subject_data = self.pre_process(subject_data)
+
+            self.validate(subject_data)
+            subject_data = self.process(subject_data)
+            if not self.filter(subject_data):
+                continue
+
+            subject_data = self.post_process(subject_data)
+
+            yield subject_data
+
+    def _read_config(self, config_path: Path, config_type: type[T]) -> list[T]:
+        if self._config_path is None:
+            return []
+
+        confs = []
+        for conf in config_path.glob("*.yml"):
+            with open(conf, "r") as f:
+                confs.append(config_type(**yaml.safe_load(f)))
+
+        return confs
+
+    def pre_process(self, subject_data: SubjectData) -> SubjectData:
+        return subject_data
+
+    def validate(self, subject_data: SubjectData) -> None:
         pass
 
-    def process(self) -> None:
-        pass
+    def process(self, subject_data: SubjectData) -> SubjectData:
+        return subject_data
 
-    def post_process(self) -> None:
-        pass
+    def filter(self, subject_data: SubjectData) -> bool:
+        return True
 
-    def filter(self) -> None:
-        pass
-
-    def validate(self) -> None:
-        pass
+    def post_process(self, subject_data: SubjectData) -> SubjectData:
+        return subject_data
