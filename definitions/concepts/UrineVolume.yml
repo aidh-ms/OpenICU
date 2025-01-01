@@ -11,7 +11,7 @@ limits:
 
 sources:
   - source: mimic
-    extractor: open_icu.sources.mimic.observation.raw_sql_observation_extractor
+    extractor: open_icu.steps.source.mimic.observation.RAWObservationExtractor
     unit:
       value: ml
     params:
@@ -21,4 +21,4 @@ sources:
         FROM mimiciv_derived.urine_output
         JOIN mimiciv_icu.icustays
           ON mimiciv_icu.icustays.stay_id = mimiciv_derived.urine_output.stay_id
-        WHERE subject_id = {{ .inputs.subject_id }}
+        WHERE subject_id = {subject_id}
