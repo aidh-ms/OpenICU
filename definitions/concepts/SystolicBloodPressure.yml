@@ -11,7 +11,7 @@ limits:
 
 sources:
   - source: mimic
-    extractor: open_icu.sources.mimic.observation.event_observation_extractor
+    extractor: open_icu.steps.source.mimic.observation.EventObservationExtractor
     unit:
       value: mmHg
     params:
