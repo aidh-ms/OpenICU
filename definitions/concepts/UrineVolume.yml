@@ -1,0 +1,24 @@
+name: UrineVolume
+description: Urine Volume measured at a certain point in time
+identifiers:
+  loinc: ''
+  snomed: ''
+unit:
+  value: ml
+limits:
+  lower: '0'
+  upper: '10000'
+
+sources:
+  - source: mimic
+    extractor: open_icu.sources.mimic.observation.raw_sql_observation_extractor
+    unit:
+      value: ml
+    params:
+      sql: |
+        SELECT
+          subject_id, urineoutput as value, charttime as timestamp
+        FROM mimiciv_derived.urine_output
+        JOIN mimiciv_icu.icustays
+          ON mimiciv_icu.icustays.stay_id = mimiciv_derived.urine_output.stay_id
+        WHERE subject_id = {{ .inputs.subject_id }}

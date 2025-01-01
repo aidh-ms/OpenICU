@@ -1,0 +1,31 @@
+name: Norepinephrine_dosage
+description: Norepinephrine dosage administered to the patient
+identifiers:
+  loinc: ''
+  snomed: ''
+unit:
+  dose_value: mcg
+  dose_unit: mcg/min
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    extractor: MimicDosageMapper  # TODO
+    unit:
+      dose_value: mg
+      dose_unit: mcg/kg/min
+    params:
+      itemid: '221906'
+      table: mimiciv_icu.inputevents
+  # - source: eicu
+  #   extractor: EICUInfusionDosageMapper
+  #   unit:
+  #     dose_value: mcg # Todo
+  #     dose_unit: mcg/min # Todo
+  #   params:
+  #     constraints:
+  #       drugname: Norepinephrine (mcg/min)
+  #     schema: eicu_crd
+  #     table: infusiondrug

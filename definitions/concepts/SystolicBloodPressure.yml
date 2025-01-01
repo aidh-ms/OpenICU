@@ -1,0 +1,37 @@
+name: SystolicBloodPressure
+description: Systolic blood pressure measured by any means, invasive or non-invasive.
+identifiers:
+  loinc: '8480-6'
+  snomed: '271649006'
+unit:
+  value: mmHg
+limits:
+  lower: '0'
+  upper: '350'
+
+sources:
+  - source: mimic
+    extractor: open_icu.sources.mimic.observation.event_observation_extractor
+    unit:
+      value: mmHg
+    params:
+      table: mimiciv_icu.chartevents
+      itemid: [220050, 220179]
+  # - source: eicu
+  #   extractor: EICUObservationMapper
+  #   unit:
+  #     value: mmHg
+  #   params:
+  #     fields:
+  #       value: systemicsystolic
+  #     schema: eicu_crd
+  #     table: vitalperiodic
+  # - source: eicu
+  #   extractor: EICUObservationMapper
+  #   unit:
+  #     value: mmHg
+  #   params:
+  #     fields:
+  #       value: noninvasivesystolic
+  #     schema: eicu_crd
+  #     table: vitalaperiodic
