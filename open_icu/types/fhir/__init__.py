@@ -1,8 +1,8 @@
 from open_icu.types.fhir.base import (
-    AbstractFHIRSchema,
     CodeableConcept,
     CodeableReference,
     Coding,
+    FHIRSchema,
     Period,
     Quantity,
     Reference,
@@ -13,7 +13,7 @@ from open_icu.types.fhir.medication import Dosage, FHIRMedicationStatement
 from open_icu.types.fhir.observation import FHIRObservation
 
 __all__ = [
-    "AbstractFHIRSchema",
+    "FHIRSchema",
     "Reference",
     "Quantity",
     "Period",

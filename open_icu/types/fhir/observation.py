@@ -4,14 +4,14 @@ import pandas as pd
 from pandera.typing import Series
 
 from open_icu.types.fhir import (
-    AbstractFHIRSchema,
     CodeableConcept,
+    FHIRSchema,
     Quantity,
     Reference,
 )
 
 
-class FHIRObservation(AbstractFHIRSchema):
+class FHIRObservation(FHIRSchema):
     """
     A class representing the FHIR Observation schema.
 

@@ -1,13 +1,13 @@
 from pandera.typing import Series
 
 from open_icu.types.fhir import (
-    AbstractFHIRSchema,
+    FHIRSchema,
     Period,
     Reference,
 )
 
 
-class FHIREncounter(AbstractFHIRSchema):
+class FHIREncounter(FHIRSchema):
     """
     A class representing the FHIR Encounter schema.
 

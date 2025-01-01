@@ -33,7 +33,7 @@ class Quantity(TypedDict):
         The unit of the quantity.
     """
 
-    value: float
+    value: float | int | str
     unit: str
 
 
@@ -95,7 +95,7 @@ class CodeableReference(TypedDict):
     concept: CodeableConcept
 
 
-class AbstractFHIRSchema(pa.DataFrameModel):
+class FHIRSchema(pa.DataFrameModel):
     """
     Abstract class for FHIR sink schemas.
 

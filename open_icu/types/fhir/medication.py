@@ -3,8 +3,8 @@ from typing import TypedDict
 from pandera.typing import Series
 
 from open_icu.types.fhir import (
-    AbstractFHIRSchema,
     CodeableReference,
+    FHIRSchema,
     Period,
     Quantity,
     Reference,
@@ -27,7 +27,7 @@ class Dosage(TypedDict):
     rate_quantity: Quantity
 
 
-class FHIRMedicationStatement(AbstractFHIRSchema):
+class FHIRMedicationStatement(FHIRSchema):
     """
     A class representing the FHIR MedicationStatement schema.
 

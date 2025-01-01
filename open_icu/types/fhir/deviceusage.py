@@ -4,13 +4,13 @@ import pandas as pd
 from pandera.typing import Series
 
 from open_icu.types.fhir import (
-    AbstractFHIRSchema,
     CodeableReference,
+    FHIRSchema,
     Reference,
 )
 
 
-class FHIRDeviceUsage(AbstractFHIRSchema):
+class FHIRDeviceUsage(FHIRSchema):
     """
     A class representing the FHIR DeviceUsage schema.
 
