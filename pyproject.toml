@@ -32,7 +32,7 @@ types-pyyaml = "^6.0.12.20241221"
 pyarrow = "^18.1.0"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.14.0"
+mypy = "^1.14.1"
 pytest = "^8.0.2"
 coverage = "^7.6.10"
 pytest-cov = "^6.0.0"
