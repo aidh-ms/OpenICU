@@ -4,7 +4,7 @@ from typing import Annotated, Generic, TypeVar, cast
 import pandas as pd
 from pandera.typing import DataFrame
 
-from open_icu.steps.source.base import PandasDatabaseMixin
+from open_icu.steps.source.database import PandasDatabaseMixin
 from open_icu.types.conf.concept import Concept, ConceptSource
 from open_icu.types.conf.source import SourceConfig
 from open_icu.types.fhir import CodeableConcept, Coding, FHIRObservation, FHIRSchema, Quantity, Reference

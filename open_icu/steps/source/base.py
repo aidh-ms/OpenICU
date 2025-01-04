@@ -4,69 +4,13 @@ from typing import Iterator
 
 import pandas as pd
 from pandera.typing import DataFrame
-from sqlalchemy import Connection, create_engine
 
 from open_icu.steps.base import BaseStep
+from open_icu.steps.source.concept import ConceptExtractor
+from open_icu.steps.source.sample import SQLSampler
 from open_icu.types.base import FHIRSchema, SubjectData
 from open_icu.types.conf.concept import Concept
 from open_icu.types.conf.source import SourceConfig
-
-
-class PandasDatabaseMixin:
-    def _create_conn(self, connection_uri: str) -> Connection:
-        engine = create_engine(connection_uri)
-        return engine.connect().execution_options(stream_results=True)
-
-    def iter_query_df(
-        self,
-        connection_uri: str,
-        sql: str = "",
-        chunksize: int | None = None,
-        **kwargs: str,
-    ) -> Iterator[DataFrame]:
-        with (
-            self._create_conn(connection_uri) as conn,
-            conn.begin(),
-        ):
-            for df in pd.read_sql_query(sql.format(**kwargs), conn, chunksize=chunksize):
-                assert isinstance(df, pd.DataFrame)
-                yield df.pipe(DataFrame)
-
-    def get_query_df(
-        self,
-        connection_uri: str,
-        sql: str = "",
-        **kwargs: str,
-    ) -> DataFrame:
-        with (
-            self._create_conn(connection_uri) as conn,
-            conn.begin(),
-        ):
-            df = pd.read_sql_query(sql.format(**kwargs), conn, chunksize=None)
-            assert isinstance(df, pd.DataFrame)
-            return df.pipe(DataFrame)
-
-
-class Sampler(PandasDatabaseMixin):
-    QUERY = """
-        SELECT DISTINCT {fields}
-        FROM {table}
-    """
-
-    def __init__(self, source_config: SourceConfig) -> None:
-        self._source_config = source_config
-
-    def sample(self) -> Iterator[SubjectData]:
-        for df in self.iter_query_df(
-            connection_uri=self._source_config.connection_uri,
-            sql=self.QUERY,
-            chunksize=1,
-            table=self._source_config.sample.table,
-            fields=self._source_config.sample.field,
-        ):
-            yield SubjectData(
-                id=str(df.loc[0, self._source_config.sample.field]), source=self._source_config.name, data={}
-            )
 
 
 class SourceStep(BaseStep):
@@ -81,7 +25,7 @@ class SourceStep(BaseStep):
 
     def __call__(self) -> Iterator[SubjectData]:
         for source_config in self._source_conigs.values():
-            sampler = Sampler(source_config)
+            sampler = SQLSampler(source_config)
 
             for subject_data in sampler.sample():
                 subject_data = self.pre_process(subject_data)
@@ -105,7 +49,7 @@ class SourceStep(BaseStep):
                 module_name, cls_name = concept_source.extractor.rsplit(".", 1)
                 module = import_module(module_name)
                 cls = getattr(module, cls_name)
-                extractor = cls(subject_data.id, source, concept, concept_source)
+                extractor: ConceptExtractor = cls(subject_data.id, source, concept, concept_source)
 
                 concept_data = extractor()
                 if concept_data is None:
