@@ -6,17 +6,19 @@ from pandera.typing import DataFrame
 
 from open_icu.steps.source.base import PandasDatabaseMixin
 from open_icu.types.conf.concept import Concept, ConceptSource
+from open_icu.types.conf.source import SourceConfig
 from open_icu.types.fhir import CodeableConcept, Coding, FHIRObservation, FHIRSchema, Quantity, Reference
 
 F = TypeVar("F", bound=FHIRSchema)
 
 
 class ConceptExtractor(ABC, Generic[F]):
-    def __init__(self, subject_id: str, concept: Concept, source: ConceptSource) -> None:
+    def __init__(self, subject_id: str, source: SourceConfig, concept: Concept, concept_source: ConceptSource) -> None:
         self._source = source
         self._concept = concept
+        self._concept_source = concept_source
 
-        self._source.params["subject_id"] = subject_id
+        self._concept_source.params["subject_id"] = subject_id
 
     def __call__(self) -> DataFrame[F] | None:
         return self.extract()
@@ -27,11 +29,8 @@ class ConceptExtractor(ABC, Generic[F]):
 
 
 class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObservation]):
-    def __init__(self, connection_uri: str, subject_id: str, concept: Concept, source: ConceptSource) -> None:
-        super().__init__(connection_uri, subject_id, concept, source)
-
     def _apply_subject(self, df: DataFrame) -> Reference:
-        return Reference(reference=str(df["subject_id"]), type=self._source.source)
+        return Reference(reference=str(df["subject_id"]), type=self._concept_source.source)
 
     def _apply_effective_date_time(self, df: DataFrame) -> Annotated[pd.DatetimeTZDtype, "ns", "utc"]:
         return cast(Annotated[pd.DatetimeTZDtype, "ns", "utc"], pd.to_datetime(df["timestamp"], utc=True))
@@ -39,7 +38,7 @@ class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObservation
     def _apply_value_quantity(self, df: DataFrame) -> Quantity:
         value = df["value"]
         assert isinstance(value, (int, float, str))
-        return Quantity(value=value, unit=self._source.unit["value"])
+        return Quantity(value=value, unit=self._concept_source.unit["value"])
 
     def _apply_code(self, df: DataFrame) -> list[CodeableConcept]:
         return [
@@ -48,7 +47,7 @@ class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObservation
         ]
 
     def extract(self) -> DataFrame[FHIRObservation] | None:
-        df: DataFrame = self.get_query_df(**self._source.params)
+        df: DataFrame = self.get_query_df(self._source.connection_uri, **self._concept_source.params)
 
         if df.empty:
             return None

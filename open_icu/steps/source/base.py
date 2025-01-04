@@ -1,7 +1,6 @@
-from functools import lru_cache
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Iterator
 
 import pandas as pd
 from pandera.typing import DataFrame
@@ -14,23 +13,19 @@ from open_icu.types.conf.source import SourceConfig
 
 
 class PandasDatabaseMixin:
-    def __init__(self, connection_uri: str, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._conn = self._create_conn(connection_uri)
-
-    @lru_cache
     def _create_conn(self, connection_uri: str) -> Connection:
         engine = create_engine(connection_uri)
         return engine.connect().execution_options(stream_results=True)
 
     def iter_query_df(
         self,
+        connection_uri: str,
         sql: str = "",
         chunksize: int | None = None,
         **kwargs: str,
     ) -> Iterator[DataFrame]:
         with (
-            self._conn as conn,
+            self._create_conn(connection_uri) as conn,
             conn.begin(),
         ):
             for df in pd.read_sql_query(sql.format(**kwargs), conn, chunksize=chunksize):
@@ -39,11 +34,12 @@ class PandasDatabaseMixin:
 
     def get_query_df(
         self,
+        connection_uri: str,
         sql: str = "",
         **kwargs: str,
     ) -> DataFrame:
         with (
-            self._conn as conn,
+            self._create_conn(connection_uri) as conn,
             conn.begin(),
         ):
             df = pd.read_sql_query(sql.format(**kwargs), conn, chunksize=None)
@@ -58,11 +54,11 @@ class Sampler(PandasDatabaseMixin):
     """
 
     def __init__(self, source_config: SourceConfig) -> None:
-        super().__init__(source_config.connection)
         self._source_config = source_config
 
     def sample(self) -> Iterator[SubjectData]:
         for df in self.iter_query_df(
+            connection_uri=self._source_config.connection_uri,
             sql=self.QUERY,
             chunksize=1,
             table=self._source_config.sample.table,
@@ -109,7 +105,7 @@ class SourceStep(BaseStep):
                 module_name, cls_name = concept_source.extractor.rsplit(".", 1)
                 module = import_module(module_name)
                 cls = getattr(module, cls_name)
-                extractor = cls(source.connection, subject_data.id, concept, concept_source)
+                extractor = cls(subject_data.id, source, concept, concept_source)
 
                 concept_data = extractor()
                 if concept_data is None:

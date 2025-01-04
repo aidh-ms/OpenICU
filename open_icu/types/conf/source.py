@@ -8,5 +8,5 @@ class SampleConfig(BaseModel):
 
 class SourceConfig(BaseModel):
     name: str
-    connection: str
+    connection_uri: str
     sample: SampleConfig
