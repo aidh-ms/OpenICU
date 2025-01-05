@@ -1,0 +1,19 @@
+name: Creatinine_absolute_serum
+description: Creatinine measured in serum.
+identifiers:
+  loinc: ''
+  snomed: ''
+unit:
+  value: mg/dl
+limits:
+  lower: '0'
+  upper: '1000000'
+
+sources:
+  - source: mimic
+    extractor: open_icu.steps.source.mimic.observation.EventObservationExtractor
+    unit:
+      value: mg/dl
+    params:
+      table: mimiciv_icu.chartevents
+      itemid: 220615
