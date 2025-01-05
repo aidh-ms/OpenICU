@@ -7,7 +7,6 @@ from open_icu.steps.source.concept.base import ConceptExtractor
 from open_icu.steps.source.database import PandasDatabaseMixin
 from open_icu.types.fhir import (
     CodeableConcept,
-    Coding,
     FHIRObservation,
     Quantity,
     Reference,
@@ -27,12 +26,7 @@ class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObservation
         return Quantity(value=value, unit=self._concept_source.unit["value"])
 
     def _apply_code(self, df: DataFrame) -> CodeableConcept:
-        return CodeableConcept(
-            coding=[
-                Coding(code=str(concept_id), system=concept_type)
-                for concept_type, concept_id in self._concept.identifiers.items()
-            ]
-        )
+        return self._get_concept_identifiers()
 
     def extract(self) -> DataFrame[FHIRObservation] | None:
         df: DataFrame = self.get_query_df(self._source.connection_uri, **self._concept_source.params)

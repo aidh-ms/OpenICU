@@ -1,10 +1,6 @@
 from pandera.typing import Series
 
-from open_icu.types.fhir import (
-    FHIRSchema,
-    Period,
-    Reference,
-)
+from open_icu.types.fhir import CodeableConcept, FHIRSchema, Period, Reference
 
 
 class FHIREncounter(FHIRSchema):
@@ -34,6 +30,7 @@ class FHIREncounter(FHIRSchema):
 
     _SINK_NAME = "encounter"
 
+    type: Series[CodeableConcept]  # type: ignore[type-var]
     subject: Series[Reference]  # type: ignore[type-var]
     actual_period: Series[Period]  # type: ignore[type-var]
     care_team: Series[Reference]  # type: ignore[type-var]

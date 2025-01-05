@@ -6,9 +6,7 @@ from pandera.typing import DataFrame
 from open_icu.steps.source.concept.base import ConceptExtractor
 from open_icu.steps.source.database import PandasDatabaseMixin
 from open_icu.types.fhir import (
-    CodeableConcept,
     CodeableReference,
-    Coding,
     FHIRDeviceUsage,
     Reference,
     StatusCodes,
@@ -23,14 +21,7 @@ class DeviceUsageExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRDeviceUsage
         return cast(Annotated[pd.DatetimeTZDtype, "ns", "utc"], pd.to_datetime(df["timestamp"], utc=True))
 
     def _apply_device(self, df: DataFrame) -> CodeableReference:
-        return CodeableReference(
-            concept=CodeableConcept(
-                coding=[
-                    Coding(code=str(concept_id), system=concept_type)
-                    for concept_type, concept_id in self._concept.identifiers.items()
-                ]
-            )
-        )
+        return CodeableReference(concept=self._get_concept_identifiers())
 
     def _apply_status(self, df: DataFrame) -> StatusCodes:
         return StatusCodes.IN_PROGRESS if df["status"] else StatusCodes.ON_HOLD

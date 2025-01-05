@@ -4,9 +4,7 @@ from pandera.typing import DataFrame
 from open_icu.steps.source.concept.base import ConceptExtractor
 from open_icu.steps.source.database import PandasDatabaseMixin
 from open_icu.types.fhir import (
-    CodeableConcept,
     CodeableReference,
-    Coding,
     Dosage,
     FHIRMedicationStatement,
     Period,
@@ -20,14 +18,7 @@ class MedicationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRMedicationSt
         return Reference(reference=str(df["subject_id"]), type=self._concept_source.source)
 
     def _apply_medication(self, df: DataFrame) -> CodeableReference:
-        return CodeableReference(
-            concept=CodeableConcept(
-                coding=[
-                    Coding(code=str(concept_id), system=concept_type)
-                    for concept_type, concept_id in self._concept.identifiers.items()
-                ]
-            )
-        )
+        return CodeableReference(concept=self._get_concept_identifiers())
 
     def _apply_dosage(self, df: DataFrame) -> Dosage:
         return Dosage(
