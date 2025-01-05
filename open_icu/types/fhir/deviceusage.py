@@ -3,11 +3,7 @@ from typing import Annotated
 import pandas as pd
 from pandera.typing import Series
 
-from open_icu.types.fhir import (
-    CodeableReference,
-    FHIRSchema,
-    Reference,
-)
+from open_icu.types.fhir import CodeableReference, FHIRSchema, Reference, StatusCodes
 
 
 class FHIRDeviceUsage(FHIRSchema):
@@ -40,3 +36,4 @@ class FHIRDeviceUsage(FHIRSchema):
     patient: Series[Reference]  # type: ignore[type-var]
     timing_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     device: Series[CodeableReference]  # type: ignore[type-var]
+    status: Series[StatusCodes]

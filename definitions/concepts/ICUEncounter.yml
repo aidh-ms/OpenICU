@@ -1,0 +1,15 @@
+name: ICUEncounter
+description: Period of time during which a patient is admitted to the ICU
+identifiers:
+  loinc: ''
+  snomed: ''
+unit: {}
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    extractor: open_icu.steps.source.mimic.encounter.ICUEncounterExtractor
+    unit: {}
+    params: {}

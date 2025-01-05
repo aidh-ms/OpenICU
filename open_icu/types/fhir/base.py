@@ -1,7 +1,9 @@
+from enum import StrEnum, auto
 from typing import Annotated, TypedDict
 
 import pandas as pd
 import pandera as pa
+from pydantic import PlainValidator
 
 
 class Reference(TypedDict):
@@ -48,12 +50,8 @@ class Period(TypedDict):
         The end of the period.
     """
 
-    start: Annotated[
-        pd.DatetimeTZDtype, "ns", "utc"
-    ]  # Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
-    end: Annotated[
-        pd.DatetimeTZDtype, "ns", "utc"
-    ]  # Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
+    start: Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
+    end: Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
 
 
 class Coding(TypedDict):
@@ -105,3 +103,13 @@ class FHIRSchema(pa.DataFrameModel):
     This class is used to define the structure of a FHIR sink schema. It is an abstract class
     that should be inherited by the specific FHIR sink schemas.
     """
+
+
+class StatusCodes(StrEnum):
+    PLANNED = auto()
+    IN_PROGRESS = auto()
+    ON_HOLD = auto()
+    DISCHARGED = auto()
+    COMPLETED = auto()
+    CANCELLED = auto()
+    DISCONTINUED = auto()

@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Iterator
 
 import pandas as pd
@@ -6,6 +7,7 @@ from sqlalchemy import Connection, create_engine
 
 
 class PandasDatabaseMixin:
+    @lru_cache
     def _create_conn(self, connection_uri: str) -> Connection:
         engine = create_engine(connection_uri)
         return engine.connect().execution_options(stream_results=True)
