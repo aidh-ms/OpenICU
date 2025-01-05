@@ -2,7 +2,6 @@ from typing import Annotated, TypedDict
 
 import pandas as pd
 import pandera as pa
-from pydantic import PlainValidator
 
 
 class Reference(TypedDict):
@@ -49,8 +48,12 @@ class Period(TypedDict):
         The end of the period.
     """
 
-    start: Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
-    end: Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
+    start: Annotated[
+        pd.DatetimeTZDtype, "ns", "utc"
+    ]  # Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
+    end: Annotated[
+        pd.DatetimeTZDtype, "ns", "utc"
+    ]  # Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
 
 
 class Coding(TypedDict):
@@ -79,7 +82,7 @@ class CodeableConcept(TypedDict):
         The coding of the CodeableConcept.
     """
 
-    coding: Coding
+    coding: list[Coding]
 
 
 class CodeableReference(TypedDict):

@@ -41,7 +41,7 @@ class FHIRObservation(FHIRSchema):
 
     _SINK_NAME = "observation"
 
-    code: Series[list[CodeableConcept]]  # type: ignore[type-var]
+    code: Series[CodeableConcept]  # type: ignore[type-var]
     subject: Series[Reference]  # type: ignore[type-var]
     effective_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     value_quantity: Series[Quantity]  # type: ignore[type-var]

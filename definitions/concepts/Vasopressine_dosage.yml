@@ -4,28 +4,27 @@ identifiers:
   loinc: ''
   snomed: ''
 unit:
-  dose: mcg
-  rate: mcg/min
+  dose: unit
+  rate: unit/hour
 limits:
   lower: ''
   upper: ''
 
 sources:
   - source: mimic
-    extractor: open_icu.steps.source.mimic.medication.EventPerWeightMedicationExtractor
+    extractor: open_icu.steps.source.mimic.medication.EventMedicationExtractor
     unit:
-      dose: mg
-      rate: mcg/kg/min
+      dose: unit
+      rate: unit/hour
     params:
-      itemid: 221906
+      itemid: 222315
       table: mimiciv_icu.inputevents
   # - source: eicu
   #   extractor: EICUInfusionDosageMapper
   #   unit:
-  #     dose_value: mcg # Todo
-  #     dose_unit: mcg/min # Todo
+  #     dose unit
   #   params:
   #     constraints:
-  #       drugname: Norepinephrine (mcg/min)
+  #       drugname: Vasopressin (units/min)
   #     schema: eicu_crd
   #     table: infusiondrug

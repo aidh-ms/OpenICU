@@ -7,7 +7,7 @@ class RAWObservationExtractor(ObservationExtractor):
     pass
 
 
-class EventObservationExtractor(ObservationExtractor):
+class EventObservationExtractor(RAWObservationExtractor):
     def __init__(self, subject_id: str, source: SourceConfig, concept: Concept, concept_source: ConceptSource) -> None:
         super().__init__(subject_id, source, concept, concept_source)
 
@@ -16,7 +16,9 @@ class EventObservationExtractor(ObservationExtractor):
 
         self._concept_source.params["sql"] = """
             SELECT
-                subject_id, valuenum as value, charttime as timestamp
+                subject_id,
+                valuenum as value,
+                charttime as timestamp
             FROM {table}
             WHERE
                 subject_id = {subject_id}
