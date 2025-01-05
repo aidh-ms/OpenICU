@@ -59,10 +59,10 @@ class SourceStep(BaseStep):
                     continue
 
                 if subject_data.data.get(concept.name, None) is None:
-                    subject_data.data[concept.name] = concept_data
+                    subject_data.data[concept.name] = concept_data.copy().pipe(DataFrame[FHIRSchema])
                 else:
-                    subject_data.data[concept.name] = pd.concat([subject_data.data[concept.name], concept_data]).pipe(
-                        DataFrame[FHIRSchema]
-                    )
+                    subject_data.data[concept.name] = pd.concat(
+                        [subject_data.data[concept.name], concept_data.copy()]
+                    ).pipe(DataFrame[FHIRSchema])
 
         return subject_data
