@@ -17,7 +17,9 @@ sources:
     params:
       sql: |
         SELECT
-          subject_id, urineoutput as value, charttime as timestamp
+          subject_id,
+          urineoutput as value,
+          charttime as timestamp
         FROM mimiciv_derived.urine_output
         JOIN mimiciv_icu.icustays
           ON mimiciv_icu.icustays.stay_id = mimiciv_derived.urine_output.stay_id
