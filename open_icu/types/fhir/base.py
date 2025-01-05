@@ -96,6 +96,21 @@ class CodeableReference(TypedDict):
     concept: CodeableConcept
 
 
+class Stage(TypedDict):
+    """
+    A TypedDict representing a FHIR Stage.
+
+    Attributes
+    ----------
+    summary : CodeableConcept
+        The summary of the stage.
+    assessment : list[Reference]
+        The assessments of the stage.
+    """
+
+    assessment: list[Reference]
+
+
 class FHIRSchema(pa.DataFrameModel):
     """
     Abstract class for FHIR sink schemas.

@@ -6,6 +6,7 @@ from open_icu.types.fhir.base import (
     Period,
     Quantity,
     Reference,
+    Stage,
     StatusCodes,
 )
 from open_icu.types.fhir.deviceusage import FHIRDeviceUsage
@@ -27,4 +28,5 @@ __all__ = [
     "Dosage",
     "FHIRObservation",
     "StatusCodes",
+    "Stage",
 ]
