@@ -1,6 +1,8 @@
 name: mimic
-connection: postgresql+psycopg://paul@host.docker.internal:5433/mimiciv
+connection_uri: postgresql+psycopg://paul@host.docker.internal:5433/mimiciv
 
 sample:
-  table: mimiciv_icu.icustays
-  field: subject_id
+  sampler: open_icu.steps.source.sample.SQLSampler
+  params:
+    table: mimiciv_icu.icustays
+    field: subject_id

@@ -2,8 +2,8 @@ from pydantic import BaseModel
 
 
 class SampleConfig(BaseModel):
-    table: str
-    field: str
+    sampler: str
+    params: dict[str, str]
 
 
 class SourceConfig(BaseModel):

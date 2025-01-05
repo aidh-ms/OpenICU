@@ -17,7 +17,7 @@ class Sampler(ABC):
 
 class SQLSampler(PandasDatabaseMixin, Sampler):
     QUERY = """
-        SELECT DISTINCT {fields}
+        SELECT DISTINCT {field} as subject_id
         FROM {table}
     """
 
@@ -26,9 +26,6 @@ class SQLSampler(PandasDatabaseMixin, Sampler):
             connection_uri=self._source_config.connection_uri,
             sql=self.QUERY,
             chunksize=1,
-            table=self._source_config.sample.table,
-            fields=self._source_config.sample.field,
+            **self._source_config.sample.params,
         ):
-            yield SubjectData(
-                id=str(df.loc[0, self._source_config.sample.field]), source=self._source_config.name, data={}
-            )
+            yield SubjectData(id=str(df.loc[0, "subject_id"]), source=self._source_config.name, data={})
