@@ -3,12 +3,11 @@ from pathlib import Path
 from typing import Iterator
 
 import pandas as pd
-from pandera.typing import DataFrame
 
 from open_icu.steps.base import BaseStep
 from open_icu.steps.source.concept import ConceptExtractor
 from open_icu.steps.source.sample import Sampler
-from open_icu.types.base import FHIRSchema, SubjectData
+from open_icu.types.base import SubjectData
 from open_icu.types.conf.concept import Concept
 from open_icu.types.conf.source import SourceConfig
 
@@ -35,7 +34,7 @@ class SourceStep(BaseStep):
 
                 self.validate(subject_data)
                 subject_data = self.process(subject_data)
-                if not self.filter(subject_data):
+                if self.filter(subject_data):
                     continue
 
                 subject_data = self.post_process(subject_data)
@@ -61,8 +60,6 @@ class SourceStep(BaseStep):
                 if subject_data.data.get(concept.name, None) is None:
                     subject_data.data[concept.name] = concept_data.copy()  # type: ignore[assignment]
                 else:
-                    subject_data.data[concept.name] = pd.concat(
-                        [subject_data.data[concept.name], concept_data.copy()]
-                    ).pipe(DataFrame[FHIRSchema])
+                    subject_data.data[concept.name] = pd.concat([subject_data.data[concept.name], concept_data.copy()])  # type: ignore[assignment]
 
         return subject_data

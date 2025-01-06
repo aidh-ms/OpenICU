@@ -12,6 +12,7 @@ F = TypeVar("F", bound=FHIRSchema)
 
 class ConceptExtractor(ABC, Generic[F]):
     def __init__(self, subject_id: str, source: SourceConfig, concept: Concept, concept_source: ConceptSource) -> None:
+        super().__init__()
         self._source = source
         self._concept = concept
         self._concept_source = concept_source

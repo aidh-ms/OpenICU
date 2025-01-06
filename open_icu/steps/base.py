@@ -30,7 +30,7 @@ class BaseStep(ABC):
 
             self.validate(subject_data)
             subject_data = self.process(subject_data)
-            if not self.filter(subject_data):
+            if self.filter(subject_data):
                 continue
 
             subject_data = self.post_process(subject_data)
@@ -58,7 +58,7 @@ class BaseStep(ABC):
         return subject_data
 
     def filter(self, subject_data: SubjectData) -> bool:
-        return True
+        return False
 
     def post_process(self, subject_data: SubjectData) -> SubjectData:
         return subject_data
