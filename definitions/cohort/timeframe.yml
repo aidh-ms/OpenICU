@@ -1,0 +1,7 @@
+name: timeframe
+description: Filters the cohort based on the length of timeframe.
+concepts:
+  - "ICUEncounter"
+filter: open_icu.steps.cohort.filters.timeframe.TimeframeFilter
+params:
+  hours: 6
