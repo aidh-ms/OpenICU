@@ -20,7 +20,7 @@ class EventMedicationExtractor(RAWMedicationExtractor):
                 amount as dose,
                 rate,
                 starttime as start_timestamp,
-                endtime as end_timestamp
+                endtime as stop_timestamp
             FROM {table}
             WHERE
                 subject_id = {subject_id}
@@ -38,7 +38,7 @@ class EventPerWeightMedicationExtractor(EventMedicationExtractor):
                 amount as dose,
                 (rate * patientweight) as rate,
                 starttime as start_timestamp,
-                endtime as end_timestamp
+                endtime as stop_timestamp
             FROM {table}
             WHERE
                 subject_id = {subject_id}
