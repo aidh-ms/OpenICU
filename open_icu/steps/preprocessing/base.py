@@ -2,7 +2,7 @@ from importlib import import_module
 from pathlib import Path
 
 from open_icu.steps.base import BaseStep
-from open_icu.steps.preprocessing.preprocessing.base import Preprocessor
+from open_icu.steps.preprocessing.processor.base import Preprocessor
 from open_icu.types.base import SubjectData
 from open_icu.types.conf.preprocessing import PreprocessorConf
 
@@ -28,6 +28,3 @@ class SubjectPreprocessingStep(BaseStep):
             subject_data = preprocessor(subject_data)
 
         return subject_data
-
-
-# Todo: add pyAKI

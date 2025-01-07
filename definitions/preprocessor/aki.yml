@@ -1,0 +1,9 @@
+name: aki
+description:
+concepts: []
+  # - "BodyWeight"
+  # - "Creatinine_absolute_serum"
+  # - "RRT"
+  # - "UrineVolume"
+preprocessor: open_icu.steps.preprocessor.conditions.aki.AKIPreprocessor
+params: {}
