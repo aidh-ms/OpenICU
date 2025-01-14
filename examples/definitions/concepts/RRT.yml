@@ -1,0 +1,24 @@
+name: RRT
+description: Renal replacement therapy (RRT) administered to the patient
+identifiers:
+  loinc: ''
+  snomed: ''
+unit: {}
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    extractor: open_icu.steps.source.mimic.deviceusage.RAWObservationExtractor
+    unit: {}
+    params:
+      sql: |
+        SELECT
+          subject_id,
+          charttime as timestamp,
+          dialysis_active as status
+        FROM mimiciv_derived.rrt
+        JOIN mimiciv_icu.icustays
+          ON mimiciv_icu.icustays.stay_id = mimiciv_derived.rrt.stay_id
+        WHERE subject_id = {subject_id}
