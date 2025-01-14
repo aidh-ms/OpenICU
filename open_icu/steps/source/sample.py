@@ -15,6 +15,12 @@ class Sampler(ABC):
         raise NotImplementedError
 
 
+class SamplesSampler(Sampler):
+    def sample(self) -> Iterator[SubjectData]:
+        for sample in self._source_config.sample.samples:
+            yield SubjectData(id=sample, source=self._source_config.name, data={})
+
+
 class SQLSampler(PandasDatabaseMixin, Sampler):
     QUERY = """
         SELECT DISTINCT {field} as subject_id
