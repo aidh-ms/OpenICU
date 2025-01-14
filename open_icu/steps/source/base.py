@@ -6,7 +6,7 @@ import pandas as pd
 
 from open_icu.steps.base import BaseStep
 from open_icu.steps.source.concept import ConceptExtractor
-from open_icu.steps.source.sample import Sampler
+from open_icu.steps.source.sample import Sampler, SamplesSampler
 from open_icu.types.base import SubjectData
 from open_icu.types.conf.concept import Concept
 from open_icu.types.conf.source import SourceConfig
@@ -24,10 +24,14 @@ class SourceStep(BaseStep):
 
     def __call__(self) -> Iterator[SubjectData]:
         for source_config in self._source_conigs.values():
-            module_name, cls_name = source_config.sample.sampler.rsplit(".", 1)
-            module = import_module(module_name)
-            cls = getattr(module, cls_name)
-            sampler: Sampler = cls(source_config)
+            sampler: Sampler
+            if source_config.sample.samples:
+                sampler = SamplesSampler(source_config)
+            else:
+                module_name, cls_name = source_config.sample.sampler.rsplit(".", 1)
+                module = import_module(module_name)
+                cls = getattr(module, cls_name)
+                sampler = cls(source_config)
 
             for subject_data in sampler.sample():
                 subject_data = self.pre_process(subject_data)
