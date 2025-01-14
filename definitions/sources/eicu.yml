@@ -1,6 +1,8 @@
 name: eicu
-connection: postgresql+psycopg://paul@host.docker.internal:5433/eicu
+connection_uri: ""
 
 sample:
-  table: eicu_crd.patient
-  field: patienthealthsystemstayid
+  sampler: open_icu.steps.source.sample.SQLSampler
+  params:
+    table: eicu_crd.patient
+    field: patienthealthsystemstayid

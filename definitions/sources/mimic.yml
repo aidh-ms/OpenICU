@@ -1,5 +1,5 @@
 name: mimic
-connection_uri: postgresql+psycopg://paul@host.docker.internal:5433/mimiciv
+connection_uri: ""
 
 sample:
   sampler: open_icu.steps.source.sample.SQLSampler
