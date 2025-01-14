@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SampleConfig(BaseModel):
+    samples: list[str] = Field([])
     sampler: str
     params: dict[str, str]
 
