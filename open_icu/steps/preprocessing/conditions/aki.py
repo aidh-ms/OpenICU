@@ -110,6 +110,9 @@ class AKIPreprocessor(Preprocessor):
                 )
             )
 
+        if not dataset:
+            return subject_data
+
         aki_data = Analyser(dataset).process_stay(subject_data.id)
 
         for col in aki_data.filter(like="stage", axis=1):
