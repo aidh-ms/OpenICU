@@ -3,7 +3,7 @@ from pandera.typing import DataFrame
 
 from open_icu.steps.preprocessing.processor.base import Preprocessor
 from open_icu.types.base import SubjectData
-from open_icu.types.fhir import FHIRCondition, FHIRDeviceUsage, FHIRObservation, StatusCodes
+from open_icu.types.fhir import FHIRObjectCondition, FHIRObjectDeviceUsage, FHIRObjectObservation, StatusCodes
 from open_icu.types.fhir.base import CodeableConcept, Coding, Reference, Stage
 
 
@@ -23,20 +23,20 @@ class AKIPreprocessor(Preprocessor):
         self._rrt = rrt
         self._urineoutput = urineoutput
 
-    def _map_observation(self, observation: DataFrame[FHIRObservation], value_name: str) -> DataFrame:
+    def _map_observation(self, observation: DataFrame[FHIRObjectObservation], value_name: str) -> DataFrame:
         df = observation.copy()[
             [
-                FHIRObservation.subject,
-                FHIRObservation.effective_date_time,
-                FHIRObservation.value_quantity,
+                FHIRObjectObservation.subject,
+                FHIRObjectObservation.effective_date_time,
+                FHIRObjectObservation.value_quantity,
             ]
         ]
 
         df = df.rename(
             columns={
-                FHIRObservation.subject: "stay_id",
-                FHIRObservation.effective_date_time: "charttime",
-                FHIRObservation.value_quantity: value_name,
+                FHIRObjectObservation.subject: "stay_id",
+                FHIRObjectObservation.effective_date_time: "charttime",
+                FHIRObjectObservation.value_quantity: value_name,
             }
         )
 
@@ -45,20 +45,20 @@ class AKIPreprocessor(Preprocessor):
 
         return df.pipe(DataFrame)
 
-    def _map_device_usage(self, device_usage: DataFrame[FHIRDeviceUsage]) -> DataFrame:
+    def _map_device_usage(self, device_usage: DataFrame[FHIRObjectDeviceUsage]) -> DataFrame:
         df = device_usage.copy()[
             [
-                FHIRDeviceUsage.patient,
-                FHIRDeviceUsage.timing_date_time,
-                FHIRDeviceUsage.status,
+                FHIRObjectDeviceUsage.patient,
+                FHIRObjectDeviceUsage.timing_date_time,
+                FHIRObjectDeviceUsage.status,
             ]
         ]
 
         df = df.rename(
             columns={
-                FHIRDeviceUsage.patient: "stay_id",
-                FHIRDeviceUsage.timing_date_time: "charttime",
-                FHIRDeviceUsage.status: "rrt_status",
+                FHIRObjectDeviceUsage.patient: "stay_id",
+                FHIRObjectDeviceUsage.timing_date_time: "charttime",
+                FHIRObjectDeviceUsage.status: "rrt_status",
             }
         )
 
@@ -77,7 +77,9 @@ class AKIPreprocessor(Preprocessor):
             dataset.append(
                 Dataset(
                     DatasetType.CREATININE,
-                    self._map_observation(subject_data.data[self._creatinie].pipe(DataFrame[FHIRObservation]), "creat"),
+                    self._map_observation(
+                        subject_data.data[self._creatinie].pipe(DataFrame[FHIRObjectObservation]), "creat"
+                    ),
                 )
             )
 
@@ -86,7 +88,7 @@ class AKIPreprocessor(Preprocessor):
                 Dataset(
                     DatasetType.URINEOUTPUT,
                     self._map_observation(
-                        subject_data.data[self._urineoutput].pipe(DataFrame[FHIRObservation]), "urineoutput"
+                        subject_data.data[self._urineoutput].pipe(DataFrame[FHIRObjectObservation]), "urineoutput"
                     ),
                 )
             )
@@ -95,7 +97,7 @@ class AKIPreprocessor(Preprocessor):
                 Dataset(
                     DatasetType.DEMOGRAPHICS,
                     self._map_observation(
-                        subject_data.data[self._demografic].pipe(DataFrame[FHIRObservation]), "weight"
+                        subject_data.data[self._demografic].pipe(DataFrame[FHIRObjectObservation]), "weight"
                     ),
                 )
             )
@@ -104,7 +106,7 @@ class AKIPreprocessor(Preprocessor):
             dataset.append(
                 Dataset(
                     DatasetType.RRT,
-                    self._map_device_usage(subject_data.data[self._rrt].pipe(DataFrame[FHIRDeviceUsage])),
+                    self._map_device_usage(subject_data.data[self._rrt].pipe(DataFrame[FHIRObjectDeviceUsage])),
                 )
             )
 
@@ -114,17 +116,17 @@ class AKIPreprocessor(Preprocessor):
             assert isinstance(col, str)
 
             condition_df = pd.DataFrame()
-            condition_df[FHIRCondition.code] = aki_data.apply(
+            condition_df[FHIRObjectCondition.code] = aki_data.apply(
                 lambda _: CodeableConcept(coding=[Coding(code=f"aki_{col}", system="open_icu")]), axis=1
             )
-            condition_df[FHIRCondition.subject] = aki_data.apply(
+            condition_df[FHIRObjectCondition.subject] = aki_data.apply(
                 lambda _: Reference(reference=subject_data.id, type=subject_data.source), axis=1
             )
-            condition_df[FHIRCondition.onset_date_time] = aki_data["charttime"]
-            condition_df[FHIRCondition.stage] = aki_data.apply(
+            condition_df[FHIRObjectCondition.onset_date_time] = aki_data["charttime"]
+            condition_df[FHIRObjectCondition.stage] = aki_data.apply(
                 lambda _df: Stage(assessment=[Reference(reference=str(_df[col]), type=col)]), axis=1
             )
 
-            subject_data.data[f"aki_{col}"] = condition_df.dropna().pipe(DataFrame[FHIRCondition]).copy()  # type: ignore[assignment]
+            subject_data.data[f"aki_{col}"] = condition_df.dropna().pipe(DataFrame[FHIRObjectCondition]).copy()  # type: ignore[assignment]
 
         return subject_data

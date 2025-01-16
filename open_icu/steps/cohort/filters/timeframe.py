@@ -5,7 +5,7 @@ from pandera.errors import SchemaError
 
 from open_icu.steps.cohort.filters.base import CohortFilter
 from open_icu.types.base import SubjectData
-from open_icu.types.fhir import FHIREncounter, Period
+from open_icu.types.fhir import FHIRObjectEncounter, Period
 
 
 class TimeframeFilter(CohortFilter):
@@ -41,7 +41,7 @@ class TimeframeFilter(CohortFilter):
                 continue
 
             try:
-                FHIREncounter.validate(concept_data)
+                FHIRObjectEncounter.validate(concept_data)
             except SchemaError:
                 continue
 
@@ -56,8 +56,8 @@ class TimeframeFilter(CohortFilter):
             )
 
             if self._strategy == "all":
-                return not (concept_data[FHIREncounter.actual_period].map(self._get_delta) >= td).all()
+                return not (concept_data[FHIRObjectEncounter.actual_period].map(self._get_delta) >= td).all()
 
-            return not (concept_data[FHIREncounter.actual_period].map(self._get_delta) >= td).any()
+            return not (concept_data[FHIRObjectEncounter.actual_period].map(self._get_delta) >= td).any()
 
         return False

@@ -3,7 +3,7 @@ from pandera.typing import Series
 from open_icu.types.fhir import CodeableConcept, FHIRSchema, Period, Reference
 
 
-class FHIREncounter(FHIRSchema):
+class FHIRObjectEncounter(FHIRSchema):
     """
     A class representing the FHIR Encounter schema.
 

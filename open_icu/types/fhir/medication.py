@@ -27,7 +27,7 @@ class Dosage(TypedDict):
     rate_quantity: Quantity
 
 
-class FHIRMedicationStatement(FHIRSchema):
+class FHIRObjectMedicationStatement(FHIRSchema):
     """
     A class representing the FHIR MedicationStatement schema.
 

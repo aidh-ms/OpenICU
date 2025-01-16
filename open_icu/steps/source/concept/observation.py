@@ -7,13 +7,13 @@ from open_icu.steps.source.concept.base import ConceptExtractor
 from open_icu.steps.source.database import PandasDatabaseMixin
 from open_icu.types.fhir import (
     CodeableConcept,
-    FHIRObservation,
+    FHIRObjectObservation,
     Quantity,
     Reference,
 )
 
 
-class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObservation]):
+class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObjectObservation]):
     def _apply_subject(self, df: DataFrame) -> Reference:
         return Reference(reference=str(df["subject_id"]), type=self._concept_source.source)
 
@@ -28,7 +28,7 @@ class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObservation
     def _apply_code(self, df: DataFrame) -> CodeableConcept:
         return self._get_concept_identifiers()
 
-    def extract(self) -> DataFrame[FHIRObservation] | None:
+    def extract(self) -> DataFrame[FHIRObjectObservation] | None:
         df: DataFrame = self.get_query_df(self._source.connection_uri, **self._concept_source.params)
 
         if df.empty:
@@ -36,9 +36,9 @@ class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObservation
 
         observation_df = pd.DataFrame()
 
-        observation_df[FHIRObservation.subject] = df.apply(self._apply_subject, axis=1)
-        observation_df[FHIRObservation.effective_date_time] = df.apply(self._apply_effective_date_time, axis=1)
-        observation_df[FHIRObservation.value_quantity] = df.apply(self._apply_value_quantity, axis=1)
-        observation_df[FHIRObservation.code] = df.apply(self._apply_code, axis=1)
+        observation_df[FHIRObjectObservation.subject] = df.apply(self._apply_subject, axis=1)
+        observation_df[FHIRObjectObservation.effective_date_time] = df.apply(self._apply_effective_date_time, axis=1)
+        observation_df[FHIRObjectObservation.value_quantity] = df.apply(self._apply_value_quantity, axis=1)
+        observation_df[FHIRObjectObservation.code] = df.apply(self._apply_code, axis=1)
 
-        return observation_df.pipe(DataFrame[FHIRObservation])
+        return observation_df.pipe(DataFrame[FHIRObjectObservation])

@@ -6,7 +6,7 @@ from pandera.typing import Series
 from open_icu.types.fhir import CodeableReference, FHIRSchema, Reference, StatusCodes
 
 
-class FHIRDeviceUsage(FHIRSchema):
+class FHIRObjectDeviceUsage(FHIRSchema):
     """
     A class representing the FHIR DeviceUsage schema.
 

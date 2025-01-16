@@ -11,7 +11,7 @@ from open_icu.types.fhir import (
 )
 
 
-class FHIRObservation(FHIRSchema):
+class FHIRObjectObservation(FHIRSchema):
     """
     A class representing the FHIR Observation schema.
 

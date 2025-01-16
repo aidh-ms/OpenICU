@@ -11,7 +11,7 @@ from open_icu.types.fhir import (
 )
 
 
-class FHIRCondition(FHIRSchema):
+class FHIRObjectCondition(FHIRSchema):
     """
     A class representing the FHIR Observation schema.
 

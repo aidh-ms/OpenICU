@@ -6,14 +6,14 @@ from open_icu.steps.source.database import PandasDatabaseMixin
 from open_icu.types.fhir import (
     CodeableReference,
     Dosage,
-    FHIRMedicationStatement,
+    FHIRObjectMedicationStatement,
     Period,
     Quantity,
     Reference,
 )
 
 
-class MedicationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRMedicationStatement]):
+class MedicationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObjectMedicationStatement]):
     def _apply_subject(self, df: DataFrame) -> Reference:
         return Reference(reference=str(df["subject_id"]), type=self._concept_source.source)
 
@@ -32,7 +32,7 @@ class MedicationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRMedicationSt
             end=pd.to_datetime(df["stop_timestamp"], utc=True),  # type: ignore[typeddict-item]
         )
 
-    def extract(self) -> DataFrame[FHIRMedicationStatement] | None:
+    def extract(self) -> DataFrame[FHIRObjectMedicationStatement] | None:
         df: DataFrame = self.get_query_df(self._source.connection_uri, **self._concept_source.params)
 
         if df.empty:
@@ -40,9 +40,9 @@ class MedicationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRMedicationSt
 
         medication_df = pd.DataFrame()
 
-        medication_df[FHIRMedicationStatement.subject] = df.apply(self._apply_subject, axis=1)
-        medication_df[FHIRMedicationStatement.medication] = df.apply(self._apply_medication, axis=1)
-        medication_df[FHIRMedicationStatement.dosage] = df.apply(self._apply_dosage, axis=1)
-        medication_df[FHIRMedicationStatement.effective_period] = df.apply(self._apply_effective_period, axis=1)
+        medication_df[FHIRObjectMedicationStatement.subject] = df.apply(self._apply_subject, axis=1)
+        medication_df[FHIRObjectMedicationStatement.medication] = df.apply(self._apply_medication, axis=1)
+        medication_df[FHIRObjectMedicationStatement.dosage] = df.apply(self._apply_dosage, axis=1)
+        medication_df[FHIRObjectMedicationStatement.effective_period] = df.apply(self._apply_effective_period, axis=1)
 
-        return medication_df.pipe(DataFrame[FHIRMedicationStatement])
+        return medication_df.pipe(DataFrame[FHIRObjectMedicationStatement])
