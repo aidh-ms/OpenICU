@@ -8,8 +8,10 @@ from open_icu.types.conf.preprocessing import PreprocessorConf
 
 
 class SubjectPreprocessingStep(BaseStep):
-    def __init__(self, config_path: Path | None = None, parent: BaseStep | None = None) -> None:
-        super().__init__(config_path, parent)
+    def __init__(
+        self, config_path: Path | None = None, concept_path: Path | None = None, parent: BaseStep | None = None
+    ) -> None:
+        super().__init__(config_path=config_path, concept_path=concept_path, parent=parent)
 
         self._filter_conigs: list[PreprocessorConf] = []
         if config_path is not None:

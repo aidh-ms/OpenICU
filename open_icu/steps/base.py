@@ -8,14 +8,22 @@ import yaml
 from pydantic import BaseModel
 
 from open_icu.types.base import SubjectData
+from open_icu.types.conf.concept import Concept
 
 T = TypeVar("T", bound=BaseModel)
 
 
 class BaseStep(ABC):
-    def __init__(self, config_path: Path | None = None, parent: BaseStep | None = None) -> None:
+    def __init__(
+        self, config_path: Path | None = None, concept_path: Path | None = None, parent: BaseStep | None = None
+    ) -> None:
         self._parent = parent
         self._config_path = config_path
+        self._concept_path = concept_path or config_path
+
+        self._concepts = []
+        if self._concept_path is not None:
+            self._concepts = self._read_config(self._concept_path / "concepts", Concept)
 
     def __rrshift__(self, other: BaseStep) -> BaseStep:
         self._parent = other

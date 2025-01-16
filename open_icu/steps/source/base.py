@@ -8,19 +8,18 @@ from open_icu.steps.base import BaseStep
 from open_icu.steps.source.concept import ConceptExtractor
 from open_icu.steps.source.sample import Sampler, SamplesSampler
 from open_icu.types.base import SubjectData
-from open_icu.types.conf.concept import Concept
 from open_icu.types.conf.source import SourceConfig
 
 
 class SourceStep(BaseStep):
-    def __init__(self, config_path: Path | None = None, parent: BaseStep | None = None) -> None:
-        super().__init__(config_path, parent)
+    def __init__(
+        self, config_path: Path | None = None, concept_path: Path | None = None, parent: BaseStep | None = None
+    ) -> None:
+        super().__init__(config_path=config_path, concept_path=concept_path, parent=parent)
 
         self._source_conigs: dict[str, SourceConfig] = {}
-        self._concepts = []
         if config_path is not None:
             self._source_conigs = {conf.name: conf for conf in self._read_config(config_path / "sources", SourceConfig)}
-            self._concepts = self._read_config(config_path / "concepts", Concept)
 
     def __call__(self) -> Iterator[SubjectData]:
         for source_config in self._source_conigs.values():
