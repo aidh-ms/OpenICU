@@ -22,3 +22,8 @@ class Concept(BaseModel):
     unit: dict[str, str]
     limits: ConceptLimits
     sources: list[ConceptSource]
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+
+        self.identifiers["open_icu"] = self.name

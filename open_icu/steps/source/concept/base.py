@@ -32,5 +32,4 @@ class ConceptExtractor(ABC, Generic[F]):
                 Coding(code=str(concept_id), system=concept_type)
                 for concept_type, concept_id in self._concept.identifiers.items()
             ]
-            + [Coding(code=self._concept.name, system="open_icu")]
         )
