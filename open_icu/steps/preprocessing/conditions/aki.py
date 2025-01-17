@@ -3,8 +3,16 @@ from pandera.typing import DataFrame
 
 from open_icu.steps.preprocessing.processor.base import Preprocessor
 from open_icu.types.base import SubjectData
-from open_icu.types.fhir import FHIRObjectCondition, FHIRObjectDeviceUsage, FHIRObjectObservation, StatusCodes
-from open_icu.types.fhir.base import CodeableConcept, Coding, Reference, Stage
+from open_icu.types.fhir import (
+    CodeableConcept,
+    Coding,
+    FHIRObjectCondition,
+    FHIRObjectDeviceUsage,
+    FHIRObjectObservation,
+    Reference,
+    Stage,
+    StatusCodes,
+)
 
 
 class AKIPreprocessor(Preprocessor):
