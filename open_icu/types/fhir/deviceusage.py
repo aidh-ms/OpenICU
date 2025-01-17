@@ -10,28 +10,20 @@ class FHIRObjectDeviceUsage(FHIRObjectSchema):
     """
     A class representing the FHIR DeviceUsage schema.
 
-    This class inherits from the AbstractFHIRSinkSchema and defines the structure of the
+    This class inherits from the FHIRObjectSchema and defines the structure of the
     FHIR DeviceUsage schema.
-
-    ...
 
     Attributes
     ----------
-    _SINK_NAME : str
-        The name of the sink, which is "deviceusage" for this class.
-
     patient : Series[Reference]
         A pandas Series of References representing the patients.
-
     timing_date_time : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
         A pandas Series of datetime objects representing the timing dates and times.
-
     device : Series[CodeableReference]
         A pandas Series of CodeableReferences representing the devices.
-
+    status : Series[StatusCodes]
+        A pandas Series of StatusCodes representing the status of the device usage.
     """
-
-    _SINK_NAME = "deviceusage"
 
     patient: Series[Reference]  # type: ignore[type-var]
     timing_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]

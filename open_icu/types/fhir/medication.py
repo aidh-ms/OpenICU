@@ -7,28 +7,20 @@ class FHIRObjectMedicationStatement(FHIRObjectSchema):
     """
     A class representing the FHIR MedicationStatement schema.
 
-    This class inherits from the AbstractFHIRSinkSchema and defines the structure of the
+    This class inherits from the FHIRObjectSchema and defines the structure of the
     FHIR MedicationStatement schema.
-
-    ...
 
     Attributes
     ----------
     subject : Series[Reference]
         A pandas Series of References representing the subjects.
-
     effective_period : Series[Period]
         A pandas Series of Periods representing the effective periods.
-
     medication : Series[CodeableReference]
         A pandas Series of CodeableReferences representing the medications.
-
     dosage : Series[Dosage]
         A pandas Series of Dosages representing the dosages.
-
     """
-
-    _SINK_NAME = "medicationstatement"
 
     subject: Series[Reference]  # type: ignore[type-var]
     effective_period: Series[Period]  # type: ignore[type-var]

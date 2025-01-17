@@ -7,28 +7,20 @@ class FHIRObjectEncounter(FHIRObjectSchema):
     """
     A class representing the FHIR Encounter schema.
 
-    This class inherits from the AbstractFHIRSinkSchema and defines the structure of the
+    This class inherits from the FHIRObjectSchema and defines the structure of the
     FHIR Encounter schema.
-
-    ...
 
     Attributes
     ----------
-    _SINK_NAME : str
-        The name of the sink, which is "encounter" for this class.
-
+    type : Series[CodeableConcept]
+        A pandas Series of CodeableConcepts representing the types.
     subject : Series[Reference]
         A pandas Series of References representing the subjects.
-
     actual_period : Series[Period]
         A pandas Series of Periods representing the actual periods.
-
     care_team : Series[Reference]
         A pandas Series of References representing the care teams.
-
     """
-
-    _SINK_NAME = "encounter"
 
     type: Series[CodeableConcept]  # type: ignore[type-var]
     subject: Series[Reference]  # type: ignore[type-var]

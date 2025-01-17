@@ -27,8 +27,8 @@ class Quantity(TypedDict):
 
     Attributes
     ----------
-    value : float
-        The numerical value of the quantity.
+    value : float | int | str
+        The value of the quantity.
     unit : str
         The unit of the quantity.
     """
