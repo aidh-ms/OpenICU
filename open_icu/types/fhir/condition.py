@@ -5,6 +5,7 @@ from pandera.typing import Series
 
 from open_icu.types.fhir import (
     CodeableConcept,
+    FHIRFlattenSchema,
     FHIRObjectSchema,
     Reference,
     Stage,
@@ -34,3 +35,8 @@ class FHIRObjectCondition(FHIRObjectSchema):
     subject: Series[Reference]  # type: ignore[type-var]
     onset_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     stage: Series[Stage]  # type: ignore[type-var]
+
+
+class FHIRObservation(FHIRFlattenSchema):
+    onset_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+    stage__assessment: Series[str]
