@@ -32,6 +32,28 @@ class FHIRObjectEncounter(FHIRObjectSchema):
 
 
 class FHIREncounter(FHIRFlattenSchema):
+    """
+    A class representing the FHIR Encounter schema.
+
+    This class inherits from the FHIRFlattenSchema and defines the structure of the
+    FHIR Encounter schema.
+
+    Attributes
+    ----------
+    identifier__coding : Series[str]
+        A pandas Series of strings representing the identifier codings (e.g. CNOMED CT, Loinc).
+    subject__reference : Series[str]
+        A pandas Series of strings representing the subject references or id.
+    subject__type : Series[str]
+        A pandas Series of strings representing the data source of a patient.
+    actual_period__start : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+        A pandas Series of datetime objects representing the start of the actual periods.
+    actual_period__end : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+        A pandas Series of datetime objects representing the end of the actual periods.
+    care_team : Series[str]
+        A pandas Series of strings representing the care teams.
+    """
+
     actual_period__start: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     actual_period__end: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     care_team: Series[str]

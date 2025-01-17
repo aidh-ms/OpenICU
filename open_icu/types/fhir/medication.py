@@ -8,7 +8,7 @@ from open_icu.types.fhir import CodeableReference, Dosage, FHIRFlattenSchema, FH
 
 class FHIRObjectMedicationStatement(FHIRObjectSchema):
     """
-    A class representing the FHIR MedicationStatement schema.
+    This class represents the FHIR MedicationStatement schema.
 
     This class inherits from the FHIRObjectSchema and defines the structure of the
     FHIR MedicationStatement schema.
@@ -32,6 +32,34 @@ class FHIRObjectMedicationStatement(FHIRObjectSchema):
 
 
 class FHIRMedicationStatement(FHIRFlattenSchema):
+    """
+    This class represents the FHIR MedicationStatement schema.
+
+    This class inherits from the FHIRFlattenSchema and defines the structure of the
+    FHIR MedicationStatement schema.
+
+    Attributes
+    ----------
+    identifier__coding : Series[str]
+        A pandas Series of strings representing the identifier codings (e.g. CNOMED CT, Loinc).
+    subject__reference : Series[str]
+        A pandas Series of strings representing the subject references or id.
+    subject__type : Series[str]
+        A pandas Series of strings representing the data source of a patient.
+    effective_period__start : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+        A pandas Series of datetime objects representing the start of the effective periods.
+    effective_period__end : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+        A pandas Series of datetime objects representing the end of the effective periods.
+    dosage__dose_quantity__value : Series[float | int | str]
+        A pandas Series of values for the dose quantity.
+    dosage__dose_quantity__unit : Series[str]
+        A pandas Series of units for the dose quantity.
+    dosage__rate_quantity__value : Series[float | int | str]
+        A pandas Series of values for the rate quantity.
+    dosage__rate_quantity__unit : Series[str]
+        A pandas Series of units for the rate quantity.
+    """
+
     effective_period__start: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     effective_period__end: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     dosage__dose_quantity__value: Series[float | int | str]

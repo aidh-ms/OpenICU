@@ -38,6 +38,28 @@ class FHIRObjectObservation(FHIRObjectSchema):
 
 
 class FHIRObservation(FHIRFlattenSchema):
+    """
+    This class represents the FHIR Observation schema.
+
+    This class inherits from the FHIRFlattenSchema and defines the structure of the
+    FHIR Observation schema.
+
+    Attributes
+    ----------
+    identifier__coding : Series[str]
+        A pandas Series of strings representing the identifier codings (e.g. CNOMED CT, Loinc).
+    subject__reference : Series[str]
+        A pandas Series of strings representing the subject references or id.
+    subject__type : Series[str]
+        A pandas Series of strings representing the data source of a patient.
+    effective_date_time : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+        A pandas Series of datetime objects representing the effective dates and times.
+    value_quantity__value : Series[float | int | str]
+        A pandas Series of values for the quantity.
+    value_quantity__unit : Series[str]
+        A pandas Series of units for the quantity.
+    """
+
     effective_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     value_quantity__value: Series[float | int | str]
     value_quantity__unit: Series[str]

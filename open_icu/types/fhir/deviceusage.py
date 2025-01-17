@@ -32,5 +32,25 @@ class FHIRObjectDeviceUsage(FHIRObjectSchema):
 
 
 class FHIRDeviceUsage(FHIRFlattenSchema):
+    """
+    This class represents the FHIR DeviceUsage schema.
+
+    This class inherits from the FHIRFlattenSchema and defines the structure of the
+    FHIR DeviceUsage schema.
+
+    Attributes
+    ----------
+    identifier__coding : Series[str]
+        A pandas Series of strings representing the identifier codings (e.g. CNOMED CT, Loinc).
+    subject__reference : Series[str]
+        A pandas Series of strings representing the subject references or id.
+    subject__type : Series[str]
+        A pandas Series of strings representing the data source of a patient.
+    timing_date_time : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+        A pandas Series of datetime objects representing the timing dates and times.
+    status : Series[StatusCodes]
+        A pandas Series of StatusCodes representing the status of the device usage.
+    """
+
     timing_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     status: Series[StatusCodes]
