@@ -3,8 +3,7 @@ from typing import Annotated
 import pandas as pd
 from pandera.typing import Series
 
-from open_icu.types.fhir import CodeableReference, Dosage, FHIRObjectSchema, Period, Reference
-from open_icu.types.fhir.base import FHIRFlattenSchema
+from open_icu.types.fhir import CodeableReference, Dosage, FHIRFlattenSchema, FHIRObjectSchema, Period, Reference
 
 
 class FHIRObjectMedicationStatement(FHIRObjectSchema):

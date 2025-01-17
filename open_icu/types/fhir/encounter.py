@@ -1,6 +1,9 @@
+from typing import Annotated
+
+import pandas as pd
 from pandera.typing import Series
 
-from open_icu.types.fhir import CodeableConcept, FHIRObjectSchema, Period, Reference
+from open_icu.types.fhir import CodeableConcept, FHIRFlattenSchema, FHIRObjectSchema, Period, Reference
 
 
 class FHIRObjectEncounter(FHIRObjectSchema):
@@ -26,3 +29,9 @@ class FHIRObjectEncounter(FHIRObjectSchema):
     subject: Series[Reference]  # type: ignore[type-var]
     actual_period: Series[Period]  # type: ignore[type-var]
     care_team: Series[Reference]  # type: ignore[type-var]
+
+
+class FHIREncounter(FHIRFlattenSchema):
+    actual_period__start: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+    actual_period__end: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+    care_team: Series[str]
