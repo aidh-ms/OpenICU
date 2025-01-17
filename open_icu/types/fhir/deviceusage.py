@@ -3,10 +3,10 @@ from typing import Annotated
 import pandas as pd
 from pandera.typing import Series
 
-from open_icu.types.fhir import CodeableReference, FHIRSchema, Reference, StatusCodes
+from open_icu.types.fhir import CodeableReference, FHIRObjectSchema, Reference, StatusCodes
 
 
-class FHIRObjectDeviceUsage(FHIRSchema):
+class FHIRObjectDeviceUsage(FHIRObjectSchema):
     """
     A class representing the FHIR DeviceUsage schema.
 

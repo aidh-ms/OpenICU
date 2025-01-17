@@ -1,22 +1,29 @@
 from open_icu.types.fhir.base import (
+    FHIRFlattenSchema,
+    FHIRObjectSchema,
+    FHIRSchema,
+)
+from open_icu.types.fhir.condition import FHIRObjectCondition
+from open_icu.types.fhir.deviceusage import FHIRObjectDeviceUsage
+from open_icu.types.fhir.encounter import FHIRObjectEncounter
+from open_icu.types.fhir.medication import FHIRObjectMedicationStatement
+from open_icu.types.fhir.observation import FHIRObjectObservation
+from open_icu.types.fhir.types import (
     CodeableConcept,
     CodeableReference,
     Coding,
-    FHIRSchema,
+    Dosage,
     Period,
     Quantity,
     Reference,
     Stage,
     StatusCodes,
 )
-from open_icu.types.fhir.condition import FHIRObjectCondition
-from open_icu.types.fhir.deviceusage import FHIRObjectDeviceUsage
-from open_icu.types.fhir.encounter import FHIRObjectEncounter
-from open_icu.types.fhir.medication import Dosage, FHIRObjectMedicationStatement
-from open_icu.types.fhir.observation import FHIRObjectObservation
 
 __all__ = [
     "FHIRSchema",
+    "FHIRFlattenSchema",
+    "FHIRObjectSchema",
     "Reference",
     "Quantity",
     "Period",
@@ -30,5 +37,6 @@ __all__ = [
     "FHIRObjectObservation",
     "StatusCodes",
     "Stage",
+    "Dosage",
     "FHIRObjectCondition",
 ]

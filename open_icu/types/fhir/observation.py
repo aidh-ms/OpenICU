@@ -5,13 +5,13 @@ from pandera.typing import Series
 
 from open_icu.types.fhir import (
     CodeableConcept,
-    FHIRSchema,
+    FHIRObjectSchema,
     Quantity,
     Reference,
 )
 
 
-class FHIRObjectObservation(FHIRSchema):
+class FHIRObjectObservation(FHIRObjectSchema):
     """
     A class representing the FHIR Observation schema.
 

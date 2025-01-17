@@ -1,130 +1,57 @@
-from enum import StrEnum, auto
-from typing import Annotated, TypedDict
+from __future__ import annotations
 
-import pandas as pd
+from abc import abstractmethod
+
 import pandera as pa
-from pydantic import PlainValidator
-
-
-class Reference(TypedDict):
-    """
-    A TypedDict representing a FHIR Reference.
-
-    Attributes
-    ----------
-    reference : str
-        The actual reference to the resource.
-    type : str
-        The type of the referenced resource.
-    """
-
-    reference: str
-    type: str
-
-
-class Quantity(TypedDict):
-    """
-    A TypedDict representing a FHIR Quantity.
-
-    Attributes
-    ----------
-    value : float
-        The numerical value of the quantity.
-    unit : str
-        The unit of the quantity.
-    """
-
-    value: float | int | str
-    unit: str
-
-
-class Period(TypedDict):
-    """
-    A TypedDict representing a FHIR Period.
-
-    Attributes
-    ----------
-    start : pd.Timestamp
-        The start of the period.
-    end : pd.Timestamp
-        The end of the period.
-    """
-
-    start: Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
-    end: Annotated[pd.Timestamp, PlainValidator(lambda x: pd.Timestamp(x))]
-
-
-class Coding(TypedDict):
-    """
-    A TypedDict representing a FHIR Coding.
-
-    Attributes
-    ----------
-    code : str
-        The code of the coding.
-    system : str
-        The system of the coding.
-    """
-
-    code: str
-    system: str
-
-
-class CodeableConcept(TypedDict):
-    """
-    A TypedDict representing a FHIR CodeableConcept.
-
-    Attributes
-    ----------
-    coding : Coding
-        The coding of the CodeableConcept.
-    """
-
-    coding: list[Coding]
-
-
-class CodeableReference(TypedDict):
-    """
-    A TypedDict representing a FHIR CodeableReference.
-
-    Attributes
-    ----------
-    concept : CodeableConcept
-        The CodeableConcept of the CodeableReference.
-    """
-
-    concept: CodeableConcept
-
-
-class Stage(TypedDict):
-    """
-    A TypedDict representing a FHIR Stage.
-
-    Attributes
-    ----------
-    summary : CodeableConcept
-        The summary of the stage.
-    assessment : list[Reference]
-        The assessments of the stage.
-    """
-
-    assessment: list[Reference]
+from pandera.typing import DataFrame
 
 
 class FHIRSchema(pa.DataFrameModel):
     """
-    Abstract class for FHIR sink schemas.
+    Abstract class for FHIR Schema.
 
-    This class is used to define the structure of a FHIR sink schema. It is an abstract class
-    that should be inherited by the specific FHIR sink schemas.
+    This class is used to define the structure of a FHIR schema. It is an abstract class
+    that should be inherited by the specific FHIR schemas.
     """
 
 
-class StatusCodes(StrEnum):
-    PLANNED = auto()
-    IN_PROGRESS = auto()
-    ON_HOLD = auto()
-    DISCHARGED = auto()
-    COMPLETED = auto()
-    CANCELLED = auto()
-    DISCONTINUED = auto()
+class FHIRFlattenSchema(FHIRSchema):
+    """
+    Abstract class for FHIR Flatten Schema.
+
+    This class is used to define the structure of a FHIR flatten schema. It is an abstract
+    class that should be inherited by the specific FHIR flatten schemas.
+    """
+
+    @abstractmethod
+    def to_object(self) -> DataFrame[FHIRObjectSchema]:
+        """
+        Convert the flattened schema to an object schema.
+
+        Returns
+        -------
+        FHIRObjectSchema
+            The object schema.
+        """
+        raise NotImplementedError
+
+
+class FHIRObjectSchema(FHIRSchema):
+    """
+    Abstract class for FHIR Object Schema.
+
+    This class is used to define the structure of a FHIR object schema. It is an abstract
+    class that should be inherited by the specific FHIR object schemas.
+    """
+
+    @abstractmethod
+    def to_flatten(self) -> DataFrame[FHIRFlattenSchema]:
+        """
+        Convert the object schema to a flatten schema.
+
+        Returns
+        -------
+        FHIRFlattenSchema
+            The flatten schema.
+        """
+        raise NotImplementedError

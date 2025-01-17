@@ -1,33 +1,9 @@
-from typing import TypedDict
-
 from pandera.typing import Series
 
-from open_icu.types.fhir import (
-    CodeableReference,
-    FHIRSchema,
-    Period,
-    Quantity,
-    Reference,
-)
+from open_icu.types.fhir import CodeableReference, Dosage, FHIRObjectSchema, Period, Reference
 
 
-class Dosage(TypedDict):
-    """
-    A TypedDict representing a FHIR Dosage.
-
-    Attributes
-    ----------
-    dose_quantity : Quantity
-        The dose quantity of the dosage.
-    rate_quantity : Quantity
-        The rate quantity of the dosage.
-    """
-
-    dose_quantity: Quantity
-    rate_quantity: Quantity
-
-
-class FHIRObjectMedicationStatement(FHIRSchema):
+class FHIRObjectMedicationStatement(FHIRObjectSchema):
     """
     A class representing the FHIR MedicationStatement schema.
 
@@ -38,9 +14,6 @@ class FHIRObjectMedicationStatement(FHIRSchema):
 
     Attributes
     ----------
-    _SINK_NAME : str
-        The name of the sink, which is "medicationstatement" for this class.
-
     subject : Series[Reference]
         A pandas Series of References representing the subjects.
 
