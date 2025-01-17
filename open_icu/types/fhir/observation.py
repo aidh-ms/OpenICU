@@ -5,6 +5,7 @@ from pandera.typing import Series
 
 from open_icu.types.fhir import (
     CodeableConcept,
+    FHIRFlattenSchema,
     FHIRObjectSchema,
     Quantity,
     Reference,
@@ -34,3 +35,9 @@ class FHIRObjectObservation(FHIRObjectSchema):
     subject: Series[Reference]  # type: ignore[type-var]
     effective_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     value_quantity: Series[Quantity]  # type: ignore[type-var]
+
+
+class FHIRObservation(FHIRFlattenSchema):
+    effective_date_time: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
+    value_quantity__value: Series[float | int | str]
+    value_quantity__unit: Series[str]
