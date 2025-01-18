@@ -3,7 +3,12 @@ from typing import Annotated
 import pandas as pd
 from pandera.typing import Series
 
-from open_icu.types.fhir import CodeableConcept, FHIRFlattenSchema, FHIRObjectSchema, Period, Reference
+from open_icu.types.fhir.base import FHIRFlattenSchema, FHIRObjectSchema
+from open_icu.types.fhir.types import (
+    CodeableConcept,
+    Period,
+    Reference,
+)
 
 
 class FHIRObjectEncounter(FHIRObjectSchema):

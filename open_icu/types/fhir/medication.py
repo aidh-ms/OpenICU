@@ -3,7 +3,13 @@ from typing import Annotated
 import pandas as pd
 from pandera.typing import Series
 
-from open_icu.types.fhir import CodeableReference, Dosage, FHIRFlattenSchema, FHIRObjectSchema, Period, Reference
+from open_icu.types.fhir.base import FHIRFlattenSchema, FHIRObjectSchema
+from open_icu.types.fhir.types import (
+    CodeableReference,
+    Dosage,
+    Period,
+    Reference,
+)
 
 
 class FHIRObjectMedicationStatement(FHIRObjectSchema):
@@ -41,7 +47,7 @@ class FHIRMedicationStatement(FHIRFlattenSchema):
     Attributes
     ----------
     identifier__coding : Series[str]
-        A pandas Series of strings representing the identifier codings (e.g. CNOMED CT, Loinc).
+        A pandas Series of strings representing the identifier codings (e.g. CNOMED CT, Loinc) of the medication.
     subject__reference : Series[str]
         A pandas Series of strings representing the subject references or id.
     subject__type : Series[str]

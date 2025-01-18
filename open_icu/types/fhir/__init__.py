@@ -6,8 +6,8 @@ from open_icu.types.fhir.base import (
 from open_icu.types.fhir.condition import FHIRCondition, FHIRObjectCondition
 from open_icu.types.fhir.deviceusage import FHIRDeviceUsage, FHIRObjectDeviceUsage
 from open_icu.types.fhir.encounter import FHIREncounter, FHIRObjectEncounter
-from open_icu.types.fhir.medication import FHIRObjectMedicationStatement
-from open_icu.types.fhir.observation import FHIRObjectObservation
+from open_icu.types.fhir.medication import FHIRMedicationStatement, FHIRObjectMedicationStatement
+from open_icu.types.fhir.observation import FHIRObjectObservation, FHIRObservation
 from open_icu.types.fhir.types import (
     CodeableConcept,
     CodeableReference,
@@ -27,10 +27,10 @@ __all__ = [
     "FHIRObjectSchema",
     # FHIR Flatten Schemas
     "FHIRDeviceUsage",
-    "FHIRObjectDeviceUsage",
     "FHIRCondition",
-    "FHIRObjectCondition",
     "FHIREncounter",
+    "FHIRMedicationStatement",
+    "FHIRObservation",
     # FHIR Object Schemas
     "FHIRObjectDeviceUsage",
     "FHIRObjectEncounter",
