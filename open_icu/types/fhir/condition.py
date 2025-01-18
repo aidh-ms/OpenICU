@@ -37,7 +37,7 @@ class FHIRObjectCondition(FHIRObjectSchema):
     stage: Series[Stage]  # type: ignore[type-var]
 
 
-class FHIRObservation(FHIRFlattenSchema):
+class FHIRCondition(FHIRFlattenSchema):
     """
     A class representing the FHIR Observation schema.
 

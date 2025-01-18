@@ -3,9 +3,9 @@ from open_icu.types.fhir.base import (
     FHIRObjectSchema,
     FHIRSchema,
 )
-from open_icu.types.fhir.condition import FHIRObjectCondition
-from open_icu.types.fhir.deviceusage import FHIRObjectDeviceUsage
-from open_icu.types.fhir.encounter import FHIRObjectEncounter
+from open_icu.types.fhir.condition import FHIRCondition, FHIRObjectCondition
+from open_icu.types.fhir.deviceusage import FHIRDeviceUsage, FHIRObjectDeviceUsage
+from open_icu.types.fhir.encounter import FHIREncounter, FHIRObjectEncounter
 from open_icu.types.fhir.medication import FHIRObjectMedicationStatement
 from open_icu.types.fhir.observation import FHIRObjectObservation
 from open_icu.types.fhir.types import (
@@ -21,22 +21,30 @@ from open_icu.types.fhir.types import (
 )
 
 __all__ = [
+    # Base Schema
     "FHIRSchema",
     "FHIRFlattenSchema",
     "FHIRObjectSchema",
+    # FHIR Flatten Schemas
+    "FHIRDeviceUsage",
+    "FHIRObjectDeviceUsage",
+    "FHIRCondition",
+    "FHIRObjectCondition",
+    "FHIREncounter",
+    # FHIR Object Schemas
+    "FHIRObjectDeviceUsage",
+    "FHIRObjectEncounter",
+    "FHIRObjectMedicationStatement",
+    "FHIRObjectObservation",
+    "FHIRObjectCondition",
     "Reference",
     "Quantity",
     "Period",
     "Coding",
     "CodeableConcept",
     "CodeableReference",
-    "FHIRObjectDeviceUsage",
-    "FHIRObjectEncounter",
-    "FHIRObjectMedicationStatement",
     "Dosage",
-    "FHIRObjectObservation",
     "StatusCodes",
     "Stage",
     "Dosage",
-    "FHIRObjectCondition",
 ]
