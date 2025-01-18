@@ -56,19 +56,19 @@ class FHIRMedicationStatement(FHIRFlattenSchema):
         A pandas Series of datetime objects representing the start of the effective periods.
     effective_period__end : Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
         A pandas Series of datetime objects representing the end of the effective periods.
-    dosage__dose_quantity__value : Series[float | int | str]
+    dosage__dose_quantity__value : Series[float]
         A pandas Series of values for the dose quantity.
     dosage__dose_quantity__unit : Series[str]
         A pandas Series of units for the dose quantity.
-    dosage__rate_quantity__value : Series[float | int | str]
+    dosage__rate_quantity__value : Series[float]
         A pandas Series of values for the rate quantity.
-    dosage__rate_quantity__unit : Series[str]
+    dosage__rate_quantity__unit : Series[str]W
         A pandas Series of units for the rate quantity.
     """
 
     effective_period__start: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
     effective_period__end: Series[Annotated[pd.DatetimeTZDtype, "ns", "utc"]]
-    dosage__dose_quantity__value: Series[float | int | str]
+    dosage__dose_quantity__value: Series[float]
     dosage__dose_quantity__unit: Series[str]
-    dosage__rate_quantity__value: Series[float | int | str]
+    dosage__rate_quantity__value: Series[float]
     dosage__rate_quantity__unit: Series[str]
