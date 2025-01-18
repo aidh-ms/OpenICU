@@ -5,9 +5,10 @@ from pandera.typing import DataFrame
 
 from open_icu.types.conf.concept import Concept, ConceptSource
 from open_icu.types.conf.source import SourceConfig
-from open_icu.types.fhir import CodeableConcept, Coding, FHIRSchema
+from open_icu.types.fhir import FHIRFlattenSchema
+from open_icu.types.fhir.utils import to_identifiers_str
 
-F = TypeVar("F", bound=FHIRSchema)
+F = TypeVar("F", bound=FHIRFlattenSchema)
 
 
 class ConceptExtractor(ABC, Generic[F]):
@@ -26,10 +27,11 @@ class ConceptExtractor(ABC, Generic[F]):
     def extract(self) -> DataFrame[F] | None:
         raise NotImplementedError
 
-    def _get_concept_identifiers(self) -> CodeableConcept:
-        return CodeableConcept(
-            coding=[
-                Coding(code=str(concept_id), system=concept_type)
-                for concept_type, concept_id in self._concept.identifiers.items()
-            ]
-        )
+    def _apply_identifier__coding(self, df: DataFrame) -> str:
+        return to_identifiers_str(self._concept.identifiers)
+
+    def _apply_subject__reference(self, df: DataFrame) -> str:
+        return str(df["subject_id"])
+
+    def _apply_subject__type(self, df: DataFrame) -> str:
+        return self._concept_source.source

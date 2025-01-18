@@ -1,34 +1,29 @@
 from typing import Annotated, cast
 
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 from pandera.typing import DataFrame
 
 from open_icu.steps.source.concept.base import ConceptExtractor
 from open_icu.steps.source.database import PandasDatabaseMixin
-from open_icu.types.fhir import (
-    CodeableConcept,
-    FHIRObjectObservation,
-    Quantity,
-    Reference,
-)
+from open_icu.types.fhir import FHIRNumericObservation, FHIRTextObservation
 
 
-class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObjectObservation]):
-    def _apply_subject(self, df: DataFrame) -> Reference:
-        return Reference(reference=str(df["subject_id"]), type=self._concept_source.source)
-
+class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRNumericObservation | FHIRTextObservation]):
     def _apply_effective_date_time(self, df: DataFrame) -> Annotated[pd.DatetimeTZDtype, "ns", "utc"]:
         return cast(Annotated[pd.DatetimeTZDtype, "ns", "utc"], pd.to_datetime(df["timestamp"], utc=True))
 
-    def _apply_value_quantity(self, df: DataFrame) -> Quantity:
+    def _apply_value_quantity__value(self, df: DataFrame) -> float | str:
         value = df["value"]
-        assert isinstance(value, (int, float, str))
-        return Quantity(value=value, unit=self._concept_source.unit["value"])
+        if isinstance(value, int):
+            value = float(value)
+        assert isinstance(value, (float, str))
+        return value
 
-    def _apply_code(self, df: DataFrame) -> CodeableConcept:
-        return self._get_concept_identifiers()
+    def _apply_value_quantity__unit(self, df: DataFrame) -> str:
+        return self._concept_source.unit["value"]
 
-    def extract(self) -> DataFrame[FHIRObjectObservation] | None:
+    def extract(self) -> DataFrame[FHIRNumericObservation] | DataFrame[FHIRTextObservation] | None:  # type: ignore[override]
         df: DataFrame = self.get_query_df(self._source.connection_uri, **self._concept_source.params)
 
         if df.empty:
@@ -36,9 +31,17 @@ class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRObjectObser
 
         observation_df = pd.DataFrame()
 
-        observation_df[FHIRObjectObservation.subject] = df.apply(self._apply_subject, axis=1)
-        observation_df[FHIRObjectObservation.effective_date_time] = df.apply(self._apply_effective_date_time, axis=1)
-        observation_df[FHIRObjectObservation.value_quantity] = df.apply(self._apply_value_quantity, axis=1)
-        observation_df[FHIRObjectObservation.code] = df.apply(self._apply_code, axis=1)
+        observation_df[FHIRNumericObservation.identifier__coding] = df.apply(self._apply_identifier__coding, axis=1)
+        observation_df[FHIRNumericObservation.subject__reference] = df.apply(self._apply_subject__reference, axis=1)
+        observation_df[FHIRNumericObservation.subject__type] = df.apply(self._apply_subject__type, axis=1)
 
-        return observation_df.pipe(DataFrame[FHIRObjectObservation])
+        observation_df[FHIRNumericObservation.effective_date_time] = df.apply(self._apply_effective_date_time, axis=1)
+        observation_df[FHIRNumericObservation.value_quantity__value] = df.apply(
+            self._apply_value_quantity__value, axis=1
+        )
+        observation_df[FHIRNumericObservation.value_quantity__unit] = df.apply(self._apply_value_quantity__unit, axis=1)
+
+        if is_numeric_dtype(observation_df[FHIRNumericObservation.value_quantity__value]):
+            return observation_df.pipe(DataFrame[FHIRNumericObservation])
+
+        return observation_df.pipe(DataFrame[FHIRTextObservation])
