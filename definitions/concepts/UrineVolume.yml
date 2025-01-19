@@ -4,7 +4,7 @@ identifiers:
   loinc: ''
   snomed: ''
 unit:
-  value: ml
+  value_quantity: ml
 limits:
   lower: '0'
   upper: '10000'
@@ -13,7 +13,7 @@ sources:
   - source: mimic
     extractor: open_icu.steps.source.mimic.observation.RAWObservationExtractor
     unit:
-      value: ml
+      value_quantity: ml
     params:
       sql: |
         SELECT

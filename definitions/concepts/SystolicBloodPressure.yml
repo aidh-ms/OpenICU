@@ -4,7 +4,7 @@ identifiers:
   loinc: '8480-6'
   snomed: '271649006'
 unit:
-  value: mmHg
+  value_quantity: mmHg
 limits:
   lower: '0'
   upper: '350'
@@ -13,7 +13,7 @@ sources:
   - source: mimic
     extractor: open_icu.steps.source.mimic.observation.EventObservationExtractor
     unit:
-      value: mmHg
+      value_quantity: mmHg
     params:
       table: mimiciv_icu.chartevents
       itemid: [220050, 220179]

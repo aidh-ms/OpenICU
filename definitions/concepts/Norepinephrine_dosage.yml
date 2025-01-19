@@ -4,8 +4,8 @@ identifiers:
   loinc: ''
   snomed: ''
 unit:
-  dose: mcg
-  rate: mcg/min
+  dosage__dose_quantity: mcg
+  dosage__rate_quantity: mcg/min
 limits:
   lower: ''
   upper: ''
@@ -14,8 +14,8 @@ sources:
   - source: mimic
     extractor: open_icu.steps.source.mimic.medication.EventPerWeightMedicationExtractor
     unit:
-      dose: mg
-      rate: mcg/kg/min
+      dosage__dose_quantity: mg
+      dosage__rate_quantity: mcg/min
     params:
       itemid: 221906
       table: mimiciv_icu.inputevents
