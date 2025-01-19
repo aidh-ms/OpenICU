@@ -21,7 +21,7 @@ class ObservationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRNumericObse
         return value
 
     def _apply_value_quantity__unit(self, df: DataFrame) -> str:
-        return self._concept_source.unit["value"]
+        return self._concept_source.unit[FHIRNumericObservation.value_quantity__unit.replace("__unit", "")]
 
     def extract(self) -> DataFrame[FHIRNumericObservation] | DataFrame[FHIRTextObservation] | None:  # type: ignore[override]
         df: DataFrame = self.get_query_df(self._source.connection_uri, **self._concept_source.params)

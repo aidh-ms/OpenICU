@@ -19,13 +19,13 @@ class MedicationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRMedicationSt
         return float(df["dose"])
 
     def _apply_doage__dose_quantity__unit(self, df: DataFrame) -> str:
-        return self._concept_source.unit["dose"]
+        return self._concept_source.unit[FHIRMedicationStatement.dosage__dose_quantity__unit.replace("__unit", "")]
 
     def _apply_dosage__rate_quantity__value(self, df: DataFrame) -> float:
         return float(df["rate"])
 
     def _apply_dosage__rate_quantity__unit(self, df: DataFrame) -> str:
-        return self._concept_source.unit["rate"]
+        return self._concept_source.unit[FHIRMedicationStatement.dosage__rate_quantity__unit.replace("__unit", "")]
 
     def extract(self) -> DataFrame[FHIRMedicationStatement] | None:
         df: DataFrame = self.get_query_df(self._source.connection_uri, **self._concept_source.params)
@@ -48,8 +48,8 @@ class MedicationExtractor(PandasDatabaseMixin, ConceptExtractor[FHIRMedicationSt
         medication_df[FHIRMedicationStatement.dosage__dose_quantity__value] = df.apply(
             self._apply_dosage__dose_quantity__value, axis=1
         )
-        medication_df[FHIRMedicationStatement.dosage__rate_quantity__value] = df.apply(
-            self._apply_dosage__rate_quantity__value, axis=1
+        medication_df[FHIRMedicationStatement.dosage__rate_quantity__unit] = df.apply(
+            self._apply_dosage__rate_quantity__unit, axis=1
         )
         medication_df[FHIRMedicationStatement.dosage__rate_quantity__value] = df.apply(
             self._apply_dosage__rate_quantity__value, axis=1
