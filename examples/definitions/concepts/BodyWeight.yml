@@ -4,7 +4,7 @@ identifiers:
   loinc: '29463-7'
   snomed: '27113001'
 unit:
-  value: kg
+  value_quantity: kg
 limits:
   lower: '0'
   upper: '500'
@@ -13,7 +13,7 @@ sources:
   - source: mimic
     extractor: open_icu.steps.source.mimic.observation.EventObservationExtractor
     unit:
-      value: kg
+      value_quantity: kg
     params:
       itemid: 224639
       table: mimiciv_icu.chartevents
