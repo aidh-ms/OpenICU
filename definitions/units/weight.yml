@@ -1,4 +1,9 @@
 name: weight
 description: "preprocessor for AKI classification"
-unitconverter: open_icu.steps.unit
-params: {}
+unitconverter: open_icu.steps.unit.converter.simple.SimpleUnitConverter
+base_unit: g
+params:
+  g: 1
+  kg: 1000
+  mg: 0.001
+  mcg: 0.000001
