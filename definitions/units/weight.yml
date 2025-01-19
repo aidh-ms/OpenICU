@@ -1,0 +1,4 @@
+name: weight
+description: "preprocessor for AKI classification"
+unitconverter: open_icu.steps.unit
+params: {}
