@@ -49,13 +49,9 @@ class UnitConversionStep(BaseStep):
                 continue
 
             for field, unit in field_units.items():
-                print("1", concept.name, field, unit)
-
                 # check if the field and unit columns are present
                 if not {f"{field}__value", f"{field}__unit"}.issubset(df.columns):
                     continue
-
-                print("2")
 
                 # validate if all unit conversions are supported
                 if not all(
@@ -63,13 +59,9 @@ class UnitConversionStep(BaseStep):
                 ):
                     continue
 
-                print("3")
-
                 # validate if all units are the same
                 if all(source_unit == unit for source_unit in df[f"{field}__unit"].unique()):
                     continue
-
-                print("4")
 
                 df[f"{field}__value"] = df.apply(
                     lambda x: self.convert(x[f"{field}__value"], x[f"{field}__unit"], unit), axis=1
