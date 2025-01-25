@@ -25,7 +25,7 @@ class BaseStep(ABC, Generic[C]):
 
         self._config_path = configs if isinstance(configs, Path) else None
         self._concept_path = concept_configs if isinstance(concept_configs, Path) else None
-        if self._concept_path is not None:
+        if self._concept_path is None:
             self._concept_path = self._config_path
 
         self._concept_configs: list[ConceptConfig] = []
