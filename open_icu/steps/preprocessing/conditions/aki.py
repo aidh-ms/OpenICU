@@ -110,17 +110,24 @@ class AKIPreprocessor(Preprocessor):
             return subject_data
 
         aki_data = Analyser(dataset).process_stay(subject_data.id)
+        aki_data = aki_data.drop(columns=["charttime", "stay_id"])
+        aki_data = aki_data.reset_index()
 
         for col in aki_data.filter(like="stage", axis=1):
             assert isinstance(col, str)
 
             condition_df = pd.DataFrame()
+            condition_df[FHIRCondition.onset_date_time] = aki_data["charttime"].dt.tz_localize("UTC")
             condition_df[FHIRCondition.identifier__coding] = to_identifiers_str({"open_icu": f"aki_{col}"})
             condition_df[FHIRCondition.subject__reference] = subject_data.id
             condition_df[FHIRCondition.subject__type] = subject_data.source
-            condition_df[FHIRCondition.onset_date_time] = aki_data["charttime"]
             condition_df[FHIRCondition.stage__assessment] = aki_data[col]
 
-            subject_data.data[f"aki_{col}"] = condition_df.dropna().pipe(DataFrame[FHIRCondition]).copy()  # type: ignore[assignment]
+            condition_df = condition_df.dropna(subset=[FHIRCondition.stage__assessment])
+            condition_df[FHIRCondition.stage__assessment] = (
+                condition_df[FHIRCondition.stage__assessment].astype(int).astype(str)
+            )
+
+            subject_data.data[f"aki_{col}"] = condition_df.reset_index(drop=True).pipe(DataFrame[FHIRCondition]).copy()  # type: ignore[assignment]
 
         return subject_data
