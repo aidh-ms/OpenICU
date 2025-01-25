@@ -3,7 +3,7 @@ from typing import Any
 from pydantic import BaseModel
 
 
-class PreprocessorConf(BaseModel):
+class PreprocessorConfig(BaseModel):
     name: str
     description: str
     concepts: list[str]

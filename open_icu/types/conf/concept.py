@@ -15,7 +15,7 @@ class ConceptSource(BaseModel):
     params: dict[str, Any]
 
 
-class Concept(BaseModel):
+class ConceptConfig(BaseModel):
     name: str
     description: str
     identifiers: dict[str, str]

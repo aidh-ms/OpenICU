@@ -4,20 +4,26 @@ from pathlib import Path
 from open_icu.steps.base import BaseStep
 from open_icu.steps.unit.converter.base import UnitConverter
 from open_icu.types.base import SubjectData
-from open_icu.types.conf.unit import UnitConverterConf
+from open_icu.types.conf.concept import ConceptConfig
+from open_icu.types.conf.unit import UnitConverterConfig
 
 
-class UnitConversionStep(BaseStep):
+class UnitConversionStep(BaseStep[UnitConverterConfig]):
     def __init__(
-        self, config_path: Path | None = None, concept_path: Path | None = None, parent: BaseStep | None = None
+        self,
+        configs: Path | list[UnitConverterConfig] | None = None,
+        concept_configs: Path | list[ConceptConfig] | None = None,
+        parent: BaseStep | None = None,
     ) -> None:
-        super().__init__(config_path=config_path, concept_path=concept_path, parent=parent)
+        super().__init__(configs=configs, concept_configs=concept_configs, parent=parent)
 
-        self._unit_converter_conigs: list[UnitConverterConf] = []
+        self._unit_converter_conigs: list[UnitConverterConfig] = []
+        if isinstance(configs, list):
+            self._unit_converter_conigs = configs
+        elif self._config_path is not None:
+            self._unit_converter_conigs = self._read_config(self._config_path / "units", UnitConverterConfig)
+
         self._converter: list[UnitConverter] = []
-        if config_path is not None:
-            self._unit_converter_conigs = self._read_config(config_path / "units", UnitConverterConf)
-
         for conf in self._unit_converter_conigs:
             module_name, cls_name = conf.unitconverter.rsplit(".", 1)
             module = import_module(module_name)
@@ -41,7 +47,7 @@ class UnitConversionStep(BaseStep):
         return value
 
     def process(self, subject_data: SubjectData) -> SubjectData:
-        for concept in self._concepts:
+        for concept in self._concept_configs:
             if (df := subject_data.data.get(concept.name)) is None:
                 continue
 

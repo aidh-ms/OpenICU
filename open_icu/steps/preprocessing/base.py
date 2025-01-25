@@ -4,18 +4,24 @@ from pathlib import Path
 from open_icu.steps.base import BaseStep
 from open_icu.steps.preprocessing.processor.base import Preprocessor
 from open_icu.types.base import SubjectData
-from open_icu.types.conf.preprocessing import PreprocessorConf
+from open_icu.types.conf.concept import ConceptConfig
+from open_icu.types.conf.preprocessing import PreprocessorConfig
 
 
-class SubjectPreprocessingStep(BaseStep):
+class SubjectPreprocessingStep(BaseStep[PreprocessorConfig]):
     def __init__(
-        self, config_path: Path | None = None, concept_path: Path | None = None, parent: BaseStep | None = None
+        self,
+        configs: Path | list[PreprocessorConfig] | None = None,
+        concept_configs: Path | list[ConceptConfig] | None = None,
+        parent: BaseStep | None = None,
     ) -> None:
-        super().__init__(config_path=config_path, concept_path=concept_path, parent=parent)
+        super().__init__(configs=configs, concept_configs=concept_configs, parent=parent)
 
-        self._filter_conigs: list[PreprocessorConf] = []
-        if config_path is not None:
-            self._filter_conigs = self._read_config(config_path / "preprocessor", PreprocessorConf)
+        self._filter_conigs: list[PreprocessorConfig] = []
+        if isinstance(configs, list):
+            self._filter_conigs = configs
+        elif self._config_path is not None:
+            self._filter_conigs = self._read_config(self._config_path / "preprocessor", PreprocessorConfig)
 
     def process(self, subject_data: SubjectData) -> SubjectData:
         for conf in self._filter_conigs:

@@ -3,7 +3,7 @@ from typing import Any
 from pydantic import BaseModel
 
 
-class UnitConverterConf(BaseModel):
+class UnitConverterConfig(BaseModel):
     name: str
     description: str
     unitconverter: str
