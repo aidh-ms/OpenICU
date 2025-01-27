@@ -2,10 +2,11 @@ from typing import Literal
 
 import pandas as pd
 from pandera.errors import SchemaError
+from pandera.typing import DataFrame
 
 from open_icu.steps.cohort.filters.base import CohortFilter
 from open_icu.types.base import SubjectData
-from open_icu.types.fhir import FHIRObjectEncounter, Period
+from open_icu.types.fhir.encounter import FHIREncounter
 
 
 class TimeframeFilter(CohortFilter):
@@ -32,8 +33,10 @@ class TimeframeFilter(CohortFilter):
         self._weeks = weeks
         self._strategy = strategy
 
-    def _get_delta(self, period: Period) -> pd.Timedelta:
-        return period["end"] - period["start"]
+    def _get_delta(self, df: DataFrame[FHIREncounter]) -> pd.Timedelta:
+        dt = df[FHIREncounter.actual_period__end] - df[FHIREncounter.actual_period__start]
+        assert isinstance(dt, pd.Timedelta)
+        return dt
 
     def filter(self, subject_data: SubjectData) -> bool:
         for concept in self.concepts:
@@ -41,7 +44,7 @@ class TimeframeFilter(CohortFilter):
                 continue
 
             try:
-                FHIRObjectEncounter.validate(concept_data)
+                FHIREncounter.validate(concept_data)
             except SchemaError:
                 continue
 
@@ -56,8 +59,8 @@ class TimeframeFilter(CohortFilter):
             )
 
             if self._strategy == "all":
-                return not (concept_data[FHIRObjectEncounter.actual_period].map(self._get_delta) >= td).all()
+                return not (concept_data.apply(self._get_delta, axis=1) >= td).all()
 
-            return not (concept_data[FHIRObjectEncounter.actual_period].map(self._get_delta) >= td).any()
+            return not (concept_data.apply(self._get_delta, axis=1) >= td).any()
 
         return False

@@ -17,14 +17,15 @@ class CohortStep(BaseStep[CohortFilterConfig]):
     ) -> None:
         super().__init__(configs=configs, concept_configs=concept_configs, parent=parent)
 
-        self._filter_conigs: list[CohortFilterConfig] = []
+        self._filter_configs: list[CohortFilterConfig] = []
         if isinstance(configs, list):
-            self._filter_conigs = configs
+            self._filter_configs = configs
         elif self._config_path is not None:
-            self._filter_conigs = self._read_config(self._config_path / "cohort", CohortFilterConfig)
+            self._filter_configs = self._read_config(self._config_path / "cohort", CohortFilterConfig)
 
     def filter(self, subject_data: SubjectData) -> bool:
-        for conf in self._filter_conigs:
+        for conf in self._filter_configs:
+            print(conf)
             if not all(concept in subject_data.data.keys() for concept in conf.concepts):
                 continue
 
