@@ -2179,13 +2179,13 @@ tests = ["pytest"]
 
 [[package]]
 name = "pyaki"
-version = "1.0.1"
+version = "1.0.4"
 description = "pyAKI allows calculation of Acute Kidney Injury from urine output and creatinine based on KDIGO criteria."
 optional = false
 python-versions = "<4.0,>=3.12"
 files = [
-    {file = "pyaki-1.0.1-py3-none-any.whl", hash = "sha256:0eac12b553b7a2c5fdac9fb17deb56c3c7dae1aade9734107ee1e689d150792f"},
-    {file = "pyaki-1.0.1.tar.gz", hash = "sha256:8a1998cc90d8013c33400f08f91dcaedd970216543e2d09433f268eafa4283ab"},
+    {file = "pyaki-1.0.4-py3-none-any.whl", hash = "sha256:7137daa5962d96baddf22859859c7e17812e47f256f184a54768fc454aef51f5"},
+    {file = "pyaki-1.0.4.tar.gz", hash = "sha256:1a45fc80af8e335073e0245497347ab7b2ca3f8f165915c20a3207d29a9c6de1"},
 ]
 
 [package.dependencies]
@@ -2427,13 +2427,13 @@ dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments
 
 [[package]]
 name = "pytest-asyncio"
-version = "0.25.2"
+version = "0.25.3"
 description = "Pytest support for asyncio"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pytest_asyncio-0.25.2-py3-none-any.whl", hash = "sha256:0d0bb693f7b99da304a0634afc0a4b19e49d5e0de2d670f38dc4bfa5727c5075"},
-    {file = "pytest_asyncio-0.25.2.tar.gz", hash = "sha256:3f8ef9a98f45948ea91a0ed3dc4268b5326c0e7bce73892acc654df4262ad45f"},
+    {file = "pytest_asyncio-0.25.3-py3-none-any.whl", hash = "sha256:9e89518e0f9bd08928f97a3482fdc4e244df17529460bc038291ccaf8f85c7c3"},
+    {file = "pytest_asyncio-0.25.3.tar.gz", hash = "sha256:fc1da2cf9f125ada7e710b4ddad05518d4cee187ae9412e9ac9271003497f07a"},
 ]
 
 [package.dependencies]
@@ -3716,4 +3716,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "e80747bf4b30d9e22161fd690bbdd55cd76ce4250db9e50d4a4d95092b931feb"
+content-hash = "2005295d2a2ebaf50f429720ba68b6bb34fa646dda2774399852402fbf990d51"
