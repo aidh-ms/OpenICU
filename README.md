@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/aidh-ms/OpenICU/badge.svg?branch=main)](https://coveralls.io/github/aidh-ms/OpenICU?branch=main)
+
 # Python Project Template
 
 This is a project to unify and analyse data from different ICU data sources.
