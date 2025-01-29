@@ -41,3 +41,11 @@ jobs:
       run: poetry run mypy .
     - name: Test with pytest
       run: poetry run pytest .
+
+    - name: Coveralls
+      env:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+      uses: coverallsapp/github-action@v2.3.6
+
+    - name: Check docs
+      run: poetry run mkdocs build
