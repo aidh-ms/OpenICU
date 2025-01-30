@@ -8,6 +8,23 @@ from open_icu.types.fhir.utils import to_identifiers_str
 
 
 class AKIPreprocessor(Preprocessor):
+    """
+    A preprocessor that processes AKI data and add aki stages for a subject.
+
+    Parameters
+    ----------
+    concepts : list[str]
+        The concepts to use for aki classification.
+    demografic : str
+        The concept for demographics.
+    creatinie : str
+        The concept for creatinine.
+    rrt : str
+        The concept for rrt.
+    urineoutput : str
+        The concept for urine output
+    """
+
     def __init__(
         self,
         concepts: list[str],
@@ -24,6 +41,21 @@ class AKIPreprocessor(Preprocessor):
         self._urineoutput = urineoutput
 
     def _map_observation(self, observation: DataFrame[FHIRNumericObservation], value_name: str) -> DataFrame:
+        """
+        A method to map the observation data to a DataFrame that is pyAKI compatible.
+
+        Parameters
+        ----------
+        observation : DataFrame[FHIRNumericObservation]
+            The observation data to map.
+        value_name : str
+            The name of the value to map.
+
+        Returns
+        -------
+        DataFrame
+            The pyAKI compatible DataFrame.
+        """
         df = observation.copy()[
             [
                 FHIRNumericObservation.subject__reference,
@@ -43,6 +75,19 @@ class AKIPreprocessor(Preprocessor):
         return df.pipe(DataFrame)
 
     def _map_device_usage(self, device_usage: DataFrame[FHIRDeviceUsage]) -> DataFrame:
+        """
+        A method to map the device usage data to a DataFrame that is pyAKI compatible.
+
+        Parameters
+        ----------
+        device_usage : DataFrame[FHIRDeviceUsage]
+            The device usage data to map.
+
+        Returns
+        -------
+        DataFrame
+            The pyAKI compatible DataFrame.
+        """
         df = device_usage.copy()[
             [
                 FHIRDeviceUsage.subject__reference,
@@ -64,6 +109,21 @@ class AKIPreprocessor(Preprocessor):
         return df.pipe(DataFrame)
 
     def process(self, subject_data: SubjectData) -> SubjectData:
+        """
+        A method to process the subject data with the AKI preprocessor.
+        This method will add the AKI stages to the subject data.
+        This is done by using the pyAKI library.
+
+        Parameters
+        ----------
+        subject_data : SubjectData
+            The subject data to preprocess.
+
+        Returns
+        -------
+        SubjectData
+            The preprocessed subject data with added aki stages.
+        """
         from pyaki.kdigo import Analyser  # type: ignore[import-untyped]
         from pyaki.probes import Dataset, DatasetType  # type: ignore[import-untyped]
 

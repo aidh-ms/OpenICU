@@ -9,6 +9,19 @@ from open_icu.types.conf.preprocessing import PreprocessorConfig
 
 
 class SubjectPreprocessingStep(BaseStep[PreprocessorConfig]):
+    """
+    A step that applies a list of preprocessors to the subject data.
+
+    Parameters
+    ----------
+    configs : Path | list[PreprocessorConfig] | None
+        The path to the configuration files or a list of configurations.
+    concept_configs : Path | list[ConceptConfig] | None
+        The path to the concept configuration files or a list of configurations.
+    parent : BaseStep | None
+        The parent step.
+    """
+
     def __init__(
         self,
         configs: Path | list[PreprocessorConfig] | None = None,
@@ -24,6 +37,19 @@ class SubjectPreprocessingStep(BaseStep[PreprocessorConfig]):
             self._filter_conigs = self._read_config(self._config_path / "preprocessor", PreprocessorConfig)
 
     def process(self, subject_data: SubjectData) -> SubjectData:
+        """
+        Process the subject data with the preprocessors.
+
+        Parameters
+        ----------
+        subject_data : SubjectData
+            The subject data to preprocess.
+
+        Returns
+        -------
+        SubjectData
+            The preprocessed subject data.
+        """
         for conf in self._filter_conigs:
             if not all(concept in subject_data.data.keys() for concept in conf.concepts):
                 continue

@@ -19,6 +19,7 @@ class CohortStep(BaseStep[CohortFilterConfig]):
     concept_configs : Path | list[ConceptConfig] | None
         The path to the concept configuration files or a list of configurations.
     parent : BaseStep | None
+        The parent step.
     """
 
     def __init__(
