@@ -9,6 +9,18 @@ from open_icu.types.conf.concept import ConceptConfig
 
 
 class CohortStep(BaseStep[CohortFilterConfig]):
+    """
+    A step that filters subjects based on their data.
+
+    Parameters
+    ----------
+    configs : Path | list[CohortFilterConfig] | None
+        The path to the configuration files or a list of configurations.
+    concept_configs : Path | list[ConceptConfig] | None
+        The path to the concept configuration files or a list of configurations.
+    parent : BaseStep | None
+    """
+
     def __init__(
         self,
         configs: Path | list[CohortFilterConfig] | None = None,
@@ -24,6 +36,19 @@ class CohortStep(BaseStep[CohortFilterConfig]):
             self._filter_configs = self._read_config(self._config_path / "cohort", CohortFilterConfig)
 
     def filter(self, subject_data: SubjectData) -> bool:
+        """
+        Filter out subjects based on their data.
+
+        Parameters
+        ----------
+        subject_data : SubjectData
+            The subject data to filter.
+
+        Returns
+        -------
+        bool
+            Whether the subject should be included or not.
+        """
         for conf in self._filter_configs:
             print(conf)
             if not all(concept in subject_data.data.keys() for concept in conf.concepts):
