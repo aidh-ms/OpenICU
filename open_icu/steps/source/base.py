@@ -13,6 +13,18 @@ from open_icu.types.conf.source import SourceConfig
 
 
 class SourceStep(BaseStep[SourceConfig]):
+    """
+    A step that generates SubjectData instances from a list of sources.
+
+    Parameters
+    ----------
+    configs : Path | list[SourceConfig] | None
+        The path to the source configuration files or a list of SourceConfig objects.
+    concept_configs : Path | list[ConceptConfig] | None
+        The path to the concept configuration files or a list of ConceptConfig objects.
+    parent : BaseStep | None
+    """
+
     def __init__(
         self,
         configs: Path | list[SourceConfig] | None = None,
@@ -30,6 +42,15 @@ class SourceStep(BaseStep[SourceConfig]):
             }
 
     def __call__(self) -> Iterator[SubjectData]:
+        """
+        A method that generates SubjectData instances from a list of sources.
+        This method was overridden from the BaseStep class.
+
+        Yields
+        ------
+        SubjectData
+            A data object containing the subject ID, source name, and any additional data.
+        """
         for source_config in self._source_configs.values():
             sampler: Sampler
             if source_config.sample.samples:
@@ -53,6 +74,19 @@ class SourceStep(BaseStep[SourceConfig]):
                 yield subject_data
 
     def process(self, subject_data: SubjectData) -> SubjectData:
+        """
+        A method that processes the SubjectData instance and add data corresponding to concepts.
+
+        Parameters
+        ----------
+        subject_data : SubjectData
+            The SubjectData instance to process.
+
+        Returns
+        -------
+        SubjectData
+            The processed SubjectData instance.
+        """
         source = self._source_configs[subject_data.source]
         for concept in self._concept_configs:
             for concept_source in concept.sources:
