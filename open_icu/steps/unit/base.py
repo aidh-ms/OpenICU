@@ -9,6 +9,19 @@ from open_icu.types.conf.unit import UnitConverterConfig
 
 
 class UnitConversionStep(BaseStep[UnitConverterConfig]):
+    """
+    A step that converts units of measurements in the data.
+
+    Parameters
+    ----------
+    configs : Path | list[UnitConverterConfig] | None
+        The path to the configuration files or a list of UnitConverterConfig objects
+    concept_configs : Path | list[ConceptConfig] | None
+        The path to the concept configuration files or a list of ConceptConfig objects
+    parent : BaseStep | None
+        The parent step of this step
+    """
+
     def __init__(
         self,
         configs: Path | list[UnitConverterConfig] | None = None,
@@ -33,6 +46,22 @@ class UnitConversionStep(BaseStep[UnitConverterConfig]):
             self._converter.append(converter)
 
     def supports_conversion(self, source_unit: str, target_unit: str) -> bool:
+        """
+        Check if the conversion between the source and target units is supported
+        by any of the converters.
+
+        Parameters
+        ----------
+        source_unit : str
+            The source unit of measurement
+        target_unit : str
+            The target unit of measurement
+
+        Returns
+        -------
+        bool
+            True if the conversion is supported, False otherwise.
+        """
         for converter in self._converter:
             if converter.supports_conversion(source_unit, target_unit):
                 return True
@@ -40,6 +69,21 @@ class UnitConversionStep(BaseStep[UnitConverterConfig]):
         return False
 
     def convert(self, value: float, source_unit: str, target_unit: str) -> float:
+        """
+        Convert the value from the source unit to the target unit.
+
+        Parameters
+        ----------
+        value : float
+            The value to be converted
+        source_unit : str
+            The source unit of measurement
+        target_unit : str
+            The target unit of measurement
+        """
+        if source_unit == target_unit:
+            return value
+
         for converter in self._converter:
             if converter.supports_conversion(source_unit, target_unit):
                 return converter.convert(value, source_unit, target_unit)
@@ -47,6 +91,19 @@ class UnitConversionStep(BaseStep[UnitConverterConfig]):
         return value
 
     def process(self, subject_data: SubjectData) -> SubjectData:
+        """
+        Process the data by converting the units of measurements for one subject at a time.
+
+        Parameters
+        ----------
+        subject_data : SubjectData
+            The data for one subject
+
+        Returns
+        -------
+        SubjectData
+            The data for one subject after converting the units of measurements.
+        """
         for concept in self._concept_configs:
             if (df := subject_data.data.get(concept.name)) is None:
                 continue
