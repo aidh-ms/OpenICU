@@ -4,10 +4,38 @@ from open_icu.types.conf.source import SourceConfig
 
 
 class RAWEncounterExtractor(EncounterExtractor):
-    pass
+    """
+    A class to extract encounter data from a mimic database with a raw sql query.
+
+    Parameters
+    ----------
+    subject_id : str
+        The subject ID to extract data for.
+    source : SourceConfig
+        The source configuration.
+    concept : ConceptConfig
+        The concept configuration.
+    concept_source : ConceptSource
+        The concept source configuration.
+    """
 
 
 class ICUEncounterExtractor(EncounterExtractor):
+    """
+    A class to extract encounter data from a mimic database.
+
+    Parameters
+    ----------
+    subject_id : str
+        The subject ID to extract data for.
+    source : SourceConfig
+        The source configuration.
+    concept : ConceptConfig
+        The concept configuration.
+    concept_source : ConceptSource
+        The concept source configuration.
+    """
+
     def __init__(
         self, subject_id: str, source: SourceConfig, concept: ConceptConfig, concept_source: ConceptSource
     ) -> None:

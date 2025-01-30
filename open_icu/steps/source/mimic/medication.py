@@ -4,10 +4,38 @@ from open_icu.types.conf.source import SourceConfig
 
 
 class RAWMedicationExtractor(MedicationExtractor):
-    pass
+    """
+    A class to extract medication data from a mimic database with raw data.
+
+    Parameters
+    ----------
+    subject_id : str
+        The subject ID to extract data for.
+    source : SourceConfig
+        The source configuration.
+    concept : ConceptConfig
+        The concept configuration.
+    concept_source : ConceptSource
+        The concept source configuration.
+    """
 
 
 class EventMedicationExtractor(RAWMedicationExtractor):
+    """
+    A class to extract medication data from a mimic database.
+
+    Parameters
+    ----------
+    subject_id : str
+        The subject ID to extract data for.
+    source : SourceConfig
+        The source configuration.
+    concept : ConceptConfig
+        The concept configuration.
+    concept_source : ConceptSource
+        The concept source configuration.
+    """
+
     def __init__(
         self, subject_id: str, source: SourceConfig, concept: ConceptConfig, concept_source: ConceptSource
     ) -> None:
@@ -31,6 +59,21 @@ class EventMedicationExtractor(RAWMedicationExtractor):
 
 
 class EventPerWeightMedicationExtractor(EventMedicationExtractor):
+    """
+    A class to extract medication data from a database with weight-based rate.
+
+    Parameters
+    ----------
+    subject_id : str
+        The subject ID to extract data for.
+    source : SourceConfig
+        The source configuration.
+    concept : ConceptConfig
+        The concept configuration.
+    concept_source : ConceptSource
+        The concept source configuration.
+    """
+
     def __init__(
         self, subject_id: str, source: SourceConfig, concept: ConceptConfig, concept_source: ConceptSource
     ) -> None:
