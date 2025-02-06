@@ -2641,13 +2641,13 @@ tests = ["pytest"]
 
 [[package]]
 name = "pyaki"
-version = "1.0.5"
+version = "1.0.6"
 description = "pyAKI allows calculation of Acute Kidney Injury from urine output and creatinine based on KDIGO criteria."
 optional = false
 python-versions = "<4.0,>=3.12"
 files = [
-    {file = "pyaki-1.0.5-py3-none-any.whl", hash = "sha256:d59f28792a56feddeecd594d031fed057ae018b32b6627c8a0b8b795a10998ef"},
-    {file = "pyaki-1.0.5.tar.gz", hash = "sha256:7847b93cc36ec8b3b3b58cf66b6f3e2d0f0f03c0048f3c5746d077d46a659639"},
+    {file = "pyaki-1.0.6-py3-none-any.whl", hash = "sha256:7693ef6f2455a8045830c79a8f1c400f89d81f6edeaaae77c902c19f83f23142"},
+    {file = "pyaki-1.0.6.tar.gz", hash = "sha256:2eae5d7a8227f0a0aad2ec3fedb501da6a4ff43a3606d04f337e01b114fef1c3"},
 ]
 
 [package.dependencies]
@@ -4404,4 +4404,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "2141e8c984839b1b74748a07b934ebd41e9997c03ba0554b44e0eb04a4640e7e"
+content-hash = "804c66efb3ed4b89349ac7a1d6fca6f16db318477f6285440f869653e32f7c94"
