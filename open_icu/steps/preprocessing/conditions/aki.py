@@ -124,8 +124,8 @@ class AKIPreprocessor(Preprocessor):
         SubjectData
             The preprocessed subject data with added aki stages.
         """
-        from pyaki.kdigo import Analyser  # type: ignore[import-untyped]
-        from pyaki.probes import Dataset, DatasetType  # type: ignore[import-untyped]
+        from pyaki.kdigo import Analyser
+        from pyaki.probes import Dataset, DatasetType
 
         dataset: list[Dataset] = []
 
