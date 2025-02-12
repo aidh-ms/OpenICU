@@ -1,8 +1,7 @@
 name: eicu
 connection_uri: ""
 
-sample:
-  sampler: open_icu.steps.source.sample.SQLSampler
-  params:
-    table: eicu_crd.patient
-    field: patienthealthsystemstayid
+path: open_icu.step.source.services.sampler.SQLSampler
+kwargs:
+  table: eicu_crd.patient
+  field: patienthealthsystemstayid
