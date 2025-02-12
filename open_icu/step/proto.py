@@ -6,6 +6,10 @@ from open_icu.type.subject import SubjectData
 
 
 class StepProto(Protocol):
+    """
+    A protocol for a step in the pipeline.
+    """
+
     def __init__(self) -> None:
         ...
 

@@ -4,11 +4,26 @@ from dependency_injector.wiring import Provide, inject
 
 from open_icu.db.proto import DataFrameDatabaseExtractorProto
 from open_icu.step.source.conf import SourceConfig
-from open_icu.step.source.proto import SourceServiceProto
+from open_icu.step.source.proto import SamplerServiceProto
 from open_icu.type.subject import SubjectData
 
 
-class SubjectSampler(SourceServiceProto):
+class SubjectSampler(SamplerServiceProto):
+    """
+    A sampler service that samples subjects from a list of subjects.
+
+    Parameters
+    ----------
+    source_config : SourceConfig
+        The source configuration.
+    subjects : list[str], default: None
+        The list of subjects to sample from.
+    args : Any
+        Additional arguments.
+    kwargs : Any
+        Additional keyword arguments.
+    """
+
     def __init__(
         self, source_config: SourceConfig, subjects: list[str] | None = None, *args: Any, **kwargs: Any
     ) -> None:
@@ -16,11 +31,36 @@ class SubjectSampler(SourceServiceProto):
         self._source_config = source_config
 
     def __call__(self, *args: Any, **kwargs: Any) -> Iterator[SubjectData]:
+        """
+        A generator that yields subjects based on the list of subjects.
+
+        Returns
+        -------
+        Iterator[SubjectData]
+            An iterator of the subjects.
+        """
         for sample in self._subjects:
             yield SubjectData(id=sample, source=self._source_config.name, data={})
 
 
-class SQLSampler(SourceServiceProto):
+class SQLSampler(SamplerServiceProto):
+    """
+    A sampler service that samples subjects from a SQL table.
+
+    Parameters
+    ----------
+    source_config : SourceConfig
+        The source configuration.
+    table : str
+        The table to sample from.
+    field : str
+        The field to sample from.
+    args : Any
+        Additional arguments.
+    kwargs : Any
+        Additional keyword arguments.
+    """
+
     SQL_QUERY = """SELECT DISTINCT {field} as subject_id FROM {table}"""
 
     def __init__(
@@ -34,5 +74,22 @@ class SQLSampler(SourceServiceProto):
     def __call__(
         self, df_extractor: DataFrameDatabaseExtractorProto = Provide["db_mimic"], *args: Any, **kwargs: Any
     ) -> Iterator[SubjectData]:
+        """
+        A generator that yields subjects based on the SQL table.
+
+        Parameters
+        ----------
+        df_extractor : DataFrameDatabaseExtractorProto
+            The database extractor.
+        args : Any
+            Additional arguments.
+        kwargs : Any
+            Additional keyword arguments.
+
+        Returns
+        -------
+        Iterator[SubjectData]
+            An iterator of the subjects.
+        """
         for df in df_extractor.iter_df(self.SQL_QUERY, chunksize=1, table=self._table, field=self._field):
             yield SubjectData(id=str(df.loc[0, "subject_id"]), source=self._source_config.name, data={})

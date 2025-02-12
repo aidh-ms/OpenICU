@@ -1,8 +1,8 @@
 from open_icu.conf import ServiceConfiguration
-from open_icu.step.source.proto import SourceServiceProto
+from open_icu.step.source.proto import SamplerServiceProto
 
 
-class SourceConfig(ServiceConfiguration[SourceServiceProto]):
+class SourceConfig(ServiceConfiguration[SamplerServiceProto]):
     """
     A class representing the source configuration.
 
@@ -14,7 +14,7 @@ class SourceConfig(ServiceConfiguration[SourceServiceProto]):
         The connection uri of the source.
     args : list[Any], default: []
         The arguments to be passed to the service class.
-    kwarg s: dict[str, Any], default: {}
+    kwargs : dict[str, Any], default: {}
         The keyword arguments to be passed to the service class.
     path : str
         Thepython dotted path to the service class.

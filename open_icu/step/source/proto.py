@@ -7,7 +7,11 @@ if TYPE_CHECKING:
     from open_icu.type.subject import SubjectData
 
 
-class SourceServiceProto(Protocol):
+class SamplerServiceProto(Protocol):
+    """
+    A protocol for the sampler service.
+    """
+
     def __init__(self, source_config: SourceConfig, *args: Any, **kwargs: Any) -> None:
         ...
 

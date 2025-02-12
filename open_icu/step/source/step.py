@@ -13,6 +13,19 @@ from open_icu.type.subject import SubjectData
 
 
 class SourceStep(BaseStep):
+    """
+    A step that extracts subjects from a source.
+
+    Parameters
+    ----------
+    source_configs : Path | list[SourceConfig]
+        The source configurations.
+    fail_silently : bool, default: False
+        Whether to fail silently or not.
+    parent : StepProto, default: None
+        The parent step.
+    """
+
     def __init__(
         self, source_configs: Path | list[SourceConfig], fail_silently: bool = False, parent: StepProto | None = None
     ) -> None:
@@ -34,5 +47,13 @@ class SourceStep(BaseStep):
         wire()
 
     def __call__(self) -> Iterator[SubjectData]:
+        """
+        Starts the pipeline. and adds on subject at a time.
+
+        Yields
+        ------
+        Iterator[SubjectData]
+            An iterator of the subjects.
+        """
         for source_config in self._source_configs:
             yield from source_config.service()

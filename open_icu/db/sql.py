@@ -36,7 +36,9 @@ class SQLDataFrameDatabaseExtractor(DataFrameDatabaseExtractorProto):
             The SQL query to execute.
         chunksize : int, optional
             The number of rows to fetch at a time, by default None.
-        kwargs : str
+        args : Any
+            additional arguments.
+        kwargs : Any
             The keyword arguments to format the SQL query with.
 
         Yields
@@ -65,6 +67,8 @@ class SQLDataFrameDatabaseExtractor(DataFrameDatabaseExtractorProto):
         ----------
         query : str
             The SQL query to execute.
+        args : Any
+            additional arguments.
         kwargs : Any
             The keyword arguments to format the SQL query with.
 
