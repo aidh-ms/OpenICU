@@ -1,5 +1,6 @@
 from typing import Any, Iterator
 
+from dependency_injector.containers import Container
 from dependency_injector.wiring import Provide, inject
 
 from open_icu.db.proto import DataFrameDatabaseExtractorProto
@@ -72,15 +73,15 @@ class SQLSampler(SamplerServiceProto):
 
     @inject
     def __call__(
-        self, df_extractor: DataFrameDatabaseExtractorProto = Provide["db_mimic"], *args: Any, **kwargs: Any
+        self, container: Container = Provide["<container>"], *args: Any, **kwargs: Any
     ) -> Iterator[SubjectData]:
         """
         A generator that yields subjects based on the SQL table.
 
         Parameters
         ----------
-        df_extractor : DataFrameDatabaseExtractorProto
-            The database extractor.
+        container : Container
+            The di container containing the database extractor.
         args : Any
             Additional arguments.
         kwargs : Any
@@ -91,5 +92,7 @@ class SQLSampler(SamplerServiceProto):
         Iterator[SubjectData]
             An iterator of the subjects.
         """
+        df_extractor: DataFrameDatabaseExtractorProto = getattr(container, f"db_{self._source_config.name}")()
+
         for df in df_extractor.iter_df(self.SQL_QUERY, chunksize=1, table=self._table, field=self._field):
             yield SubjectData(id=str(df.loc[0, "subject_id"]), source=self._source_config.name, data={})
