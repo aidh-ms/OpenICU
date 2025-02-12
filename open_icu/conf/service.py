@@ -10,6 +10,21 @@ T = TypeVar("T", bound=ServiceProto)
 
 
 class ServiceConfiguration(Configuration, Generic[T]):
+    """
+    A class representing the configuration for a service.
+
+    Attributes
+    ----------
+    args : list[Any]
+        A list of arguments to pass to the service.
+    kwargs : dict[str, Any]
+        A dictionary of keyword arguments to pass to the service.
+    path : str
+        A python dotter path to the service class.
+    service : T
+        The service instance.
+    """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     args: list[Any] = Field(default_factory=list)

@@ -2,4 +2,6 @@ from pydantic import BaseModel
 
 
 class Configuration(BaseModel):
-    pass
+    """
+    A class representing the configuration for a step.
+    """
