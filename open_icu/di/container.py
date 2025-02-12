@@ -14,4 +14,8 @@ modules = [
 
 
 def wire() -> None:
+    """
+    A method that wires the dynamic container with the modules in the package.
+    to add modules to the container, add them to the modules list.
+    """
     dynamic_container.wire(modules=modules)
