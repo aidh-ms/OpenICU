@@ -1,14 +1,16 @@
 name: mimic
 connection_uri: postgresql+psycopg://paul@host.docker.internal:5433/mimiciv
 
-sample:
-  samples:
-    - "10020640"
-    - "10010471"
-    - "10027602"
-    - "18613232"
-    - "17417573"
-  sampler: open_icu.steps.source.sample.SQLSampler
-  params:
-    table: mimiciv_icu.icustays
-    field: subject_id
+path: open_icu.step.source.services.sampler.SubjectSampler
+kwargs:
+  subjects:
+  - "10020640"
+  - "10010471"
+  - "10027602"
+  - "18613232"
+  - "17417573"
+
+# path: open_icu.step.source.services.sampler.SQLSampler
+# kwargs:
+#   table: mimiciv_icu.icustays
+#   field: subject_id
