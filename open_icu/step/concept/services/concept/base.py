@@ -11,20 +11,18 @@ from open_icu.step.concept.proto import FHIR_TYPE, IConceptService
 from open_icu.type.fhir.utils import to_identifiers_str
 
 
-class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
+class BaseConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
     """
     A base class for extracting data from a source based on a concept.
 
     Parameters
     ----------
-    subject_id : str
-        The subject ID to extract data for.
-    source : SourceConfig
-        The source configuration.
-    concept : ConceptConfig
-        The concept configuration.
-    concept_source : ConceptSource
+    concept_source_config : ConceptSourceConfig
         The concept source configuration.
+    args : Any
+        The arguments to be passed to the extract method.
+    kwargs : Any
+        The keyword arguments to be passed to the extract method.
     """
 
     def __init__(self, concept_source_config: ConceptSourceConfig, *args: Any, **kwargs: Any) -> None:
@@ -56,11 +54,10 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
     @inject
     def _get_data(
         self,
-        concept_source_config: ConceptSourceConfig,
         container: Container = Provide["<container>"],
         *args: Any,
         **kwargs: Any,
-    ) -> DataFrame | None:
+    ) -> DataFrame[Any]:
         """
         A method to get the data from the source.
 
@@ -86,7 +83,7 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
 
         return df_extractor.get_df(query, **kwargs)
 
-    def _apply_identifier__coding(self, df: DataFrame, concept_config: ConceptConfig | None = None) -> str:
+    def _apply_identifier__coding(self, df: DataFrame, concept_config: ConceptConfig) -> str:
         """
         A method to apply to the concept DataFrame to add the identifier coding to the DataFrame.
 
@@ -94,7 +91,7 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         ----------
         df : DataFrame
             The DataFrame to apply the identifier coding to.
-        concept_config : ConceptConfig, optional
+        concept_config : ConceptConfig
             The concept configuration.
 
         Returns
@@ -102,10 +99,9 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         str
             The identifier coding.
         """
-        assert concept_config is not None
         return to_identifiers_str(concept_config.identifiers)
 
-    def _apply_subject__reference(self, df: DataFrame, concept_config: ConceptConfig | None = None) -> str:
+    def _apply_subject__reference(self, df: DataFrame, concept_config: ConceptConfig) -> str:
         """
         A method to apply to the concept DataFrame to add the subject reference to the DataFrame.
 
@@ -113,7 +109,7 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         ----------
         df : DataFrame
             The DataFrame to apply the subject reference to.
-        concept_config : ConceptConfig, optional
+        concept_config : ConceptConfig
             The concept configuration.
 
         Returns
@@ -123,7 +119,7 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         """
         return str(df["subject_id"])
 
-    def _apply_subject__type(self, df: DataFrame, concept_config: ConceptConfig | None = None) -> str:
+    def _apply_subject__type(self, df: DataFrame, concept_config: ConceptConfig) -> str:
         """
         A method to apply to the concept DataFrame to add the subject type to the DataFrame.
 
@@ -131,7 +127,7 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         ----------
         df : DataFrame
             The DataFrame to apply the subject type to.
-        concept_config : ConceptConfig, optional
+        concept_config : ConceptConfig
             The concept configuration.
 
         Returns

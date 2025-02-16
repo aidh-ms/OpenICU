@@ -22,5 +22,5 @@ class IConceptService(Protocol, Generic[FHIR_TYPE]):
     def __call__(self, concept_config: ConceptConfig, *args: Any, **kwargs: Any) -> DataFrame[FHIR_TYPE] | None:
         ...
 
-    def _get_data(self, concept_source_config: ConceptSourceConfig, *args: Any, **kwargs: Any) -> DataFrame | None:
+    def _get_data(self, *args: Any, **kwargs: Any) -> DataFrame[Any]:
         ...
