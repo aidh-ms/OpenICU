@@ -1,7 +1,7 @@
 from typing import Any, Protocol
 
 
-class ServiceProto(Protocol):
+class IService(Protocol):
     """
     A protocol for a service class.
 

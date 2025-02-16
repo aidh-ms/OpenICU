@@ -3,10 +3,10 @@ from typing import Any, Generic, TypeVar, cast
 from pydantic import ConfigDict, Field, computed_field
 
 from open_icu.conf.base import Configuration
-from open_icu.conf.proto import ServiceProto
+from open_icu.conf.proto import IService
 from open_icu.conf.utils import import_callable
 
-T = TypeVar("T", bound=ServiceProto)
+T = TypeVar("T", bound=IService)
 
 
 class ServiceConfiguration(Configuration, Generic[T]):
