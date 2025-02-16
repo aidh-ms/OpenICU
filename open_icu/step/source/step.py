@@ -4,7 +4,7 @@ from typing import Iterator
 from dependency_injector import providers
 
 from open_icu.conf import load_yaml_configs
-from open_icu.db.sql import SQLDataFrameDatabaseExtractor
+from open_icu.data.sql import SQLDataFrameDatabaseExtractor
 from open_icu.di.container import dynamic_container, wire
 from open_icu.step.base import BaseStep
 from open_icu.step.proto import StepProto

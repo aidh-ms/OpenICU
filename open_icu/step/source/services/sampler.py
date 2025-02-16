@@ -3,7 +3,7 @@ from typing import Any, Iterator
 from dependency_injector.containers import Container
 from dependency_injector.wiring import Provide, inject
 
-from open_icu.db.proto import IDataFrameDatabaseExtractor
+from open_icu.data.proto import IDataFrameDatabaseExtractor
 from open_icu.step.source.conf import SourceConfig
 from open_icu.step.source.proto import ISamplerService
 from open_icu.type.subject import SubjectData

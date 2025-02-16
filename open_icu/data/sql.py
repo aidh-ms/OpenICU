@@ -4,7 +4,7 @@ import pandas as pd
 from pandera.typing import DataFrame
 from sqlalchemy import create_engine
 
-from open_icu.db.proto import IDataFrameDatabaseExtractor
+from open_icu.data.proto import IDataFrameDatabaseExtractor
 
 
 class SQLDataFrameDatabaseExtractor(IDataFrameDatabaseExtractor):
