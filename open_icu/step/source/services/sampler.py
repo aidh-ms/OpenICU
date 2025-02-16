@@ -5,11 +5,11 @@ from dependency_injector.wiring import Provide, inject
 
 from open_icu.db.proto import DataFrameDatabaseExtractorProto
 from open_icu.step.source.conf import SourceConfig
-from open_icu.step.source.proto import SamplerServiceProto
+from open_icu.step.source.proto import ISamplerService
 from open_icu.type.subject import SubjectData
 
 
-class SubjectSampler(SamplerServiceProto):
+class SubjectSampler(ISamplerService):
     """
     A sampler service that samples subjects from a list of subjects.
 
@@ -44,7 +44,7 @@ class SubjectSampler(SamplerServiceProto):
             yield SubjectData(id=sample, source=self._source_config.name, data={})
 
 
-class SQLSampler(SamplerServiceProto):
+class SQLSampler(ISamplerService):
     """
     A sampler service that samples subjects from a SQL table.
 

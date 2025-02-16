@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from open_icu.type.subject import SubjectData
 
 
-class SamplerServiceProto(Protocol):
+class ISamplerService(Protocol):
     """
     A protocol for the sampler service.
     """

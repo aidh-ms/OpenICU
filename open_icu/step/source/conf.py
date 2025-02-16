@@ -1,8 +1,8 @@
 from open_icu.conf import ServiceConfiguration
-from open_icu.step.source.proto import SamplerServiceProto
+from open_icu.step.source.proto import ISamplerService
 
 
-class SourceConfig(ServiceConfiguration[SamplerServiceProto]):
+class SourceConfig(ServiceConfiguration[ISamplerService]):
     """
     A class representing the source configuration.
 
