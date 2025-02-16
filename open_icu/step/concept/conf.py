@@ -1,9 +1,10 @@
 from typing import Any
 
 from open_icu.conf import Configuration, ServiceConfiguration
+from open_icu.step.concept.proto import IConceptService
 
 
-class ConceptSourceConfig(ServiceConfiguration):
+class ConceptSourceConfig(ServiceConfiguration[IConceptService]):
     """
     A class representing the source configuration.
 
