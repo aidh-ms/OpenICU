@@ -10,9 +10,9 @@ limits:
 
 sources:
   - source: mimic
-    extractor: open_icu.steps.source.mimic.deviceusage.RAWObservationExtractor
+    path: open_icu.steps.source.mimic.deviceusage.RAWObservationExtractor
     unit: {}
-    params:
+    kwargs:
       sql: |
         SELECT
           subject_id,

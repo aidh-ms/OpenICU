@@ -11,9 +11,9 @@ limits:
 
 sources:
   - source: mimic
-    extractor: open_icu.steps.source.mimic.observation.EventObservationExtractor
+    path: open_icu.steps.source.mimic.observation.EventObservationExtractor
     unit:
       value_quantity: mg/dl
-    params:
+    kwargs:
       table: mimiciv_icu.chartevents
       itemid: 220615
