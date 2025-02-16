@@ -1,1 +1,1 @@
-poetry install --with dev
+poetry install --with aki,dev,docs
