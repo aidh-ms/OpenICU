@@ -84,7 +84,7 @@ class ObservationExtractor(BaseConceptExtractor[FHIRNumericObservation | FHIRTex
         return self._concept_source_config.unit[FHIRNumericObservation.value_quantity__unit.replace("__unit", "")]
 
     def __call__(  # type: ignore[override]
-        self, concept_config: ConceptConfig, *args: Any, **kwargs: Any
+        self, concept_config: ConceptConfig, subject_id: str, *args: Any, **kwargs: Any
     ) -> DataFrame[FHIRNumericObservation] | DataFrame[FHIRTextObservation] | None:
         """
         A method to extract observation data from the database.
@@ -103,7 +103,7 @@ class ObservationExtractor(BaseConceptExtractor[FHIRNumericObservation | FHIRTex
         DataFrame[FHIRNumericObservation] | DataFrame[FHIRTextObservation] | None
             The extracted observation data.
         """
-        df: DataFrame = self._get_data()
+        df: DataFrame = self._get_data(subject_id)
 
         if df.empty:
             return None

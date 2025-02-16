@@ -80,7 +80,9 @@ class EncounterExtractor(BaseConceptExtractor[FHIREncounter]):
         """
         return str(df["care_team_id"])
 
-    def __call__(self, concept_config: ConceptConfig, *args: Any, **kwargs: Any) -> DataFrame[FHIREncounter] | None:
+    def __call__(
+        self, concept_config: ConceptConfig, subject_id: str, *args: Any, **kwargs: Any
+    ) -> DataFrame[FHIREncounter] | None:
         """
         A method to extract encounter data from the database.
 
@@ -98,7 +100,7 @@ class EncounterExtractor(BaseConceptExtractor[FHIREncounter]):
         DataFrame[FHIREncounter] | None
             The extracted encounter data.
         """
-        df: DataFrame = self._get_data()
+        df: DataFrame = self._get_data(subject_id)
 
         if df.empty:
             return None

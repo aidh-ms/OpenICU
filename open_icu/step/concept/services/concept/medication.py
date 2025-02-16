@@ -127,7 +127,7 @@ class MedicationExtractor(BaseConceptExtractor[FHIRMedicationStatement]):
         ]
 
     def __call__(
-        self, concept_config: ConceptConfig, *args: Any, **kwargs: Any
+        self, concept_config: ConceptConfig, subject_id: str, *args: Any, **kwargs: Any
     ) -> DataFrame[FHIRMedicationStatement] | None:
         """
         A method to extract medication data from the database.
@@ -146,7 +146,7 @@ class MedicationExtractor(BaseConceptExtractor[FHIRMedicationStatement]):
         DataFrame[FHIRMedicationStatement] | None
             The extracted medication data.
         """
-        df: DataFrame = self._get_data()
+        df: DataFrame = self._get_data(subject_id)
 
         if df.empty:
             return None

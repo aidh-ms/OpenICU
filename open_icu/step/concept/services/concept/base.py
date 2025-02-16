@@ -54,6 +54,7 @@ class BaseConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMet
     @inject
     def _get_data(
         self,
+        subject_id: str,
         container: Container = Provide["<container>"],
         *args: Any,
         **kwargs: Any,
@@ -63,6 +64,8 @@ class BaseConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMet
 
         Parameters
         ----------
+        subject_id : str
+            The subject ID to extract data for.
         concept_source_config : ConceptSourceConfig
             The concept source configuration.
         container : Container
@@ -79,6 +82,7 @@ class BaseConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMet
         """
         df_extractor: IDataFrameDatabaseExtractor = getattr(container, f"db_{self._concept_source_config.source}")()
         kwargs = self._concept_source_config.kwargs.copy()
+        kwargs["subject_id"] = subject_id
         query = kwargs.pop("query")
 
         return df_extractor.get_df(query, **kwargs)
