@@ -11,10 +11,10 @@ limits:
 
 sources:
   - source: mimic
-    extractor: open_icu.steps.source.mimic.observation.EventObservationExtractor
+    path: open_icu.steps.source.mimic.observation.EventObservationExtractor
     unit:
       value_quantity: mmHg
-    params:
+    kwargs:
       table: mimiciv_icu.chartevents
       itemid: [220050, 220179]
   # - source: eicu

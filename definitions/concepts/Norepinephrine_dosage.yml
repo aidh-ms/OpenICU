@@ -12,11 +12,11 @@ limits:
 
 sources:
   - source: mimic
-    extractor: open_icu.steps.source.mimic.medication.EventPerWeightMedicationExtractor
+    path: open_icu.steps.source.mimic.medication.EventPerWeightMedicationExtractor
     unit:
       dosage__dose_quantity: mg
       dosage__rate_quantity: mcg/min
-    params:
+    kwargs:
       itemid: 221906
       table: mimiciv_icu.inputevents
   # - source: eicu

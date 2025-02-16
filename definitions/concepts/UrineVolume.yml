@@ -11,10 +11,10 @@ limits:
 
 sources:
   - source: mimic
-    extractor: open_icu.steps.source.mimic.observation.RAWObservationExtractor
+    path: open_icu.steps.source.mimic.observation.RAWObservationExtractor
     unit:
       value_quantity: ml
-    params:
+    kwargs:
       sql: |
         SELECT
           subject_id,
