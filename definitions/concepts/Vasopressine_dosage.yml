@@ -12,7 +12,7 @@ limits:
 
 sources:
   - source: mimic
-    path: open_icu.steps.source.mimic.medication.EventMedicationExtractor
+    path: open_icu.step.concept.services.mimic.medication.EventMedicationExtractor
     unit:
       dosage__dose_quantity: unit
       dosage__rate_quantity: unit/hour

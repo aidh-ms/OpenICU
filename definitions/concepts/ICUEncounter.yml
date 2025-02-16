@@ -10,6 +10,6 @@ limits:
 
 sources:
   - source: mimic
-    path: open_icu.steps.source.mimic.encounter.ICUEncounterExtractor
+    path: open_icu.step.concept.services.mimic.encounter.ICUEncounterExtractor
     unit: {}
     kwargs: {}

@@ -12,7 +12,7 @@ limits:
 
 sources:
   - source: mimic
-    path: open_icu.steps.source.mimic.medication.EventPerWeightMedicationExtractor
+    path: open_icu.step.concept.services.mimic.medication.EventPerWeightMedicationExtractor
     unit:
       dosage__dose_quantity: mg
       dosage__rate_quantity: mcg/min
