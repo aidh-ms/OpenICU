@@ -4,10 +4,10 @@ import pandas as pd
 from pandera.typing import DataFrame
 from sqlalchemy import create_engine
 
-from open_icu.db.proto import DataFrameDatabaseExtractorProto
+from open_icu.db.proto import IDataFrameDatabaseExtractor
 
 
-class SQLDataFrameDatabaseExtractor(DataFrameDatabaseExtractorProto):
+class SQLDataFrameDatabaseExtractor(IDataFrameDatabaseExtractor):
     """
     A class for querying databases and returning pandas DataFrames.
 

@@ -3,7 +3,7 @@ from typing import Any, Iterator, Protocol
 from pandera.typing import DataFrame
 
 
-class DataFrameDatabaseExtractorProto(Protocol):
+class IDataFrameDatabaseExtractor(Protocol):
     """
     A protocol for a database extractor class that returns pandas DataFrames.
     """
