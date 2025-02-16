@@ -23,7 +23,7 @@ class SQLDataFrameDatabaseExtractor(IDataFrameDatabaseExtractor):
     def iter_df(
         self,
         query: str,
-        chunksize: int | None = None,
+        chunksize: int,
         *args: Any,
         **kwargs: Any,
     ) -> Iterator[DataFrame]:
@@ -77,4 +77,10 @@ class SQLDataFrameDatabaseExtractor(IDataFrameDatabaseExtractor):
         DataFrame
             A pandas DataFrame containing the query results.
         """
-        return next(self.iter_df(query, *args, **kwargs))
+        with (
+            self._engine.connect().execution_options(stream_results=True) as conn,
+            conn.begin(),
+        ):
+            df = pd.read_sql_query(query.format(**kwargs), conn, chunksize=None)
+            assert isinstance(df, pd.DataFrame)
+            return df.pipe(DataFrame)
