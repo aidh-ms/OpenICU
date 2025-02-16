@@ -10,7 +10,7 @@ limits:
 
 sources:
   - source: mimic
-    path: open_icu.steps.source.mimic.deviceusage.RAWObservationExtractor
+    path: open_icu.step.concept.services.mimic.deviceusage.RAWObservationExtractor
     unit: {}
     kwargs:
       query: |
