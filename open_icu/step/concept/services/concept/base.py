@@ -1,8 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Generic
 
+from dependency_injector.containers import Container
+from dependency_injector.wiring import Provide, inject
 from pandera.typing import DataFrame
 
+from open_icu.data.proto import IDataFrameDatabaseExtractor
 from open_icu.step.concept.conf import ConceptConfig, ConceptSourceConfig
 from open_icu.step.concept.proto import FHIR_TYPE, IConceptService
 from open_icu.type.fhir.utils import to_identifiers_str
@@ -50,8 +53,14 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def _get_data(self, concept_source_config: ConceptSourceConfig, *args: Any, **kwargs: Any) -> DataFrame | None:
+    @inject
+    def _get_data(
+        self,
+        concept_source_config: ConceptSourceConfig,
+        container: Container = Provide["<container>"],
+        *args: Any,
+        **kwargs: Any,
+    ) -> DataFrame | None:
         """
         A method to get the data from the source.
 
@@ -59,6 +68,8 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         ----------
         concept_source_config : ConceptSourceConfig
             The concept source configuration.
+        container : Container
+            The di container containing the database extractor.
         args : Any
             The arguments to be passed to the extract method.
         kwargs : Any
@@ -69,7 +80,11 @@ class ConceptExtractor(IConceptService, Generic[FHIR_TYPE], metaclass=ABCMeta):
         DataFrame | None
             The extracted data.
         """
-        raise NotImplementedError
+        df_extractor: IDataFrameDatabaseExtractor = getattr(container, f"db_{self._concept_source_config.source}")()
+        kwargs = self._concept_source_config.kwargs.copy()
+        query = kwargs.pop("query")
+
+        return df_extractor.get_df(query, **kwargs)
 
     def _apply_identifier__coding(self, df: DataFrame, concept_config: ConceptConfig | None = None) -> str:
         """
