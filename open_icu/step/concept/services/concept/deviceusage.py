@@ -61,7 +61,7 @@ class DeviceUsageExtractor(BaseConceptExtractor[FHIRDeviceUsage]):
         """
         return StatusCodes.IN_PROGRESS if df["status"] else StatusCodes.ON_HOLD
 
-    def extract(self, concept_config: ConceptConfig, *args: Any, **kwargs: Any) -> DataFrame[FHIRDeviceUsage] | None:
+    def __call__(self, concept_config: ConceptConfig, *args: Any, **kwargs: Any) -> DataFrame[FHIRDeviceUsage] | None:
         """
         A method to extract device usage data from the database.
 
