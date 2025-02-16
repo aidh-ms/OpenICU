@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABCMeta
 from typing import TYPE_CHECKING, Iterator
 
 from open_icu.step.proto import StepProto
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from open_icu.step.exception import StepValidationError  # noqa
 
 
-class BaseStep(ABC):
+class BaseStep(StepProto, metaclass=ABCMeta):
     """
     A base class for all steps in the pipeline.
     It follows the pattern of a pipe and filter architecture.
