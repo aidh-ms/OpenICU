@@ -3,7 +3,7 @@ from typing import Any, Iterator
 from dependency_injector.containers import Container
 from dependency_injector.wiring import Provide, inject
 
-from open_icu.db.proto import DataFrameDatabaseExtractorProto
+from open_icu.db.proto import IDataFrameDatabaseExtractor
 from open_icu.step.source.conf import SourceConfig
 from open_icu.step.source.proto import ISamplerService
 from open_icu.type.subject import SubjectData
@@ -92,7 +92,7 @@ class SQLSampler(ISamplerService):
         Iterator[SubjectData]
             An iterator of the subjects.
         """
-        df_extractor: DataFrameDatabaseExtractorProto = getattr(container, f"db_{self._source_config.name}")()
+        df_extractor: IDataFrameDatabaseExtractor = getattr(container, f"db_{self._source_config.name}")()
 
         for df in df_extractor.iter_df(self.SQL_QUERY, chunksize=1, table=self._table, field=self._field):
             yield SubjectData(id=str(df.loc[0, "subject_id"]), source=self._source_config.name, data={})
