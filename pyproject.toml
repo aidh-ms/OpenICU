@@ -29,7 +29,7 @@ pandas-stubs = "^2.2.3.241126"
 pydantic = "^2.10.6"
 pyyaml = "^6.0.2"
 types-pyyaml = "^6.0.12.20241230"
-pyarrow = "^19.0.0"
+pyarrow = "^19.0.1"
 dependency-injector = "^4.45.0"
 
 [tool.poetry.group.aki.dependencies]
