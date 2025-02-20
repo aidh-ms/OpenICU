@@ -4,6 +4,9 @@
 	"service": "openicu",
 	"workspaceFolder": "/workspaces",
 	"remoteUser": "vscode",
+	"mounts": [
+		"type=bind,source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,readonly"
+	],
 	"postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
 	"postStartCommand": "bash .devcontainer/scripts/post-start.sh",
 	"customizations": {
