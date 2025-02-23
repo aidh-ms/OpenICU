@@ -1,0 +1,8 @@
+name: aki
+description: "preprocessor for AKI classification"
+path: open_icu.step.preprocessing.service.aki.AKIPreprocessor
+kwargs:
+  demografic: "BodyWeight"
+  creatinie: "Creatinine_absolute_serum"
+  rrt: "RRT"
+  urineoutput: "UrineVolume"
