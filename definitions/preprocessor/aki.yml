@@ -1,9 +1,0 @@
-name: aki
-description: "preprocessor for AKI classification"
-concepts: []
-preprocessor: open_icu.steps.preprocessing.conditions.aki.AKIPreprocessor
-params:
-  demografic: "BodyWeight"
-  creatinie: "Creatinine_absolute_serum"
-  rrt: "RRT"
-  urineoutput: "UrineVolume"
