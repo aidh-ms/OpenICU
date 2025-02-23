@@ -43,7 +43,7 @@ class SimpleUnitConverter(IUnitConversionService):
         """
         return value * self._conversion_factor[source_unit] / self._conversion_factor[target_unit]
 
-    def supports_conversion(self, source_unit: str, target_unit: str) -> bool:
+    def supports_conversion(self, source_unit: str, target_unit: str, subject_data: SubjectData) -> bool:
         """
         Check if the converter supports the conversion between the source and target units.
 
@@ -53,6 +53,8 @@ class SimpleUnitConverter(IUnitConversionService):
             The source unit of measurement.
         target_unit : str
             The target unit of measurement.
+        subject_data : SubjectData
+            The subject data.
 
         Returns
         -------

@@ -43,7 +43,7 @@ class UnitConversionStep(BaseStep):
         elif isinstance(concept_configs, Path):
             self._concept_configs = load_yaml_configs(concept_configs, ConceptConfig)
 
-    def supports_conversion(self, source_unit: str, target_unit: str) -> bool:
+    def supports_conversion(self, source_unit: str, target_unit: str, subject_data: SubjectData) -> bool:
         """
         Check if the conversion between the source and target units is supported
         by any of the converters.
@@ -61,7 +61,7 @@ class UnitConversionStep(BaseStep):
             True if the conversion is supported, False otherwise.
         """
         for converter in self._unit_configs:
-            if converter.service.supports_conversion(source_unit, target_unit):
+            if converter.service.supports_conversion(source_unit, target_unit, subject_data):
                 return True
 
         return False
@@ -83,7 +83,7 @@ class UnitConversionStep(BaseStep):
             return value
 
         for converter in self._unit_configs:
-            if converter.service.supports_conversion(source_unit, target_unit):
+            if converter.service.supports_conversion(source_unit, target_unit, subject_data):
                 return converter.service(value, source_unit, target_unit, subject_data)
 
         return value
@@ -103,7 +103,8 @@ class UnitConversionStep(BaseStep):
 
                 # validate if all unit conversions are supported
                 if not all(
-                    self.supports_conversion(source_unit, unit) for source_unit in df[f"{field}__unit"].unique()
+                    self.supports_conversion(source_unit, unit, subject_data)
+                    for source_unit in df[f"{field}__unit"].unique()
                 ):
                     continue
 

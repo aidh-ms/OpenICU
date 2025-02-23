@@ -19,5 +19,5 @@ class IUnitConversionService(Protocol):
     def __call__(self, value: float, source_unit: str, target_unit: str, subject_data: SubjectData) -> float:
         ...
 
-    def supports_conversion(self, source_unit: str, target_unit: str) -> bool:
+    def supports_conversion(self, source_unit: str, target_unit: str, subject_data: SubjectData) -> bool:
         ...

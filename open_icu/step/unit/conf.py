@@ -8,6 +8,8 @@ class UnitConversionConfig(ServiceConfiguration[IUnitConversionService]):
 
     Attributes
     ----------
+    name : str
+        The name of the conversion.
     base_unit : str
         The base unit of the conversion.
     args : list[Any], default: []
@@ -20,4 +22,5 @@ class UnitConversionConfig(ServiceConfiguration[IUnitConversionService]):
         a property that returns an instance of the service class.
     """
 
+    name: str
     base_unit: str
