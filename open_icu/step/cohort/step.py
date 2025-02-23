@@ -13,8 +13,8 @@ class CohortFilterStep(BaseStep):
 
     Parameters
     ----------
-    source_configs : Path | list[SourceConfig]
-        The source configurations.
+    cohort_configs : Path | list[CohortConfig]
+        The cohort configurations.
     fail_silently : bool, default: False
         Whether to fail silently or not.
     parent : StepProto, default: None
