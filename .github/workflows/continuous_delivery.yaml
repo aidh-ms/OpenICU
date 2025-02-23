@@ -44,3 +44,11 @@ jobs:
       run: |
         poetry version ${{ github.ref_name }}
         poetry publish --skip-existing --build
+
+    - name: Install doc dependencies
+      run: |
+        poetry install --with docs
+
+    - name: Build and deploy Documentation
+      run: |
+        poetry run mkdocs gh-deploy --force
