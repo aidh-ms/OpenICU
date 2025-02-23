@@ -1,7 +1,9 @@
 name: timeframe
 description: Filters the cohort based on the length of timeframe.
-concepts:
-  - "ICUEncounter"
-filter: open_icu.steps.cohort.filters.timeframe.TimeframeFilter
-params:
+path: open_icu.step.cohort.services.timeframe.TimeframeFilter
+kwargs:
+  concepts:
+  - name: ICUEncounter
+    start: actual_period__start
+    end: actual_period__end
   hours: 6
