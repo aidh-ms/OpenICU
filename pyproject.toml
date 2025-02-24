@@ -22,7 +22,7 @@ Bugtracker = "https://github.com/aidh-ms/OpenICU/issues"
 [tool.poetry.dependencies]
 python = "^3.13"
 sqlalchemy = "^2.0.38"
-psycopg = {extras = ["binary"], version = "^3.2.4"}
+psycopg = {extras = ["binary"], version = "^3.2.5"}
 pandera = {extras = ["strategies"], version = "^0.22.0"}
 pandas = "^2.2.3"
 pandas-stubs = "^2.2.3.241126"
