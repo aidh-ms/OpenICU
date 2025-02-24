@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 import pandas as pd
 from pydantic import BaseModel
@@ -54,6 +54,10 @@ class TimeframeFilter(ICohortService):
     strategy : {"any", "all"}, default "any"
         The strategy to use when filtering the data. If "any", the filter will
         return True if any of the timeframes fit the criteria.
+    args : Any
+        Additional arguments.
+    kwargs : Any
+        Additional keyword arguments.
     """
 
     def __init__(
@@ -68,6 +72,8 @@ class TimeframeFilter(ICohortService):
         hours: int = 0,
         weeks: int = 0,
         strategy: Literal["any"] | Literal["all"] = "any",
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         self._cohort_config = cohort_config
         self._days = days
@@ -84,7 +90,7 @@ class TimeframeFilter(ICohortService):
         else:
             self._concepts = concepts or []
 
-    def __call__(self, subject_data: SubjectData) -> bool:
+    def __call__(self, subject_data: SubjectData, *args: Any, **kwargs: Any) -> bool:
         """
         Filter out subjects based on the timeframe of their data.
         if the strategy is "any", the filter will return False if any of the timeframes is larger as the criteria.
@@ -96,6 +102,10 @@ class TimeframeFilter(ICohortService):
         ----------
         subject_data : SubjectData
             The subject data to filter.
+        args : Any
+            Additional arguments.
+        kwargs : Any
+            Additional keyword arguments.
 
         Returns
         -------

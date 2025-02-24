@@ -16,5 +16,5 @@ class ICohortService(Protocol):
     def __init__(self, cohort_config: CohortConfig, *args: Any, **kwargs: Any) -> None:
         ...
 
-    def __call__(self, subject_data: SubjectData) -> bool:
+    def __call__(self, subject_data: SubjectData, *args: Any, **kwargs: Any) -> bool:
         ...
