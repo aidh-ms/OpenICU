@@ -16,5 +16,5 @@ class IPreprocessorService(Protocol):
     def __init__(self, preprocessor_config: PreprocessorConfig, *args: Any, **kwargs: Any) -> None:
         ...
 
-    def __call__(self, subject_data: SubjectData) -> SubjectData:
+    def __call__(self, subject_data: SubjectData, *args: Any, **kwargs: Any) -> SubjectData:
         ...
