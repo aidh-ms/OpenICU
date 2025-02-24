@@ -1,6 +1,6 @@
 name: aki
 description: "preprocessor for AKI classification"
-path: open_icu.step.preprocessing.service.aki.AKIPreprocessor
+path: open_icu.step.preprocessor.services.aki.AKIPreprocessor
 kwargs:
   demografic: "BodyWeight"
   creatinie: "Creatinine_absolute_serum"
