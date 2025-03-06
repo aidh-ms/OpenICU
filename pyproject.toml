@@ -33,7 +33,7 @@ pyarrow = "^19.0.1"
 dependency-injector = "^4.46.0"
 
 [tool.poetry.group.aki.dependencies]
-pyaki = "^1.0.6"
+pyaki = "^1.0.7"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.15.0"
