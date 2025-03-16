@@ -4,10 +4,10 @@ connection_uri: postgresql+psycopg://paul@host.docker.internal:5433/mimiciv
 path: open_icu.step.source.services.sampler.SubjectSampler
 kwargs:
   subjects:
+  - "18613232"
   - "10020640"
   - "10010471"
   - "10027602"
-  - "18613232"
   - "17417573"
 
 # path: open_icu.step.source.services.sampler.SQLSampler
