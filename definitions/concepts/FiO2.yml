@@ -1,0 +1,19 @@
+name: FiO2
+description: Fraction of inspired oxygen
+identifiers:
+  loinc: ''
+  snomed: '250774007'
+unit:
+  value_quantity: 1/1
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    path: open_icu.step.concept.services.mimic.observation.EventObservationExtractor
+    unit:
+      value_quantity: 1/1
+    kwargs:
+      itemid: 223835
+      table: mimiciv_icu.chartevents
