@@ -1,0 +1,23 @@
+name: Age
+description: Age of the patient
+identifiers:
+  loinc: ''
+  snomed: '263495000'
+unit:
+  value_quantity: years
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    path: open_icu.step.concept.services.mimic.observation.RAWObservationExtractor
+    unit:
+      value_quantity: years
+    kwargs:
+      query: |
+        SELECT
+          subject_id,
+          age as value,
+          admittime as timestamp
+        FROM mimiciv_derived.age
