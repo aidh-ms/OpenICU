@@ -1,0 +1,19 @@
+name: TidalVolume
+description: Actual tidal volume of a patient.
+identifiers:
+  loinc: ''
+  snomed: '13621006'
+unit:
+  value_quantity: ml
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    path: open_icu.step.concept.services.mimic.observation.EventObservationExtractor
+    unit:
+      value_quantity: ml
+    kwargs:
+      itemid: 224685
+      table: mimiciv_icu.chartevents
