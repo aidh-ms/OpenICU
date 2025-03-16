@@ -1,0 +1,19 @@
+name: HeartRate
+description: Heart Rate measured at a certain point in time
+identifiers:
+  loinc: '8867-4'
+  snomed: '364075005'
+unit:
+  value_quantity: bpm
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    path: open_icu.step.concept.services.mimic.observation.EventObservationExtractor
+    unit:
+      value_quantity: bpm
+    kwargs:
+      itemid: 220045
+      table: mimiciv_icu.chartevents
