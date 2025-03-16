@@ -1,0 +1,19 @@
+name: MeanBloodPressue_Arterial_Invasive
+description: Mean Blood Pressure measured at a certain point in time
+identifiers:
+  loinc: ''
+  snomed: '251075007'
+unit:
+  value_quantity: mmHg
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    path: open_icu.step.concept.services.mimic.observation.EventObservationExtractor
+    unit:
+      value_quantity: mmHg
+    kwargs:
+      itemid: 220052
+      table: mimiciv_icu.chartevents
