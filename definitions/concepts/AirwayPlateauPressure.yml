@@ -1,0 +1,19 @@
+name: AirwayPlateauPressure
+description: Airway Plateau Pressure of a patient.
+identifiers:
+  loinc: ''
+  snomed: '698822002'
+unit:
+  value_quantity: mmHg
+limits:
+  lower: ''
+  upper: ''
+
+sources:
+  - source: mimic
+    path: open_icu.step.concept.services.mimic.observation.EventObservationExtractor
+    unit:
+      value_quantity: mmHg
+    kwargs:
+      itemid: 224696
+      table: mimiciv_icu.chartevents
