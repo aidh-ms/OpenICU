@@ -38,7 +38,7 @@ pyaki = "^1.0.7"
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.15.0"
 pytest = "^8.3.5"
-coverage = "^7.6.11"
+coverage = "^7.7.0"
 pytest-cov = "^6.0.0"
 ruff = "^0.10.0"
 pytest-asyncio = "^0.25.3"
