@@ -28,7 +28,7 @@ pandas = "^2.2.3"
 pandas-stubs = "^2.2.3.250308"
 pydantic = "^2.11.4"
 pyyaml = "^6.0.2"
-types-pyyaml = "^6.0.12.20250402"
+types-pyyaml = "^6.0.12.20250516"
 pyarrow = "^20.0.0"
 dependency-injector = "^4.46.0"
 
