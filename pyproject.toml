@@ -25,7 +25,7 @@ sqlalchemy = "^2.0.41"
 psycopg = {extras = ["binary"], version = "^3.2.9"}
 pandera = {extras = ["strategies"], version = "^0.23.1"}
 pandas = "^2.2.3"
-pandas-stubs = "^2.2.3.250308"
+pandas-stubs = "^2.2.3.250527"
 pydantic = "^2.11.5"
 pyyaml = "^6.0.2"
 types-pyyaml = "^6.0.12.20250516"
