@@ -31,8 +31,9 @@
 				"GitHub.copilot-chat",
 				"GitHub.vscode-pull-request-github",
 				"github.vscode-github-actions",
+				"charliermarsh.ruff",
 				"tamasfe.even-better-toml",
-				"charliermarsh.ruff"
+				"redhat.vscode-yaml"
 			]
 		}
 	}
