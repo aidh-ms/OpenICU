@@ -1,1 +1,1 @@
-docker pull mcr.microsoft.com/devcontainers/python:3.13
+docker pull python:3.13
