@@ -31,7 +31,7 @@ This is a project to unify and extract data from different ICU data sources.
 
 ## Documentation
 
-Some documentation description
+The following documentation describes the use and architecture of the OpenICU project.
 
 ### Requirements and architecture documentation
 
