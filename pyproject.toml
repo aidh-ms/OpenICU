@@ -33,6 +33,7 @@ build-backend = "hatchling.build"
 dev = [
     "mypy>=1.16.0",
     "pytest>=8.4.0",
+    "pytest-cov>=6.2.1",
     "ruff>=0.11.13",
 ]
 docs = [
@@ -51,6 +52,10 @@ python_files = ["test_*.py", "*_test.py"]
 filterwarnings = ["ignore::DeprecationWarning"]
 pythonpath = ["src"]
 addopts = [
+    "--cov",
+    "--cov-branch",
+    "--cov=src",
+    "--cov-report=xml",
     "--import-mode=importlib",
 ]
 
