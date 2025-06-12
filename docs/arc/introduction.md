@@ -3,6 +3,7 @@
 For more information, please refer to the [arc42](https://docs.arc42.org/section-1/) documentation.
 
 
+
 ## Requirements Overview
 
 
@@ -12,3 +13,8 @@ For more information, please refer to the [arc42](https://docs.arc42.org/section
 
 
 ## Stakeholder
+
+The stakeholder landscape primarily comprises two closely related groups, both sharing professional backgrounds as researchers or physicians:
+
+1. **Primary User Group**: This group focuses on leveraging the tool to extract standardized data from existing datasets, primarily for research activities. Their main interest lies in the usability, accuracy, and efficiency of data retrieval for scientific or clinical studies.
+1. **Contributor Group**: In addition to using the tool for research purposes, this group actively participates in its development and enhancement. Their dual role includes providing user feedback, specifying requirements, and contributing to technical or conceptual improvements.
