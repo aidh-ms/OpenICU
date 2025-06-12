@@ -45,3 +45,21 @@ docs = [
     "mkdocstrings-python>=1.16.12",
     "pymdown-extensions>=10.15",
 ]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "*_test.py"]
+filterwarnings = ["ignore::DeprecationWarning"]
+pythonpath = ["src"]
+addopts = [
+    "--import-mode=importlib",
+]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+strict_optional = true
+exclude = [
+    "docs/*",
+]
