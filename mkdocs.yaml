@@ -7,6 +7,19 @@ nav:
       - Basic Usage: "getting_started/basic_usage.md"
       - Contributing: "getting_started/contributing.md"
   # - User Guide:
+  - Architecture:
+      - Introduction and Goals: "arc/introduction.md"
+      - Architecture Constraints: "arc/constraints.md"
+      - Context and Scope: "arc/context.md"
+      - Solution Strategy: "arc/strategy.md"
+      - Building Block View: "arc/building_block.md"
+      - Runtime View: "arc/runtime.md"
+      - Deployment view: "arc/deployment.md"
+      - Crosscutting Concepts: "arc/concepts.md"
+      - Architecture Decisions: "arc/decisions.md"
+      - Quality Requirements: "arc/quality.md"
+      - Risks and Technical Debt: "arc/risks.md"
+      - Glossary: "arc/glossary.md"
   - API Reference: reference/
 
 copyright: Copyright &copy; 2023 AIDH MS
