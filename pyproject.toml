@@ -1,83 +1,47 @@
-[tool.poetry]
+[project]
 name = "open_icu"
 description = "This is a project to unify and analyse data from different ICU data sources."
-version = "1.0.0"
+version = "0.0.1"
 license = "MIT"
-authors = ["ADIH MS"]
+authors = [
+    { name = "Paul-B98", email = "115164840+Paul-B98@users.noreply.github.com" }
+]
+maintainers = [
+    { name = "Paul-B98", email = "115164840+Paul-B98@users.noreply.github.com" }
+]
 readme = "README.md"
-homepage = "https://github.com/aidh-ms/OpenICU"
-repository = "https://github.com/aidh-ms/OpenICU"
-documentation = "https://github.com/aidh-ms/OpenICU"
-keywords = ["Data", "ICU", "Healthcare", "Analysis"]
+keywords = ["Data", "ICU", "Healthcare"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+requires-python = ">=3.13"
 
-[tool.poetry.urls]
-Changelog = "https://github.com/aidh-ms/OpenICU/releases"
-Bugtracker = "https://github.com/aidh-ms/OpenICU/issues"
-
-[tool.poetry.dependencies]
-python = "^3.13"
-sqlalchemy = "^2.0.40"
-psycopg = {extras = ["binary"], version = "^3.2.6"}
-pandera = {extras = ["strategies"], version = "^0.23.1"}
-pandas = "^2.2.3"
-pandas-stubs = "^2.2.3.250308"
-pydantic = "^2.11.3"
-pyyaml = "^6.0.2"
-types-pyyaml = "^6.0.12.20250402"
-pyarrow = "^19.0.1"
-dependency-injector = "^4.46.0"
-
-[tool.poetry.group.aki.dependencies]
-pyaki = "^1.0.11"
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.15.0"
-pytest = "^8.3.5"
-coverage = "^7.8.0"
-pytest-cov = "^6.1.1"
-ruff = "^0.11.4"
-pytest-asyncio = "^0.26.0"
-pytest-recording = "^0.13.1"
-pytest-random-order = "^1.1.1"
-jupyterlab = "^4.3.6"
-
-[tool.poetry.group.docs.dependencies]
-mkdocs = "^1.6.1"
-mkdocs-material = "^9.6.11"
-pymdown-extensions = "^10.14.3"
-mkdocstrings-python = "^1.16.10"
-mkdocs-macros-plugin = "^1.3.7"
-mkdocs-gen-files = "^0.5.0"
-mkdocs-literate-nav = "^0.6.2"
-mkdocs-section-index = "^0.3.10"
-mkdocs-jupyter = "^0.25.1"
-jupyter = "^1.1.1"
+[project.urls]
+homepage = "https://github.com/aidh-ms/OpenICU"
+repository = "https://github.com/aidh-ms/OpenICU"
+changelog = "https://github.com/aidh-ms/OpenICU/releases"
+issues = "https://github.com/aidh-ms/OpenICU/issues"
+documentation = "https://github.com/aidh-ms/OpenICU/wiki"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.mypy]
-python_version = "3.13"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-strict_optional = true
-
-[tool.pytest.ini_options]
-python_files = ["test_*.py", "*_test.py"]
-filterwarnings = ["ignore::DeprecationWarning"]
-asyncio_mode = "auto"
-addopts = [
-    "--cov",
-    "--cov-branch",
-    "--cov=src",
-    "--cov-report=xml",
-    "--import-mode=importlib",
-    "--random-order",
+[dependency-groups]
+dev = [
+    "mypy>=1.16.0",
+    "pytest>=8.4.0",
+    "ruff>=0.11.13",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-gen-files>=0.5.0",
+    "mkdocs-literate-nav>=0.6.2",
+    "mkdocs-macros-plugin>=1.3.7",
+    "mkdocs-material>=9.6.14",
+    "mkdocs-section-index>=0.3.10",
+    "mkdocstrings-python>=1.16.12",
+    "pymdown-extensions>=10.15",
 ]
