@@ -2514,31 +2514,28 @@ types-pytz = ">=2022.1.1"
 
 [[package]]
 name = "pandera"
-version = "0.23.1"
+version = "0.24.0"
 description = "A light-weight and flexible data validation and testing tool for statistical data objects."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "platform_python_implementation == \"PyPy\""
 files = [
-    {file = "pandera-0.23.1-py3-none-any.whl", hash = "sha256:37f75cfb5e34db88afc07adf3ea07ba8738bca709f0e67799c8f1b2fc6b9c977"},
-    {file = "pandera-0.23.1.tar.gz", hash = "sha256:2afed504ad61bbd2960dc7f85dd6be0b28d230a626f392b8ba05c291b970ae06"},
+    {file = "pandera-0.24.0-py3-none-any.whl", hash = "sha256:3b7de575b43a4aa03a1561802be4ee0c7471e49153684fe327f7bbea0724b02b"},
+    {file = "pandera-0.24.0.tar.gz", hash = "sha256:154231780643bc73b121bd976b0ada9dcebb3e065c622954fd099dc299cf44bd"},
 ]
 
 [package.dependencies]
 hypothesis = {version = ">=6.92.7", optional = true, markers = "extra == \"strategies\""}
-numpy = ">=1.24.4"
 packaging = ">=20.0"
-pandas = ">=2.1.1"
 pydantic = "*"
 typeguard = "*"
+typing_extensions = "*"
 typing_inspect = ">=0.6.0"
 
 [package.extras]
 all = ["black", "dask[dataframe]", "distributed", "fastapi", "frictionless (<=4.40.8)", "geopandas", "hypothesis (>=6.92.7)", "modin", "pandas-stubs", "polars (>=0.20.0)", "pyspark[connect] (>=3.2.0)", "pyyaml (>=5.1)", "ray", "scipy", "shapely"]
 dask = ["dask[dataframe]", "distributed"]
-dev = ["hypothesis (>=6.92.7)", "importlib_metadata", "isort (>=5.7.0)", "joblib", "mypy (==1.10.0)", "nox", "pip", "pre_commit", "pyarrow", "pylint (<3.3)", "pytest", "pytest-asyncio", "pytest-cov", "pytest-xdist", "python-multipart", "pytz", "uvicorn", "xdoctest"]
-docs = ["furo", "grpcio", "myst-nb", "ray", "recommonmark", "sphinx", "sphinx-autodoc-typehints (<=1.14.1)", "sphinx-copybutton", "sphinx-design", "sphinx-docsearch", "types-click", "types-pytz", "types-pyyaml", "types-requests", "types-setuptools"]
 fastapi = ["fastapi"]
 geopandas = ["geopandas", "shapely"]
 hypotheses = ["scipy"]
@@ -2547,6 +2544,7 @@ modin = ["dask[dataframe]", "distributed", "modin", "ray"]
 modin-dask = ["dask[dataframe]", "distributed", "modin"]
 modin-ray = ["modin", "ray"]
 mypy = ["pandas-stubs"]
+pandas = ["numpy (>=1.24.4)", "pandas (>=2.1.1)"]
 polars = ["polars (>=0.20.0)"]
 pyspark = ["pyspark[connect] (>=3.2.0)"]
 strategies = ["hypothesis (>=6.92.7)"]
@@ -4745,4 +4743,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "312c8083f3c9c9f1b5b65c9eb48f2d15ce5573c46d34d2b2f5bba8a17ce0f0b2"
+content-hash = "2f12f21c69c2d11fa0cb0925df4f918dc0e7660157eed251d74dfc1e939d0f24"

@@ -23,7 +23,7 @@ Bugtracker = "https://github.com/aidh-ms/OpenICU/issues"
 python = "^3.13"
 sqlalchemy = "^2.0.41"
 psycopg = {extras = ["binary"], version = "^3.2.9"}
-pandera = {extras = ["strategies"], version = "^0.23.1"}
+pandera = {extras = ["strategies"], version = "^0.24.0"}
 pandas = "^2.3.0"
 pandas-stubs = "^2.2.3.250527"
 pydantic = "^2.11.5"
