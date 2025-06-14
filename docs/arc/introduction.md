@@ -1,6 +1,8 @@
 # Introduction and Goals
 
+The use of data from Intensive Care Units (ICUs) holds significant potential for advancing both clinical decision-making and medical research. However, the practical utilization of such data is often impeded by its inherent complexity and the heterogeneity of data sources. Effective analysis requires not only domain-specific clinical knowledge but also specialized skills in data engineering — a combination that is not always readily available.
 
+The OpenICU Project addresses this challenge by providing an open-source, Python-based framework specifically designed to streamline the extraction, preprocessing, and analysis of ICU time series data. By enabling standardized and transparent data workflows, OpenICU empowers clinicians, researchers, and developers to work collaboratively and reproducibly with diverse ICU datasets. The framework is built with openness, extensibility, and ease of use in mind, making it a valuable tool in the growing field of data-driven intensive care.
 
 ## Requirements Overview
 
