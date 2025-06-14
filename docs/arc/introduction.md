@@ -6,7 +6,7 @@ The OpenICU Project addresses this challenge by providing an open-source, Python
 
 ## Requirements Overview
 
-| Id | Requirement | Explanation |
+| ID | Requirement | Explanation |
 | -- | ----------- | ----------- |
 | F1 | Data Sources | The system must support multiple types of data sources for ICU datasets. |
 | F1.1 | Public Dataset Support | Must allow integration of publicly available ICU datasets (e.g., MIMIC, eICU, HiRID, AUCMCdb, DICdb). |
@@ -27,7 +27,15 @@ The OpenICU Project addresses this challenge by providing an open-source, Python
 
 ## Quality goals
 
-
+| ID | Quality | Explanation |
+| -- | ------- | ----------- |
+| Q1 | Reproducibility | Results generated from the system should be reproducible across environments and over time. This includes consistent behavior when using the same data version, concept definitions, and parameters. |
+| Q2 | Usability | The tool must be usable by both clinical researchers and data engineers. This includes an intuitive UI for non-technical users and a clean API/CLI for technical integration. |
+| Q3 | Extensibility | Users should be able to extend the system with custom concept definitions, extraction logic, or export formats without modifying core components. |
+| Q4 | Interoperability | The system must integrate easily with standard data representations (e.g., CSV, Parquet, SQL) and medical coding systems (e.g., ICD, SNOMED CT, LOINC). |
+| Q5 | Privacy & Security | The system must operate without requiring internet access and must avoid transmitting any patient data externally. Offline use is essential to meet medical data protection regulations. |
+| Q6 | Robustness | The system should gracefully handle missing, malformed, or incomplete data without failure, and provide meaningful warnings or fallbacks. |
+| Q7 | Performance | The system should be capable of processing ICU datasets in a reasonable time on notebooks with 16-32 GB RAM. |
 
 ## Stakeholder
 
