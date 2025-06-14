@@ -1,9 +1,0 @@
-name: weight
-description: "preprocessor for AKI classification"
-path: open_icu.step.unit.services.simple.SimpleUnitConverter
-base_unit: g
-kwargs:
-  g: 1
-  kg: 1000
-  mg: 0.001
-  mcg: 0.000001

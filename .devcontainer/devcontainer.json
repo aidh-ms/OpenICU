@@ -1,51 +1,40 @@
 {
 	"name": "OpenICU",
-	"dockerComposeFile": "docker-compose.yml",
 	"service": "openicu",
-	"workspaceFolder": "/workspaces",
 	"remoteUser": "vscode",
+	"workspaceFolder": "/workspaces",
+	"dockerComposeFile": "docker-compose.yml",
 	"mounts": [
 		"type=bind,source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,readonly",
 		"type=bind,source=${localEnv:HOME}${localEnv:USERPROFILE}/.gnupg,target=/home/vscode/.gnupg,readonly"
 	],
+	"initializeCommand": "bash .devcontainer/scripts/initialize.sh",
 	"postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
 	"postStartCommand": "bash .devcontainer/scripts/post-start.sh",
+	"features": {
+        "ghcr.io/devcontainers/features/common-utils:2":{
+            "installZsh": "true",
+            "username": "vscode",
+            "userUid": "1000",
+            "userGid": "1000",
+            "upgradePackages": "true"
+        }
+    },
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"ms-python.python",
 				"ms-python.mypy-type-checker",
-				"tamasfe.even-better-toml",
-				"charliermarsh.ruff",
-				"ryanluker.vscode-coverage-gutters",
+				"ms-toolsai.jupyter",
+				"ms-vsliveshare.vsliveshare",
 				"GitHub.copilot",
 				"GitHub.copilot-chat",
-				"ms-vsliveshare.vsliveshare",
 				"GitHub.vscode-pull-request-github",
 				"github.vscode-github-actions",
-				"ms-toolsai.jupyter"
-			],
-			"settings": {
-				"[python]": {
-					"editor.defaultFormatter": "charliermarsh.ruff",
-					"editor.codeActionsOnSave": {
-						"source.fixAll": true,
-						"source.organizeImports": true
-					},
-					"files.eol": "\n"
-				},
-				"mypy-type-checker.importStrategy": "fromEnvironment",
-				"mypy-type-checker.args": [
-					"--config-file=${workspaceFolder}/pyproject.toml"
-				],
-				"python.analysis.typeCheckingMode": "basic",
-				"coverage-gutters.coverageBaseDir": "/workspaces/openicu",
-				"coverage-gutters.coverageFileNames": [
-					"coverage.xml"
-				]
-			}
+				"charliermarsh.ruff",
+				"tamasfe.even-better-toml",
+				"redhat.vscode-yaml"
+			]
 		}
-	},
-	"forwardPorts": [],
-	"initializeCommand": "bash .devcontainer/scripts/initialize.sh"
+	}
 }

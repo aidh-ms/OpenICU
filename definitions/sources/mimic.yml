@@ -1,7 +1,0 @@
-name: mimic
-connection_uri: ""
-
-path: open_icu.step.source.services.sampler.SQLSampler
-kwargs:
-  table: mimiciv_icu.icustays
-  field: subject_id
