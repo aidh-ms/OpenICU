@@ -6,7 +6,10 @@ The OpenICU Project addresses this challenge by providing an open-source, Python
 
 ## Requirements Overview
 
-
+| Id | Requirement | Explanation |
+| -- | ----------- | ----------- |
+| F1 | Concepts |  |
+| F1 | Base Concept | |
 
 ## Quality goals
 
