@@ -20,8 +20,9 @@ The OpenICU Project addresses this challenge by providing an open-source, Python
 | F4 | Derived Concept | A derived concept is computed from other concepts (base or derived) using deterministic logic or formulas (e.g., Acute Kidney Injury [AKI]). |
 | F5 | Extraction of Medical Concepts | The system should enable bulk extraction of defined concepts from one or more data sources with minimal manual intervention. |
 | F6 | Export Formats | Processed data should be exportable in both long format (event stream) and wide format (pivoted with one column per concept). |
-| F7 | Command-Line Interface (CLI) | A CLI should support scripting and automation for advanced users and integration into data pipelines. |
-| F8 | User Interface (UI) | A graphical user interface should be provided to make configuration and execution accessible to clinical or non-technical users. |
+| F7 | Python Interface | The tool should offer a native Python API to enable integration with existing Python workflows and use within IPython/Jupyter notebooks. |
+| F8 | Command-Line Interface (CLI) | A CLI should support scripting and automation for advanced users and integration into data pipelines. |
+| F9 | User Interface (UI) | A graphical user interface should be provided to make configuration and execution accessible to clinical or non-technical users. |
 
 ## Quality goals
 
