@@ -10,6 +10,7 @@ The OpenICU Project addresses this challenge by providing an open-source, Python
 | -- | ----------- | ----------- |
 | F1 | Data Sources | The system must support multiple types of data sources for ICU datasets. |
 | F1.1 | Public Dataset Support | Must allow integration of publicly available ICU datasets (e.g., MIMIC, eICU, HiRID, AUCMCdb, DICdb). |
+| F1.1.1 | Public Dataset Versioning | The system must support clear handling of dataset versions, ensuring reproducibility by allowing users to select and lock specific dataset versions. |
 | F1.2 | Custom Dataset Support | Users must be able to load their own institutional data in tabular or SQL-based form. |
 | F1.3 | Data Privacy | Data should not leave the user’s secure perimeter; the system must support fully offline usage to comply with medical data protection regulations. |
 | F2 | Medical Concept Structure | Medical concepts must be clearly defined and reusable across workflows. |
