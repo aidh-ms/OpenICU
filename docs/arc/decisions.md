@@ -7,6 +7,6 @@ TODO: later
 We should use ADRs
 
 Ideas:
+
 * Parquet as file format
 * Python tabular libs: PyArrow, Pandas, Polars, Dask, ...
-*

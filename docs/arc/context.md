@@ -1,10 +1,6 @@
 # Context and Scope
 
-
-
 ## Business context
-
-
 
 ## Technical context
 
