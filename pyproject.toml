@@ -17,6 +17,12 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 requires-python = ">=3.13"
+dependencies = [
+    "polars>=1.31.0",
+    "pyarrow>=20.0.0",
+    "pyyaml>=6.0.2",
+    "types-pyyaml>=6.0.12.20250516",
+]
 
 [project.urls]
 homepage = "https://github.com/aidh-ms/OpenICU"
