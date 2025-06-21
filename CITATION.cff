@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+title: "OpenICU"
+authors:
+- family-names: "Paul"
+  given-names: "Brauckmann"
+  affiliation: Universität Münster
+  orcid: "https://orcid.org/0009-0002-8163-0989"
+- given-names: Christian
+  family-names: Porschen
+  email: c_pors01@uni-muenster.de
+  affiliation: Universität Münster
+  orcid: 'https://orcid.org/0000-0001-5355-4531'
+type: software
+version: 0.0.1
+date-released: 2025-01-01
+license: MIT
+url: https://github.com/aidh-ms/OpenICU
+repository-code: https://github.com/aidh-ms/OpenICU
+identifiers:
+- type: url
+  value: https://github.com/aidh-ms/OpenICU
+keywords:
+- python library
+- icu datasets
