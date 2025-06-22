@@ -56,5 +56,5 @@ Commit Message Format
 To test your contribution, you can use the testing tap in the VS code or utilise the following command to run the unit tests for this project:
 
 ```shell
-poetry run pytest .
+uv run pytest .
 ```

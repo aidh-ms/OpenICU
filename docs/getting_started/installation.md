@@ -15,9 +15,9 @@ The library can be installed from PyPI using various package managers.
 pip install
 ```
 
-**With poetry**
+**With uv**
 ```bash
-poetry add
+uv add
 ```
 
 ## Installing from Source
@@ -29,9 +29,9 @@ The library can be installed from source (GitHub).
 pip install git+https://github.com/aidh-ms/OpenICU
 ```
 
-**With poetry**
+**With uv**
 ```bash
-poetry add git+https://github.com/aidh-ms/OpenICU
+uv add git+https://github.com/aidh-ms/OpenICU
 ```
 
 ## Dependencies
