@@ -12,7 +12,7 @@
 	"postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
 	"postStartCommand": "bash .devcontainer/scripts/post-start.sh",
 	"features": {
-        "ghcr.io/devcontainers/features/common-utils:2":{
+        "ghcr.io/devcontainers/features/common-utils:2": {
             "installZsh": "true",
             "username": "vscode",
             "userUid": "1000",
@@ -30,6 +30,7 @@
 				"ms-toolsai.datawrangler",
 				"ms-vsliveshare.vsliveshare",
 				"ms-vscode.vscode-speech",
+				"ms-azuretools.vscode-containers",
 				"GitHub.copilot",
 				"GitHub.copilot-chat",
 				"GitHub.vscode-pull-request-github",
