@@ -1,0 +1,30 @@
+name: mimic
+version: "3.1"
+tables:
+  - name: inputevents
+    events:
+      - name: dosage
+        join:
+          - table: d_items
+            on: [itemid]
+        fields:
+          subject_id:
+            field: dosage.subject_id
+            type: int64
+          time:
+            field: dosage.charttime
+            type: datetime
+          code:
+            - field: d_items.label
+              type: string
+            - field: dosage.amountuom
+              type: string
+          numeric_value:
+            field: dosage.amount
+            type: float32
+
+      # - name: rate
+      #   fields:
+
+      # - name: weight
+      #   fields:
