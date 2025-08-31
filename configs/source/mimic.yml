@@ -2,7 +2,7 @@ name: mimic
 version: "3.1"
 tables:
   - name: medications
-    path: icu/inputevents_small.csv
+    path: icu/inputevents.csv
     fields:
       - field: subject_id
         type: int64
