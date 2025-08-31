@@ -1,30 +1,49 @@
 name: mimic
 version: "3.1"
 tables:
-  - name: inputevents
+  - name: medications
+    path: icu/inputevents_small.csv
+    fields:
+      - field: subject_id
+        type: int64
+      - field: endtime
+        type: datetime
+      - field: amount
+        type: float32
+      - field: amountuom
+        type: string
+      - field: starttime
+        type: datetime
+      - field: rateuom
+        type: string
+      - field: rate
+        type: float32
+      - field: itemid
+        type: int64
+    join:
+      - name: d_items
+        path: icu/d_items.csv
+        fields:
+          - field: itemid
+            type: int64
+          - field: label
+            type: string
+        both_on:
+          - itemid
     events:
       - name: dosage
-        join:
-          - table: d_items
-            on: [itemid]
         fields:
-          subject_id:
-            field: dosage.subject_id
-            type: int64
-          time:
-            field: dosage.charttime
-            type: datetime
+          subject_id: subject_id
+          time: endtime
           code:
-            - field: d_items.label
-              type: string
-            - field: dosage.amountuom
-              type: string
-          numeric_value:
-            field: dosage.amount
-            type: float32
-
-      # - name: rate
-      #   fields:
-
-      # - name: weight
-      #   fields:
+            - label
+            - amountuom
+          numeric_value: amount
+      - name: rate
+        fields:
+          subject_id: subject_id
+          time: starttime
+          code:
+            - label
+            - rateuom
+          numeric_value: rate
