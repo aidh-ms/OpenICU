@@ -9,6 +9,8 @@ services:
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
+    ports:
+      - "8787:8787"
     environment:
       - no_proxy="127.0.0.1,localhost"
       - NO_PROXY="127.0.0.1,localhost"
