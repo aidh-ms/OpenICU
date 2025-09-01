@@ -25,7 +25,9 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
             path / table_paths[table_name],
             usecols=fields,
             dtype=dtypes,
-            parse_dates=date_fields
+            parse_dates=date_fields,
+            engine="pyarrow",
+            dtype_backend="pyarrow",
         )
 
     df = tables[table.name]
@@ -37,7 +39,6 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
         )
 
     for event in table.events:
-
         _df = df[event.field_names()]
         if event.fields.text_value is None:
             _df["text_value"] = ""
@@ -50,11 +51,36 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
             event.fields.numeric_value: "numeric_value",
             event.fields.text_value: "text_value",
         })
-        _df["code"] = df[event.fields.code].apply(lambda c: c.str.cat(sep="//"), axis=1)
-        _df = _df.drop(columns=event.fields.code)
-        _df.to_parquet(output_path / "data", name_function=lambda i: f"{table.name}_{event.name}_{i}.parquet")
 
-        _medadata_df = _df[["code"]].drop_duplicates()
+        _df = _df.dropna()
+
+        codes = df[event.fields.code].drop_duplicates()
+        codes["code"] = codes[event.fields.code].apply(lambda c: c.str.cat(sep="//"), axis=1, meta=(None, "string"))
+
+        _df = _df.merge(
+            codes,
+            on=event.fields.code,
+            how="left"
+        )
+
+        _df = _df.drop(columns=event.fields.code)
+        _df.to_parquet(
+            output_path / "data",
+            name_function=lambda i: f"{table.name}_{event.name}_{i}.parquet",
+            write_index=False
+        )
+
+        _medadata_df = codes[["code"]]
         _medadata_df["description"] = None
         _medadata_df["parent_codes"] = None
-        _medadata_df.to_parquet(output_path / "metadata", name_function=lambda i: f"{table.name}_{event.name}_{i}.parquet")
+
+        codes_path = output_path / "metadata" / "codes.parquet"
+        if codes_path.exists():
+            existing_codes = dd.read_parquet(codes_path)
+            _medadata_df = dd.concat([existing_codes, _medadata_df]).drop_duplicates(subset=["code"])
+
+        _medadata_df.repartition(npartitions=1).to_parquet(
+            codes_path.parent,
+            name_function=lambda i: "codes.parquet",
+            write_index=False,
+        )
