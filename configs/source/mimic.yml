@@ -47,3 +47,39 @@ tables:
             - label
             - rateuom
           numeric_value: rate
+
+  - name: chartevents
+    path: icu/chartevents.csv
+    fields:
+      - field: subject_id
+        type: int64
+      - field: charttime
+        type: datetime
+      - field: value
+        type: string
+      - field: valuenum
+        type: float32
+      - field: valueuom
+        type: string
+      - field: itemid
+        type: int64
+    join:
+      - name: d_items
+        path: icu/d_items.csv
+        fields:
+          - field: itemid
+            type: int64
+          - field: label
+            type: string
+        both_on:
+          - itemid
+    events:
+      - name: chartevent
+        fields:
+          subject_id: subject_id
+          time: charttime
+          code:
+            - label
+            - valueuom
+          numeric_value: valuenum
+          text_value: value

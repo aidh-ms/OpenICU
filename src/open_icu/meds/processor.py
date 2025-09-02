@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import dask.dataframe as dd
+import pandas as pd
 
 from open_icu.config.source import TableConfig
 
@@ -54,8 +55,13 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
 
         _df = _df.dropna()
 
-        codes = df[event.fields.code].drop_duplicates()
-        codes["code"] = codes[event.fields.code].apply(lambda c: c.str.cat(sep="//"), axis=1, meta=(None, "string"))
+        def _apply(df: pd.DataFrame) -> pd.Series:
+            return df[event.fields.code[0]].str.cat(df[event.fields.code[1:]], sep="//")
+
+        codes = _df[event.fields.code].drop_duplicates()
+        # codes["code"] = codes[event.fields.code].apply(lambda c: c.str.cat(sep="//"), axis=1, meta=(None, "string"))
+        # codes["code"] = codes[event.fields.code[0]].str.cat(codes[event.fields.code[1:]], sep="//")
+        codes["code"] = codes.map_partitions(_apply, meta=(None, "string"))
 
         _df = _df.merge(
             codes,
