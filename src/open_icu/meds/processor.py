@@ -22,7 +22,7 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
         }
         date_fields = [name for name, dtype in table_field_dtypes[table_name].items() if dtype == "datetime"]
 
-        tables[table_name] = dd.read_csv(
+        ddf = dd.read_csv(
             path / table_paths[table_name],
             usecols=fields,
             dtype=dtypes,
@@ -30,6 +30,11 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
             engine="pyarrow",
             dtype_backend="pyarrow",
         )
+
+        for const_field, const_value in table.table_constants().get(table_name, {}).items():
+            ddf[const_field] = const_value
+
+        tables[table_name] = ddf
 
     df = tables[table.name]
     for join in table.join:

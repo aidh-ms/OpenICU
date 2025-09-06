@@ -28,6 +28,7 @@ class EventConfig(BaseModel):
 class FieldConfig(BaseModel):
     field: str
     type: str
+    constant: str | int | float | None = None
 
 
 class JoinConfig(BaseModel):
@@ -61,18 +62,26 @@ class TableConfig(BaseModel):
     def table_field_names(self) -> dict[str, list]:
         field_names = {}
         for join_table in self.join:
-            field_names[join_table.name] = [field.field for field in join_table.fields]
-        field_names[self.name] = [field.field for field in self.fields]
+            field_names[join_table.name] = [field.field for field in join_table.fields if field.constant is None]
+        field_names[self.name] = [field.field for field in self.fields if field.constant is None]
 
         return field_names
 
     def table_field_dtypes(self) -> dict[str, dict[str, str]]:
         field_dtypes = {}
         for join_table in self.join:
-            field_dtypes[join_table.name] = {field.field: field.type for field in join_table.fields}
-        field_dtypes[self.name] = {field.field: field.type for field in self.fields}
+            field_dtypes[join_table.name] = {field.field: field.type for field in join_table.fields if field.constant is None}
+        field_dtypes[self.name] = {field.field: field.type for field in self.fields if field.constant is None}
 
         return field_dtypes
+
+    def table_constants(self) -> dict[str, dict[str, str | int | float]]:
+        constants: dict[str, dict[str, str | int | float]] = {}
+        for join_table in self.join:
+            constants[join_table.name] = {field.field: field.constant for field in join_table.fields if field.constant is not None}
+        constants[self.name] = {field.field: field.constant for field in self.fields if field.constant is not None}
+
+        return constants
 
 
 class SourceConfig(Config):

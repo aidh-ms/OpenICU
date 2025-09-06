@@ -83,3 +83,56 @@ tables:
             - valueuom
           numeric_value: valuenum
           text_value: value
+
+
+  - name: icustays
+    path: icu/icustays.csv
+    fields:
+      - field: subject_id
+        type: int64
+      - field: intime
+        type: datetime
+      - field: outtime
+        type: datetime
+      - field: first_careunit
+        type: string
+      - field: last_careunit
+        type: string
+      - field: stay_id
+        type: int64
+      - field: los
+        type: float32
+      - field: in_code
+        type: string
+        constant: ICU_ADMISSION
+      - field: out_code
+        type: string
+        constant: ICU_DISCHARGE
+      - field: los_code
+        type: string
+        constant: ICU_LENGTH_OF_STAY
+    events:
+      - name: icu_admission
+        fields:
+          subject_id: subject_id
+          time: intime
+          code:
+            - in_code
+            - first_careunit
+          text_value: stay_id
+      - name: icu_discharge
+        fields:
+          subject_id: subject_id
+          time: outtime
+          code:
+            - out_code
+            - last_careunit
+          text_value: stay_id
+      - name: icu_length_of_stay
+        fields:
+          subject_id: subject_id
+          time: outtime
+          code:
+            - los_code
+          text_value: stay_id
+          numeric_value: los
