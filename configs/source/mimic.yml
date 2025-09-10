@@ -6,6 +6,10 @@ tables:
     fields:
       - field: subject_id
         type: int64
+      - field: hadm_id
+        type: int64
+      - field: stay_id
+        type: int64
       - field: endtime
         type: datetime
       - field: amount
@@ -39,6 +43,9 @@ tables:
             - label
             - amountuom
           numeric_value: amount
+          extension:
+            hadm_id: hadm_id
+            stay_id: stay_id
       - name: rate
         fields:
           subject_id: subject_id
@@ -47,11 +54,21 @@ tables:
             - label
             - rateuom
           numeric_value: rate
+          extension:
+            hadm_id: hadm_id
+            stay_id: stay_id
+        filters:
+          dropna:
+            - rate
 
   - name: chartevents
     path: icu/chartevents.csv
     fields:
       - field: subject_id
+        type: int64
+      - field: hadm_id
+        type: int64
+      - field: stay_id
         type: int64
       - field: charttime
         type: datetime
@@ -83,12 +100,19 @@ tables:
             - valueuom
           numeric_value: valuenum
           text_value: value
+          extension:
+            hadm_id: hadm_id
+            stay_id: stay_id
 
 
   - name: icustays
     path: icu/icustays.csv
     fields:
       - field: subject_id
+        type: int64
+      - field: hadm_id
+        type: int64
+      - field: stay_id
         type: int64
       - field: intime
         type: datetime
@@ -98,8 +122,6 @@ tables:
         type: string
       - field: last_careunit
         type: string
-      - field: stay_id
-        type: int64
       - field: los
         type: float32
       - field: in_code
@@ -111,6 +133,9 @@ tables:
       - field: los_code
         type: string
         constant: ICU_LENGTH_OF_STAY
+      - field: los_unit
+        type: string
+        constant: d
     events:
       - name: icu_admission
         fields:
@@ -119,7 +144,9 @@ tables:
           code:
             - in_code
             - first_careunit
-          text_value: stay_id
+          extension:
+            hadm_id: hadm_id
+            stay_id: stay_id
       - name: icu_discharge
         fields:
           subject_id: subject_id
@@ -127,12 +154,17 @@ tables:
           code:
             - out_code
             - last_careunit
-          text_value: stay_id
+          extension:
+            hadm_id: hadm_id
+            stay_id: stay_id
       - name: icu_length_of_stay
         fields:
           subject_id: subject_id
           time: outtime
           code:
             - los_code
-          text_value: stay_id
+            - los_unit
           numeric_value: los
+          extension:
+            hadm_id: hadm_id
+            stay_id: stay_id
