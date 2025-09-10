@@ -13,4 +13,3 @@ class MEDSData(PyArrowSchema):
 class OpenICUMEDSData(MEDSData):
     hadm_id: Optional(pa.int64())
     stay_id: Optional(pa.int64())
-
