@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import dask.dataframe as dd
+import pandas as pd
 
 from open_icu.config.source import TableConfig
 from open_icu.meds.schema import OpenICUMEDSData
@@ -54,20 +55,38 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
         _df = _df.dropna(subset=event.filters.dropna)
         _df = _df.rename(columns=event.column_mapping)
 
+        codes = []
+        def _map(df: pd.DataFrame) -> pd.DataFrame:
+            codes_df = df[event.fields.code].drop_duplicates()
+            codes_df["code"] = codes_df[event.fields.code[0]].str.cat(codes_df[event.fields.code[1:]], sep="//")
+            codes.append(codes_df[["code"]])
+
+            df = df.merge(
+                codes_df,
+                on=event.fields.code,
+                how="left"
+            ).drop(columns=event.fields.code)
+
+            return df
+
+
+
         # def _apply(df: pd.DataFrame) -> pd.Series:
         #     return df[event.fields.code[0]].str.cat(df[event.fields.code[1:]], sep="//")
 
-        codes = _df[event.fields.code].drop_duplicates().compute()
+        # codes = _df[event.fields.code].drop_duplicates().compute()
         # codes["code"] = codes[event.fields.code].apply(lambda c: c.str.cat(sep="//"), axis=1, meta=(None, "string"))
-        codes["code"] = codes[event.fields.code[0]].str.cat(codes[event.fields.code[1:]], sep="//")
-        # codes["code"] = codes.map_partitions(_apply, meta=(None, "string"))
+        # codes["code"] = codes[event.fields.code[0]].str.cat(codes[event.fields.code[1:]], sep="//")
+        # codes["code"] = codes.map_partitions(map, meta=OpenICUMEDSData.schema())
 
-        _df = _df.merge(
-            codes,
-            on=event.fields.code,
-            how="left"
-        )
-        _df = _df.drop(columns=event.fields.code)
+        # _df = _df.map_partitions(_map, meta=[(f.name, f.type) for f in OpenICUMEDSData.schema()])
+        _df = _df.map_partitions(_map)
+        # _df = _df.merge(
+        #     codes,
+        #     on=event.fields.code,
+        #     how="left"
+        # )
+        # _df = _df.drop(columns=event.fields.code)
         _df.to_parquet(
             output_path / "data",
             name_function=lambda i: f"{table.name}_{event.name}_{i}.parquet",
@@ -75,7 +94,9 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
             schema=OpenICUMEDSData.schema()
         )
 
-        _medadata_df = codes[["code"]].copy()
+        # _medadata_df = codes[["code"]].copy()
+        _codes_df = pd.concat(codes).drop_duplicates(subset=["code"])
+        _medadata_df = dd.from_pandas(_codes_df, npartitions=1)
         _medadata_df["description"] = None
         _medadata_df["parent_codes"] = None
 
