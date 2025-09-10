@@ -67,9 +67,7 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
             on=event.fields.code,
             how="left"
         )
-
         _df = _df.drop(columns=event.fields.code)
-
         _df.to_parquet(
             output_path / "data",
             name_function=lambda i: f"{table.name}_{event.name}_{i}.parquet",

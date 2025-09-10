@@ -71,6 +71,13 @@ addopts = [
     "--cov-report=xml",
     "--import-mode=importlib",
 ]
+[[tool.mypy.overrides]]
+module = [
+    "pyarrow.*",
+    "flexible_schema.*",
+]
+follow_untyped_imports = true
+
 
 [tool.mypy]
 python_version = "3.13"
