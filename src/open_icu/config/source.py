@@ -53,7 +53,7 @@ class EventConfig(BaseModel):
         if self.fields.text_value:
             mappings[self.fields.text_value] = "text_value"
 
-        mappings.update(self.fields.extension)
+        mappings.update({v: k for k, v in self.fields.extension.items()})
         return mappings
 
     @computed_field  # type: ignore[prop-decorator]
@@ -73,6 +73,33 @@ class FieldConfig(BaseModel):
     field: str
     type: str
     constant: str | int | float | None = None
+
+
+class CalcDatetimeFieldConfig(BaseModel):
+    field: str
+    year: FieldConfig
+    month: FieldConfig
+    day: FieldConfig
+    time: FieldConfig
+    offset: FieldConfig
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def table_field_dtypes(self) -> dict[str, str]:
+        return {
+            field.field: field.type
+            for _, field in iter(self)
+            if isinstance(field, FieldConfig) and field.constant is None
+        }
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def table_constants(self) -> dict[str, str | int | float]:
+        return {
+            field.field: field.constant
+            for _, field in iter(self)
+            if isinstance(field, FieldConfig) and field.constant is not None
+        }
 
 
 class JoinConfig(BaseModel):
@@ -101,19 +128,9 @@ class JoinConfig(BaseModel):
 class TableConfig(BaseModel):
     name: str
     path: str
-    fields: list[FieldConfig] = Field(default_factory=list)
+    fields: list[FieldConfig | CalcDatetimeFieldConfig] = Field(default_factory=list)
     join: list[JoinConfig] = Field(default_factory=list)
     events: list[EventConfig] = Field(default_factory=list)
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def table_field_names(self) -> dict[str, list]:
-        field_names = {}
-        for join_table in self.join:
-            field_names[join_table.name] = [field.field for field in join_table.fields if field.constant is None]
-        field_names[self.name] = [field.field for field in self.fields if field.constant is None]
-
-        return field_names
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -121,7 +138,12 @@ class TableConfig(BaseModel):
         field_dtypes = {}
         for join_table in self.join:
             field_dtypes[join_table.name] = {field.field: field.type for field in join_table.fields if field.constant is None}
-        field_dtypes[self.name] = {field.field: field.type for field in self.fields if field.constant is None}
+        field_dtypes[self.name] = {field.field: field.type for field in self.fields if isinstance(field, FieldConfig) and field.constant is None}
+
+        for filed in self.fields:
+            if not isinstance(filed, CalcDatetimeFieldConfig):
+                continue
+            field_dtypes[self.name].update(filed.table_field_dtypes)
 
         return field_dtypes
 
@@ -131,9 +153,21 @@ class TableConfig(BaseModel):
         constants: dict[str, dict[str, str | int | float]] = {}
         for join_table in self.join:
             constants[join_table.name] = {field.field: field.constant for field in join_table.fields if field.constant is not None}
-        constants[self.name] = {field.field: field.constant for field in self.fields if field.constant is not None}
+        constants[self.name] = {field.field: field.constant for field in self.fields if isinstance(field, FieldConfig) and field.constant is not None}
+
+        for filed in self.fields:
+            if not isinstance(filed, CalcDatetimeFieldConfig):
+                continue
+            constants[self.name].update(filed.table_constants)
 
         return constants
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def calc_datetime_fields(self) -> dict[str, list[CalcDatetimeFieldConfig]]:
+        return {
+            self.name: [field for field in self.fields if isinstance(field, CalcDatetimeFieldConfig)]
+        }
 
 
 class SourceConfig(Config):
