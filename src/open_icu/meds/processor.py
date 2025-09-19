@@ -7,7 +7,7 @@ from open_icu.config.source import TableConfig
 from open_icu.meds.schema import OpenICUMEDSData
 
 
-def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
+def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -> None:
     table_paths = {
         join_table.name: join_table.path
         for join_table in table.join
@@ -16,7 +16,7 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
     table_field_dtypes = table.table_field_dtypes
 
     tables: dict[str, dd.DataFrame] = {}
-    for table_name, fields in table.table_field_names.items():
+    for table_name, fields in table.table_field_dtypes.items():
         dtypes = {
             name: dtype if dtype != "datetime" else "string"
             for name, dtype in table_field_dtypes[table_name].items()
@@ -25,7 +25,7 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
 
         ddf = dd.read_csv(
             path / table_paths[table_name],
-            usecols=fields,
+            usecols=fields.keys(),
             dtype=dtypes,
             parse_dates=date_fields,
             engine="pyarrow",
@@ -36,6 +36,17 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
             ddf[const_field] = const_value
 
         tables[table_name] = ddf
+
+    for table_name, dt_fields in table.calc_datetime_fields.items():
+        df = tables[table_name]
+        for dt_field in dt_fields:
+            df[dt_field.field] = dd.to_datetime(
+                df[dt_field.year.field].astype("string").str.zfill(4) + "-" +
+                df[dt_field.month.field].astype("string").str.zfill(2) + "-" +
+                df[dt_field.day.field].astype("string").str.zfill(2) + " " +
+                df[dt_field.time.field].astype("string"),
+            ) + dd.to_timedelta(df[dt_field.offset.field].abs(), unit="m")
+        tables[table_name] = df
 
     df = tables[table.name]
     for join in table.join:
@@ -48,9 +59,9 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
     for event in table.events:
         _df = df[event.field_names]
         if event.fields.text_value is None:
-            _df["text_value"] = ""
+            _df["text_value"] = None
         if event.fields.numeric_value is None:
-            _df["numeric_value"] = 0
+            _df["numeric_value"] = None
 
         _df = _df.dropna(subset=event.filters.dropna)
         _df = _df.rename(columns=event.column_mapping)
@@ -68,33 +79,15 @@ def process_table(table: TableConfig, path: Path, output_path: Path) -> None:
             ).drop(columns=event.fields.code)
 
             return df
-
-
-
-        # def _apply(df: pd.DataFrame) -> pd.Series:
-        #     return df[event.fields.code[0]].str.cat(df[event.fields.code[1:]], sep="//")
-
-        # codes = _df[event.fields.code].drop_duplicates().compute()
-        # codes["code"] = codes[event.fields.code].apply(lambda c: c.str.cat(sep="//"), axis=1, meta=(None, "string"))
-        # codes["code"] = codes[event.fields.code[0]].str.cat(codes[event.fields.code[1:]], sep="//")
-        # codes["code"] = codes.map_partitions(map, meta=OpenICUMEDSData.schema())
-
-        # _df = _df.map_partitions(_map, meta=[(f.name, f.type) for f in OpenICUMEDSData.schema()])
         _df = _df.map_partitions(_map)
-        # _df = _df.merge(
-        #     codes,
-        #     on=event.fields.code,
-        #     how="left"
-        # )
-        # _df = _df.drop(columns=event.fields.code)
+
         _df.to_parquet(
             output_path / "data",
-            name_function=lambda i: f"{table.name}_{event.name}_{i}.parquet",
+            name_function=lambda i: f"{src}_{table.name}_{event.name}_{i}.parquet",
             write_index=False,
             schema=OpenICUMEDSData.schema()
         )
 
-        # _medadata_df = codes[["code"]].copy()
         _codes_df = pd.concat(codes).drop_duplicates(subset=["code"])
         _medadata_df = dd.from_pandas(_codes_df, npartitions=1)
         _medadata_df["description"] = None
