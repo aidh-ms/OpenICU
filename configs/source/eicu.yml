@@ -1,0 +1,89 @@
+name: eicu
+version: "2.0"
+tables:
+  - name: patient
+    path: patient.csv
+    fields:
+      - field: patienthealthsystemstayid
+        type: int64
+      - field: hadm_id
+        type: int64
+        constant: -1
+      - field: patientunitstayid
+        type: int64
+
+      - field: admission_timestamp
+        year:
+          field: hospitaldischargeyear
+          type: int64[pyarrow]
+        month:
+          field: month
+          type: int64[pyarrow]
+          constant: 1
+        day:
+          field: day
+          type: int64[pyarrow]
+          constant: 1
+        time:
+          field: hospitaladmittime24
+          type: string
+        offset:
+          field: hospitaladmitoffset
+          type: int64
+
+      - field: unittype
+        type: string
+      - field: in_code
+        type: string
+        constant: ICU_ADMISSION
+      - field: out_code
+        type: string
+        constant: ICU_DISCHARGE
+
+      # - name: gender
+      #   type: string
+      # - name: gender_code
+      #   type: string
+      #   constant: GENDER
+      # - name: age
+      #   type: int64
+      # - name: age_code
+      #   type: string
+      #   constant: AGE
+      # - name: age_unit
+      #   type: string
+      #   constant: y
+      # - name: ethnicity
+      #   type: string
+      # - name: ethnicity_code
+      #   type: string
+      #   constant: ETHNICITY
+      # - name: admissionheight
+      #   type: float32
+      # - name: admissionheight_code
+      #   type: string
+      #   constant: HEIGHT
+      # - name: admissionheight_unit
+      #   type: string
+      #   constant: cm
+      # - name: admissionweight
+      #   type: float32
+      # - name: dischargeheight
+      #   type: float32
+      # - name: weight_code
+      #   type: string
+      #   constant: WEIGHT
+      # - name: weight_unit
+      #   type: string
+      #   constant: kg
+    events:
+      - name: icu_admission
+        fields:
+          subject_id: patienthealthsystemstayid
+          time: admission_timestamp
+          code:
+            - in_code
+            - unittype
+          extension:
+            hadm_id: hadm_id
+            stay_id: patientunitstayid
