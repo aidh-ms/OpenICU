@@ -31,6 +31,14 @@ tables:
           field: hospitaladmitoffset
           type: int64
 
+      - field: discharge_timestamp
+        base:
+          field: admission_timestamp
+          type: datetime
+        offset:
+          field: unitdischargeoffset
+          type: int64
+
       - field: unittype
         type: string
       - field: in_code
@@ -84,6 +92,133 @@ tables:
           code:
             - in_code
             - unittype
+          extension:
+            hadm_id: hadm_id
+            stay_id: patientunitstayid
+      - name: icu_discharge
+        fields:
+          subject_id: patienthealthsystemstayid
+          time: discharge_timestamp
+          code:
+            - out_code
+            - unittype
+          extension:
+            hadm_id: hadm_id
+            stay_id: patientunitstayid
+
+  - name: vitalPeriodic
+    path: vitalPeriodic.csv
+    fields:
+      - field: patientunitstayid
+        type: int64
+      - field: heartrate
+        type: float32
+      - field: heartrate_code
+        type: string
+        constant: HEART_RATE//BPM
+      - field: event_timestamp
+        base:
+          field: admission_timestamp
+          type: datetime
+        offset:
+          field: observationoffset
+          type: int64
+    join:
+      - name: patient
+        path: patient.csv
+        fields:
+          - field: patienthealthsystemstayid
+            type: int64
+          - field: hadm_id
+            type: int64
+            constant: -1
+          - field: patientunitstayid
+            type: int64
+
+          - field: admission_timestamp
+            year:
+              field: hospitaldischargeyear
+              type: int64[pyarrow]
+            month:
+              field: month
+              type: int64[pyarrow]
+              constant: 1
+            day:
+              field: day
+              type: int64[pyarrow]
+              constant: 1
+            time:
+              field: hospitaladmittime24
+              type: string
+            offset:
+              field: hospitaladmitoffset
+              type: int64
+    events:
+      - name: heartrate
+        fields:
+          subject_id: patienthealthsystemstayid
+          time: event_timestamp
+          code:
+            - heartrate_code
+          numeric_value: heartrate
+          extension:
+            hadm_id: hadm_id
+            stay_id: patientunitstayid
+
+  - name: infusionDrug
+    path: infusionDrug.csv
+    fields:
+      - field: patientunitstayid
+        type: int64
+      - field: drugamount
+        type: float32
+      - field: drugname
+        type: string
+      - field: event_timestamp
+        base:
+          field: admission_timestamp
+          type: datetime
+        offset:
+          field: infusionoffset
+          type: int64
+    join:
+      - name: patient
+        path: patient.csv
+        fields:
+          - field: patienthealthsystemstayid
+            type: int64
+          - field: hadm_id
+            type: int64
+            constant: -1
+          - field: patientunitstayid
+            type: int64
+
+          - field: admission_timestamp
+            year:
+              field: hospitaldischargeyear
+              type: int64[pyarrow]
+            month:
+              field: month
+              type: int64[pyarrow]
+              constant: 1
+            day:
+              field: day
+              type: int64[pyarrow]
+              constant: 1
+            time:
+              field: hospitaladmittime24
+              type: string
+            offset:
+              field: hospitaladmitoffset
+              type: int64
+    events:
+      - name: drugamount
+        fields:
+          subject_id: patienthealthsystemstayid
+          time: event_timestamp
+          code:
+            - drugname
+          numeric_value: drugamount
           extension:
             hadm_id: hadm_id
             stay_id: patientunitstayid
