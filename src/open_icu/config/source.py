@@ -1,3 +1,4 @@
+
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import Config
@@ -101,11 +102,26 @@ class CalcDatetimeFieldConfig(BaseModel):
             if isinstance(field, FieldConfig) and field.constant is not None
         }
 
+class OffsetDatetimeFieldConfig(BaseModel):
+    field: str
+    base: FieldConfig
+    offset: FieldConfig
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def table_field_dtypes(self) -> dict[str, str]:
+        return {self.offset.field: self.offset.type}
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def table_constants(self) -> dict[str, str | int | float]:
+        return {}
+
 
 class JoinConfig(BaseModel):
     name: str
     path: str
-    fields: list[FieldConfig] = Field(default_factory=list)
+    fields: list[FieldConfig | CalcDatetimeFieldConfig | OffsetDatetimeFieldConfig] = Field(default_factory=list)
     both_on: list[str] = Field(default_factory=list)
     left_on: list[str] = Field(default_factory=list)
     right_on: list[str] = Field(default_factory=list)
@@ -128,7 +144,7 @@ class JoinConfig(BaseModel):
 class TableConfig(BaseModel):
     name: str
     path: str
-    fields: list[FieldConfig | CalcDatetimeFieldConfig] = Field(default_factory=list)
+    fields: list[FieldConfig | CalcDatetimeFieldConfig | OffsetDatetimeFieldConfig] = Field(default_factory=list)
     join: list[JoinConfig] = Field(default_factory=list)
     events: list[EventConfig] = Field(default_factory=list)
 
@@ -137,13 +153,30 @@ class TableConfig(BaseModel):
     def table_field_dtypes(self) -> dict[str, dict[str, str]]:
         field_dtypes = {}
         for join_table in self.join:
-            field_dtypes[join_table.name] = {field.field: field.type for field in join_table.fields if field.constant is None}
+            field_dtypes[join_table.name] = {field.field: field.type for field in join_table.fields if isinstance(field, FieldConfig) and field.constant is None}
         field_dtypes[self.name] = {field.field: field.type for field in self.fields if isinstance(field, FieldConfig) and field.constant is None}
 
         for filed in self.fields:
             if not isinstance(filed, CalcDatetimeFieldConfig):
                 continue
             field_dtypes[self.name].update(filed.table_field_dtypes)
+
+        for join_table in self.join:
+            for filed in join_table.fields:
+                if not isinstance(filed, CalcDatetimeFieldConfig):
+                    continue
+                field_dtypes[join_table.name].update(filed.table_field_dtypes)
+
+        for filed in self.fields:
+            if not isinstance(filed, OffsetDatetimeFieldConfig):
+                continue
+            field_dtypes[self.name].update(filed.table_field_dtypes)
+
+        for join_table in self.join:
+            for filed in join_table.fields:
+                if not isinstance(filed, OffsetDatetimeFieldConfig):
+                    continue
+                field_dtypes[join_table.name].update(filed.table_field_dtypes)
 
         return field_dtypes
 
@@ -152,7 +185,7 @@ class TableConfig(BaseModel):
     def table_constants(self) -> dict[str, dict[str, str | int | float]]:
         constants: dict[str, dict[str, str | int | float]] = {}
         for join_table in self.join:
-            constants[join_table.name] = {field.field: field.constant for field in join_table.fields if field.constant is not None}
+            constants[join_table.name] = {field.field: field.constant for field in join_table.fields if isinstance(field, FieldConfig) and field.constant is not None}
         constants[self.name] = {field.field: field.constant for field in self.fields if isinstance(field, FieldConfig) and field.constant is not None}
 
         for filed in self.fields:
@@ -160,14 +193,33 @@ class TableConfig(BaseModel):
                 continue
             constants[self.name].update(filed.table_constants)
 
+        for join_table in self.join:
+            for filed in join_table.fields:
+                if not isinstance(filed, CalcDatetimeFieldConfig):
+                    continue
+                constants[join_table.name].update(filed.table_constants)
+
         return constants
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def calc_datetime_fields(self) -> dict[str, list[CalcDatetimeFieldConfig]]:
-        return {
-            self.name: [field for field in self.fields if isinstance(field, CalcDatetimeFieldConfig)]
-        }
+        datetime_fields: dict[str, list[CalcDatetimeFieldConfig]] = {}
+        for join_table in self.join:
+            datetime_fields[join_table.name] = [field for field in join_table.fields if isinstance(field, CalcDatetimeFieldConfig)]
+        datetime_fields[self.name] = [field for field in self.fields if isinstance(field, CalcDatetimeFieldConfig)]
+
+        return datetime_fields
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def offset_datetime_fields(self) -> dict[str, list[OffsetDatetimeFieldConfig]]:
+        datetime_fields: dict[str, list[OffsetDatetimeFieldConfig]] = {}
+        for join_table in self.join:
+            datetime_fields[join_table.name] = [field for field in join_table.fields if isinstance(field, OffsetDatetimeFieldConfig)]
+        datetime_fields[self.name] = [field for field in self.fields if isinstance(field, OffsetDatetimeFieldConfig)]
+
+        return datetime_fields
 
 
 class SourceConfig(Config):
