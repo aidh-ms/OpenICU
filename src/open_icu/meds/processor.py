@@ -56,6 +56,10 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
             how=join.how
         )
 
+    for table_name, odt_fields in table.offset_datetime_fields.items():
+        for odt_field in odt_fields:
+            df[odt_field.field] = df[odt_field.base.field] + dd.to_timedelta(df[odt_field.offset.field].abs(), unit="m")
+
     for event in table.events:
         _df = df[event.field_names]
         if event.fields.text_value is None:
