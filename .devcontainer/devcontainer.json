@@ -18,7 +18,11 @@
             "userUid": "1000",
             "userGid": "1000",
             "upgradePackages": "true"
-        }
+        },
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": false
+		},
+		"ghcr.io/devcontainers/features/node:1": {}
     },
 	"customizations": {
 		"vscode": {
@@ -39,7 +43,8 @@
 				"charliermarsh.ruff",
 				"tamasfe.even-better-toml",
 				"redhat.vscode-yaml",
-				"esbenp.prettier-vscode"
+				"esbenp.prettier-vscode",
+				"anthropic.claude-code"
 			]
 		}
 	}
