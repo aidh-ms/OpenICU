@@ -1,10 +1,8 @@
 from pathlib import Path
 
-import dask.dataframe as dd
-import pandas as pd
+import polars as pl
 
 from open_icu.config.source import TableConfig
-from open_icu.meds.schema import OpenICUMEDSData
 
 
 def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -> None:
@@ -15,95 +13,157 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
     table_paths[table.name] = table.path
     table_field_dtypes = table.table_field_dtypes
 
-    tables: dict[str, dd.DataFrame] = {}
+    tables: dict[str, pl.LazyFrame] = {}
     for table_name, fields in table.table_field_dtypes.items():
+        # Map config dtypes to Polars dtypes
+        dtype_mapping = {
+            "int64": pl.Int64,
+            "int32": pl.Int32,
+            "float64": pl.Float64,
+            "float32": pl.Float32,
+            "string": pl.Utf8,
+            "datetime": pl.Utf8,  # Read as string first, then parse
+        }
+
         dtypes = {
-            name: dtype if dtype != "datetime" else "string"
+            name: dtype_mapping.get(dtype, pl.Utf8)
             for name, dtype in table_field_dtypes[table_name].items()
         }
         date_fields = [name for name, dtype in table_field_dtypes[table_name].items() if dtype == "datetime"]
 
-        ddf = dd.read_csv(
+        # Read CSV lazily with Polars
+        lf = pl.scan_csv(  # type: ignore[call-arg]
             path / table_paths[table_name],
-            usecols=fields.keys(),
-            dtype=dtypes,
-            parse_dates=date_fields,
-            engine="pyarrow",
-            dtype_backend="pyarrow",
+            dtypes=dtypes,
         )
 
+        # Parse datetime columns
+        for date_field in date_fields:
+            lf = lf.with_columns(
+                pl.col(date_field).str.to_datetime().alias(date_field)
+            )
+
+        # Add constant fields
         for const_field, const_value in table.table_constants.get(table_name, {}).items():
-            ddf[const_field] = const_value
+            lf = lf.with_columns(
+                pl.lit(const_value).alias(const_field)
+            )
 
-        tables[table_name] = ddf
+        tables[table_name] = lf
 
+    # Process calculated datetime fields
     for table_name, dt_fields in table.calc_datetime_fields.items():
-        df = tables[table_name]
+        lf = tables[table_name]
         for dt_field in dt_fields:
-            df[dt_field.field] = dd.to_datetime(
-                df[dt_field.year.field].astype("string").str.zfill(4) + "-" +
-                df[dt_field.month.field].astype("string").str.zfill(2) + "-" +
-                df[dt_field.day.field].astype("string").str.zfill(2) + " " +
-                df[dt_field.time.field].astype("string"),
-            ) + dd.to_timedelta(df[dt_field.offset.field].abs(), unit="m")
-        tables[table_name] = df
+            # Build datetime string from components
+            datetime_expr = (
+                pl.col(dt_field.year.field).cast(pl.Utf8).str.zfill(4) + pl.lit("-") +
+                pl.col(dt_field.month.field).cast(pl.Utf8).str.zfill(2) + pl.lit("-") +
+                pl.col(dt_field.day.field).cast(pl.Utf8).str.zfill(2) + pl.lit(" ") +
+                pl.col(dt_field.time.field).cast(pl.Utf8)
+            ).str.to_datetime()
 
-    df = tables[table.name]
+            # Add offset in minutes
+            offset_expr = pl.duration(minutes=pl.col(dt_field.offset.field).abs())
+
+            lf = lf.with_columns(
+                (datetime_expr + offset_expr).alias(dt_field.field)
+            )
+        tables[table_name] = lf
+
+    # Start with main table
+    lf = tables[table.name]
+
+    # Perform joins
     for join in table.join:
-        df = df.merge(
+        lf = lf.join(
             tables[join.name],
-            **join.join_params,
-            how=join.how
+            how=join.how,  # type: ignore[arg-type]
+            **join.join_params  # type: ignore[arg-type]
         )
 
+    # Process offset datetime fields
     for table_name, odt_fields in table.offset_datetime_fields.items():
         for odt_field in odt_fields:
-            df[odt_field.field] = df[odt_field.base.field] + dd.to_timedelta(df[odt_field.offset.field].abs(), unit="m")
+            offset_expr = pl.duration(minutes=pl.col(odt_field.offset.field).abs())
+            lf = lf.with_columns(
+                (pl.col(odt_field.base.field) + offset_expr).alias(odt_field.field)
+            )
+
+    # Process each event
+    all_codes = []
 
     for event in table.events:
-        _df = df[event.field_names]
+        # Select event fields
+        event_lf = lf.select(event.field_names)
+
+        # Add missing columns
         if event.fields.text_value is None:
-            _df["text_value"] = None
+            event_lf = event_lf.with_columns(pl.lit(None).alias("text_value"))
         if event.fields.numeric_value is None:
-            _df["numeric_value"] = None
+            event_lf = event_lf.with_columns(pl.lit(None).alias("numeric_value"))
 
-        _df = _df.dropna(subset=event.filters.dropna)
-        _df = _df.rename(columns=event.column_mapping)
+        # Drop rows with missing values in specified columns
+        if event.filters.dropna:
+            event_lf = event_lf.drop_nulls(subset=event.filters.dropna)
 
-        codes = []
-        def _map(df: pd.DataFrame) -> pd.DataFrame:
-            codes_df = df[event.fields.code].drop_duplicates()
-            codes_df["code"] = codes_df[event.fields.code[0]].str.cat(codes_df[event.fields.code[1:]], sep="//")
-            codes.append(codes_df[["code"]])
+        # Rename columns
+        rename_mapping = event.column_mapping
+        event_lf = event_lf.rename(rename_mapping)
 
-            df = df.merge(
-                codes_df,
-                on=event.fields.code,
-                how="left"
-            ).drop(columns=event.fields.code)
+        # Create code column by concatenating code fields
+        if len(event.fields.code) > 1:
+            code_expr = pl.concat_str(
+                [pl.col(field) for field in event.fields.code],
+                separator="//",
+                ignore_nulls=True
+            ).alias("code")
+        else:
+            code_expr = pl.col(event.fields.code[0]).fill_null("").alias("code")
 
-            return df
-        _df = _df.map_partitions(_map)
+        # Collect unique codes
+        codes_df = (
+            event_lf
+            .select(event.fields.code)
+            .unique()
+            .with_columns(code_expr)
+            .select("code")
+            .collect()
+        )
+        all_codes.append(codes_df)
 
-        _df.to_parquet(
-            output_path / "data",
-            name_function=lambda i: f"{src}_{table.name}_{event.name}_{i}.parquet",
-            write_index=False,
-            schema=OpenICUMEDSData.schema()
+        # Add code column and drop original code fields
+        event_lf = event_lf.with_columns(code_expr)
+        event_lf = event_lf.drop(event.fields.code)
+
+        # Reorder columns
+        event_lf = event_lf.select(event.column_order)
+
+        # Ensure output directory exists
+        output_data_path = output_path / "data" / src / table.name
+        output_data_path.mkdir(parents=True, exist_ok=True)
+
+        # Write to parquet
+        # Polars doesn't support custom name functions like Dask, so we write to a single file
+        output_file = output_data_path / f"{event.name}.parquet"
+        event_lf.sink_parquet(
+            output_file,
+            compression="snappy"
         )
 
-        _codes_df = pd.concat(codes).drop_duplicates(subset=["code"])
-        _medadata_df = dd.from_pandas(_codes_df, npartitions=1)
-        _medadata_df["description"] = None
-        _medadata_df["parent_codes"] = None
+    # Process metadata codes
+    if all_codes:
+        codes_df = pl.concat(all_codes).unique(subset=["code"])
+        codes_df = codes_df.with_columns([
+            pl.lit(None).alias("description"),
+            pl.lit(None).alias("parent_codes")
+        ])
 
         codes_path = output_path / "metadata" / "codes.parquet"
-        if codes_path.exists():
-            existing_codes = dd.read_parquet(codes_path)
-            _medadata_df = dd.concat([existing_codes, _medadata_df]).drop_duplicates(subset=["code"])
+        codes_path.parent.mkdir(parents=True, exist_ok=True)
 
-        _medadata_df.repartition(npartitions=1).to_parquet(
-            codes_path.parent,
-            name_function=lambda i: "codes.parquet",
-            write_index=False,
-        )
+        if codes_path.exists():
+            existing_codes = pl.read_parquet(codes_path)
+            codes_df = pl.concat([existing_codes, codes_df]).unique(subset=["code"])
+
+        codes_df.write_parquet(codes_path, compression="snappy")
