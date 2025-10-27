@@ -153,6 +153,8 @@ tables:
             offset:
               field: hospitaladmitoffset
               type: int64
+        both_on:
+          - patientunitstayid
     events:
       - name: heartrate
         fields:
@@ -211,6 +213,8 @@ tables:
             offset:
               field: hospitaladmitoffset
               type: int64
+        both_on:
+          - patientunitstayid
     events:
       - name: drugamount
         fields:
