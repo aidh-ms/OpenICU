@@ -66,7 +66,7 @@ class EventConfig(BaseModel):
             "code",
             "numeric_value",
             "text_value",
-            *sorted(self.fields.ext_field_names)
+            *sorted(self.fields.extension.keys())
         ]
 
 
