@@ -46,7 +46,7 @@ class JsonTableConfig(BaseTableConfig):
 
 
 class TableConfig(BaseTableConfig):
-    joins: list[JsonTableConfig] = Field(
+    join: list[JsonTableConfig] = Field(
         default_factory=list,
         description="List of join configurations for joining tables.",
     )

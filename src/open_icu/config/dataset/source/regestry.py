@@ -77,6 +77,9 @@ class DatasetConfigRegistry:
 
         return cls(configs)
 
+    def set(self, config: SourceDatasetConfig) -> None:
+        self._configs[DatasetIdentifier(name=config.name, version=config.version)] = config
+
     def get(self, name: str, version: str) -> SourceDatasetConfig | None:
         return self._configs.get(DatasetIdentifier(name=name, version=version))
 
