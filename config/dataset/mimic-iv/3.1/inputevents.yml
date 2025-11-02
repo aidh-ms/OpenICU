@@ -55,6 +55,8 @@ events:
         - label
         - rateuom
       numeric_value: rate
-    filters:
-      dropna:
-        - rate
+    callbacks:
+      - callback: drop_na
+        params:
+          columns:
+            - rate
