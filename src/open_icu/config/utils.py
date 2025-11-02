@@ -3,9 +3,9 @@ from typing import TypeVar
 
 import yaml
 
-from open_icu.config.base import Config
+from open_icu.config.source import BaseModel
 
-ConfigType = TypeVar("ConfigType", bound=Config)
+ConfigType = TypeVar("ConfigType", bound=BaseModel)
 
 
 def load_yaml_configs(config_path: Path, config_type: type[ConfigType]) -> list[ConfigType]:
