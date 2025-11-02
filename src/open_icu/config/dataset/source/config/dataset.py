@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from open_icu.dataset.source.config.table import TableConfig
+from open_icu.config.dataset.source.config.table import TableConfig
 
 
 class SourceDatasetConfig(BaseModel):

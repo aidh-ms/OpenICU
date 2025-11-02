@@ -4,9 +4,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from open_icu.dataset.source.config.callback import CallbackConfig
-from open_icu.dataset.source.config.event import EventConfig, MEDSEventFieldDefaultConfig
-from open_icu.dataset.source.config.field import ConstantFieldConfig, FieldConfig
+from open_icu.config.dataset.source.config.callback import CallbackConfig
+from open_icu.config.dataset.source.config.event import EventConfig, MEDSEventFieldDefaultConfig
+from open_icu.config.dataset.source.config.field import ConstantFieldConfig, FieldConfig
 
 
 class TableType(StrEnum):

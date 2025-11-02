@@ -5,8 +5,8 @@ from typing import NamedTuple
 
 import yaml
 
-from open_icu.dataset.source.config.dataset import SourceDatasetConfig
-from open_icu.dataset.source.config.table import TableConfig
+from open_icu.config.dataset.source.config.dataset import SourceDatasetConfig
+from open_icu.config.dataset.source.config.table import TableConfig
 
 
 class DatasetIdentifier(NamedTuple):

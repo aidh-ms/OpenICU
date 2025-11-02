@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from open_icu.dataset.source.config.callback import CallbackConfig
+from open_icu.config.dataset.source.config.callback import CallbackConfig
 
 
 class MEDSEventFieldConfig(BaseModel):
