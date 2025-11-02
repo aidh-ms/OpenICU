@@ -1,8 +1,6 @@
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from open_icu.config.base import Config
-
 
 class MEDSFieldsConfig(BaseModel):
     subject_id: str
@@ -222,7 +220,7 @@ class TableConfig(BaseModel):
         return datetime_fields
 
 
-class SourceConfig(Config):
+class SourceConfig(BaseModel):
     name: str
     version: str
     tables: list[TableConfig] = Field(default_factory=list)
