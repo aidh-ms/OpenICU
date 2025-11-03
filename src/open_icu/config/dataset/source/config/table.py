@@ -2,7 +2,7 @@ from abc import ABCMeta
 from enum import StrEnum, auto
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from open_icu.config.dataset.source.config.callback import CallbackConfig
 from open_icu.config.dataset.source.config.event import EventConfig, MEDSEventFieldDefaultConfig
@@ -43,6 +43,19 @@ class JsonTableConfig(BaseTableConfig):
         "left",
         description="Type of join to be performed (e.g. inner, left, right, outer).",
     )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def join_params(self) -> dict[str, list[str]]:
+        params = {}
+        if self.both_on:
+            params["on"] = self.both_on
+        if self.left_on:
+            params["left_on"] = self.left_on
+        if self.right_on:
+            params["right_on"] = self.right_on
+
+        return params
 
 
 class TableConfig(BaseTableConfig):

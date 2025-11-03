@@ -20,13 +20,9 @@ class CallbackConfig(BaseModel):
 
         return super().model_post_init(context)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def call(self) -> Callable[[LazyFrame], LazyFrame]:
-
-
         callback_class = CallbackRegistry().get(self.callback)
-        if callback_class is None:
-            raise ValueError(f"Callback '{self.callback}' is not registered.")
-
+        assert callback_class is not None
         return callback_class(**self.params)
