@@ -8,13 +8,14 @@ fields:
     type: float32
   - name: drugname
     type: string
-  # - name: event_timestamp
-  #   base:
-  #     name: admission_timestamp
-  #     type: datetime
-  #   offset:
-  #     name: infusionoffset
-  #     type: int64
+  - name: infusionoffset
+    type: int64
+callbacks:
+  - callback: add_offset
+    params:
+      datetime: admission_timestamp
+      offset: infusionoffset
+      output: event_timestamp
 
 join:
   - name: patient
@@ -27,27 +28,29 @@ join:
         constant: -1
       - name: patientunitstayid
         type: int64
-
-      # - name: admission_timestamp
-      #   year:
-      #     name: hospitaldischargeyear
-      #     type: int64[pyarrow]
-      #   month:
-      #     name: month
-      #     type: int64[pyarrow]
-      #     constant: 1
-      #   day:
-      #     name: day
-      #     type: int64[pyarrow]
-      #     constant: 1
-      #   time:
-      #     name: hospitaladmittime24
-      #     type: string
-      #   offset:
-      #     name: hospitaladmitoffset
-      #     type: int64
+      - name: hospitaldischargeyear
+        type: int64[pyarrow]
+      - name: month
+        type: int64[pyarrow]
+        constant: 1
+      - name: day
+        type: int64[pyarrow]
+        constant: 1
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaladmitoffset
+        type: int64
     both_on:
       - patientunitstayid
+    callbacks:
+      - callback: to_datetime
+        params:
+          year: hospitaldischargeyear
+          month: month
+          day: day
+          time: hospitaladmittime24
+          offset: hospitaladmitoffset
+          output: admission_timestamp
 
 events:
   - name: drugamount
