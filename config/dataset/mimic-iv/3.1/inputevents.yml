@@ -59,4 +59,4 @@ events:
       - callback: drop_na
         params:
           columns:
-            - rate
+            - numeric_value
