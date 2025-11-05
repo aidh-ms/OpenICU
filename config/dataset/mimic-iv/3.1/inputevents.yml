@@ -1,0 +1,62 @@
+name: medications
+path: icu/inputevents.csv
+
+fields:
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: endtime
+    type: datetime
+  - name: amount
+    type: float32
+  - name: amountuom
+    type: string
+  - name: starttime
+    type: datetime
+  - name: rateuom
+    type: string
+  - name: rate
+    type: float32
+  - name: itemid
+    type: int64
+
+join:
+  - name: d_items
+    path: icu/d_items.csv
+    fields:
+      - name: itemid
+        type: int64
+      - name: label
+        type: string
+    both_on:
+      - itemid
+
+event_defaults:
+  subject_id: subject_id
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+
+events:
+  - name: dosage
+    fields:
+      time: endtime
+      code:
+        - label
+        - amountuom
+      numeric_value: amount
+  - name: rate
+    fields:
+      time: starttime
+      code:
+        - label
+        - rateuom
+      numeric_value: rate
+    callbacks:
+      - callback: drop_na
+        params:
+          columns:
+            - numeric_value

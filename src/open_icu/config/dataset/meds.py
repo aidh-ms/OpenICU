@@ -6,11 +6,11 @@ from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
 
-import meds
+from meds._version import __version__ as meds_version
 from meds.schema import DatasetMetadataSchema
 
 
-class MEDSProject:
+class MEDSDataset:
     def __init__(
             self,
             project_path: Path | str | None = None,
@@ -55,7 +55,7 @@ class MEDSProject:
         _metadata = {
             "etl_name": "OpenICU",
             "etl_version": "0.0.1",
-            "meds_version": meds.__version__,
+            "meds_version": meds_version,
             "created_at": datetime.now().isoformat(),
         }
 

@@ -1,0 +1,45 @@
+name: chartevents
+path: icu/chartevents.csv
+
+fields:
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: charttime
+    type: datetime
+  - name: value
+    type: string
+  - name: valuenum
+    type: float32
+  - name: valueuom
+    type: string
+  - name: itemid
+    type: int64
+
+join:
+  - name: d_items
+    path: icu/d_items.csv
+    fields:
+      - name: itemid
+        type: int64
+      - name: label
+        type: string
+    both_on:
+      - itemid
+
+events:
+  - name: chartevent
+    fields:
+      subject_id: subject_id
+      time: charttime
+      code:
+        - label
+        - valueuom
+      numeric_value: valuenum
+      text_value: value
+      extension:
+        hadm_id: hadm_id
+        stay_id: stay_id
