@@ -1,0 +1,182 @@
+name: ingredientevents
+path: icu/ingredientevents.csv
+
+fields:
+    # general code
+    - field: source_db_code
+      type: string
+      constant: mimic
+    - field: source_table_code
+      type: string
+      constant: icu/ingredientevents
+    # codes
+    - field: amount_code
+      type: string
+      constant: DOSAGE
+    - field: caregiver_store_code
+      type: string
+      constant: CG_ST # caregiver_storetime
+    - field: linkorder_code
+      type: string
+      constant: LINKORDER
+    - field: order_code
+      type: string
+      constant: ORDER
+    - field: originalamount_code
+      type: string
+      constant: ORIGINAL_DOSAGE
+    - field: originalrate_code
+      type: string
+      constant: ORIGINALRATE
+    - field: rate_end_code
+      type: string
+      constant: RATE_END
+    - field: rate_start_code
+      type: string
+      constant: RATE_START
+    - field: statusdescription_code
+      type: string
+      constant: STATUSDESCRIPTION
+    # subject_id and extentions
+    - field: hadm_id
+      type: int64
+    - field: row_id
+      type: int64
+    - field: stay_id
+      type: int64
+    - field: subject_id
+      type: int64
+    # db fields
+    - field: amount
+      type: float32
+    - field: amountuom
+      type: string
+    - field: caregiver_id
+      type: int64[pyarrow]
+    - field: endtime
+      type: datetime
+    - field: itemid
+      type: int64
+    - field: linkorderid
+      type: int64
+    - field: orderid
+      type: int64
+    - field: originalamount
+      type: int64
+    - field: originalrate
+      type: float32 
+    - field: rate
+      type: float32
+    - field: rateuom
+      type: string
+    - field: starttime
+      type: datetime
+    - field: statusdescription
+      type: string
+    - field: storetime
+      type: datetime
+      
+join:
+  - name: d_items
+    path: icu/d_items.csv
+    fields:
+      # general code
+      # codes
+      # subject_id and extentions
+      # db fields
+      - field: itemid
+        type: int64
+      - field: label
+        type: string
+    both_on:
+      - itemid
+
+event_defaults:
+  subject_id: subject_id
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+    row_id: row_id
+
+events:
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - source_db_code
+        - source_table_code
+        - caregiver_store_code
+      numeric_value: caregiver_id
+  - name: rate_start
+    fields:
+      time: starttime
+      code:
+        - source_db_code
+        - source_table_code
+        - rate_start_code
+        - label
+        - rateuom
+      numeric_value: rate
+      filters:
+        dropna:
+          - rate
+  - name: rate_end
+    fields:
+      time: endtime
+      code:
+        - source_db_code
+        - source_table_code
+        - rate_end_code
+        - label
+        - rateuom
+      numeric_value: rate
+    filters:
+      dropna:
+        - rate
+  - name: dosage
+    fields:
+      time: endtime
+      code: 
+        - source_db_code
+        - source_table_code
+        - amount_code
+        - label
+        - amountuom
+      numeric_value: amount
+  - name: order
+    fields:
+      time: endtime
+      code:
+        - source_db_code
+        - source_table_code
+        - order_code
+      numeric_value: orderid
+  - name: linkorder
+    fields: 
+      time: endtime
+      code: 
+        - source_db_code
+        - source_table_code
+        - linkorder_code
+      numeric_value: linkorderid  
+  - name: statusdescription
+    fields:
+      time: endtime
+      code: 
+        - source_db_code
+        - source_table_code
+        - statusdescription_code
+        - statusdescription
+  - name: originalrate
+    fields:
+      time: starttime
+      code:
+        - source_db_code
+        - source_table_code
+        - originalrate_code
+        - label
+        - rateuom
+      numeric_value: originalrate
+    filters:
+      dropna:
+        - originalrate
