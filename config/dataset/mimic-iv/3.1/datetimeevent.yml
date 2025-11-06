@@ -1,0 +1,99 @@
+name: datetimeevent
+path: icu/datetimeevents.csv
+
+fields:
+  # general code
+  - name: source_db_code
+    type: string
+    constant: mimic 
+  - name: source_table_code
+    type: string
+    constant: icu/datetimeevents
+  # codes
+  - name: caregiver_store_code
+    type: string
+    constant: CG_ST # caregiver_storetime
+  - name: chartevent_code
+    type: string
+    constant: DATETIMEEVENT
+  - name: warning_code
+    type: string
+    constant: WARNING
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields
+  - name: caregiver_id
+    type: int64
+  - name: charttime
+    type: datetime
+  - name: itemid
+    type: int64
+  - name: storetime
+    type: datetime
+  - name: value
+    type: string
+  - name: valueuom
+    type: string
+  - name: warning
+    type: int64[pyarrow]
+
+join:
+  - name: d_items
+    path: icu/d_items.csv
+    fields:
+      # general code
+      # codes
+      # db fields
+      # subject_id and extentions
+      - name: itemid
+        type: int64
+      - name: label
+        type: string
+    both_on:
+      - itemid
+
+event_defaults:
+  subject_id: subject_id
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+  code_prefix:
+    - source_db_code
+    - source_table_code
+
+events:
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - caregiver_store_code
+      numeric_value: caregiver_id
+  - name: datetimeevent
+    fields:
+      time: charttime
+      code:
+        - chartevent_code
+        - label
+        - valueuom
+      text_value: value
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - text_value
+  - name: warning
+    fields:
+      time: storetime
+      code:
+        - warning_code
+      numeric_value: warning
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - numeric_value

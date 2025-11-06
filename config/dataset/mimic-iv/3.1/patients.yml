@@ -1,0 +1,93 @@
+name: patients
+path: hosp/patients.csv
+
+fields:
+  # general code
+  - name: source_db_code
+    type: string
+    constant: mimic
+  - name: source_table_code
+    type: string
+    constant: hosp/patients
+  # codes
+  - name: age_code
+    type: string
+    constant: AGE
+  - name: dob_code
+    type: string
+    constant: DOB
+  - name: dod_code
+    type: string
+    constant: DOD
+  - name: gender_code
+    type: string
+    constant: SEX
+  - name: patient_code
+    type: string
+    constant: PATIENT
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+    constant: -1
+  - name: stay_id
+    type: int64
+    constant: -1
+  - name: subject_id
+    type: int64
+  # db fields
+  - name: anchor_age
+    type: int64
+  - name: anchor_year
+    type: int64
+  - name: anchor_year_group
+    type: string
+  - name: dod
+    type: datetime
+  - name: month
+    type: int64[pyarrow]
+    constant: 1
+  - name: day
+    type: int64[pyarrow]
+    constant: 1
+  - name: basetime  # if using time as name, dupplication error appears
+    type: string
+    constant: "00:00:00"
+  - name: gender
+    type: string
+
+callbacks:
+  - callback: to_datetime
+    params:
+      year: anchor_year
+      month: month
+      day: day
+      time: basetime
+      offset: anchor_age # check ! if anchor year is added as year not as other time
+      output: dob
+
+event_defaults:
+  subject_id: subject_id
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+  code_prefix:
+    - source_db_code
+    - source_table_code
+
+events: 
+  - name: dob
+    fields:
+      time: dob
+      code:
+        - dob_code
+  - name: dod
+    fields:
+      time: dod
+      code:
+        - dod_code
+  - name: gender
+    fields:
+      time: dob
+      code: 
+        - gender_code
+        - gender

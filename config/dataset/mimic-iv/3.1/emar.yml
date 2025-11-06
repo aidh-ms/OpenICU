@@ -1,0 +1,66 @@
+name: emar
+path: hosp/emar.csv
+
+fields:
+  # general code
+  - name: source_db_code
+    type: string
+    constant: mimic 
+  - name: source_table_code
+    type: string
+    constant: hosp/emar
+  # codes
+  - name: scheduletime_code
+    type: string
+    constant: SCHEDULETIME
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64[pyarrow]
+  - name: stay_id
+    type: int64
+    constant: -1
+  - name: subject_id
+    type: int64
+  # db fields
+  - name: charttime
+    type: datetime
+  - name: emar_id  # emar = subject_id + "-" + emar_seq
+    type: string
+  - name: emar_seq
+    type: int64
+  - name: enter_provider_id
+    type: string[pyarrow]
+  - name: event_txt
+    type: string[pyarrow]
+  - name: medication
+    type: string[pyarrow]
+  - name: pharmacy_id
+    type: int64[pyarrow]
+  - name: poe_id
+    type: string
+  - name: scheduletime
+    type: datetime
+  - name: storetime
+    type: datetime
+   
+event_defaults:
+  subject_id: subject_id
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+  code_prefix:
+    - source_db_code
+    - source_table_code
+
+events:
+  - name: diagnoses
+    fields:
+      time: charttime
+      code: 
+        - medication
+      text_value: event_txt
+  - name: scheduletime
+    fields:
+      time: scheduletime
+      code:
+        - scheduletime_code

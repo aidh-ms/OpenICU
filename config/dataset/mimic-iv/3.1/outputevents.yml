@@ -1,0 +1,78 @@
+name: outputevents
+path: icu/outputevents.csv
+
+fields:
+  # general code
+  - name: source_db_code
+    type: string
+    constant: mimic 
+  - name: source_table_code
+    type: string
+    constant: icu/outputevents
+  # codes
+  - name: caregiver_store_code
+    type: string
+    constant: CG_ST # caregiver_storetime
+  - name: dosage_code
+    type: string
+    constant: DOSAGE
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields
+  - name: caregiver_id
+    type: int64
+  - name: charttime
+    type: datetime
+  - name: itemid
+    type: int64
+  - name: storetime
+    type: datetime
+  - name: value
+    type: int64
+  - name: valueuom
+    type: string
+
+join:
+  - name: d_items
+    path: icu/d_items.csv
+    fields:
+      # general code
+      # codes
+      # db fields
+      # subject_id and extentions
+      - name: itemid
+        type: int64
+      - name: label
+        type: string
+    both_on:
+      - itemid
+      
+event_defaults:
+  subject_id: subject_id
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+  code_prefix:
+    - source_db_code
+    - source_table_code
+
+events:
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - caregiver_store_code
+      numeric_value: caregiver_id
+  - name: dosage
+    fields:
+      time: charttime
+      code: 
+        - dosage_code
+        - label
+        - valueuom
+      numeric_value: value

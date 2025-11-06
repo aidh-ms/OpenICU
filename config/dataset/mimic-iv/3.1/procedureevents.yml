@@ -1,0 +1,213 @@
+name: procedureevents
+path: icu/procedureevents.csv
+
+fields:
+  # general code
+  - name: source_db_code
+    type: string
+    constant: mimic 
+  - name: source_table_code
+    type: string
+    constant: icu/proceureevents
+  # codes
+  - name: caregiver_store_code
+    type: string
+    constant: CG_ST # caregiver_storetime
+  - name: continueinnextdept_code
+    type: string
+    constant: CONTINUEINNEXTDEPT
+  - name: event_end_code
+    type: string
+    constant: EVENT_END
+  - name: event_start_code
+    type: string
+    constant: EVENT_START
+  - name: isopenbag_code
+    type: string
+    constant: ISOPENBAG
+  - name: linkorder_code
+    type: string
+    constant: LINKORDER
+  - name: location_code
+    type: string
+    constant: LOCATION
+  - name: order_code
+    type: string
+    constant: ORDER
+  - name: originalamount_code
+    type: string
+    constant: ORIGINAL_AMOUNT
+  - name: originalrate_code
+    type: string
+    constant: ORIGINALRATE
+  - name: statusdescription_code
+    type: string
+    constant: STATUSDESCRIPTION
+  - name: weight_code
+    type: string
+    constant: WEIGHT 
+  # subject_id and extensions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields
+  - name: caregiver_id
+    type: int64[pyarrow]
+  - name: continueinnextdept
+    type: int64
+  - name: endtime
+    type: datetime
+  - name: isopenbag
+    type: int64
+  - name: itemid
+    type: int64
+  - name: location
+    type: string
+  - name: linkorderid
+    type: int64
+  - name: locationcategory
+    type: string
+  - name: ordercategoryname
+    type: string
+  - name: orderid
+    type: int64
+  - name: ORIGINALAMOUNT
+    type: int64[pyarrow]
+  - name: ORIGINALRATE
+    type: int64
+  - name: patientweight
+    type: float32[pyarrow]
+  - name: starttime
+    type: datetime
+  - name: statusdescription
+    type: string
+  - name: storetime
+    type: datetime
+  - name: value
+    type: int64[pyarrow]
+  - name: valueuom
+    type: string
+  - name: weightuom
+    type: string
+    constant: kg
+
+join:
+  - name: d_items
+    path: icu/d_items.csv
+    fields:
+      # general code
+      # codes
+      # subject_id and extensions
+      # db fields
+      - name: itemid
+        type: int64
+      - name: label
+        type: string
+    both_on:
+      - itemid
+
+event_defaults:
+  subject_id: subject_id
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+  code_prefix:
+    - source_db_code
+    - source_table_code
+
+events:
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - caregiver_store_code
+      numeric_value: caregiver_id
+  - name: event_start
+    fields:
+      time: starttime
+      code:
+        - event_start_code
+        - label
+        - valueuom
+      numeric_value: value
+  - name: event_end
+    fields:
+      time: endtime
+      code:
+        - event_end_code
+        - label
+        - valueuom
+      numeric_value: value
+  - name: location
+    fields:
+      time: endtime
+      code:
+        - location_code
+        - locationcategory
+      text_value: location
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - text_value
+  - name: order
+    fields: 
+      time: endtime
+      code: 
+        - order_code
+        - ordercategoryname
+      numeric_value: orderid
+  - name: linkorder
+    fields: 
+      time: endtime
+      code: 
+        - linkorder_code
+      numeric_value: linkorderid
+  - name: weight
+    fields:
+      time: starttime
+      code: 
+        - weight_code
+        - weightuom
+      numeric_value: patientweight
+  - name: isopenbag
+    fields:
+      time: starttime
+      code:
+        - isopenbag_code
+      numeric_value: isopenbag
+  - name: continueinnextdept
+    fields:
+      time: endtime
+      code: 
+        - continueinnextdept_code
+        - continueinnextdept
+  - name: statusdescription
+    fields:
+      time: endtime
+      code: 
+        - statusdescription_code
+        - statusdescription
+  - name: originalamount
+    fields:
+      time: starttime
+      code: 
+        - originalamount_code
+        - label
+        - valueuom
+      numeric_value: ORIGINALAMOUNT
+  - name: originalrate
+    fields:
+      time: starttime
+      code:
+        - originalrate_code
+        - label
+      numeric_value: ORIGINALRATE
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - numeric_value
