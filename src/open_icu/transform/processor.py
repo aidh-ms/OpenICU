@@ -3,33 +3,16 @@ from pathlib import Path
 import polars as pl
 
 from open_icu.config.dataset.source.config.field import ConstantFieldConfig
-from open_icu.config.dataset.source.config.table import JsonTableConfig, TableConfig
+from open_icu.config.dataset.source.config.table import BaseTableConfig, TableConfig
 
 
-def _process_join_table(join_table: JsonTableConfig, path: Path) -> pl.LazyFrame:
+def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
     lf = pl.scan_csv(
-        path / join_table.path,
+        path / table.path,
     )
 
-    for field in join_table.fields:
-        if isinstance(field, ConstantFieldConfig):
-            lf = lf.with_columns(
-                pl.lit(field.constant).alias(field.name)
-            )
-
-        if field.type == "datetime":
-            lf = lf.with_columns(
-                pl.col(field.name).str.to_datetime().alias(field.name)
-            )
-
-    for callback in join_table.callbacks:
+    for callback in table.pre_callbacks:
         lf = callback.call(lf)
-
-    return lf
-
-
-def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -> None:
-    lf = pl.scan_csv(path / table.path)
 
     for field in table.fields:
         if isinstance(field, ConstantFieldConfig):
@@ -42,14 +25,25 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
                 pl.col(field.name).str.to_datetime().alias(field.name)
             )
 
+    for callback in table.callbacks:
+        lf = callback.call(lf)
+
+    return lf
+
+
+def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -> None:
+    lf = _process_table(table, path)
+
+    post_callbacks = [*table.post_callbacks]
     for join_table in table.join:
         lf = lf.join(
-            _process_join_table(join_table, path),
+            _process_table(join_table, path),
             how=join_table.how,  # type: ignore[arg-type]
             **join_table.join_params  # type: ignore[arg-type]
         )
+        post_callbacks.extend(join_table.post_callbacks)
 
-    for callback in table.callbacks:
+    for callback in post_callbacks:
         lf = callback.call(lf)
 
     # Process each event

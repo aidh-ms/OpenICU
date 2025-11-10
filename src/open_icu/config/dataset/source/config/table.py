@@ -21,8 +21,14 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
         default_factory=list,
         description="The list of field configurations for the table."
     )
+    pre_callbacks: list[CallbackConfig] = Field(
+        default_factory=list, description="The list of pre-processing callback configurations for the table."
+    )
     callbacks: list[CallbackConfig] = Field(
         default_factory=list, description="The list of callback configurations for the table."
+    )
+    post_callbacks: list[CallbackConfig] = Field(
+        default_factory=list, description="The list of post-processing callback configurations for the table."
     )
 
 
