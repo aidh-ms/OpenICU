@@ -10,7 +10,7 @@ fields:
     type: string
   - name: infusionoffset
     type: int64
-callbacks:
+post_callbacks:
   - callback: add_offset
     params:
       datetime: admission_timestamp
