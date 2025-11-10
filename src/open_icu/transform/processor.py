@@ -22,7 +22,7 @@ def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
 
         if field.type == "datetime":
             lf = lf.with_columns(
-                pl.col(field.name).str.to_datetime().alias(field.name)
+                pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
             )
 
     for callback in table.callbacks:
