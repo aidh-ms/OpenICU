@@ -827,7 +827,7 @@ wheels = [
 
 [[package]]
 name = "meds"
-version = "0.4.0"
+version = "0.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "flexible-schema" },
@@ -835,9 +835,9 @@ dependencies = [
     { name = "pyarrow" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ae/f3/c99769ba2e36d67e015190733a03689dffa64139b93006277a4e3abdd034/meds-0.4.0.tar.gz", hash = "sha256:8f0c9ed8334a57eb8e93beefa7c1c5003490d9c647691fb740be4fa3919e8ec3", size = 376216, upload-time = "2025-05-03T05:40:49.536Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/2a/6949d9da216fcc9df2f44dd3d3c10b8dbc6b41c069ec129ca23184cd76fd/meds-0.4.1.tar.gz", hash = "sha256:b6c77f84e32ad49e6065140992396064a8a7bbb1e68440448e53c7e66f3f8f2c", size = 386332, upload-time = "2025-11-05T17:15:04.8Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dc/de/845251288337b576f10b13c3fed6f0cbbdd02bb3aae07145109f689d5561/meds-0.4.0-py3-none-any.whl", hash = "sha256:7201393a607aac5c4e71c3543ff54c46cf2e83f7a6e5875d6bfc0104f7dc7ebd", size = 20529, upload-time = "2025-05-03T05:40:47.442Z" },
+    { url = "https://files.pythonhosted.org/packages/a0/4c/2c40e3ba53504728d6895bba26d69c165757424cfa79ce2bc20679cbb0b0/meds-0.4.1-py3-none-any.whl", hash = "sha256:3a83e2410d720da10d133fd6920180a249e063565edbe41f78ac1c5e75c42b6b", size = 20695, upload-time = "2025-11-05T17:15:03.105Z" },
 ]
 
 [[package]]
