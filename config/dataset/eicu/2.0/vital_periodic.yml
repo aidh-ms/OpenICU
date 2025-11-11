@@ -11,7 +11,7 @@ fields:
     constant: HEART_RATE//BPM
   - name: observationoffset
     type: int64
-callbacks:
+post_callbacks:
   - callback: add_offset
     params:
       datetime: admission_timestamp
@@ -32,12 +32,12 @@ join:
       - name: patientunitstayid
         type: int64
       - name: hospitaldischargeyear
-        type: int64[pyarrow]
+        type: int64
       - name: month
-        type: int64[pyarrow]
+        type: int64
         constant: 1
       - name: day
-        type: int64[pyarrow]
+        type: int64
         constant: 1
       - name: hospitaladmittime24
         type: string
