@@ -32,12 +32,12 @@ join:
       - name: patientunitstayid
         type: int64
       - name: hospitaldischargeyear
-        type: int64[pyarrow]
+        type: int64
       - name: month
-        type: int64[pyarrow]
+        type: int64
         constant: 1
       - name: day
-        type: int64[pyarrow]
+        type: int64
         constant: 1
       - name: hospitaladmittime24
         type: string
