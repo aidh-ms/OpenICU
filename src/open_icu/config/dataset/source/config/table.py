@@ -2,9 +2,11 @@ from abc import ABCMeta
 from enum import StrEnum, auto
 from typing import Any
 
-from pydantic import BaseModel, Field, computed_field
+from polars.datatypes import DataTypeClass
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.dataset.source.config.callback import CallbackConfig
+from open_icu.config.dataset.source.config.dtype import DTYPES
 from open_icu.config.dataset.source.config.event import EventConfig, MEDSEventFieldDefaultConfig
 from open_icu.config.dataset.source.config.field import ConstantFieldConfig, FieldConfig
 
@@ -14,6 +16,8 @@ class TableType(StrEnum):
 
 
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     name: str = Field(..., description="The name of the table.")
     path: str = Field(..., description="The file path to the table data.")
     type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
@@ -30,6 +34,15 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     post_callbacks: list[CallbackConfig] = Field(
         default_factory=list, description="The list of post-processing callback configurations for the table."
     )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def dtypes(self) -> dict[str, DataTypeClass]:
+        dtype_map = {}
+        for field in self.fields:
+            dtype_map[field.name] = DTYPES[field.type]
+
+        return dtype_map
 
 
 class JsonTableConfig(BaseTableConfig):

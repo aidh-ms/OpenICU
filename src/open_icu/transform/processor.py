@@ -9,6 +9,8 @@ from open_icu.config.dataset.source.config.table import BaseTableConfig, TableCo
 def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
     lf = pl.scan_csv(
         path / table.path,
+        schema_overrides=table.dtypes,
+        infer_schema=False,
     )
 
     for callback in table.pre_callbacks:
