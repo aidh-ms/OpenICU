@@ -207,7 +207,7 @@ events:
       code:
         - originalrate_code
         - label
-      numeric_value: ORIGINALRATE
+      numeric_value: originalrate
     callbacks:
       - callback: drop_na
         params: 
