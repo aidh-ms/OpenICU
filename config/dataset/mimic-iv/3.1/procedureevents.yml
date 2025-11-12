@@ -86,6 +86,8 @@ fields:
     type: string
   - name: storetime
     type: datetime
+    params:
+      strict: false
   - name: value
     type: float32
   - name: valueuom
