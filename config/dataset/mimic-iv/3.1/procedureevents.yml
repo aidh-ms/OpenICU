@@ -87,7 +87,7 @@ fields:
   - name: storetime
     type: datetime
   - name: value
-    type: int64[pyarrow]
+    type: float32
   - name: valueuom
     type: string
   - name: weightuom
