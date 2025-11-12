@@ -74,9 +74,9 @@ fields:
     type: string
   - name: orderid
     type: int64
-  - name: ORIGINALAMOUNT
-    type: int64[pyarrow]
-  - name: ORIGINALRATE
+  - name: originalamount
+    type: float32
+  - name: originalrate
     type: int64
   - name: patientweight
     type: float32[pyarrow]
