@@ -79,7 +79,7 @@ fields:
   - name: originalrate
     type: int64
   - name: patientweight
-    type: float32[pyarrow]
+    type: float32
   - name: starttime
     type: datetime
   - name: statusdescription
