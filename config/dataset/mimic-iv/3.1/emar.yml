@@ -31,7 +31,7 @@ fields:
   - name: enter_provider_id
     type: string
   - name: event_txt
-    type: string[pyarrow]
+    type: string
   - name: medication
     type: string[pyarrow]
   - name: pharmacy_id
