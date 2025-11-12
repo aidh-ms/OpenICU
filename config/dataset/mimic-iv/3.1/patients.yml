@@ -2,11 +2,8 @@ name: patients
 path: hosp/patients.csv
 
 fields:
-  # general code
-  - name: source_db_code
-    type: string
-    constant: mimic
-  - name: source_table_code
+  # general codes
+  - name: src_table_code
     type: string
     constant: hosp/patients
   # codes
@@ -32,9 +29,12 @@ fields:
   - name: stay_id
     type: int64
     constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic
   - name: subject_id
     type: int64
-  # db fields
+  # db fields - times
   - name: anchor_age
     type: int64
   - name: anchor_year
@@ -44,18 +44,19 @@ fields:
   - name: dod
     type: datetime
   - name: month
-    type: int64[pyarrow]
+    type: int64
     constant: 1
   - name: day
-    type: int64[pyarrow]
+    type: int64
     constant: 1
-  - name: basetime  # if using time as name, dupplication error appears
+  - name: basetime  # if using "time" as name, duplication error appears
     type: string
+  # db fields - values
     constant: "00:00:00"
   - name: gender
     type: string
 
-callbacks:
+post_callbacks:
   - callback: to_datetime
     params:
       year: anchor_year
@@ -67,12 +68,12 @@ callbacks:
 
 event_defaults:
   subject_id: subject_id
+  code_prefix:
+    - src_table_code
   extension:
     hadm_id: hadm_id
     stay_id: stay_id
-  code_prefix:
-    - source_db_code
-    - source_table_code
+    src_db_id: src_db_id
 
 events: 
   - name: dob

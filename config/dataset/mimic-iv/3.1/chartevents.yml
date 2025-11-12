@@ -2,27 +2,43 @@ name: chartevents
 path: icu/chartevents.csv
 
 fields:
-  - name: subject_id
-    type: int64
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: icu/chartevents
+  # codes
+  # subject_id and extentions
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
+  - name: src_db_id
+    type: string
+    constant: mimic
+  - name: subject_id
+    type: int64
+  # db fields - times
   - name: charttime
     type: datetime
+  # db fields - values
+  - name: itemid
+    type: int64
   - name: value
     type: string
   - name: valuenum
     type: float32
   - name: valueuom
     type: string
-  - name: itemid
-    type: int64
 
 join:
   - name: d_items
     path: icu/d_items.csv
     fields:
+      # general codes
+      # codes
+      # subject_id and extentions
+      # db fields - times
+      # db fields - values
       - name: itemid
         type: int64
       - name: label
@@ -36,6 +52,7 @@ events:
       subject_id: subject_id
       time: charttime
       code:
+        - src_table_code
         - label
         - valueuom
       numeric_value: valuenum
@@ -43,3 +60,4 @@ events:
       extension:
         hadm_id: hadm_id
         stay_id: stay_id
+        src_db_id: src_db_id

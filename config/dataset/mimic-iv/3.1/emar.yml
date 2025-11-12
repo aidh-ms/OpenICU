@@ -2,11 +2,8 @@ name: emar
 path: hosp/emar.csv
 
 fields:
-  # general code
-  - name: source_db_code
-    type: string
-    constant: mimic 
-  - name: source_table_code
+  # general codes
+  - name: src_table_code
     type: string
     constant: hosp/emar
   # codes
@@ -19,11 +16,19 @@ fields:
   - name: stay_id
     type: int64
     constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic 
   - name: subject_id
     type: int64
-  # db fields
+  # db fields - times
   - name: charttime
     type: datetime
+  - name: scheduletime
+    type: datetime
+  - name: storetime
+    type: datetime
+  # db fields - values
   - name: emar_id  # emar = subject_id + "-" + emar_seq
     type: string
   - name: emar_seq
@@ -38,19 +43,15 @@ fields:
     type: int64
   - name: poe_id
     type: string
-  - name: scheduletime
-    type: datetime
-  - name: storetime
-    type: datetime
    
 event_defaults:
   subject_id: subject_id
+  code_prefix:
+    - src_table_code
   extension:
     hadm_id: hadm_id
     stay_id: stay_id
-  code_prefix:
-    - source_db_code
-    - source_table_code
+    src_db_id: src_db_id
 
 events:
   - name: diagnoses

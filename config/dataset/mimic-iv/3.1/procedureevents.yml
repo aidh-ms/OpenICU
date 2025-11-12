@@ -2,11 +2,8 @@ name: procedureevents
 path: icu/procedureevents.csv
 
 fields:
-  # general code
-  - name: source_db_code
-    type: string
-    constant: mimic 
-  - name: source_table_code
+  # general codes 
+  - name: src_table_code
     type: string
     constant: icu/proceureevents
   # codes
@@ -51,15 +48,23 @@ fields:
     type: int64
   - name: stay_id
     type: int64
+  - name: src_db_id
+    type: string
+    constant: mimic
   - name: subject_id
     type: int64
-  # db fields
+  # db fields - times
+  - name: endtime
+    type: datetime
+  - name: starttime
+    type: datetime
+  - name: storetime
+    type: datetime
+  # db fields - values
   - name: caregiver_id
     type: int64
   - name: continueinnextdept
     type: int64
-  - name: endtime
-    type: datetime
   - name: isopenbag
     type: int64
   - name: itemid
@@ -74,22 +79,16 @@ fields:
     type: string
   - name: orderid
     type: int64
-  - name: originalamount
+  - name: ORIGINALAMOUNT
+    type: float64
+  - name: ORIGINALRATE
     type: float32
-  - name: originalrate
-    type: int64
   - name: patientweight
     type: float32
-  - name: starttime
-    type: datetime
   - name: statusdescription
     type: string
-  - name: storetime
-    type: datetime
-    params:
-      strict: false
   - name: value
-    type: float32
+    type: float64
   - name: valueuom
     type: string
   - name: weightuom
@@ -100,10 +99,11 @@ join:
   - name: d_items
     path: icu/d_items.csv
     fields:
-      # general code
+      # general codes
       # codes
       # subject_id and extensions
-      # db fields
+      # db fields - times
+      # db fields - values
       - name: itemid
         type: int64
       - name: label
@@ -113,12 +113,12 @@ join:
 
 event_defaults:
   subject_id: subject_id
+  code_prefix:
+    - src_table_code
   extension:
     hadm_id: hadm_id
     stay_id: stay_id
-  code_prefix:
-    - source_db_code
-    - source_table_code
+    src_db_id: src_db_id
 
 events:
   - name: caregiver_store
@@ -200,14 +200,14 @@ events:
         - originalamount_code
         - label
         - valueuom
-      numeric_value: originalamount
+      numeric_value: ORIGINALAMOUNT
   - name: originalrate
     fields:
       time: starttime
       code:
         - originalrate_code
         - label
-      numeric_value: originalrate
+      numeric_value: ORIGINALRATE
     callbacks:
       - callback: drop_na
         params: 

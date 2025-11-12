@@ -2,11 +2,8 @@ name: omr # online medical record
 path: hosp/omr.csv
 
 fields:
-  # general code
-  - name: source_db_code
-    type: string
-    constant: mimic 
-  - name: source_table_code
+  # general codes
+  - name: src_table_code
     type: string
     constant: hosp/omr
   # codes
@@ -20,11 +17,15 @@ fields:
   - name: stay_id
     type: int64
     constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic 
   - name: subject_id
     type: int64
-  # db fields
+  # db fields - times
   - name: chartdate
     type: datetime
+  # db fields - values
   - name: result_name
     type: string
   - name: result_value
@@ -38,8 +39,7 @@ events:
       subject_id: subject_id
       time: chartdate
       code: 
-        - source_db_code
-        - source_table_code
+        - src_table_code
         - omr_code
         - result_name
       text_value: result_value
@@ -47,3 +47,4 @@ events:
       extension:
         hadm_id: hadm_id
         stay_id: stay_id
+        src_db_id: src_db_id

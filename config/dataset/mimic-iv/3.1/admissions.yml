@@ -2,11 +2,8 @@ name: admissions
 path: hosp/admissions.csv
 
 fields:
-  # general code
-  - name: source_db_code
-    type: string
-    constant: mimic 
-  - name: source_table_code
+  # general codes
+  - name: src_table_code
     type: string
     constant: hosp/admissions
   # codes
@@ -46,26 +43,30 @@ fields:
   - name: stay_id
     type: int64
     constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic
   - name: subject_id
     type: int64
-  # db fields
+  # db fields - times
+  - name: admittime
+    type: datetime
+  - name: deathtime
+    type: datetime
+  - name: dischtime
+    type: datetime
+  - name: edregtime
+    type: string
+  - name: edouttime
+    type: string
+  # db fields - values
   - name: admission_location
     type: string
   - name: admission_type
     type: string
   - name: admit_provider_id
     type: string
-  - name: admittime
-    type: datetime
-  - name: deathtime
-    type: datetime
   - name: discharge_location
-    type: string
-  - name: dischtime
-    type: datetime
-  - name: edregtime
-    type: string
-  - name: edouttime
     type: string
   - name: hospital_expire_flag
     type: int64
@@ -80,12 +81,12 @@ fields:
 
 event_defaults:
   subject_id: subject_id
+  code_prefix:
+    - src_table_code
   extension:
     hadm_id: hadm_id
     stay_id: stay_id
-  code_prefix:
-    - source_db_code
-    - source_table_code
+    src_db_id: src_db_id
     
 events: 
   - name: admission

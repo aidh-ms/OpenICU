@@ -2,40 +2,54 @@ name: icustays
 path: icu/icustays.csv
 
 fields:
-  - name: subject_id
-    type: int64
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/icustays
+  # codes
+  - name: in_code
+    type: string
+    constant: ICU_ADMISSION
+  - name: los_code
+    type: string
+    constant: ICU_LENGTH_OF_STAY
+  - name: out_code
+    type: string
+    constant: ICU_DISCHARGE
+  # subject_id and extentions
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
+  - name: src_db_id
+    type: string
+    constant: mimic 
+  - name: subject_id
+    type: int64
+  # db fields - times
   - name: intime
     type: datetime
   - name: outtime
     type: datetime
+  # db fields - values
   - name: first_careunit
     type: string
   - name: last_careunit
     type: string
   - name: los
     type: float32
-  - name: in_code
-    type: string
-    constant: ICU_ADMISSION
-  - name: out_code
-    type: string
-    constant: ICU_DISCHARGE
-  - name: los_code
-    type: string
-    constant: ICU_LENGTH_OF_STAY
   - name: los_unit
     type: string
     constant: d
 
 event_defaults:
   subject_id: subject_id
+  code_prefix:
+    - src_table_code
   extension:
     hadm_id: hadm_id
     stay_id: stay_id
+    src_db_id: src_db_id
 
 events:
   - name: icu_admission
