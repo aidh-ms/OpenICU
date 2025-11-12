@@ -29,7 +29,7 @@ fields:
   - name: seq_num
     type: int64
   - name: short_description
-    type: string[pyarrow]
+    type: string
 
 events: 
   - name: hpcsevent
