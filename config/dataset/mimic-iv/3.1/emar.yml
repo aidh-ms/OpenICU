@@ -33,7 +33,7 @@ fields:
   - name: event_txt
     type: string
   - name: medication
-    type: string[pyarrow]
+    type: string
   - name: pharmacy_id
     type: int64[pyarrow]
   - name: poe_id
