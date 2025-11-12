@@ -55,7 +55,7 @@ fields:
     type: int64
   # db fields
   - name: caregiver_id
-    type: int64[pyarrow]
+    type: int64
   - name: continueinnextdept
     type: int64
   - name: endtime
