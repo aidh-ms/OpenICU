@@ -35,7 +35,7 @@ fields:
   - name: medication
     type: string
   - name: pharmacy_id
-    type: int64[pyarrow]
+    type: int64
   - name: poe_id
     type: string
   - name: scheduletime
