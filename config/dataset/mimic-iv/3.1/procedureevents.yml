@@ -200,7 +200,7 @@ events:
         - originalamount_code
         - label
         - valueuom
-      numeric_value: ORIGINALAMOUNT
+      numeric_value: originalamount
   - name: originalrate
     fields:
       time: starttime
