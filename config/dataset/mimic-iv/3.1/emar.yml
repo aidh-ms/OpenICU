@@ -15,7 +15,7 @@ fields:
     constant: SCHEDULETIME
   # subject_id and extentions
   - name: hadm_id
-    type: int64[pyarrow]
+    type: int64
   - name: stay_id
     type: int64
     constant: -1
