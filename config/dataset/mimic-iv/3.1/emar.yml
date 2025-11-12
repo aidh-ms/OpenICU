@@ -29,7 +29,7 @@ fields:
   - name: emar_seq
     type: int64
   - name: enter_provider_id
-    type: string[pyarrow]
+    type: string
   - name: event_txt
     type: string[pyarrow]
   - name: medication
