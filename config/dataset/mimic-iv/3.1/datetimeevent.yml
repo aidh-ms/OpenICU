@@ -1,12 +1,21 @@
-name: medications
-path: icu/inputevents.csv
+name: datetimeevent
+path: icu/datetimeevents.csv
 
 fields:
   # general codes
   - name: src_table_code
     type: string
-    constant: icu/inputevents
+    constant: icu/datetimeevents
   # codes
+  - name: caregiver_store_code
+    type: string
+    constant: CG_ST # caregiver_storetime
+  - name: chartevent_code
+    type: string
+    constant: DATETIMEEVENT
+  - name: warning_code
+    type: string
+    constant: WARNING
   # subject_id and extentions
   - name: hadm_id
     type: int64
@@ -14,25 +23,25 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: mimic
+    constant: mimic 
   - name: subject_id
     type: int64
   # db fields - times
-  - name: endtime
+  - name: charttime
     type: datetime
-  - name: starttime
+  - name: storetime
     type: datetime
   # db fields - values
-  - name: amount
-    type: float32
-  - name: amountuom
-    type: string
+  - name: caregiver_id
+    type: int64
   - name: itemid
     type: int64
-  - name: rate
-    type: float32
-  - name: rateuom
+  - name: value
     type: string
+  - name: valueuom
+    type: string
+  - name: warning
+    type: int64
 
 join:
   - name: d_items
@@ -60,27 +69,33 @@ event_defaults:
     src_db_id: src_db_id
 
 events:
-  - name: dosage
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - caregiver_store_code
+      numeric_value: caregiver_id
+  - name: datetimeevent
     fields:
-      time: endtime
+      time: charttime
       code:
+        - chartevent_code
         - label
-        - amountuom
-      numeric_value: amount
+        - valueuom
+      text_value: value
     callbacks:
       - callback: drop_na
-        params:
+        params: 
           columns:
-            - numeric_value
-  - name: rate
+            - text_value
+  - name: warning
     fields:
-      time: starttime
+      time: storetime
       code:
-        - label
-        - rateuom
-      numeric_value: rate
+        - warning_code
+      numeric_value: warning
     callbacks:
       - callback: drop_na
-        params:
+        params: 
           columns:
             - numeric_value

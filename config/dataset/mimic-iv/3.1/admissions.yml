@@ -1,0 +1,150 @@
+name: admissions
+path: hosp/admissions.csv
+
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/admissions
+  # codes
+  - name: admission_code
+    type: string
+    constant: ADMISSION_TIME
+  - name: death_code
+    type: string
+    constant: DOD
+  - name: discharge_code
+    type: string
+    constant: DISCHARGE_TIME
+  - name: edreg_code
+    type: string
+    constant: EDREGTIME
+  - name: edout_code
+    type: string
+    constant: EDOUTTIME
+  - name: hospital_expire_flag_code
+    type: string
+    constant: HOSPITAL_EXPIRE_FLAG
+  - name: insurance_code
+    type: string
+    constant: INSURANCE
+  - name: language_code
+    type: string
+    constant: LANGUAGE
+  - name: marital_status_code
+    type: string
+    constant: MARITAL_STATUS
+  - name: race_code
+    type: string
+    constant: RACE
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+    constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: admittime
+    type: datetime
+  - name: deathtime
+    type: datetime
+  - name: dischtime
+    type: datetime
+  - name: edregtime
+    type: string
+  - name: edouttime
+    type: string
+  # db fields - values
+  - name: admission_location
+    type: string
+  - name: admission_type
+    type: string
+  - name: admit_provider_id
+    type: string
+  - name: discharge_location
+    type: string
+  - name: hospital_expire_flag
+    type: int64
+  - name: insurance
+    type: string
+  - name: language
+    type: string
+  - name: marital_status
+    type: string
+  - name: race
+    type: string
+
+event_defaults:
+  subject_id: subject_id
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+    src_db_id: src_db_id
+    
+events: 
+  - name: admission
+    fields:
+      time: admittime
+      code: 
+        - admission_code
+        - admission_location
+        - admission_type
+        - admit_provider_id
+  - name: discharge
+    fields:
+      time: dischtime
+      code:
+        - discharge_code
+        - discharge_location
+  - name: deathtime
+    fields:
+      time: deathtime
+      code:
+        - death_code
+  - name: insurance
+    fields:
+      time: admittime
+      code: 
+        - insurance_code
+        - insurance
+  - name: language
+    fields:
+      time: admittime
+      code:
+        - language_code
+        - language
+  - name: marital_status
+    fields:
+      time: admittime
+      code:
+        - marital_status_code
+        - marital_status
+  - name: race
+    fields:
+      time: admittime
+      code: 
+        - race_code
+        - race
+  - name: emergency_department_registration
+    fields:
+      time: edregtime
+      code:
+        - edreg_code
+  - name: emergency_department_discharge
+    fields:
+      time: edouttime
+      code:
+        - edout_code
+  - name: hospital_expire_flag
+    fields:
+      time: dischtime
+      code: 
+        - hospital_expire_flag_code
+      numeric_value: hospital_expire_flag

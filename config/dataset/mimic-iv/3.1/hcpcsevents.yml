@@ -1,0 +1,49 @@
+name: hcpcsevents
+path: hosp/hcpcsevents.csv
+
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/hcpcsevents
+  # codes
+  - name: hcspsevents_code
+    type: string
+    constant: HCPCS
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+    constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic 
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: chartdate
+    type: datetime
+  # db fields - values
+  - name: hcpcs_cd
+    type: string
+  - name: seq_num
+    type: int64
+  - name: short_description
+    type: string
+
+events: 
+  - name: hpcsevent
+    fields:
+      subject_id: subject_id
+      time: chartdate
+      code: 
+        - src_table_code
+        - hcspsevents_code
+        - hcpcs_cd
+      numeric_value: seq_num
+      text_value: short_description
+      extension:
+          hadm_id: hadm_id
+          stay_id: stay_id
+          src_db_id: src_db_id

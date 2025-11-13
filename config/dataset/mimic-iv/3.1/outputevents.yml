@@ -1,12 +1,18 @@
-name: medications
-path: icu/inputevents.csv
+name: outputevents
+path: icu/outputevents.csv
 
 fields:
   # general codes
   - name: src_table_code
     type: string
-    constant: icu/inputevents
+    constant: icu/outputevents
   # codes
+  - name: caregiver_store_code
+    type: string
+    constant: CG_ST # caregiver_storetime
+  - name: dosage_code
+    type: string
+    constant: DOSAGE
   # subject_id and extentions
   - name: hadm_id
     type: int64
@@ -14,24 +20,22 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: mimic
+    constant: mimic 
   - name: subject_id
     type: int64
   # db fields - times
-  - name: endtime
+  - name: charttime
     type: datetime
-  - name: starttime
+  - name: storetime
     type: datetime
   # db fields - values
-  - name: amount
-    type: float32
-  - name: amountuom
-    type: string
+  - name: caregiver_id
+    type: int64
   - name: itemid
     type: int64
-  - name: rate
+  - name: value
     type: float32
-  - name: rateuom
+  - name: valueuom
     type: string
 
 join:
@@ -40,16 +44,16 @@ join:
     fields:
       # general codes
       # codes
-      # subject_id and extentions
       # db fields - times
       # db fields - values
+      # subject_id and extentions
       - name: itemid
         type: int64
       - name: label
         type: string
     both_on:
       - itemid
-
+      
 event_defaults:
   subject_id: subject_id
   code_prefix:
@@ -60,27 +64,17 @@ event_defaults:
     src_db_id: src_db_id
 
 events:
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - caregiver_store_code
+      numeric_value: caregiver_id
   - name: dosage
     fields:
-      time: endtime
-      code:
+      time: charttime
+      code: 
+        - dosage_code
         - label
-        - amountuom
-      numeric_value: amount
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
-  - name: rate
-    fields:
-      time: starttime
-      code:
-        - label
-        - rateuom
-      numeric_value: rate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+        - valueuom
+      numeric_value: value

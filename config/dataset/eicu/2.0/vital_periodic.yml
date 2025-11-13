@@ -2,15 +2,29 @@ name: vitalPeriodic
 path: vitalPeriodic.csv
 
 fields:
-  - name: patientunitstayid
-    type: int64
-  - name: heartrate
-    type: float32
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: vitalPeriodic
+  # codes
   - name: heartrate_code
     type: string
-    constant: HEART_RATE//BPM
+    constant: HEART_RATE
+  # subject_id and extentions
+  - name: patientunitstayid
+    type: int64
+  - name: src_db_id
+    type: string
+    constant: eicu 
+  # db fields - times
   - name: observationoffset
     type: int64
+  # db fields - values
+  - name: heartrate
+    type: float32
+  - name: heartrate_uom
+    type: string
+    constant: BPM
 post_callbacks:
   - callback: add_offset
     params:
@@ -22,27 +36,30 @@ join:
   - name: patient
     path: patient.csv
     fields:
-      - name: patienthealthsystemstayid
-        type: int64
+      # general codes
+      # codes
+      # subject_id and extentions
       - name: hadm_id
         type: int64
         constant: -1
-      - name: patientunitstayid
+      - name: patienthealthsystemstayid
         type: int64
       - name: patientunitstayid
         type: int64
+      # db fields - times
+      - name: day
+        type: int64
+        constant: 1
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
       - name: hospitaldischargeyear
         type: int64
       - name: month
         type: int64
         constant: 1
-      - name: day
-        type: int64
-        constant: 1
-      - name: hospitaladmittime24
-        type: string
-      - name: hospitaladmitoffset
-        type: int64
+      # db fields - values
     both_on:
       - patientunitstayid
     callbacks:
@@ -61,8 +78,11 @@ events:
       subject_id: patienthealthsystemstayid
       time: event_timestamp
       code:
+        - src_table_code
         - heartrate_code
+        - heartrate_uom
       numeric_value: heartrate
       extension:
         hadm_id: hadm_id
         stay_id: patientunitstayid
+        src_db_id: src_db_id
