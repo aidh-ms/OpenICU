@@ -11,4 +11,6 @@ __all__ = [
     "DropNa",
     "ToDatetime",
     "AddOffset",
+
+    "Subtract",
 ]
