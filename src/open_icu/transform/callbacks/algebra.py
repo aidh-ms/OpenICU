@@ -28,8 +28,7 @@ class Sum(CallbackProtocol):
         return lf.with_columns(
             (pl.sum_horizontal([pl.col(c) for c in self.summands]).alias(self.sum))
         )
-    
-    
+
 @register_callback_class
 class Subtract(CallbackProtocol):
     def __init__(self, minuend: str, subtrahend: str, difference: str) -> None:
@@ -53,7 +52,7 @@ class Multiply(CallbackProtocol):
         return lf.with_columns(
             (pl.col(self.multiplicand) * pl.col(self.multiplier)).alias(self.product)
         )
-    
+
 @register_callback_class
 class Product(CallbackProtocol):
     def __init__(self, factor: list[str], product: str) -> None:
@@ -64,7 +63,7 @@ class Product(CallbackProtocol):
         return lf.with_columns(
             (pl.pro_hor([pl.col(c) for c in self.factor]).alias(self.product))
         )
-    
+
 @register_callback_class
 class Divide(CallbackProtocol):
     def __init__(self, dividend: str, divisor: str, quotient: str) -> None:
@@ -88,7 +87,7 @@ class Pow(CallbackProtocol):
         return lf.with_columns(
             (pl.col(self.base) ** pl.col(self.exponent)).alias(self.power)
         )
-    
+
 @register_callback_class
 class Root(CallbackProtocol):
     def __init__(self, radicand: str, index: Number, root: str) -> None:
@@ -100,7 +99,7 @@ class Root(CallbackProtocol):
         return lf.with_columns(
             (pl.col(self.radicand).sign() * (pl.col(self.radicand).abs() ** (1 / pl.col(self.index))).alias(self.root))
         )
-    
+
 @register_callback_class
 class Modulo(CallbackProtocol):
     def __init__(self, dividend: str, divisor: str, remainder: str) -> None:
