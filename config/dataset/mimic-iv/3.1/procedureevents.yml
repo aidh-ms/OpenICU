@@ -79,9 +79,9 @@ fields:
     type: string
   - name: orderid
     type: int64
-  - name: ORIGINALAMOUNT
+  - name: originalamount
     type: float64
-  - name: ORIGINALRATE
+  - name: originalrate
     type: float32
   - name: patientweight
     type: float32
