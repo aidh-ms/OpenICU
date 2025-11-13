@@ -60,6 +60,8 @@ fields:
     type: datetime
   - name: storetime
     type: datetime
+    params:
+      strict: false
   # db fields - values
   - name: caregiver_id
     type: int64
