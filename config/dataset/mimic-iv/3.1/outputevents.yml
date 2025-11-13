@@ -34,7 +34,7 @@ fields:
   - name: itemid
     type: int64
   - name: value
-    type: int64
+    type: float32
   - name: valueuom
     type: string
 
