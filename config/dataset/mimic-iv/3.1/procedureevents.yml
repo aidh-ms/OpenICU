@@ -60,6 +60,8 @@ fields:
     type: datetime
   - name: storetime
     type: datetime
+    params:
+      strict: false
   # db fields - values
   - name: caregiver_id
     type: int64
@@ -79,9 +81,9 @@ fields:
     type: string
   - name: orderid
     type: int64
-  - name: ORIGINALAMOUNT
+  - name: originalamount
     type: float64
-  - name: ORIGINALRATE
+  - name: originalrate
     type: float32
   - name: patientweight
     type: float32
@@ -200,14 +202,14 @@ events:
         - originalamount_code
         - label
         - valueuom
-      numeric_value: ORIGINALAMOUNT
+      numeric_value: originalamount
   - name: originalrate
     fields:
       time: starttime
       code:
         - originalrate_code
         - label
-      numeric_value: ORIGINALRATE
+      numeric_value: originalarate
     callbacks:
       - callback: drop_na
         params: 

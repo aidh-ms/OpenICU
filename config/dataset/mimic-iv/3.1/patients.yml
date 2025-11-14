@@ -51,8 +51,8 @@ fields:
     constant: 1
   - name: basetime  # if using "time" as name, duplication error appears
     type: string
-  # db fields - values
     constant: "00:00:00"
+  # db fields - values
   - name: gender
     type: string
 
