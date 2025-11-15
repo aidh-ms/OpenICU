@@ -3,7 +3,7 @@ from typing import Any, Callable
 from polars import LazyFrame
 from pydantic import BaseModel, Field, computed_field
 
-from open_icu.transform.callbacks.regestry import CallbackRegistry
+from open_icu.transform.callbacks.registry import CallbackRegistry
 
 
 class CallbackConfig(BaseModel):
