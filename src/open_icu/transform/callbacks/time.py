@@ -2,7 +2,7 @@ import polars as pl
 from polars import LazyFrame
 
 from open_icu.transform.callbacks.proto import CallbackProtocol
-from open_icu.transform.callbacks.regestry import register_callback_class
+from open_icu.transform.callbacks.registry import register_callback_class
 
 
 @register_callback_class
