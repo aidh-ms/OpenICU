@@ -20,14 +20,18 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
   - name: charttime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   - name: storetime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: caregiver_id
     type: int64
@@ -53,7 +57,7 @@ join:
         type: string
     both_on:
       - itemid
-      
+
 event_defaults:
   subject_id: subject_id
   code_prefix:
@@ -65,15 +69,15 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields: 
+    fields:
       time: storetime
-      code: 
+      code:
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: dosage
     fields:
       time: charttime
-      code: 
+      code:
         - dosage_code
         - label
         - valueuom

@@ -23,14 +23,18 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
   - name: intime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   - name: outtime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: first_careunit
     type: string
