@@ -1,3 +1,4 @@
+import gc
 from pathlib import Path
 
 import polars as pl
@@ -11,7 +12,9 @@ def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
         path / table.path,
         schema_overrides=table.dtypes,
         infer_schema=False,
+        low_memory=True,
     )
+    lf = lf.select(table.dtypes.keys())
 
     for callback in table.pre_callbacks:
         lf = callback.call(lf)
@@ -38,9 +41,12 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
 
     post_callbacks = [*table.post_callbacks]
     for join_table in table.join:
+        # Use broadcast join with small right table
+        join_lf = _process_table(join_table, path)
         lf = lf.join(
-            _process_table(join_table, path),
+            join_lf,
             how=join_table.how,  # type: ignore[arg-type]
+            coalesce=True,  # Reduces memory by coalescing join keys
             **join_table.join_params  # type: ignore[arg-type]
         )
         post_callbacks.extend(join_table.post_callbacks)
@@ -49,7 +55,15 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
         lf = callback.call(lf)
 
     # Process each event
-    all_codes = []
+    codes_path = output_path / "metadata" / "codes.parquet"
+    codes_path.parent.mkdir(parents=True, exist_ok=True)
+    if codes_path.exists():
+        codes_lf = pl.scan_parquet(codes_path)
+    else:
+        codes_lf = pl.LazyFrame(
+            {"code": [], "description": [], "parent_codes": []},
+            schema={"code": pl.String, "description": pl.String, "parent_codes": pl.String}
+        )
 
     for event in table.events:
         event_lf = lf
@@ -84,17 +98,6 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
         else:
             code_expr = pl.col(event.fields.code[0]).fill_null("").alias("code")
 
-        # Collect unique codes
-        codes_df = (
-            event_lf
-            .select(event.fields.code)
-            .unique()
-            .with_columns(code_expr)
-            .select("code")
-            .collect()
-        )
-        all_codes.append(codes_df)
-
         # Add code column and drop original code fields
         event_lf = event_lf.with_columns(code_expr)
         event_lf = event_lf.drop(event.fields.code)
@@ -111,27 +114,33 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
         output_data_path = output_path / "data" / src / table.name
         output_data_path.mkdir(parents=True, exist_ok=True)
 
-        # Write to parquet
-        # Polars doesn't support custom name functions like Dask, so we write to a single file
+        # Write to parquet with streaming
         output_file = output_data_path / f"{event.name}.parquet"
         event_lf.sink_parquet(
             output_file,
-            compression="snappy"
         )
 
-    # Process metadata codes
-    if all_codes:
-        codes_df = pl.concat(all_codes).unique(subset=["code"])
-        codes_df = codes_df.with_columns([
-            pl.lit(None).alias("description"),
-            pl.lit(None).alias("parent_codes")
+        event_codes_lf = event_lf.select("code").unique()
+        event_codes_lf = event_codes_lf.with_columns([
+            pl.lit(None).alias("description").cast(pl.String),
+            pl.lit(None).alias("parent_codes").cast(pl.String)
         ])
 
-        codes_path = output_path / "metadata" / "codes.parquet"
-        codes_path.parent.mkdir(parents=True, exist_ok=True)
+        del event_lf
+        gc.collect()
 
-        if codes_path.exists():
-            existing_codes = pl.read_parquet(codes_path)
-            codes_df = pl.concat([existing_codes, codes_df]).unique(subset=["code"])
+        # Collect unique codes
+        codes_lf = pl.concat([
+            codes_lf,
+            event_codes_lf,
+        ]).unique(subset=["code"])
 
-        codes_df.write_parquet(codes_path, compression="snappy")
+    temp_codes_path = output_path / "metadata" / "codes_temp.parquet"
+    codes_lf.sink_parquet(
+        temp_codes_path,
+    )
+    temp_codes_path.replace(codes_path)
+
+    del lf
+    del codes_lf
+    gc.collect()
