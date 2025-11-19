@@ -20,6 +20,8 @@ fields:
   # db fields - times
   - name: charttime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: itemid
     type: int64

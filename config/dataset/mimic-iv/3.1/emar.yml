@@ -18,16 +18,22 @@ fields:
     constant: -1
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
   - name: charttime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   - name: scheduletime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   - name: storetime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: emar_id  # emar = subject_id + "-" + emar_seq
     type: string
@@ -43,7 +49,7 @@ fields:
     type: int64
   - name: poe_id
     type: string
-   
+
 event_defaults:
   subject_id: subject_id
   code_prefix:
@@ -57,7 +63,7 @@ events:
   - name: diagnoses
     fields:
       time: charttime
-      code: 
+      code:
         - medication
       text_value: event_txt
   - name: scheduletime

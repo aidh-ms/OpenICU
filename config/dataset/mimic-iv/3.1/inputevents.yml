@@ -20,8 +20,12 @@ fields:
   # db fields - times
   - name: endtime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   - name: starttime
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: amount
     type: float32

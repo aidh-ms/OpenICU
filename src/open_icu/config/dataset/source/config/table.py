@@ -21,7 +21,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     name: str = Field(..., description="The name of the table.")
     path: str = Field(..., description="The file path to the table data.")
     type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
-    fields: list[ConstantFieldConfig |FieldConfig] = Field(
+    fields: list[ConstantFieldConfig | FieldConfig] = Field(
         default_factory=list,
         description="The list of field configurations for the table."
     )
@@ -40,6 +40,9 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     def dtypes(self) -> dict[str, DataTypeClass]:
         dtype_map = {}
         for field in self.fields:
+            if isinstance(field, ConstantFieldConfig):
+                continue
+
             dtype_map[field.name] = DTYPES[field.type]
 
         return dtype_map
