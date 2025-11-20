@@ -24,6 +24,8 @@ fields:
   # db fields - times
   - name: chartdate
     type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: hcpcs_cd
     type: string

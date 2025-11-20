@@ -7,6 +7,21 @@ fields:
     type: string
     constant: infusionDrug
   # codes
+  - name: patientweight_code
+    type: string
+    constant: WEIGHT
+  - name: drugamount_code
+    type: string
+    constant: AMOUNT
+  - name: drugrate_code
+    type: string
+    constant: RATE
+  - name: infusionrate_code
+    type: string
+    constant: INFUSION_RATE
+  - name: volumeoffluid_code
+    type: string
+    constant: VOLUME_OF_FLUID
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
@@ -18,9 +33,20 @@ fields:
     type: int64
   # db fields - values
   - name: drugamount
-    type: float32
+    type: float64 # decimal(x,y)
   - name: drugname
     type: string
+  - name: drugrate
+    type: string
+  - name: infusionrate
+    type: string
+  - name: patientweight
+    type: string
+  - name: volumeoffluid
+    type: string
+  - name: weight_uom
+    type: string
+    constant: kg
 post_callbacks:
   - callback: add_offset
     params:
@@ -68,17 +94,70 @@ join:
           offset: hospitaladmitoffset
           output: admission_timestamp
 
+event_defaults:
+  subject_id: patienthealthsystemstayid
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: patientunitstayid
+    src_db_id: src_db_id
+
 events:
+  - name: patientweight
+    fields:
+      time: admission_timestamp
+      code: 
+        - patientweight_code
+        - weight_uom
+      text_value: patientweight
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - text_value
   - name: drugamount
     fields:
-      subject_id: patienthealthsystemstayid
       time: event_timestamp
       code:
-        - src_table_code
+        - drugamount_code
         - drugname
       numeric_value: drugamount
-      extension:
-        hadm_id: hadm_id
-        stay_id: patientunitstayid
-        src_db_id: src_db_id
-        
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - numeric_value
+  - name: drugrate
+    fields:
+      time: event_timestamp
+      code: 
+        - drugrate_code
+      text_value: drugrate
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - text_value
+  - name: infusionrate
+    fields: 
+      time: event_timestamp
+      code:
+        - infusionrate_code
+      text_value: infusionrate
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - numeric_value
+  - name: volumeoffluid
+    fields:
+      time: event_timestamp
+      code: 
+        - volumeoffluid_code
+      text_value: volumeoffluid
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - text_value

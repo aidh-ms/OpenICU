@@ -41,6 +41,9 @@ fields:
     type: int64
   - name: anchor_year_group
     type: string
+  - name: basetime  # if using "time" as name, duplication error appears
+    type: string
+    constant: "00:00:00"
   - name: dod
     type: datetime
   - name: month
@@ -49,9 +52,6 @@ fields:
   - name: day
     type: int64
     constant: 1
-  - name: basetime  # if using "time" as name, duplication error appears
-    type: string
-    constant: "00:00:00"
   # db fields - values
   - name: gender
     type: string
@@ -63,7 +63,7 @@ post_callbacks:
       month: month
       day: day
       time: basetime
-      offset: anchor_age # check ! if anchor year is added as year not as other time
+      offset: anchor_age
       output: dob
 
 event_defaults:

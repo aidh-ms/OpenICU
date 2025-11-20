@@ -97,12 +97,12 @@ event_defaults:
     hadm_id: hadm_id
     stay_id: stay_id
     src_db_id: src_db_id
-
-events:
+    
+events: 
   - name: admission
     fields:
       time: admittime
-      code:
+      code: 
         - admission_code
         - admission_location
         - admission_type
@@ -113,7 +113,7 @@ events:
       code:
         - discharge_code
         - discharge_location
-  - name: deathtime
+  - name: dod
     fields:
       time: deathtime
       code:
@@ -121,7 +121,7 @@ events:
   - name: insurance
     fields:
       time: admittime
-      code:
+      code: 
         - insurance_code
         - insurance
   - name: language
@@ -139,7 +139,7 @@ events:
   - name: race
     fields:
       time: admittime
-      code:
+      code: 
         - race_code
         - race
   - name: emergency_department_registration
@@ -155,6 +155,6 @@ events:
   - name: hospital_expire_flag
     fields:
       time: dischtime
-      code:
+      code: 
         - hospital_expire_flag_code
       numeric_value: hospital_expire_flag

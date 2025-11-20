@@ -1,0 +1,82 @@
+name: diagnoses_icd
+path: hosp/diagnoses_icd.csv
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/diagnoses_icd
+  # codes
+  - name: diagnoses_code
+    type: string
+    constant: DIAGNOSES
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: src_db_id
+    type: string
+    constant: mimic 
+  - name: subject_id
+    type: int64
+  # db fields - times
+  # db fields - values
+  - name: icd_code
+    type: string
+  - name: icd_version
+    type: int64
+  - name: seq_num
+    type: int64
+
+join:
+  - name: d_icd_diagnoses
+    path: hosp/d_icd_diagnoses.csv
+    fields:
+      # general codes
+      # codes
+      # subject_id and extentions
+      # db fields - times
+      # db fields - values
+      - name: icd_code
+        type: string
+      - name: icd_version
+        type: int64
+      - name: long_title
+        type: string
+    both_on:
+      - icd_code
+      - icd_version
+  - name: admissions
+    path: hosp/admissions.csv
+    fields:
+      # general codes
+      - name: hadm_id
+        type: int64
+      - name: stay_id
+        type: int64
+        constant: -1
+      # codes
+      # subject_id and extentions
+      # db fields - times
+      - name: dischtime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+      # db fields - values
+    both_on:
+      - hadm_id 
+
+events: 
+  - name: diagnoses
+    fields:
+      subject_id: subject_id
+      time: dischtime
+      code: 
+        - src_table_code
+        - diagnoses_code
+        - icd_code
+        - icd_version  
+      numeric_value: seq_num
+      extension:
+          hadm_id: hadm_id
+          stay_id: stay_id
+          src_db_id: src_db_id
+

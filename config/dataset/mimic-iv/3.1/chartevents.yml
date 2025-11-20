@@ -7,6 +7,15 @@ fields:
     type: string
     constant: icu/chartevents
   # codes
+  - name: caregiver_store_code
+    type: string
+    constant: CG_ST # caregiver_storetime
+  - name: chartevent_code
+    type: string
+    constant: chartevent
+  - name: warning_code
+    type: string
+    constant: WARNING
   # subject_id and extentions
   - name: hadm_id
     type: int64
@@ -22,7 +31,13 @@ fields:
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
+  - name: caregiver_id
+    type: int64
   - name: itemid
     type: int64
   - name: value
@@ -31,6 +46,8 @@ fields:
     type: float32
   - name: valueuom
     type: string
+  - name: warning
+    type: int64
 
 join:
   - name: d_items
@@ -48,18 +65,39 @@ join:
     both_on:
       - itemid
 
+event_defaults:
+  subject_id: subject_id
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+    src_db_id: src_db_id
+
 events:
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - caregiver_store_code
+      numeric_value: caregiver_id
   - name: chartevent
     fields:
-      subject_id: subject_id
       time: charttime
       code:
-        - src_table_code
+        - chartevent_code
         - label
         - valueuom
       numeric_value: valuenum
       text_value: value
-      extension:
-        hadm_id: hadm_id
-        stay_id: stay_id
-        src_db_id: src_db_id
+  - name: warning
+    fields:
+      time: storetime
+      code:
+        - warning_code
+      numeric_value: warning
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - numeric_value
