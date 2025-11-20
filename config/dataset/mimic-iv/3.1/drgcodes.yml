@@ -55,8 +55,8 @@ join:
       # db fields - times
       - name: admittime
         type: datetime
-        params:
-          format: "%Y-%m-%d %H:%M:%S"
+        # params:
+        #   format: "%Y-%m-%d %H:%M:%S"
       # db fields - values
     both_on:
       - subject_id

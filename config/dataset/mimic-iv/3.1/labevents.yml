@@ -51,12 +51,12 @@ fields:
   # db fields - times
   - name: charttime
     type: datetime
-    params:
-      format: "%Y-%m-%d %H:%M:%S"
+    # params:
+    #   format: "%Y-%m-%d %H:%M:%S"
   - name: storetime
     type: datetime
-    params:
-      format: "%Y-%m-%d %H:%M:%S"
+    # params:
+    #   format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: comments
     type: string  

@@ -39,12 +39,12 @@ fields:
   # db fields - times
   - name: starttime # identical field in pharmacy
     type: datetime
-    params:
-      format: "%Y-%m-%d %H:%M:%S"
+    # params:
+    #   format: "%Y-%m-%d %H:%M:%S"
   - name: stoptime  # identical field in pharmacy
     type: datetime
-    params:
-      format: "%Y-%m-%d %H:%M:%S"
+    # params:
+    #   format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: doses_per_24_hrs
     type: float32
@@ -97,16 +97,16 @@ join:
       # db fields - times
       - name: entertime
         type: datetime
-        params:
-          format: "%Y-%m-%d %H:%M:%S"
+        # params:
+        #   format: "%Y-%m-%d %H:%M:%S"
       - name: expirationdate
         type: datetime
-        params:
-          format: "%Y-%m-%d %H:%M:%S"
+        # params:
+        #   format: "%Y-%m-%d %H:%M:%S"
       - name: verifiedtime
         type: datetime
-        params:
-          format: "%Y-%m-%d %H:%M:%S"
+        # params:
+        #   format: "%Y-%m-%d %H:%M:%S"
       # db fields - values
       - name: basal_rate
         type: float32

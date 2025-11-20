@@ -46,6 +46,8 @@ fields:
     constant: "00:00:00"
   - name: dod
     type: datetime
+    # params:
+    #   format: "%Y-%m-%d %H:%M:%S"
   - name: month
     type: int64
     constant: 1

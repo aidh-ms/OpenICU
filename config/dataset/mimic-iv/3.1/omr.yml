@@ -25,8 +25,8 @@ fields:
   # db fields - times
   - name: chartdate
     type: datetime
-    params:
-      format: "%Y-%m-%d %H:%M:%S"
+    # params:
+    #   format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: result_name
     type: string
