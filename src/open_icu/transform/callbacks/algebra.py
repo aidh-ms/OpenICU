@@ -1,6 +1,7 @@
 import polars as pl
 from polars import LazyFrame
-from numbers import Number
+from numbers import Real
+import operator
 
 from open_icu.transform.callbacks.proto import CallbackProtocol
 from open_icu.transform.callbacks.registry import register_callback_class
@@ -61,7 +62,7 @@ class Product(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return lf.with_columns(
-            (pl.pro_hor([pl.col(c) for c in self.factor]).alias(self.product))
+            (pl.fold(acc=pl.lit(1),function=operator.mul, exprs=pl.col(self.factor)).alias(self.product))
         )
 
 @register_callback_class
@@ -90,14 +91,14 @@ class Pow(CallbackProtocol):
 
 @register_callback_class
 class Root(CallbackProtocol):
-    def __init__(self, radicand: str, index: Number, root: str) -> None:
+    def __init__(self, radicand: str, index: Real, root: str) -> None:
         self.radicand = radicand
         self.index = index
         self.root = root
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return lf.with_columns(
-            (pl.col(self.radicand).sign() * (pl.col(self.radicand).abs() ** (1 / pl.col(self.index))).alias(self.root))
+            (pl.col(self.radicand).sign() * (pl.col(self.radicand).abs() ** (1 / float(self.index))).alias(self.root))
         )
 
 @register_callback_class
