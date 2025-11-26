@@ -1,14 +1,14 @@
-import polars as pl
-from polars import LazyFrame, Expr
-
 import ast
+
+import polars as pl
+from polars import Expr, LazyFrame
 
 from open_icu.transform.callbacks.proto import CallbackProtocol
 from open_icu.transform.callbacks.registry import register_callback_class
 
 
 @register_callback_class
-class Ast(CallbackProtocol):
+class AbstractSyntaxTree(CallbackProtocol):
     def __init__(self, expression: str, result: str) -> None:
         self.expression = expression
         self.result = result
