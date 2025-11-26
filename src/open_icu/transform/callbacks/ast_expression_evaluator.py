@@ -1,5 +1,5 @@
 import polars as pl
-from polars import LazyFrame
+from polars import LazyFrame, Expr
 
 import ast
 
@@ -19,7 +19,7 @@ class Ast(CallbackProtocol):
         polars_expression = self._ast_to_polars(self.ast_tree.body).alias(self.result)
         return lf.with_columns(polars_expression)
     
-    def _ast_to_polars(self, node):
+    def _ast_to_polars(self, node) -> Expr:
         if isinstance(node, ast.Constant):
             return pl.lit(node.value)
 
@@ -75,7 +75,7 @@ class Ast(CallbackProtocol):
 
         raise NotImplementedError(f"Unsupported AST node: {type(node)}")
     
-    def _get_func_name(self, node):
+    def _get_func_name(self, node) -> str:
         if isinstance(node, ast.Name):
             return node.id
         if isinstance(node, ast.Attribute):
