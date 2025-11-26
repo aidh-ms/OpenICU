@@ -8,7 +8,7 @@ from open_icu.transform.callbacks.registry import register_callback_class
 
 
 @register_callback_class
-class AST(CallbackProtocol):
+class Ast(CallbackProtocol):
     def __init__(self, expression: str, result: str) -> None:
         self.expression = expression
         self.result = result
@@ -16,7 +16,7 @@ class AST(CallbackProtocol):
         
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
-        polars_expression = self._ast_to_polars(self.ast_tree)
+        polars_expression = self._ast_to_polars(self.ast_tree.body).alias(self.result)
         return lf.with_columns(polars_expression)
     
     def _ast_to_polars(self, node):
@@ -25,6 +25,15 @@ class AST(CallbackProtocol):
 
         if isinstance(node, ast.Name):
             return pl.col(node.id)
+
+        if isinstance(node, ast.UnaryOp):
+            op = node.op
+            operand = self._ast_to_polars(node.operand)
+
+            if isinstance(op, ast.USub):
+                return -operand
+            if isinstance(op, ast.UAdd):
+                return operand
 
         if isinstance(node, ast.BinOp):
             left = self._ast_to_polars(node.left)
@@ -39,6 +48,10 @@ class AST(CallbackProtocol):
                 return left * right
             if isinstance(op, ast.Div):
                 return left / right
+            if isinstance(op, ast.Pow):
+                return left ** right
+            if isinstance(op, ast.Mod):
+                return left % right
             raise NotImplementedError(f"Unsupported operator: {type(op)}")
 
         if isinstance(node, ast.Call):
@@ -49,6 +62,14 @@ class AST(CallbackProtocol):
                 return args[0].mean()
             if func_name == "abs":
                 return args[0].abs()
+            if func_name == "sum":
+                return pl.sum_horizontal(args)
+            if func_name == "prod":
+                import operator
+                return pl.fold(acc=pl.lit(1), function=operator.mul, exprs=args)
+            if func_name == "root":
+                radicand, index = args
+                return radicand.sign() * (radicand.abs() ** (1 / index))
 
             raise NotImplementedError(f"Function {func_name} not implemented")
 
