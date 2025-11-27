@@ -3,7 +3,7 @@ from open_icu.transform.callbacks.proto import CallbackProtocol
 from open_icu.transform.callbacks.registry import CallbackRegistry, register_callback_class
 from open_icu.transform.callbacks.time import AddOffset, ToDatetime
 from open_icu.transform.callbacks.algebra import Add, Sum, Subtract, Multiply, Product, Divide, Pow, Root, Modulo
-from open_icu.transform.callbacks.ast_expression_evaluator import AbstractSyntaxTree
+from open_icu.transform.callbacks.ast_expression_evaluator_v2 import AbstractSyntaxTree
 
 __all__ = [
     "CallbackRegistry",
