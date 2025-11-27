@@ -14,7 +14,7 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -58,25 +58,22 @@ join:
       # db fields - times
       - name: dischtime
         type: datetime
-        # params:
-        #   format: "%Y-%m-%d %H:%M:%S"
       # db fields - values
     both_on:
-      - hadm_id 
+      - hadm_id
 
-events: 
+events:
   - name: diagnoses
     fields:
       subject_id: subject_id
       time: dischtime
-      code: 
+      code:
         - src_table_code
         - diagnoses_code
         - icd_code
-        - icd_version  
+        - icd_version
       numeric_value: seq_num
       extension:
-          hadm_id: hadm_id
-          stay_id: stay_id
-          src_db_id: src_db_id
-
+        hadm_id: hadm_id
+        stay_id: stay_id
+        src_db_id: src_db_id

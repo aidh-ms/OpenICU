@@ -24,7 +24,7 @@ fields:
   #   constant: -1
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -55,8 +55,8 @@ join:
       # db fields - times
       - name: admittime
         type: datetime
-        # params:
-        #   format: "%Y-%m-%d %H:%M:%S"
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
       # db fields - values
     both_on:
       - subject_id
@@ -89,7 +89,3 @@ events:
       code:
         - drg_mortality_code
       numeric_value: drg_mortality
-      
-  
-  
-  

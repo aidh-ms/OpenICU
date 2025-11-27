@@ -2,7 +2,7 @@ name: procedureevents
 path: icu/procedureevents.csv
 
 fields:
-  # general codes 
+  # general codes
   - name: src_table_code
     type: string
     constant: icu/proceureevents
@@ -42,7 +42,7 @@ fields:
     constant: STATUSDESCRIPTION
   - name: weight_code
     type: string
-    constant: WEIGHT 
+    constant: WEIGHT
   # subject_id and extensions
   - name: hadm_id
     type: int64
@@ -85,9 +85,9 @@ fields:
     type: string
   - name: orderid
     type: int64
-  - name: ORIGINALAMOUNT
+  - name: originalamount
     type: float32
-  - name: ORIGINALRATE
+  - name: originalrate
     type: float32
   - name: patientweight
     type: float32
@@ -128,9 +128,9 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields: 
+    fields:
       time: storetime
-      code: 
+      code:
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: event_start
@@ -158,26 +158,26 @@ events:
       text_value: location
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: order
-    fields: 
+    fields:
       time: endtime
-      code: 
+      code:
         - order_code
         - ordercategoryname
       numeric_value: orderid
   - name: linkorder
-    fields: 
+    fields:
       time: endtime
-      code: 
+      code:
         - linkorder_code
       numeric_value: linkorderid
   - name: weight
     fields:
       time: starttime
-      code: 
+      code:
         - weight_code
         - weightuom
       numeric_value: patientweight
@@ -190,32 +190,32 @@ events:
   - name: continueinnextdept
     fields:
       time: endtime
-      code: 
+      code:
         - continueinnextdept_code
         - continueinnextdept
   - name: statusdescription
     fields:
       time: endtime
-      code: 
+      code:
         - statusdescription_code
         - statusdescription
   - name: originalamount
     fields:
       time: starttime
-      code: 
+      code:
         - originalamount_code
         - label
         - valueuom
-      numeric_value: ORIGINALAMOUNT
+      numeric_value: originalamount
   - name: originalrate
     fields:
       time: starttime
       code:
         - originalrate_code
         - label
-      numeric_value: ORIGINALRATE
+      numeric_value: originalrate
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - numeric_value

@@ -45,21 +45,21 @@ fields:
     constant: -1
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
   - name: charttime
     type: datetime
-    # params:
-    #   format: "%Y-%m-%d %H:%M:%S"
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   - name: storetime
     type: datetime
-    # params:
-    #   format: "%Y-%m-%d %H:%M:%S"
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: comments
-    type: string  
+    type: string
   - name: flag
     type: string
   - name: itemid
@@ -128,18 +128,18 @@ events:
   - name: order_provider_id
     fields:
       time: charttime
-      code: 
+      code:
         - order_provider_id_code
       text_value: order_provider_id
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - numeric_value
   - name: labevent
     fields:
       time: charttime
-      code: 
+      code:
         - labevent_code
         - label
         - valueuom
@@ -147,7 +147,7 @@ events:
       text_value: value
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: ref_range_lower
@@ -158,7 +158,7 @@ events:
       numeric_value: ref_range_lower
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - numeric_value
   - name: ref_range_upper
@@ -169,7 +169,7 @@ events:
       numeric_value: ref_range_upper
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - numeric_value
   - name: flag
@@ -180,18 +180,18 @@ events:
       text_value: flag
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: priority
     fields:
       time: charttime
-      code: 
+      code:
         - priority_code
       text_value: priority
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: comments
@@ -202,16 +202,16 @@ events:
       text_value: comments
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: caregiver_store
-    fields: 
+    fields:
       time: storetime
-      code: 
+      code:
         - caregiver_store_code
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - time

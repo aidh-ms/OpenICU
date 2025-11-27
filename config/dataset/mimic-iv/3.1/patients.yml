@@ -46,8 +46,8 @@ fields:
     constant: "00:00:00"
   - name: dod
     type: datetime
-    # params:
-    #   format: "%Y-%m-%d %H:%M:%S"
+    params:
+      format: "%Y-%m-%d"
   - name: month
     type: int64
     constant: 1
@@ -77,7 +77,7 @@ event_defaults:
     stay_id: stay_id
     src_db_id: src_db_id
 
-events: 
+events:
   - name: dob
     fields:
       time: dob
@@ -91,6 +91,6 @@ events:
   - name: gender
     fields:
       time: dob
-      code: 
+      code:
         - gender_code
         - gender

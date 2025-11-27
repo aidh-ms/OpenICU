@@ -39,12 +39,12 @@ fields:
   # db fields - times
   - name: starttime # identical field in pharmacy
     type: datetime
-    # params:
-    #   format: "%Y-%m-%d %H:%M:%S"
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   - name: stoptime  # identical field in pharmacy
     type: datetime
-    # params:
-    #   format: "%Y-%m-%d %H:%M:%S"
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: doses_per_24_hrs
     type: float32
@@ -66,7 +66,7 @@ fields:
     type: string
   - name: gsn # Generic Sequence Number
     type: string
-  - name: ndc # National Drug Code 
+  - name: ndc # National Drug Code
     type: string
   - name: order_provider_id
     type: string
@@ -95,18 +95,18 @@ join:
         constant: VERIFIEDTIME
       # subject_id and extentions
       # db fields - times
-      - name: entertime
-        type: datetime
-        # params:
-        #   format: "%Y-%m-%d %H:%M:%S"
-      - name: expirationdate
-        type: datetime
-        # params:
-        #   format: "%Y-%m-%d %H:%M:%S"
-      - name: verifiedtime
-        type: datetime
-        # params:
-        #   format: "%Y-%m-%d %H:%M:%S"
+      # - name: entertime
+      #   type: datetime
+      #   params:
+      #     format: "%H:%M:%S"
+      # - name: expirationdate
+      #   type: datetime
+      #   params:
+      #     format: "%Y-%m-%d"
+      # - name: verifiedtime
+      #   type: datetime
+      #   params:
+      #     format: "%H:%M:%S"
       # db fields - values
       - name: basal_rate
         type: float32
@@ -161,14 +161,14 @@ events:
       code:
         - medication_start_code
         - medication
-        - infusion_type 
+        - infusion_type
         - drug
         - drug_type
         - prod_strength
   - name: status
     fields:
       time: stoptime
-      code: 
+      code:
         - status_code
       text_value: status
   # - name: verifiedtime
@@ -182,16 +182,16 @@ events:
       code:
         - frequency_code
         - frequency
-  - name: sliding_scale 
+  - name: sliding_scale
     fields:
       time: starttime
-      code: 
+      code:
         - sliding_scale_code
-        - sliding_scale 
+        - sliding_scale
   - name: lockout_interval
     fields:
       time: starttime
-      code: 
+      code:
         - lockout_interval_code
         - lockout_interval
   - name: medication_stop
@@ -200,7 +200,7 @@ events:
       code:
         - medication_stop_code
         - medication
-        - infusion_type 
+        - infusion_type
         - drug
         - drug_type
         - prod_strength
@@ -209,4 +209,3 @@ events:
   #     time: entertime
   #     code:
   #       - caregiver_store_code
-      
