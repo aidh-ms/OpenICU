@@ -6,10 +6,6 @@ from polars import Expr, LazyFrame
 from open_icu.transform.callbacks.proto import CallbackProtocol, ExpressionCallback, FrameCallback, HybridCallback 
 from open_icu.transform.callbacks.registry import CallbackRegistry, register_callback_class
 
-ExpCall = ExpressionCallback
-FraCall = FrameCallback
-HybCall = HybridCallback
-
 @register_callback_class
 class AbstractSyntaxTree(CallbackProtocol):
     def __init__(self, expression: str, result: str) -> None:
@@ -32,6 +28,7 @@ class AbstractSyntaxTree(CallbackProtocol):
                     not issubclass(CallbackClass, HybridCallback):
                     if not issubclass(CallbackClass, FrameCallback):
                         raise TypeError(f"Unknown callback type: {type(self.expression)}")
+                    print("hier")
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args]).__call__(lf)
         """If it is a CallbackObject with as_expression method, evaluate via abstract syntax tree"""
         # return lf.with_columns(self._ast_to_polars(node.body).alias(self.result))
@@ -72,18 +69,20 @@ class AbstractSyntaxTree(CallbackProtocol):
             if isinstance(op, ast.Mod):
                 return left % right
             raise NotImplementedError(f"Unsupported operator: {type(op)}")
-        print(isinstance(node, ast.Call))
         if isinstance(node, ast.Call):
             func_name = self._get_func_name(node.func)
             args = [self._ast_to_polars(a) for a in node.args]
 
             registry = CallbackRegistry()
-
+            # TODO: 
             if func_name in registry:
                 CallbackClass = registry[func_name]
                 if issubclass(CallbackClass, FrameCallback):
                     raise TypeError(f"FrameCallback not allowed inside ob abstract syntax tree: {node}")
-                return ExpressionCallback(*args).as_expression()
+                if issubclass(CallbackClass, ExpressionCallback):
+                    print("!is subclass")
+                callback: ExpressionCallback | HybridCallback = CallbackClass(*args)
+                return callback.as_expression()
         
             if func_name == "mean":
                 return pl.mean_horizontal(args)
