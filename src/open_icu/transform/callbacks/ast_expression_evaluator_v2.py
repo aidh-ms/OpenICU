@@ -34,7 +34,7 @@ class AbstractSyntaxTree(CallbackProtocol):
                         raise TypeError(f"Unknown callback type: {type(self.expression)}")
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args]).__call__(lf)
         """If it is a CallbackObject with as_expression method, evaluate via abstract syntax tree"""
-        return lf.with_columns(self._ast_to_polars(node).alias(self.result), mode="eval")
+        return lf.with_columns(self._ast_to_polars(node.body).alias(self.result))
     
 
     def _ast_to_polars(self, node) -> Expr:
@@ -71,7 +71,7 @@ class AbstractSyntaxTree(CallbackProtocol):
             if isinstance(op, ast.Mod):
                 return left % right
             raise NotImplementedError(f"Unsupported operator: {type(op)}")
-        
+        print(isinstance(node, ast.Call))
         if isinstance(node, ast.Call):
             func_name = self._get_func_name(node.func)
             args = [self._ast_to_polars(a) for a in node.args]
@@ -96,7 +96,6 @@ class AbstractSyntaxTree(CallbackProtocol):
                 return radicand.sign() * (radicand.abs() ** (1 / index))
             
             raise NotImplementedError(f"Function {func_name} not implemented")
-
 
         raise NotImplementedError(f"Unsupported AST node: {type(node)}")
     
