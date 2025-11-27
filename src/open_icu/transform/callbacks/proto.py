@@ -20,6 +20,10 @@ class ExpressionCallback(CallbackProtocol):
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return lf.with_columns(self.as_expression())
 
+    def __init__(self, **kwargs: Any) -> None:
+        ...
+
+
 class FrameCallback(CallbackProtocol):
     """Callback that apply directly to LazyFrame. 
     Cannot be used in ast."""

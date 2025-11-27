@@ -34,6 +34,7 @@ class AbstractSyntaxTree(CallbackProtocol):
                         raise TypeError(f"Unknown callback type: {type(self.expression)}")
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args]).__call__(lf)
         """If it is a CallbackObject with as_expression method, evaluate via abstract syntax tree"""
+        # return lf.with_columns(self._ast_to_polars(node.body).alias(self.result))
         return lf.with_columns(self._ast_to_polars(node.body).alias(self.result))
     
 
@@ -82,7 +83,7 @@ class AbstractSyntaxTree(CallbackProtocol):
                 CallbackClass = registry[func_name]
                 if issubclass(CallbackClass, FrameCallback):
                     raise TypeError(f"FrameCallback not allowed inside ob abstract syntax tree: {node}")
-                return CallbackClass(*args)
+                return ExpressionCallback(*args).as_expression()
         
             if func_name == "mean":
                 return pl.mean_horizontal(args)
