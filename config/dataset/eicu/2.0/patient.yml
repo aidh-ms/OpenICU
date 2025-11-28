@@ -53,27 +53,36 @@ fields:
     type: int64
   - name: hospitaladmittime24
     type: string
+  - name: hospitaldischargeoffset
+    type: int64
   - name: hospitaldischargeyear
     type: int64
+  - name: unitadmittime24
+    type: string
   - name: unitdischargeoffset
     type: int64
+  - name: unitdischargetime24
+    type: string
   # db fields - values
   - name: admissionheight
-    type: float64 # decimal(10,2)
+    type: float64 # decimal(x,y) # decimal(10,2)
   - name: admissionheight_unit
     type: string
     constant: cm
   - name: admissionweight
-    type: float32
+    type: float64 # decimal(x,y)
+  - name: admissionwight_uom
+    type: string
+    constant: kg
+  - name: age
+    type: string
   - name: age_unit
     type: string
     constant: y
   - name: apacheadmissiondx
     type: string
-  # - name: categoric_age
-  #   type: string
   - name: dischargeweight
-    type: float32
+    type: float64 # decimal(x,y)
   - name: ethnicity
     type: string
   - name: gender
@@ -82,11 +91,15 @@ fields:
     type: string
   - name: hospitaldischargelocation
     type: string
+  - name: hospitaldischargestatus
+    type: string
   - name: hospitalid
     type: int64
-  # - name: numeric_age
-  #   type: int64
   - name: unitadmitsource
+    type: string
+  - name: unitdischargelocation
+    type: string
+  - name: unitdischargestatus
     type: string
   - name: unitstaytype
     type: string
@@ -127,30 +140,56 @@ event_defaults:
     src_db_id: src_db_id
 
 events:
-  - name: icu_admission
-    fields:
-      time: admission_timestamp
-      code:
-        - in_code
-        - unittype
-  - name: icu_discharge
-    fields:
-      time: discharge_timestamp
-      code:
-        - out_code
-        - unittype
   - name: gender
     fields:
       # TODO: suggest and maybe change time birthdate
       time: admission_timestamp 
       code: # codes is null, when using gender and gender is empty string 
         - gender_code
-        - gender 
+        - gender
+  - name: icu_admission
+    fields:
+      time: admission_timestamp
+      code:
+        - in_code
+        - unittype
   - name: age
     fields:
       time: admission_timestamp
       code:
         - age_code
         - age_unit
-  #     numeric_value: numeric_age
-  #     text_value: categoric_age
+      text_value: age
+  - name: ethnicity
+    fields:
+      time: admission_timestamp
+      code:
+        - ethnicity_code
+        - ethnicity
+  - name: admissionheight
+    fields:
+      time: admission_timestamp
+      code: 
+        - admissionheight_code
+        - admissionheight_unit
+      numeric_value: admissionheight
+  - name: admissionweight
+    fields:
+      time: admission_timestamp
+      code: 
+        - admissionweight_code
+        - weight_unit
+      numeric_value: admissionweight
+  - name: icu_discharge
+    fields:
+      time: discharge_timestamp
+      code:
+        - out_code
+        - unittype
+  # - name: dischargeweight
+  #   fields:
+  #   time: discharge_timestamp
+  #   code: 
+  #     - dischargeweight_code
+  #     - weight_unit
+  #   numeric_value: dischargeweight

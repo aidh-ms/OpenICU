@@ -1,0 +1,211 @@
+name: prescriptions
+path: hosp/prescriptions.csv
+
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/prescriptions
+  # codes
+  - name: frequency_code
+    type: string
+    constant: FREQUENCY
+  - name: lockout_interval_code
+    type: string
+    constant: LOCKOUT_INTERVAL
+  - name: medication_start_code
+    type: string
+    constant: MEDICATION_START
+  - name: medication_stop_code
+    type: string
+    constant: MEDICATION_STOP
+  - name: sliding_scale_code
+    type: string
+    constant: SLIDING_SCALE
+  - name: status_code
+    type: string
+    constant: STATUS
+  # subject_id and extentions
+  - name: hadm_id # should be identical field in pharmacy
+    type: int64
+  - name: stay_id
+    type: int64
+    constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic
+  - name: subject_id  # should be identical field in pharmacy
+    type: int64
+  # db fields - times
+  - name: starttime # identical field in pharmacy
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: stoptime  # identical field in pharmacy
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: doses_per_24_hrs
+    type: float32
+  - name: dose_unit_rx
+    type: string
+  - name: dose_val_rx
+    type: string
+  - name: drug
+    type: string
+  - name: drug_type
+    type: string
+  - name: form_rx
+    type: string
+  - name: form_unit_disp
+    type: string
+  - name: form_val_disp
+    type: string
+  - name: formulary_drug_cd
+    type: string
+  - name: gsn # Generic Sequence Number
+    type: string
+  - name: ndc # National Drug Code
+    type: string
+  - name: order_provider_id
+    type: string
+  - name: pharmacy_id # unique id in pharmacy table
+    type: int64
+  - name: prod_strength
+    type: string
+  - name: poe_id  # orders
+    type: string
+  - name: poe_seq
+    type: int64
+  - name: route # identical field in pharmacy
+    type: string
+
+join:
+  - name: pharmacy
+    path: hosp/pharmacy.csv
+    fields:
+      # general codes
+      # codes
+      - name: caregiver_store_code
+        type: string
+        constant: CG_ST
+      - name: verifiedtime_code
+        type: string
+        constant: VERIFIEDTIME
+      # subject_id and extentions
+      # db fields - times
+      # - name: entertime
+      #   type: datetime
+      #   params:
+      #     format: "%H:%M:%S"
+      # - name: expirationdate
+      #   type: datetime
+      #   params:
+      #     format: "%Y-%m-%d"
+      # - name: verifiedtime
+      #   type: datetime
+      #   params:
+      #     format: "%H:%M:%S"
+      # db fields - values
+      - name: basal_rate
+        type: float32
+      - name: disp_sched
+        type: string
+      - name: dispensation
+        type: string
+      - name: duration
+        type: float32
+      - name: duration_interval
+        type: string
+      - name: expiration_value
+        type: int64
+      - name: expiration_unit
+        type: string
+      - name: fill_quantity
+        type: string
+      - name: frequency
+        type: string
+      - name: infusion_type
+        type: string
+      - name: lockout_interval
+        type: string
+      - name: medication
+        type: string
+      - name: one_hr_max
+        type: string
+      - name: pharmacy_id
+        type: int64
+      - name: proc_type
+        type: string
+      - name: sliding_scale
+        type: string
+      - name: status
+        type: string
+    both_on:
+      - pharmacy_id
+
+event_defaults:
+  subject_id: subject_id
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+    src_db_id: src_db_id
+
+events:
+  - name: medication_start
+    fields:
+      time: starttime
+      code:
+        - medication_start_code
+        - medication
+        - infusion_type
+        - drug
+        - drug_type
+        - prod_strength
+  - name: status
+    fields:
+      time: stoptime
+      code:
+        - status_code
+      text_value: status
+  # - name: verifiedtime
+  #   fields:
+  #     time: verifiedtime
+  #     code:
+  #       - verifiedtime_code
+  - name: frequency
+    fields:
+      time: starttime
+      code:
+        - frequency_code
+        - frequency
+  - name: sliding_scale
+    fields:
+      time: starttime
+      code:
+        - sliding_scale_code
+        - sliding_scale
+  - name: lockout_interval
+    fields:
+      time: starttime
+      code:
+        - lockout_interval_code
+        - lockout_interval
+  - name: medication_stop
+    fields:
+      time: stoptime
+      code:
+        - medication_stop_code
+        - medication
+        - infusion_type
+        - drug
+        - drug_type
+        - prod_strength
+  # - name: caregiver_store
+  #   fields:
+  #     time: entertime
+  #     code:
+  #       - caregiver_store_code

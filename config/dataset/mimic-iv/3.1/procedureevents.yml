@@ -86,7 +86,7 @@ fields:
   - name: orderid
     type: int64
   - name: originalamount
-    type: float64
+    type: float32
   - name: originalrate
     type: float32
   - name: patientweight
@@ -94,7 +94,7 @@ fields:
   - name: statusdescription
     type: string
   - name: value
-    type: float64
+    type: float32
   - name: valueuom
     type: string
   - name: weightuom

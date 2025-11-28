@@ -1,0 +1,91 @@
+name: drgcodes
+path: hosp/drgcodes.csv
+
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/drgcodes
+  # codes
+  - name: drg_code_code
+    type: string
+    constant: DRG_CODE
+  - name: drg_mortality_code
+    type: string
+    constant: DRG_MORTALITY
+  - name: drg_severity_code
+    type: string
+    constant: DRG_SEVERITY
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  # - name: stay_id#PanicException: dtype is unknown; consider supplying data-types for all operations
+  #   type: int64
+  #   constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic
+  - name: subject_id
+    type: int64
+  # db fields - times
+  # db fields - values
+  - name: description
+    type: string
+  - name: drg_code
+    type: string
+  - name: drg_mortality
+    type: int64
+  - name: drg_severity
+    type: int64
+  - name: drg_type
+    type: string
+
+join:
+  - name: admissions
+    path: hosp/admissions.csv
+    fields:
+      # general codes
+      # codes
+      # subject_id and extensions
+      - name: subject_id
+        type: int64
+      - name: stay_id
+        type: int64
+        constant: -1
+      # db fields - times
+      - name: admittime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+      # db fields - values
+    both_on:
+      - subject_id
+
+event_defaults:
+  subject_id: subject_id
+  time: admittime
+  code_prefix:
+    - src_table_code
+    - drg_type
+    - drg_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+    src_db_id: src_db_id
+
+events:
+  - name: drg_code
+    fields:
+      code:
+        - drg_code_code
+      text_value: description
+  - name: drg_severity
+    fields:
+      code:
+        - drg_severity_code
+      numeric_value: drg_severity
+  - name: drg_mortality
+    fields:
+      code:
+        - drg_mortality_code
+      numeric_value: drg_mortality
