@@ -22,7 +22,7 @@ def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
     for field in table.fields:
         if isinstance(field, ConstantFieldConfig):
             lf = lf.with_columns(
-                pl.lit(field.constant).cast(pl.String).alias(field.name)
+                pl.lit(field.constant).cast(field.dtype).alias(field.name)
             )
 
         if field.type == "datetime":
