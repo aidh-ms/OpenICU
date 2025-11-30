@@ -6,7 +6,6 @@ from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.dataset.source.config.callback import CallbackConfig
-from open_icu.config.dataset.source.config.dtype import DTYPES
 from open_icu.config.dataset.source.config.event import EventConfig, MEDSEventFieldDefaultConfig
 from open_icu.config.dataset.source.config.field import ConstantFieldConfig, FieldConfig
 
@@ -43,7 +42,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
             if isinstance(field, ConstantFieldConfig):
                 continue
 
-            dtype_map[field.name] = DTYPES[field.type]
+            dtype_map[field.name] = field.dtype
 
         return dtype_map
 

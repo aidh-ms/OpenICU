@@ -1,6 +1,9 @@
 from typing import Any
 
-from pydantic import BaseModel, Field
+from polars.datatypes import DataTypeClass
+from pydantic import BaseModel, Field, computed_field
+
+from open_icu.config.dataset.source.config.dtype import DTYPES
 
 
 class FieldConfig(BaseModel):
@@ -10,6 +13,11 @@ class FieldConfig(BaseModel):
         default_factory=dict,
         description="Additional parameters for the field."
     )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def dtype(self) -> DataTypeClass:
+        return DTYPES[self.type]
 
 
 class ConstantFieldConfig(FieldConfig):
