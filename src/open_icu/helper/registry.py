@@ -138,7 +138,7 @@ class BaseConfigRegistry[T: BaseConfig](BaseRegistry[T], metaclass=SingletonABCM
     config_file_name: str = "*"
 
     @classmethod
-    def from_path(cls, path: str | Path | list[str | Path]) -> BaseConfigRegistry[T]:
+    def from_config_path(cls, path: str | Path | list[str | Path]) -> BaseConfigRegistry[T]:
         """Create registry from configuration files at given path(s).
 
         Args:
