@@ -15,12 +15,12 @@ class Add(HybridCallback):
         self.result = sum
 
     def as_expression(self) -> Expr:
-        return (self.augend + self.addend)
+        return self.augend + self.addend
 
     def as_field(self, lf: LazyFrame) -> LazyFrame:
         return lf.with_columns((pl.col(self.augend) + pl.col(self.addend)).alias(self.result))
 
-#TODO: not working
+#TODO: might not be working
 @register_callback_class
 class Sum(HybridCallback):
     def __init__(self, summands: list[str], sum: str | None = None) -> None:
@@ -41,7 +41,7 @@ class Subtract(HybridCallback):
         self.result = difference
 
     def as_expression(self) -> Expr:
-        return (self.minuend - self.subtrahend)
+        return self.minuend - self.subtrahend
 
     def as_field(self, lf: LazyFrame) -> LazyFrame:
         return lf.with_columns((pl.col(self.minuend) - pl.col(self.subtrahend)).alias(self.result))
@@ -54,8 +54,12 @@ class Multiply(HybridCallback):
         self.result = product
 
     def as_expression(self) -> Expr:
-        return (pl.col(self.multiplicand) * pl.col(self.multiplier))
+        return self.multiplicand * self.multiplier
+    
+    def as_field(self, lf):
+        return lf.with_columns((pl.col(self.multiplicand) * pl.col(self.multiplier)).alias(self.result))
 
+# TODO: Might not be working
 @register_callback_class
 class Product(HybridCallback):
     def __init__(self, factor: list[str], product: str | None = None) -> None:
@@ -73,7 +77,10 @@ class Divide(HybridCallback):
         self.result = quotient
 
     def as_expression(self) -> Expr:
-        return (pl.col(self.dividend) / pl.col(self.divisor))
+        return self.dividend / self.divisor
+    
+    def as_field(self, lf):
+        return lf.with_columns((pl.col(self.dividend) / pl.col(self.divisor)).alias(self.result))
 
 @register_callback_class
 class Pow(HybridCallback):
@@ -83,8 +90,12 @@ class Pow(HybridCallback):
         self.result = power
 
     def as_expression(self) -> Expr:
-        return (pl.col(self.base) ** pl.col(self.exponent))
+        return self.base ** self.exponent
+    
+    def as_field(self, lf):
+        return lf.with_columns((pl.col(self.base) ** pl.col(self.exponent)).alias(self.result))
 
+# TODO: Not working
 @register_callback_class
 class Root(HybridCallback):
     def __init__(self, radicand: str, index: Real, root: str | None = None) -> None:
@@ -93,7 +104,10 @@ class Root(HybridCallback):
         self.result = root
 
     def as_expression(self) -> Expr:
-        return (pl.col(self.radicand).sign() * (pl.col(self.radicand).abs() ** (1 / float(self.index))))
+        return self.radicand.sign() * self.radicand.abs() ** (1 / float(self.index))
+    
+    def as_field(self, lf):
+        return lf.with_columns((pl.col(self.radicand).sign() * (pl.col(self.radicand).abs() ** (1 / float(self.index)))).alias(self.result))
 
 @register_callback_class
 class Modulo(HybridCallback):
@@ -103,4 +117,7 @@ class Modulo(HybridCallback):
         self.result = remainder
     
     def as_expression(self) -> Expr:
-        return (pl.col(self.dividend) % pl.col(self.divisor))
+        return self.dividend % self.divisor
+    
+    def as_field(self, lf):
+        return lf.with_columns((pl.col(self.dividend) % pl.col(self.divisor)).alias(self.result))

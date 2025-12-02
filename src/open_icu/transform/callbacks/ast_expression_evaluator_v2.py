@@ -6,6 +6,7 @@ from polars import Expr, LazyFrame
 from open_icu.transform.callbacks.proto import CallbackProtocol, ExpressionCallback, FrameCallback, HybridCallback 
 from open_icu.transform.callbacks.registry import CallbackRegistry, register_callback_class
 
+
 @register_callback_class
 class AbstractSyntaxTree(CallbackProtocol):
     def __init__(self, expression: str, result: str) -> None:
@@ -28,14 +29,15 @@ class AbstractSyntaxTree(CallbackProtocol):
                     not issubclass(CallbackClass, HybridCallback):
                     if not issubclass(CallbackClass, FrameCallback):
                         raise TypeError(f"Unknown callback type: {type(self.expression)}")
-                    print("hier")
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args]).__call__(lf)
         """If it is a CallbackObject with as_expression method, evaluate via abstract syntax tree"""
-        # return lf.with_columns(self._ast_to_polars(node.body).alias(self.result))
         return lf.with_columns(self._ast_to_polars(node.body).alias(self.result))
     
-
+    """Creating an Polars expression for pl.with_columns from the ast expression"""
     def _ast_to_polars(self, node) -> Expr:
+
+        """evaluate simple expression"""
+
         if isinstance(node, ast.Constant):
             return pl.lit(node.value)
         
@@ -69,6 +71,8 @@ class AbstractSyntaxTree(CallbackProtocol):
             if isinstance(op, ast.Mod):
                 return left % right
             raise NotImplementedError(f"Unsupported operator: {type(op)}")
+        
+        """evaluate callback calls"""
         if isinstance(node, ast.Call):
             func_name = self._get_func_name(node.func)
             args = [self._ast_to_polars(a) for a in node.args]
@@ -78,7 +82,7 @@ class AbstractSyntaxTree(CallbackProtocol):
             if func_name in registry:
                 CallbackClass = registry[func_name]
                 if issubclass(CallbackClass, FrameCallback):
-                    raise TypeError(f"FrameCallback not allowed inside ob abstract syntax tree: {node}")
+                    raise TypeError(f"FrameCallback not allowed inside of abstract syntax tree: {node}")
                 if issubclass(CallbackClass, ExpressionCallback):
                     print("!is subclass")
                 callback: ExpressionCallback | HybridCallback = CallbackClass(*args)
