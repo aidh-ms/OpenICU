@@ -18,12 +18,14 @@ fields:
     constant: -1
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
   - name: chartdate
     type: datetime
+    params:
+      format: "%Y-%m-%d"
   # db fields - values
   - name: hcpcs_cd
     type: string
@@ -32,12 +34,12 @@ fields:
   - name: short_description
     type: string
 
-events: 
+events:
   - name: hpcsevent
     fields:
       subject_id: subject_id
       time: chartdate
-      code: 
+      code:
         - src_table_code
         - hcspsevents_code
         - hcpcs_cd

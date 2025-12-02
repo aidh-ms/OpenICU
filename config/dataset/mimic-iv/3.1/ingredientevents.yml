@@ -73,14 +73,14 @@ fields:
   - name: originalamount
     type: int64
   - name: originalrate
-    type: float32
+    type: float32 
   - name: rate
     type: float32
   - name: rateuom
     type: string
   - name: statusdescription
     type: string
-
+    
 join:
   - name: d_items
     path: icu/d_items.csv
@@ -108,9 +108,9 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields:
+    fields: 
       time: storetime
-      code:
+      code: 
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: rate_start
@@ -120,10 +120,10 @@ events:
         - rate_start_code
         - label
         - rateuom
-      numeric_value: rate
+      numeric_value: rate 
     callbacks:
       - callback: drop_na
-        params:
+        params: 
           columns:
             - numeric_value
   - name: rate_end
@@ -136,13 +136,13 @@ events:
       numeric_value: rate
     callbacks:
       - callback: drop_na
-        params:
+        params: 
           columns:
             - numeric_value
   - name: dosage
     fields:
       time: endtime
-      code:
+      code: 
         - amount_code
         - label
         - amountuom
@@ -154,15 +154,15 @@ events:
         - order_code
       numeric_value: orderid
   - name: linkorder
-    fields:
+    fields: 
       time: endtime
-      code:
+      code: 
         - linkorder_code
-      numeric_value: linkorderid
+      numeric_value: linkorderid  
   - name: statusdescription
     fields:
       time: endtime
-      code:
+      code: 
         - statusdescription_code
         - statusdescription
   - name: originalrate
@@ -175,6 +175,6 @@ events:
       numeric_value: originalrate
     callbacks:
       - callback: drop_na
-        params:
+        params: 
           columns:
             - numeric_value

@@ -62,11 +62,11 @@ fields:
     params:
       format: "%Y-%m-%d %H:%M:%S"
   - name: edregtime
-    type: string
+    type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
   - name: edouttime
-    type: string
+    type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
@@ -113,7 +113,7 @@ events:
       code:
         - discharge_code
         - discharge_location
-  - name: deathtime
+  - name: dod
     fields:
       time: deathtime
       code:
