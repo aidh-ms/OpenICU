@@ -9,14 +9,14 @@ from open_icu.config.dataset.source.config.callback import CallbackConfig
 from open_icu.config.dataset.source.config.dtype import DTYPES
 from open_icu.config.dataset.source.config.event import EventConfig, MEDSEventFieldDefaultConfig
 from open_icu.config.dataset.source.config.field import ConstantFieldConfig, FieldConfig
-from open_icu.config.dataset.source.config.base import FieldBaseModel
+from open_icu.config.dataset.source.config.base import OpenICUBaseModel
 
 
 class TableType(StrEnum):
     CSV = auto()
 
 
-class BaseTableConfig(FieldBaseModel, metaclass=ABCMeta):
+class BaseTableConfig(OpenICUBaseModel, metaclass=ABCMeta):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str = Field(..., description="The name of the table.")
@@ -113,7 +113,7 @@ class JsonTableConfig(BaseTableConfig):
         }      
     
     def summary(self) -> Dict[str, Any] | str | List[Any]:
-        return super().to_dict() | {    # type: ignore
+        return super().summary() | {    # type: ignore
             "both_on_count" : len(self.both_on),
             "left_on_count" : len(self.left_on),
             "right_on_count" : len(self.right_on),
@@ -143,13 +143,13 @@ class TableConfig(BaseTableConfig):
         super().__init__(**data)
     
     def to_dict(self)-> Dict[str, Any] | str | List[Any]:
-        return {
+        return super().to_dict() | {    # type: ignore
             "join" : [json_table_config.to_dict() for json_table_config in self.join],
             "events" :  [event.to_dict() for event in self.events]
         }
     
     def summary(self) -> Dict[str, Any] | str | List[Any]:
-        return {
+        return super().summary() | {    # type: ignore
             "join_count" : len(self.join),
             "events_count" : len(self.events)
         }

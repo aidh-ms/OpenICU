@@ -4,7 +4,7 @@ from typing import List, Dict, Any
 
 from pydantic import BaseModel
 
-class FieldBaseModel(BaseModel):
+class OpenICUBaseModel(BaseModel):
     def to_dict(self) -> Dict[str, Any] | str | List[Any]:
         ...
     

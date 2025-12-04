@@ -4,10 +4,10 @@ from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
 from open_icu.config.dataset.source.config.callback import CallbackConfig
-from open_icu.config.dataset.source.config.base import FieldBaseModel
+from open_icu.config.dataset.source.config.base import OpenICUBaseModel
 
 
-class MEDSEventFieldConfig(FieldBaseModel):
+class MEDSEventFieldConfig(OpenICUBaseModel):
     subject_id: str = Field(..., description="The subject identifier field name.")
     time: str = Field(..., description="The timestamp field name.")
     code: list[str] = Field(default_factory=list, description="The code field name.")
@@ -36,7 +36,7 @@ class MEDSEventFieldConfig(FieldBaseModel):
         }
 
 
-class MEDSEventFieldDefaultConfig(FieldBaseModel):
+class MEDSEventFieldDefaultConfig(OpenICUBaseModel):
     subject_id: str | None = Field(None, description="The default subject identifier field name.")
     time: str | None = Field(None, description="The default timestamp field name.")
     code: list[str] | None = Field(None, description="The default code field name.")
@@ -91,7 +91,7 @@ class MEDSEventFieldDefaultConfig(FieldBaseModel):
         }
 
 
-class EventConfig(FieldBaseModel):
+class EventConfig(OpenICUBaseModel):
     name: str = Field(..., description="The name of the event.")
     fields: MEDSEventFieldConfig = Field(..., description="The field configuration for the event.")
     callbacks: list[CallbackConfig] = Field(
