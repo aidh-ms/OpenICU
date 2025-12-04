@@ -1,6 +1,6 @@
 from abc import ABCMeta
 from enum import StrEnum, auto
-from typing import Any
+from typing import Any, Dict, List
 
 from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
@@ -9,13 +9,14 @@ from open_icu.config.dataset.source.config.callback import CallbackConfig
 from open_icu.config.dataset.source.config.dtype import DTYPES
 from open_icu.config.dataset.source.config.event import EventConfig, MEDSEventFieldDefaultConfig
 from open_icu.config.dataset.source.config.field import ConstantFieldConfig, FieldConfig
+from open_icu.config.dataset.source.config.base import FieldBaseModel
 
 
 class TableType(StrEnum):
     CSV = auto()
 
 
-class BaseTableConfig(BaseModel, metaclass=ABCMeta):
+class BaseTableConfig(FieldBaseModel, metaclass=ABCMeta):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str = Field(..., description="The name of the table.")
@@ -46,6 +47,30 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
             dtype_map[field.name] = DTYPES[field.type]
 
         return dtype_map
+
+    def to_dict(self)-> Dict[str, Any] | str | List[Any]:
+        return {
+            "name" : self.name,
+            "path" : self.path,
+            "type" : self.type,
+            "fields" : [field.to_dict() for field in self.fields],
+            "pre_callbacks" : [pre_callback.to_dict() for pre_callback in  self.pre_callbacks],
+            "callbacks"  : [callback.to_dict() for callback in self.callbacks],
+            "post_callbacks" : [post_callback.to_dict() for post_callback in self.post_callbacks]
+        }
+    
+    def summary(self) -> Dict[str, Any] | str | List[Any]:
+        return {
+            "name" : self.name,
+            "path" : self.path,
+            "type" : self.type,
+            "fields_count" : len(self.fields),
+            "pre_callbacks_count" : len(self.pre_callbacks),
+            "callbacks_count"  : len(self.callbacks),
+            "post_callbacks_count" : len(self.post_callbacks),
+        }
+    
+
 
 
 class JsonTableConfig(BaseTableConfig):
@@ -78,6 +103,23 @@ class JsonTableConfig(BaseTableConfig):
             params["right_on"] = self.right_on
 
         return params
+    
+    def to_dict(self)-> Dict[str, Any] | str | List[Any]:
+        return super().to_dict() | {    # type: ignore
+            "both_on" : self.both_on,
+            "left_on" : self.left_on,
+            "right_on" : self.right_on or [],
+            "how": self.how,
+        }      
+    
+    def summary(self) -> Dict[str, Any] | str | List[Any]:
+        return super().to_dict() | {    # type: ignore
+            "both_on_count" : len(self.both_on),
+            "left_on_count" : len(self.left_on),
+            "right_on_count" : len(self.right_on),
+            "how": self.how,
+        }
+
 
 
 class TableConfig(BaseTableConfig):
@@ -99,3 +141,15 @@ class TableConfig(BaseTableConfig):
         data["events"] = events
 
         super().__init__(**data)
+    
+    def to_dict(self)-> Dict[str, Any] | str | List[Any]:
+        return {
+            "join" : [json_table_config.to_dict() for json_table_config in self.join],
+            "events" :  [event.to_dict() for event in self.events]
+        }
+    
+    def summary(self) -> Dict[str, Any] | str | List[Any]:
+        return {
+            "join_count" : len(self.join),
+            "events_count" : len(self.events)
+        }

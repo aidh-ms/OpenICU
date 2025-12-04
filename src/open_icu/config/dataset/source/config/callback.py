@@ -1,12 +1,13 @@
-from typing import Any, Callable
+from typing import Any, Callable, List, Dict
 
 from polars import LazyFrame
 from pydantic import BaseModel, Field, computed_field
 
 from open_icu.transform.callbacks.registry import CallbackRegistry
+from open_icu.config.dataset.source.config.base import FieldBaseModel
 
 
-class CallbackConfig(BaseModel):
+class CallbackConfig(FieldBaseModel):
     callback: str = Field(..., description="The callback function for the event.")
     params: dict[str, Any] = Field(
         default_factory=dict, description="The parameters for the callback function."
@@ -26,3 +27,17 @@ class CallbackConfig(BaseModel):
         callback_class = CallbackRegistry().get(self.callback)
         assert callback_class is not None
         return callback_class(**self.params)
+
+    def to_dict(self) -> Dict[str, Any] | str | List[Any]:
+        return {
+            "callback": self.callback,
+            "params" : self.params,
+        }
+    
+    def summary(self) -> Dict[str, Any] | str | List[Any]:
+        return {
+            "callback": self.callback,
+            "params_count" : len(self.params),
+        }
+    
+    

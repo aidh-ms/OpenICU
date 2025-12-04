@@ -1,10 +1,11 @@
 from abc import ABCMeta
-from typing import Hashable
+from typing import Any, Dict, Hashable, List
 
 from pydantic import BaseModel, computed_field
+from open_icu.config.dataset.source.config.base import FieldBaseModel
 
 
-class BaseConfig(BaseModel, metaclass=ABCMeta):
+class BaseConfig(FieldBaseModel, metaclass=ABCMeta):
     """Abstract base class for configuration models."""
     __key_fields__: tuple[str, ...] = ()
 
