@@ -12,7 +12,7 @@ class OpenICUBaseModel(BaseModel):
         ...
         
     def __repr__(self):
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), indent=2)
 
     def __str__(self):
-        return self.summary()
+        return json.dumps(self.summary(), indent=2)
