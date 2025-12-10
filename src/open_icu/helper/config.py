@@ -1,7 +1,7 @@
 from abc import ABCMeta
-from typing import Any, Dict, Hashable, List
+from typing import Hashable
 
-from pydantic import BaseModel, computed_field
+from pydantic import computed_field
 from open_icu.config.dataset.source.config.base import OpenICUBaseModel
 
 

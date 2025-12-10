@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from open_icu.config.dataset.source.config.base import OpenICUBaseModel
 

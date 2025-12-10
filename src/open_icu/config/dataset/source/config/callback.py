@@ -1,7 +1,7 @@
 from typing import Any, Callable, List, Dict
 
 from polars import LazyFrame
-from pydantic import BaseModel, Field, computed_field
+from pydantic import Field, computed_field
 
 from open_icu.transform.callbacks.registry import CallbackRegistry
 from open_icu.config.dataset.source.config.base import OpenICUBaseModel

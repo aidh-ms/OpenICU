@@ -3,7 +3,7 @@ from enum import StrEnum, auto
 from typing import Any, Dict, List
 
 from polars.datatypes import DataTypeClass
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import ConfigDict, Field, computed_field
 
 from open_icu.config.dataset.source.config.callback import CallbackConfig
 from open_icu.config.dataset.source.config.dtype import DTYPES
