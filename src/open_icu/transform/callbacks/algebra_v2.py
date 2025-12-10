@@ -3,7 +3,7 @@ from polars import LazyFrame, Expr
 from numbers import Real
 import operator
 
-from open_icu.transform.callbacks.proto import HybridCallback, HybridCallback
+from open_icu.transform.callbacks.proto import HybridCallback
 from open_icu.transform.callbacks.registry import register_callback_class
 
 
