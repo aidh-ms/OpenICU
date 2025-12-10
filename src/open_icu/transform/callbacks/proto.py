@@ -32,16 +32,8 @@ class FrameCallback(CallbackProtocol):
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return self.as_field(lf)
     
-class HybridCallback(CallbackProtocol):
+class HybridCallback(ExpressionCallback, FrameCallback):
     """Callback that can be used either directly on LazyFrame or in ast."""
-
-    result: str
-
-    def as_expression(self) -> Expr:
-        raise NotImplementedError("Subclasses must implement this method.")
-
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        raise NotImplementedError("Subclasses must implement this method.")
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return self.as_field(lf)

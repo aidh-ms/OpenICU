@@ -45,32 +45,32 @@ class AbstractSyntaxTree(CallbackProtocol):
             return pl.col(node.id)
         
         if isinstance(node, ast.UnaryOp):
-            op = node.op
+            unary_op = node.op
             operand = self._ast_to_polars(node.operand)
 
-            if isinstance(op, ast.USub):
+            if isinstance(unary_op, ast.USub):
                 return -operand
-            if isinstance(op, ast.UAdd):
+            if isinstance(unary_op, ast.UAdd):
                 return operand
             
         if isinstance(node, ast.BinOp):
             left = self._ast_to_polars(node.left)
             right = self._ast_to_polars(node.right)
 
-            op = node.op
-            if isinstance(op, ast.Add):
+            binary_op = node.op
+            if isinstance(binary_op, ast.Add):
                 return left + right
-            if isinstance(op, ast.Sub):
+            if isinstance(binary_op, ast.Sub):
                 return left - right
-            if isinstance(op, ast.Mult):
+            if isinstance(binary_op, ast.Mult):
                 return left * right
-            if isinstance(op, ast.Div):
+            if isinstance(binary_op, ast.Div):
                 return left / right
-            if isinstance(op, ast.Pow):
+            if isinstance(binary_op, ast.Pow):
                 return left ** right
-            if isinstance(op, ast.Mod):
+            if isinstance(binary_op, ast.Mod):
                 return left % right
-            raise NotImplementedError(f"Unsupported operator: {type(op)}")
+            raise NotImplementedError(f"Unsupported operator: {type(binary_op)}")
         
         """evaluate callback calls"""
         if isinstance(node, ast.Call):
@@ -84,8 +84,7 @@ class AbstractSyntaxTree(CallbackProtocol):
                 if issubclass(CallbackClass, FrameCallback):
                     raise TypeError(f"FrameCallback not allowed inside of abstract syntax tree: {node}")
                 if issubclass(CallbackClass, ExpressionCallback):
-                    print("!is subclass")
-                callback: ExpressionCallback | HybridCallback = CallbackClass(*args)
+                    callback: ExpressionCallback = CallbackClass(*args)
                 return callback.as_expression()
         
             if func_name == "mean":
@@ -104,7 +103,7 @@ class AbstractSyntaxTree(CallbackProtocol):
         raise NotImplementedError(f"Unsupported AST node: {type(node)}")
     
 
-    def _get_func_name(self, node) -> str:
+    def _get_func_name(self, node: ast.AST) -> str:
         if isinstance(node, ast.Name):
             return node.id
         if isinstance(node, ast.Attribute):
