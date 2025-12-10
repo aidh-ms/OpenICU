@@ -17,7 +17,7 @@ class ExpressionCallback(CallbackProtocol):
     result: str
 
     def as_expression(self) -> Expr:
-        ...
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return lf.with_columns(self.as_expression().alias(self.result))
@@ -27,7 +27,7 @@ class FrameCallback(CallbackProtocol):
     Cannot be used in ast."""
 
     def as_field(self, lf: LazyFrame) -> LazyFrame:
-        ...
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return self.as_field(lf)
@@ -38,10 +38,10 @@ class HybridCallback(CallbackProtocol):
     result: str
 
     def as_expression(self) -> Expr:
-        ...
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def as_field(self, lf: LazyFrame) -> LazyFrame:
-        ...
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         return self.as_field(lf)
