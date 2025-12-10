@@ -34,7 +34,7 @@ class AbstractSyntaxTree(CallbackProtocol):
         return lf.with_columns(self._ast_to_polars(node.body).alias(self.result))
     
     """Creating an Polars expression for pl.with_columns from the ast expression"""
-    def _ast_to_polars(self, node) -> Expr:
+    def _ast_to_polars(self, node: ast.AST) -> Expr:
 
         """evaluate simple expression"""
 
