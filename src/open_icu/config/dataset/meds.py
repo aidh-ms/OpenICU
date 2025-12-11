@@ -66,7 +66,7 @@ class MEDSDataset:
             "created_at": datetime.now().isoformat(),
         }
         for key, value in _metadata.items():
-            logging.info(f"{key: value}")
+            logging.info(f"{key}:{value}")
 
 
         metadata.update(_metadata)
