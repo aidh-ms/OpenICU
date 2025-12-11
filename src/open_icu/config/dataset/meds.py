@@ -69,6 +69,7 @@ class MEDSDataset:
         for key, value in _metadata.items():
             log += f"{key}:{value}\n"
         logging.info(log)
+        logging.info(_metadata)
         metadata.update(_metadata)
         DatasetMetadataSchema.validate(metadata)
 
