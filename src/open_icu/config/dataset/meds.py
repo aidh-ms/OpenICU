@@ -20,7 +20,7 @@ class MEDSDataset:
         logging.basicConfig(
             filename="app.log",
             level=logging.INFO,
-            format="%(asctime)s [%(levelname)s] %(message)s"
+            format="%(asctime)s [%(levelname)s] [%(name)s] [%(module)s] %(message)s",
             )
         temp_dir = None
         if project_path is None:
