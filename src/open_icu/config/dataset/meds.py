@@ -65,13 +65,10 @@ class MEDSDataset:
             "meds_version": meds_version,
             "created_at": datetime.now().isoformat(),
         }
-        log = "WRITE METADATA\n"
-        for key, value in _metadata.items():
-            log += f"{key}:{value}\n"
-        logging.info(log)
-        logging.info(_metadata)
         metadata.update(_metadata)
         DatasetMetadataSchema.validate(metadata)
 
         with open(self.metadata_path / "dataset.json", "w") as f:
             json.dump(metadata, f, indent=4)
+
+        logging.info("Write metadata:" + str(_metadata))
