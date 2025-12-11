@@ -1,11 +1,13 @@
 import gc
 from pathlib import Path
 
+import logging
 import polars as pl
 
 from open_icu.config.dataset.source.config.field import ConstantFieldConfig
 from open_icu.config.dataset.source.config.table import BaseTableConfig, TableConfig
 
+logger = logging.getLogger(__name__)
 
 def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
     lf = pl.scan_csv(
@@ -37,6 +39,7 @@ def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
 
 
 def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -> None:
+    logger.info(f"start proccessing: {src}/{table.name}")
     lf = _process_table(table, path)
 
     post_callbacks = [*table.post_callbacks]
@@ -140,6 +143,8 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
             event_codes_lf,
         ]).unique(subset=["code"])
 
+        logger.info(f"processing event {event.name}")
+
     temp_codes_path = output_path / "metadata" / "codes_temp.parquet"
     codes_lf.sink_parquet(
         temp_codes_path,
@@ -149,3 +154,4 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
     del lf
     del codes_lf
     gc.collect()
+    

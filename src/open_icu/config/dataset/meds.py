@@ -11,17 +11,18 @@ from meds._version import __version__ as meds_version
 from meds.schema import DatasetMetadataSchema
 
 
+logging.basicConfig(
+    filename="app.log",
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] [%(name)s] [%(module)s] %(message)s",
+    )
+
 class MEDSDataset:
     def __init__(
             self,
             project_path: Path | str | None = None,
             overwrite: bool = False,
     ) -> None:
-        logging.basicConfig(
-            filename="app.log",
-            level=logging.INFO,
-            format="%(asctime)s [%(levelname)s] [%(name)s] [%(module)s] %(message)s",
-            )
         temp_dir = None
         if project_path is None:
             temp_dir = TemporaryDirectory()
