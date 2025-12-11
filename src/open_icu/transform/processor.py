@@ -143,7 +143,7 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
             event_codes_lf,
         ]).unique(subset=["code"])
 
-        logger.info(f"processing event {event.name}")
+        logger.info(f"{src}/{table.name}/{event.name}")
 
     temp_codes_path = output_path / "metadata" / "codes_temp.parquet"
     codes_lf.sink_parquet(
@@ -154,4 +154,4 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
     del lf
     del codes_lf
     gc.collect()
-    
+
