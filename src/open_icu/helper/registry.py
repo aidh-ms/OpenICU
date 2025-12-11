@@ -170,7 +170,8 @@ class BaseConfigRegistry[T: BaseConfig](BaseRegistry[T], metaclass=SingletonABCM
         for config in registry._parse_configs(config_paths):
             registry.register(config.key, config)
 
-        logger.info(f"Registry:{registry}")
+
+        logger.info(f"Registry: {registry}")
 
         return registry
 
@@ -189,5 +190,5 @@ class BaseConfigRegistry[T: BaseConfig](BaseRegistry[T], metaclass=SingletonABCM
                 config_data = yaml.safe_load(f)
 
             configs.append(self.config_class(**config_data))
-
+        logger.info(f"Loaded {len(configs)} config files")
         return configs

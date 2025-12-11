@@ -41,7 +41,7 @@ class MEDSDataset:
             self.data_path.mkdir(parents=True, exist_ok=True)
             self.metadata_path.mkdir(parents=True, exist_ok=True)
         
-        logging.info(f"Initialized:{project_path}")
+        logging.info(f"Initialized: {project_path}")
 
     def cleanup(self) -> None:
         if self._temp_dir:
@@ -75,4 +75,4 @@ class MEDSDataset:
         with open(self.metadata_path / "dataset.json", "w") as f:
             json.dump(metadata, f, indent=4)
 
-        logging.info(f"Write metadata:{_metadata}")
+        logging.info(f"Write metadata: {_metadata}")
