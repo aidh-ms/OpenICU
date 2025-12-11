@@ -65,10 +65,10 @@ class MEDSDataset:
             "meds_version": meds_version,
             "created_at": datetime.now().isoformat(),
         }
+        log = "WRITE METADATA\n"
         for key, value in _metadata.items():
-            logging.info(f"{key}:{value}")
-
-
+            log += f"{key}:{value}\n"
+        logging.info(log)
         metadata.update(_metadata)
         DatasetMetadataSchema.validate(metadata)
 
