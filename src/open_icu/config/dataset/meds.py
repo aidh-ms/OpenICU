@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+import logging
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
@@ -16,10 +17,16 @@ class MEDSDataset:
             project_path: Path | str | None = None,
             overwrite: bool = False,
     ) -> None:
+        logging.basicConfig(
+            filename="app.log",
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] %(message)s"
+            )
         temp_dir = None
         if project_path is None:
             temp_dir = TemporaryDirectory()
             project_path = temp_dir.name
+            logging.info("Create temporary directory")
 
         self._project_path = Path(project_path)
         self._temp_dir = temp_dir
@@ -58,6 +65,9 @@ class MEDSDataset:
             "meds_version": meds_version,
             "created_at": datetime.now().isoformat(),
         }
+        for key, value in _metadata.items():
+            logging.info(f"{key: value}")
+
 
         metadata.update(_metadata)
         DatasetMetadataSchema.validate(metadata)
