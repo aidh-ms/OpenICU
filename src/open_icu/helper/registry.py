@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC
+import logging
 from pathlib import Path
 from typing import Hashable
 
@@ -10,6 +11,7 @@ import yaml
 from open_icu.helper.config import BaseConfig
 from open_icu.helper.singelton import SingletonABCMeta
 
+logger = logging.getLogger(__name__) 
 
 class BaseRegistry[T](ABC, metaclass=SingletonABCMeta):
     """Abstract base class for registries with singleton pattern.
@@ -167,6 +169,8 @@ class BaseConfigRegistry[T: BaseConfig](BaseRegistry[T], metaclass=SingletonABCM
 
         for config in registry._parse_configs(config_paths):
             registry.register(config.key, config)
+
+        logger.info(f"Registry:{registry}")
 
         return registry
 
