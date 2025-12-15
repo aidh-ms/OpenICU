@@ -38,7 +38,6 @@ class PipelineArtifacts(Enum):
     EVENT_AVAILABLE = "event_available"
     EVENT_CREATED = "event_created"
 
-
     def __str__(self) -> str:
         return self.value
 
@@ -47,18 +46,17 @@ class OpenICUStatistics(OpenICUBaseModel):
 
     _instance: Optional["OpenICUStatistics"] = None
     
-
-    ordering = (
+    ordering: List[str] = [str(artifact) for artifact in (
         pa.SRC_CONFIG_AVAILABLE,
         pa.SRC_CONFIG_USED,
         pa.SRC_TABLE_AVAILABLE,
         pa.SRC_TABLE_USED,
         pa.EVENT_AVAILABLE,
         pa.EVENT_CREATED,
-    )
+    )]
 
     def _init_metrics(self) -> None:
-        self.metrics: Dict[str, Metric] = {str(artifact): Metric() for artifact in self.ordering}
+        self.metrics: Dict[str, Metric] = {artifact: Metric() for artifact in OpenICUStatistics.ordering}
 
     # TODO: More Object-oriented
 
@@ -85,6 +83,9 @@ class OpenICUStatistics(OpenICUBaseModel):
             cls._instance = super().__new__(cls)
             cls._instance._init_metrics()
         return cls._instance
+    
+    def add(self, artifact: str, name: str) -> None:
+        self.metrics[artifact].add(name)
     
     # def set_src_config_available_count(self, n: int) -> None:
     #     self.src_config_available_count = n
@@ -135,7 +136,7 @@ class OpenICUStatistics(OpenICUBaseModel):
     #         self.event_created_count = len(self.event_created_names)
 
     def to_dict(self) -> Dict[str, Any] | str | List[Any]:
-        return {str(artifact) : self.metrics[str(artifact)] for artifact in self.ordering}
+        return {artifact: self.metrics[artifact] for artifact in self.metrics}
 
     # def to_dict(self) -> Dict[str, Any] | str | List[Any]:
     #     return {
@@ -167,7 +168,7 @@ class OpenICUStatistics(OpenICUBaseModel):
     
     # ordering has to have an even number of elements with two successively elements having the same structur (name + "_sth")
     def summary(self) -> Dict[str, Any] | str | List[Any]:
-        return {str(self.ordering[i]).rsplit("_", 1)[0]: f"{self.ordering[i + 1]}/{self.ordering[i]}" for i in range(int(len(self.ordering)/2))}
+        return {artifact: self.metrics[artifact].count for artifact in self.metrics}
 
     # def summary(self) -> Dict[str, Any] | str | List[Any]:
     #     return {
@@ -176,6 +177,10 @@ class OpenICUStatistics(OpenICUBaseModel):
     #         "event" : f"{self.event_created_count}/{self.event_available_count}",
     #     }
     
+    def reset(self) -> None:
+        for artifact in self.metrics:
+            self.metrics[artifact].reset()
+            
     # def reset(self) -> None:
     #     self.src_config_available_count = 0
     #     self.src_config_used_count = 0
@@ -210,18 +215,22 @@ class OpenICUStatistics(OpenICUBaseModel):
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
 
-        instance.src_config_available_names = set(data["src_config_available"]["names"])
-        instance.src_config_used_names = set(data["src_config_used"]["names"])
-        instance.src_table_available_names = set(data["src_table_available"]["names"])
-        instance.src_table_used_names = set(data["src_table_used"]["names"])
-        instance.event_available_names = set(data["event_available"]["names"])
-        instance.event_created_names = set(data["event_created"]["names"])
+            for artifact in OpenICUStatistics.ordering:
+                instance.metrics[artifact] = Metric()
+                instance.metrics[artifact].names = set(data[artifact])
 
-        instance.src_config_available_count = data["src_config_available"]["count"]
-        instance.src_config_used_count = data["src_config_used"]["count"]
-        instance.src_table_available_count = data["src_table_available"]["count"]
-        instance.src_table_used_count = data["src_table_used"]["count"]
-        instance.event_available_count = data["event_available"]["count"]
-        instance.event_created_count = data["event_created"]["count"]
+        # instance.src_config_available_names = set(data["src_config_available"]["names"])
+        # instance.src_config_used_names = set(data["src_config_used"]["names"])
+        # instance.src_table_available_names = set(data["src_table_available"]["names"])
+        # instance.src_table_used_names = set(data["src_table_used"]["names"])
+        # instance.event_available_names = set(data["event_available"]["names"])
+        # instance.event_created_names = set(data["event_created"]["names"])
+
+        # instance.src_config_available_count = data["src_config_available"]["count"]
+        # instance.src_config_used_count = data["src_config_used"]["count"]
+        # instance.src_table_available_count = data["src_table_available"]["count"]
+        # instance.src_table_used_count = data["src_table_used"]["count"]
+        # instance.event_available_count = data["event_available"]["count"]
+        # instance.event_created_count = data["event_created"]["count"]
 
         return instance
