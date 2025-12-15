@@ -4,7 +4,6 @@ from pathlib import Path
 import json
 from enum import Enum
 
-from open_icu.metrics.metrics import PipelineArtifacts as pa
 from open_icu.config.dataset.source.config.base import OpenICUBaseModel
 
 _statistics: Optional["OpenICUStatistics"] = None
@@ -55,12 +54,12 @@ class OpenICUStatistics(OpenICUBaseModel):
     _instance: Optional["OpenICUStatistics"] = None
     
     ordering: List[str] = [str(artifact) for artifact in (
-        pa.SRC_CONFIG_AVAILABLE,
-        pa.SRC_CONFIG_USED,
-        pa.SRC_TABLE_AVAILABLE,
-        pa.SRC_TABLE_USED,
-        pa.EVENT_AVAILABLE,
-        pa.EVENT_CREATED,
+        PipelineArtifacts.SRC_CONFIG_AVAILABLE,
+        PipelineArtifacts.SRC_CONFIG_USED,
+        PipelineArtifacts.SRC_TABLE_AVAILABLE,
+        PipelineArtifacts.SRC_TABLE_USED,
+        PipelineArtifacts.EVENT_AVAILABLE,
+        PipelineArtifacts.EVENT_CREATED,
     )]
 
     def _init_metrics(self) -> None:
