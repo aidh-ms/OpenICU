@@ -9,14 +9,17 @@ from tempfile import TemporaryDirectory
 
 from meds._version import __version__ as meds_version
 from meds.schema import DatasetMetadataSchema
-from open_icu.metrics.statistics import OpenICUStatistics
+from open_icu.metrics.metrics import OpenICUStatistics
 
+# initialize logging
 logging.basicConfig(
     filename="app.log",
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] [%(name)s] [%(module)s] %(message)s",
     )
+logging.info("Logging initialized.")
 
+# initilize statistics
 statistics = OpenICUStatistics()    # TODO: global?
 
 class MEDSDataset:
