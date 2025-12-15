@@ -4,8 +4,6 @@ from pathlib import Path
 import json
 from enum import Enum
 
-from open_icu.config.dataset.source.config.base import OpenICUBaseModel
-
 _statistics: Optional["OpenICUStatistics"] = None
 
 def get_statistics() -> "OpenICUStatistics":
@@ -15,7 +13,7 @@ def get_statistics() -> "OpenICUStatistics":
     return _statistics
 
 @dataclass
-class Metric(OpenICUBaseModel):
+class Metric:
     names: Set[str] = field(default_factory=set)
 
     @property
@@ -48,7 +46,7 @@ class PipelineArtifacts(Enum):
     def __str__(self) -> str:
         return self.value
 
-class OpenICUStatistics(OpenICUBaseModel):
+class OpenICUStatistics:
     """Global metrics"""
 
     _instance: Optional["OpenICUStatistics"] = None
@@ -82,7 +80,7 @@ class OpenICUStatistics(OpenICUBaseModel):
         self.metrics[artifact].add(name)
 
     def to_dict(self) -> Dict[str, Any] | str | List[Any]:
-        return {artifact: self.metrics[artifact] for artifact in self.metrics}
+        return {artifact: self.metrics[artifact].to_dict() for artifact in self.metrics}
     
     def summary(self) -> Dict[str, Any] | str | List[Any]:
         return {artifact: self.metrics[artifact].count for artifact in self.metrics}
@@ -99,25 +97,6 @@ class OpenICUStatistics(OpenICUBaseModel):
 
         with self.filename.open("w", encoding="utf-8") as f:
             json.dump(self.to_dict(), f, indent=2)
-
-
-    # @classmethod
-    # def load(cls, path: str | Path) -> "OpenICUStatistics":
-    #     path = Path(path)
-
-    #     instance = cls()
-
-    #     if not path.exists():
-    #         return instance
-        
-    #     with path.open("r", encoding="utf-8") as f:
-    #         data = json.load(f)
-
-    #         for artifact in OpenICUStatistics.ordering:
-    #             instance.metrics[artifact] = Metric()
-    #             instance.metrics[artifact].names = set(data[artifact])
-
-    #     return instance
 
     def _load_from_file(self) -> None:
         with self.filename.open("r", encoding="utf-8") as f:

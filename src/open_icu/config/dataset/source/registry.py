@@ -53,4 +53,5 @@ class DatasetConfigRegistry(BaseConfigRegistry[SourceDatasetConfig]):
                 )
 
         logger.info(f"Loaded {len(configs)} = {statistics.to_dict()} srcconfig files")
+        statistics.save()
         return configs

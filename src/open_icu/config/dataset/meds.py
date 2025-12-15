@@ -42,13 +42,15 @@ class MEDSDataset:
         # Remove existing project directory if overwrite is True
         if overwrite and self._project_path.exists():
             self.cleanup()
+            logging.info("Removed existing project directory.")
 
         # Create the project directory if it doesn't exist
         if not self.project_path.exists():
             self.data_path.mkdir(parents=True, exist_ok=True)
             self.metadata_path.mkdir(parents=True, exist_ok=True)
+            logging.info("Created project directory.")
         
-        logging.info(f"Initialized: {project_path}")
+        logging.info(f"Initialized project directory: {project_path}")
 
     def cleanup(self) -> None:
         if self._temp_dir:
@@ -82,4 +84,4 @@ class MEDSDataset:
         with open(self.metadata_path / "dataset.json", "w") as f:
             json.dump(metadata, f, indent=4)
 
-        logging.info(f"Write metadata: {_metadata}")
+        logging.info(f"Wrote metadata: {_metadata}")
