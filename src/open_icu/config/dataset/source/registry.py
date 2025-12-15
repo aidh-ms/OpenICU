@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 from pathlib import Path
+import logging
 
 import yaml
 
 from open_icu.config.dataset.source.config.dataset import SourceDatasetConfig
 from open_icu.config.dataset.source.config.table import TableConfig
 from open_icu.helper.registry import BaseConfigRegistry
+from open_icu.metrics.metrics import get_statistics, PipelineArtifacts as pa
 
+statistics = get_statistics()
+logger = logging.getLogger(__name__) 
 
 class DatasetConfigRegistry(BaseConfigRegistry[SourceDatasetConfig]):
     config_class = SourceDatasetConfig
@@ -37,7 +41,7 @@ class DatasetConfigRegistry(BaseConfigRegistry[SourceDatasetConfig]):
 
                     with open(table_config_path, "r") as f:
                         table_config = yaml.safe_load(f)
-
+                    statistics.add(str(pa.SRC_CONFIG_AVAILABLE), table_config["name"])
                     tables.append(TableConfig(**table_config))
 
                 configs.append(
@@ -48,4 +52,5 @@ class DatasetConfigRegistry(BaseConfigRegistry[SourceDatasetConfig]):
                     )
                 )
 
+        logger.info(f"Loaded {len(configs)} = {statistics.to_dict()} srcconfig files")
         return configs

@@ -9,7 +9,11 @@ from tempfile import TemporaryDirectory
 
 from meds._version import __version__ as meds_version
 from meds.schema import DatasetMetadataSchema
-from open_icu.metrics.metrics import OpenICUStatistics
+from open_icu.metrics.metrics import get_statistics, PipelineArtifacts as pa
+
+# initilize statistics
+statistics = get_statistics()
+statistics.basicConfig("statistics.json")
 
 # initialize logging
 logging.basicConfig(
@@ -19,8 +23,6 @@ logging.basicConfig(
     )
 logging.info("Logging initialized.")
 
-# initilize statistics
-statistics = OpenICUStatistics()    # TODO: global?
 
 class MEDSDataset:
     def __init__(
