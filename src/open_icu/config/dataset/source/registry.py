@@ -41,7 +41,10 @@ class DatasetConfigRegistry(BaseConfigRegistry[SourceDatasetConfig]):
 
                     with open(table_config_path, "r") as f:
                         table_config = yaml.safe_load(f)
-                    statistics.add(str(pa.SRC_CONFIG_AVAILABLE), table_config["name"])
+                        
+                    statistics.add(str(pa.SRC_CONFIG_AVAILABLE), name + "/" + table_config["name"])
+                    logger.info(f"registered src_config: {name + "/" + table_config["name"]}")
+
                     tables.append(TableConfig(**table_config))
 
                 configs.append(
