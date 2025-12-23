@@ -23,7 +23,7 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: mimic
+    constant: mimic 
   - name: subject_id
     type: int64
   # db fields - times
@@ -74,9 +74,9 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields:
+    fields: 
       time: storetime
-      code:
+      code: 
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: datetimeevent
@@ -89,7 +89,7 @@ events:
       text_value: value
     callbacks:
       - callback: drop_na
-        params:
+        params: 
           columns:
             - text_value
   - name: warning
@@ -100,6 +100,6 @@ events:
       numeric_value: warning
     callbacks:
       - callback: drop_na
-        params:
+        params: 
           columns:
             - numeric_value

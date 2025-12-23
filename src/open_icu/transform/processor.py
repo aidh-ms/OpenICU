@@ -22,7 +22,7 @@ def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
     for field in table.fields:
         if isinstance(field, ConstantFieldConfig):
             lf = lf.with_columns(
-                pl.lit(field.constant).alias(field.name)
+                pl.lit(field.constant).cast(pl.String).alias(field.name)
             )
 
         if field.type == "datetime":
@@ -107,8 +107,13 @@ def process_table(table: TableConfig, path: Path, output_path: Path, src: str) -
             event_lf = callback.call(event_lf)
 
         # Reorder columns
-        ordering = event.fields.model_dump()
-        event_lf = event_lf.select(list((ordering | ordering.pop("extension")).keys()))
+        event_lf = event_lf.select([
+            pl.col("subject_id").cast(pl.Int64),
+            pl.col("time").cast(pl.Datetime(time_unit="us")),
+            pl.col("code").cast(pl.String),
+            pl.col("numeric_value").cast(pl.Float32),
+            pl.col("text_value").cast(pl.String),
+        ] + [pl.col(col).cast(pl.String) for col in event.fields.extension.keys()])
 
         # Ensure output directory exists
         output_data_path = output_path / "data" / src / table.name

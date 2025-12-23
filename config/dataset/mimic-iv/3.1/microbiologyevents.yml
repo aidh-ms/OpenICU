@@ -1,0 +1,228 @@
+name: microbiologyevents
+path: hosp/microbiologyevents.csv
+
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/microbiologyevents
+  # codes (unique identifiers)
+  - name: antibiotic_item_code
+    type: string
+    constant: ANTIBIOTIC_ITEM
+  - name: caregiver_store_code
+    type: string
+    constant: CG_ST
+  - name: comments_code
+    type: string
+    constant: COMMENTS
+  - name: dilution_code
+    type: string
+    constant: DILUTION
+  - name: interpretation_code
+    type: string
+    constant: INTERPRETATION
+  - name: microevent_id_code
+    type: string
+    constant: MICROEVENT_ID
+  - name: micro_specimen_id_code
+    type: string
+    constant: MICRO_SPECIMEN_ID
+  - name: order_provider_id_code
+    type: string
+    constant: ORDER_PROVIDER_ID
+  - name: organism_item_code
+    type: string
+    constant: ORGANISM_ITEM
+  - name: spec_code
+    type: string
+    constant: SPEC
+  - name: test_item_code
+    type: string
+    constant: TEST_ITEM
+  # subject_id and extensions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+    constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: chartdate
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storedate
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: ab_itemid
+    type: int64
+  - name: ab_name
+    type: string
+  - name: comments
+    type: string
+  - name: dilution_comparison
+    type: string
+  - name: dilution_text
+    type: string
+  - name: dilution_value
+    type: float32
+  - name: interpretation
+    type: string
+  - name: micro_specimen_id
+    type: int64
+  - name: microevent_id
+    type: int64
+  - name: order_provider_id
+    type: string
+  - name: order_provider_id
+    type: string
+  - name: org_itemid
+    type: int64
+  - name: org_name
+    type: string
+  - name: spec_itemid
+    type: int64
+  - name: spec_type_desc
+    type: string
+  - name: test_itemid
+    type: int64
+  - name: test_name
+    type: string
+  - name: test_seq
+    type: int64
+  - name: quantity
+    type: string
+
+event_defaults:
+  subject_id: subject_id
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+    src_db_id: src_db_id
+
+events:
+  - name: microevent_id
+    fields:
+      time: charttime
+      code:
+        - microevent_id_code
+      numeric_value: microevent_id
+  - name: specimen_id
+    fields:
+      time: charttime
+      code:
+        - micro_specimen_id_code
+      numeric_value: micro_specimen_id
+  - name: order_provider_id
+    fields:
+      time: charttime
+      code:
+        - order_provider_id_code
+      text_value: order_provider_id
+    callbacks:
+      - callback: drop_na
+        params:
+          columns:
+            - text_value
+  - name: spec
+    fields:
+      time: charttime
+      code:
+        - spec_code
+        - spec_type_desc   
+      numeric_value: spec_itemid
+  - name: test_item
+    fields:
+      time: charttime
+      code:
+        - test_item_code
+        - test_name
+      numeric_value: test_itemid
+  - name: organism
+    fields:
+      time: charttime
+      code:
+        - organism_item_code
+        - org_name
+      numeric_value: org_itemid
+  - name: antibiotic
+    fields:
+      time: charttime
+      code:
+        - antibiotic_item_code
+        - ab_name
+      numeric_value: ab_itemid
+  - name: dilution
+    fields:
+      time: charttime
+      code:
+        - dilution_code
+      text_value: dilution_text
+      numeric_value: dilution_value
+      # dilution_comparison
+    callbacks:
+      - callback: drop_na
+        params:
+          columns:
+            - numeric_value
+            - text_value
+  - name: interpretation
+    fields:
+      time: charttime
+      code:
+        - interpretation_code
+      text_value: interpretation
+    callbacks:
+      - callback: drop_na
+        params:
+          columns:
+            - text_value
+  - name: comments
+    fields:
+      time: charttime
+      code:
+        - comments_code
+      text_value: comments
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - text_value
+  - name: comments
+    fields:
+      time: charttime
+      code:
+        - comments_code
+      text_value: comments
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - text_value
+  - name: caregiver_store
+    fields: 
+      time: storetime
+      code: 
+        - caregiver_store_code
+    callbacks:
+      - callback: drop_na
+        params: 
+          columns:
+            - time

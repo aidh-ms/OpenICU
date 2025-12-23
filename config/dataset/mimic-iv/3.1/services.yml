@@ -1,0 +1,58 @@
+name: services
+path: hosp/services.csv
+
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: hosp/services
+  # codes
+  - name: curr_service_code
+    type: string
+    constant: PREV_SERVICE
+  - name: prev_service_code
+    type: string
+    constant: PREV_SERVICE
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+    constant: -1
+  - name: src_db_id
+    type: string
+    constant: mimic
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: transfertime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: curr_service
+    type: string
+  - name: prev_service
+    type: string
+
+event_defaults:
+  subject_id: subject_id
+  time: transfertime
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: stay_id
+    src_db_id: src_db_id
+
+events: 
+  - name: prev_service
+    fields:
+      code: 
+        - prev_service_code
+        - prev_service
+  - name: curr_service
+    fields:
+      code: 
+        - curr_service_code
+        - curr_service

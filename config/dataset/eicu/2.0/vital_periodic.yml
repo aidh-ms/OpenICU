@@ -7,24 +7,106 @@ fields:
     type: string
     constant: vitalPeriodic
   # codes
+  - name: cvp_code
+    type: string
+    constant: CVP
+  - name: etco2_code
+    type: string
+    constant: ETCO2
   - name: heartrate_code
     type: string
-    constant: HEART_RATE
+    constant: HEARTRATE
+  - name: icp_code
+    type: string
+    constant: ICP
+  - name: padiastolic_code
+    type: string
+    constant: PADIASTOLIC
+  - name: pamean_code
+    type: string
+    constant: PAMEAN
+  - name: pasystolic_code
+    type: string
+    constant: PASYSTOLIC
+  - name: respiration_code
+    type: string
+    constant: RESPIRATION
+  - name: sao2_code
+    type: string
+    constant: SAO2
+  - name: st1_code
+    type: string
+    constant: ST1
+  - name: st2_code
+    type: string
+    constant: ST2
+  - name: st3_code
+    type: string
+    constant: ST3
+  - name: systemicdiastolic_code
+    type: string
+    constant: SYSTEMICDIASTOLIC
+  - name: systemicmean_code
+    type: string
+    constant: SYSTEMICMEAN
+  - name: systemicsystolic_code
+    type: string
+    constant: SYSTEMICSYSTOLIC
+  - name: temperature_code
+    type: string
+    constant: TEMPERATURE
+  - name: vitalperiodicid_code
+    type: string
+    constant: VITAL_PERIODIC_ID
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
   - name: src_db_id
     type: string
-    constant: eicu 
+    constant: eicu
   # db fields - times
   - name: observationoffset
     type: int64
   # db fields - values
+  - name: cvp
+    type: int64
+  - name: etco2 # etCo2
+    type: int64
   - name: heartrate
-    type: float32
+    type: float64 # decimal(x,y)
   - name: heartrate_uom
     type: string
     constant: BPM
+  - name: padiastolic
+    type: int64
+  - name: pamean
+    type: int64
+  - name: pasystolic
+    type: int64
+  - name: respiration
+    type: int64
+  - name: sao2  # saO2
+    type: int64
+  - name: st1
+    type: float32
+  - name: st2
+    type: float32
+  - name: st3
+    type: float32
+  - name: icp
+    type: int64
+  - name: systemicdiastolic
+    type: int64
+  - name: systemicmean
+    type: int64
+  - name: systemicsystolic
+    type: int64
+  - name: temperature
+    type: float64 # decimal(x,y)
+  - name: vitalperiodicid
+    type: int64
+  
+    
 post_callbacks:
   - callback: add_offset
     params:
@@ -72,17 +154,100 @@ join:
           offset: hospitaladmitoffset
           output: admission_timestamp
 
+event_defaults:
+  subject_id: patienthealthsystemstayid
+  time: event_timestamp
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: patientunitstayid
+    src_db_id: src_db_id
+
 events:
   - name: heartrate
     fields:
-      subject_id: patienthealthsystemstayid
-      time: event_timestamp
       code:
-        - src_table_code
         - heartrate_code
         - heartrate_uom
       numeric_value: heartrate
-      extension:
-        hadm_id: hadm_id
-        stay_id: patientunitstayid
-        src_db_id: src_db_id
+  - name: vitalperiodicid
+    fields:
+      code:
+        - vitalperiodicid_code
+      numeric_value: observationoffset
+  - name: temperature
+    fields:
+      code:
+        - temperature_code
+      numeric_value: temperature
+  - name: sao2
+    fields:
+      code:
+        - sao2_code
+      numeric_value: sao2
+  - name: respiration
+    fields:
+      code:
+        - respiration_code
+      numeric_value: respiration
+  - name: cvp
+    fields:
+      code:
+        - cvp_code
+      numeric_value: cvp
+  - name: etco2
+    fields:
+      code:
+        - etco2_code
+      numeric_value: etco2
+  - name: systemicsystolic
+    fields:
+      code:
+        - systemicsystolic_code
+      numeric_value: systemicsystolic
+  - name: systemicdiastolic
+    fields:
+      code:
+        - systemicdiastolic_code
+      numeric_value: systemicdiastolic
+  - name: systemicmean
+    fields:
+      code:
+        - systemicmean_code
+      numeric_value: systemicmean
+  - name: pasystolic
+    fields:
+      code:
+        - pasystolic_code
+      numeric_value: pasystolic
+  - name: padiastolic
+    fields:
+      code:
+        - padiastolic_code
+      numeric_value: padiastolic
+  - name: pamean
+    fields:
+      code:
+        - pamean_code
+      numeric_value: pamean
+  - name: st1
+    fields:
+      code:
+        - st1_code
+      numeric_value: st1
+  - name: st2
+    fields:
+      code:
+        - st2_code
+      numeric_value: st2
+  - name: st3
+    fields:
+      code:
+        - st3_code
+      numeric_value: st3
+  - name: icp
+    fields:
+      code:
+        - icp_code
+      numeric_value: icp
