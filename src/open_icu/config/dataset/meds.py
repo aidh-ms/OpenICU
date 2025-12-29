@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 
 from meds._version import __version__ as meds_version
 from meds.schema import DatasetMetadataSchema
-from open_icu.metrics.metrics import get_statistics, PipelineArtifacts as pa
+from open_icu.metrics.metrics import get_statistics
 
 # initilize statistics
 statistics = get_statistics()
