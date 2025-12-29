@@ -14,8 +14,8 @@ class OpenICUBaseModel(BaseModel):
     def summary(self) -> Dict[str, Any] | str | List[Any]:
         ...
         
-    def __repr__(self):
+    def __repr__(self) -> str:
         return json.dumps(self.to_dict(), indent=2)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return json.dumps(self.summary(), indent=2)
