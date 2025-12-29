@@ -1,13 +1,16 @@
 import json
 
 from typing import List, Dict, Any
+from abc import abstractmethod
 
 from pydantic import BaseModel
 
 class OpenICUBaseModel(BaseModel):
+    @abstractmethod
     def to_dict(self) -> Dict[str, Any] | str | List[Any]:
         ...
     
+    @abstractmethod
     def summary(self) -> Dict[str, Any] | str | List[Any]:
         ...
         
