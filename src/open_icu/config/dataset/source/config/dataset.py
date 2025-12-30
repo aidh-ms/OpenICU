@@ -7,7 +7,7 @@ from open_icu.helper.config import BaseConfig
 
 import json
 
-class SourceDatasetConfig(BaseConfig, metaclass=ABCMeta):
+class SourceDatasetConfig(BaseConfig):
     __key_fields__ = ("name", "version")
 
     name: str = Field(..., description="The name of the dataset.")
@@ -16,13 +16,13 @@ class SourceDatasetConfig(BaseConfig, metaclass=ABCMeta):
         default_factory=list,
         description="List of table configurations for the dataset.",
     )
-
-    def display(self) -> Dict[str, Any] | str | List[Any]:
+    
+    def to_dict(self) -> Dict[str, Any] | str | List[Any]:
         return {
             "name": self.name,
             "version": self.version,
             "tables": [table.to_dict() for table in self.tables]
-        }    
+        }  
     
     def summary(self) -> Dict[str, Any] | str | List[Any]:
         return {
