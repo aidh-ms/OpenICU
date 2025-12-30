@@ -121,10 +121,10 @@ class AbstractSyntaxTree(CallbackProtocol):
 
             if func_name in registry:
                 CallbackClass = registry[func_name]
-                if issubclass(CallbackClass, FrameCallback):
-                    raise TypeError(f"FrameCallback not allowed inside of abstract syntax tree: {node}")
                 if issubclass(CallbackClass, ExpressionCallback):
                     return CallbackClass(*args).as_expression()
+                if issubclass(CallbackClass, FrameCallback):
+                    raise TypeError(f"FrameCallback not allowed inside of abstract syntax tree: {node}")
         
             if func_name == "mean":
                 return pl.mean_horizontal(args)
