@@ -305,7 +305,7 @@ class Root(HybridCallback):
         Returns:
             A Polars expression computing the signed n-th root.
         """
-        return (self.radicand.sign() * self.radicand.abs() ** (1 / float(self.index))) # type: ignore
+        return (self.radicand.sign() * self.radicand.abs() ** (1 / self.index)) # type: ignore
 
     def as_field(self, lf: LazyFrame) -> LazyFrame:
         """Apply the root operation and add the result as a new column.
@@ -319,7 +319,7 @@ class Root(HybridCallback):
         return lf.with_columns(
             (
                 pl.col(self.radicand).sign()
-                * (pl.col(self.radicand).abs() ** (1 / float(self.index)))
+                * (pl.col(self.radicand).abs() ** (1 / self.index))
             ).alias(self.result)
         )
 
