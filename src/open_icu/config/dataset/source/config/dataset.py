@@ -1,12 +1,13 @@
 from typing import Any, Dict, List
 from pydantic import Field
+from abc import ABCMeta
 
 from open_icu.config.dataset.source.config.table import TableConfig
 from open_icu.helper.config import BaseConfig
 
 import json
 
-class SourceDatasetConfig(BaseConfig):
+class SourceDatasetConfig(BaseConfig, metaclass=ABCMeta):
     __key_fields__ = ("name", "version")
 
     name: str = Field(..., description="The name of the dataset.")
