@@ -1,11 +1,11 @@
 import json
 
 from typing import List, Dict, Any
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 
 from pydantic import BaseModel
 
-class OpenICUBaseModel(BaseModel):
+class OpenICUBaseModel(BaseModel, metaclass=ABCMeta):
     @abstractmethod
     def to_dict(self) -> Dict[str, Any] | str | List[Any]:
         ...
