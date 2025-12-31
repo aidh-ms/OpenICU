@@ -73,7 +73,7 @@ class Sum(HybridCallback):
         Returns:
             A Polars expression computing the row-wise sum.
         """
-        return pl.sum_horizontal([pl.col(c) for c in self.summands])
+        return pl.sum_horizontal(self.summands)
 
     def as_field(self, lf: LazyFrame) -> LazyFrame:
         """Apply the row-wise sum and add the result as a new column.
@@ -196,7 +196,7 @@ class Product(HybridCallback):
         return pl.fold(
             acc=pl.lit(1),
             function=operator.mul,
-            exprs=[pl.col(c) for c in self.factor],
+            exprs=self.factor,
         )
 
 
