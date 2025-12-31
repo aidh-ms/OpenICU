@@ -138,6 +138,9 @@ class AbstractSyntaxTree(CallbackProtocol):
                 return radicand.sign() * (radicand.abs() ** (1 / index))
             
             raise NotImplementedError(f"Function {func_name} not implemented")
+        
+        if isinstance(node, ast.List):
+            print(node.elts)
 
         raise NotImplementedError(f"Unsupported AST node: {type(node)}")
     
