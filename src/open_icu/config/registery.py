@@ -1,10 +1,9 @@
 from abc import ABC
 from pathlib import Path
-from types import get_original_bases
-
-from typing_extensions import get_args
+from typing import cast
 
 from open_icu.config.base import BaseConfig
+from open_icu.utils.type import get_generic_type
 
 
 class BaseConfigRegistery[T: BaseConfig](ABC):
@@ -14,11 +13,8 @@ class BaseConfigRegistery[T: BaseConfig](ABC):
 
     @property
     def _config_type(self) -> type[T]:
-        base = get_original_bases(self.__class__)[0]
-        if not (types := get_args(base)):
-           raise TypeError(f"Could not resolve generic type for '{self.__class__.__name__}'.")
-
-        return types[0]
+        t = get_generic_type(self.__class__)
+        return cast(type[T], t)
 
     def register(self, value: T, overwrite: bool = False) -> None:
         if overwrite or value.identifier in self._registry:
