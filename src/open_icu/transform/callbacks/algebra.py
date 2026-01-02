@@ -4,7 +4,7 @@ from numbers import Real
 import polars as pl
 from polars import Expr, LazyFrame
 
-from open_icu.transform.callbacks.proto import HybridCallback
+from open_icu.transform.callbacks.proto import HybridCallback, ExpressionCallback
 from open_icu.transform.callbacks.registry import register_callback_class
 
 
@@ -180,7 +180,7 @@ class Product(HybridCallback):
         """Initialize the callback.
 
         Args:
-            factor: List of column names whose values are multiplied row-wise.
+            factors: List of column names whose values are multiplied row-wise.
             product: Optional name of the output column.
         """
         self.factors = factors
@@ -271,6 +271,7 @@ class Pow(HybridCallback):
         """
         return self.base ** self.exponent  # type: ignore
 
+
     def as_field(self, lf: LazyFrame) -> LazyFrame:
         """Apply the power operation and add the result as a new column.
 
@@ -286,7 +287,7 @@ class Pow(HybridCallback):
 
 
 @register_callback_class
-class Root(HybridCallback):
+class Root(ExpressionCallback):
     """Compute the signed n-th root of a column.
 
     The sign of the radicand is preserved, allowing real-valued roots of
@@ -314,21 +315,22 @@ class Root(HybridCallback):
         """
         return (self.radicand.sign() * self.radicand.abs() ** (1 / self.index)) # type: ignore
 
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the root operation and add the result as a new column.
+    # # Hybrid-/FrameCallback
+    # def as_field(self, lf: LazyFrame) -> LazyFrame:
+    #     """Apply the root operation and add the result as a new column.
 
-        Args:
-            lf: Input LazyFrame.
+    #     Args:
+    #         lf: Input LazyFrame.
 
-        Returns:
-            A LazyFrame with the computed root column added.
-        """
-        return lf.with_columns(
-            (
-                pl.col(self.radicand).sign()
-                * (pl.col(self.radicand).abs() ** (1 / self.index))
-            ).alias(self.result)
-        )
+    #     Returns:
+    #         A LazyFrame with the computed root column added.
+    #     """
+    #     return lf.with_columns(
+    #         (
+    #             pl.col(self.radicand).sign()
+    #             * (pl.col(self.radicand).abs() ** (1 / self.index))
+    #         ).alias(self.result)
+    #     )
 
 
 @register_callback_class
