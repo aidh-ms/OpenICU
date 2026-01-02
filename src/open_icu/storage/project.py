@@ -6,10 +6,10 @@ from open_icu.storage.base import FilStorage
 class OpenICUProject(FilStorage):
     def __init__(
             self,
-            dataset_path: Path,
+            path: Path,
             overwrite: bool = False,
     ) -> None:
-        super().__init__(dataset_path, overwrite)
+        super().__init__(path, overwrite)
         # Create the project directory if it doesn't exist
         if not self._path.exists():
             self.datasets_path.mkdir(parents=True, exist_ok=True)
