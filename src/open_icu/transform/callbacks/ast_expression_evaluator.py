@@ -140,7 +140,7 @@ class AbstractSyntaxTree(CallbackProtocol):
             raise NotImplementedError(f"Function {func_name} not implemented")
         
         if isinstance(node, ast.List):
-            return [self._ast_to_polars(e) for e in node.elts]
+            return [self._ast_to_polars(e) for e in node.elts] # type: ignore
 
         raise NotImplementedError(f"Unsupported AST node: {type(node)}")
     
