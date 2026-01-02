@@ -176,14 +176,14 @@ class Product(HybridCallback):
         materialization is currently not implemented.
     """
 
-    def __init__(self, factor: list[str], product: str | None = None) -> None:
+    def __init__(self, factors: list[str], product: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
             factor: List of column names whose values are multiplied row-wise.
             product: Optional name of the output column.
         """
-        self.factor = factor
+        self.factors = factors
         if product is not None:
             self.result = product
 
@@ -196,12 +196,12 @@ class Product(HybridCallback):
         return pl.fold(
             acc=pl.lit(1),
             function=operator.mul,
-            exprs=self.factor,
+            exprs=self.factors,
         )
 
     def as_field(self, lf: LazyFrame) -> LazyFrame:
         return lf.with_columns(
-            (pl.fold(acc=pl.lit(1),function=operator.mul, exprs=pl.col(self.factor)).alias(self.result))
+            (pl.fold(acc=pl.lit(1), function=operator.mul, exprs=[pl.col(factor) for factor in self.factors]).alias(self.result))
         )
 
         
