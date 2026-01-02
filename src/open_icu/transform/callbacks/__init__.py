@@ -24,7 +24,6 @@ __all__ = [
     "Product",
     "Divide",
     "Pow",
-    "Root",
     "Modulo",
 
     "AbstractSyntaxTree",
