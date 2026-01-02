@@ -199,6 +199,13 @@ class Product(HybridCallback):
             exprs=self.factor,
         )
 
+    def as_field(self, lf: LazyFrame) -> LazyFrame:
+        return lf.with_columns(
+            (pl.fold(acc=pl.lit(1),function=operator.mul, exprs=pl.col(self.factor)).alias(self.result))
+        )
+
+        
+
 
 @register_callback_class
 class Divide(HybridCallback):
