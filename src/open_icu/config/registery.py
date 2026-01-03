@@ -26,8 +26,8 @@ class BaseConfigRegistery[T: BaseConfig](ABC):
             return True
         return False
 
-    def get(self, name: str, version: str, default: T | None = None) -> T | None:
-        identifier = self._config_type.build_identifier(name, version)
+    def get(self, identifiers: tuple[str, ...], default: T | None = None) -> T | None:
+        identifier = self._config_type.build_identifier(identifiers)
         return self._registry.get(identifier, default)
 
     def keys(self) -> list[str]:
@@ -42,6 +42,11 @@ class BaseConfigRegistery[T: BaseConfig](ABC):
     def load(self, file_path: Path, overwrite: bool = False) -> None:
         for config in load_config(file_path, self._config_type):
             self.register(config, overwrite=overwrite)
+
+    def save(self, path: Path) -> None:
+        path.mkdir(parents=True, exist_ok=True)
+        for config in self._registry.values():
+            config.save(path)
 
 
 def load_config[T: BaseConfig](file_path, config_type: type[T]) -> list[T]:
