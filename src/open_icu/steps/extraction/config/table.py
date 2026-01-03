@@ -80,6 +80,7 @@ class JsonTableConfig(BaseTableConfig):
 
 
 class TableConfig(BaseConfig, BaseTableConfig):
+    dataset: str = Field(..., description="The dataset this table belongs to.")
     join: list[JsonTableConfig] = Field(
         default_factory=list,
         description="List of join configurations for joining tables.",
@@ -98,3 +99,8 @@ class TableConfig(BaseConfig, BaseTableConfig):
         data["events"] = events
 
         super().__init__(**data)
+
+    @computed_field
+    @property
+    def identifier_tuple(self) -> tuple[str, ...]:
+        return "dataset", self.dataset, self.version, self.name
