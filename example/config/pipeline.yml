@@ -5,4 +5,11 @@ project:
   path: /workspaces/example/output/project
   overwrite: true
 
-steps: []
+steps:
+- name: ExtractionStep
+  config:
+    files:
+    - path: /workspaces/config/dataset/mimic-iv/3.1/
+      dataset_path: /workspaces/example/data/mimic-iv/3.1/
+    - path: /workspaces/config/dataset/eicu/2.0/
+      dataset_path: /workspaces/example/data/eicu/2.0/
