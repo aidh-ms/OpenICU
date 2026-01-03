@@ -17,7 +17,7 @@ class BaseConfigRegistery[T: BaseConfig](ABC):
         return cast(type[T], t)
 
     def register(self, value: T, overwrite: bool = False) -> None:
-        if overwrite or value.identifier in self._registry:
+        if overwrite or value.identifier not in self._registry:
             self._registry[value.identifier] = value
 
     def unregister(self, key: str) -> bool:
@@ -40,12 +40,19 @@ class BaseConfigRegistery[T: BaseConfig](ABC):
         return list(self._registry.items())
 
     def load(self, file_path: Path, overwrite: bool = False) -> None:
-        for file_path in file_path.rglob("*.*"):
-            if (
-                not file_path.is_file()
-                or file_path.suffix.lower() not in {".yml", ".yaml"}
-            ):
-                continue
-
-            config = self._config_type.load(file_path)
+        for config in load_config(file_path, self._config_type):
             self.register(config, overwrite=overwrite)
+
+
+def load_config[T: BaseConfig](file_path, config_type: type[T]) -> list[T]:
+    configs = []
+    for file_path in file_path.rglob("*.*"):
+        if (
+            not file_path.is_file()
+            or file_path.suffix.lower() not in {".yml", ".yaml"}
+        ):
+            continue
+
+        config = config_type.load(file_path)
+        configs.append(config)
+    return configs

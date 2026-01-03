@@ -1,10 +1,14 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any, cast
 
+from open_icu.config.base import BaseConfig
+from open_icu.config.registery import BaseConfigRegistery, load_config
 from open_icu.pipeline.context import PipelineContext
-from open_icu.steps.base.config import BaseStepConfig
+from open_icu.steps.base.config import BaseStepConfig, ConfigurableBaseStepConfig
 from open_icu.utils.type import get_generic_type
 
+# create workspace
+# safe config
 
 class BaseStep[T: BaseStepConfig](ABC):
     def __init__(self, context: PipelineContext, config: dict[str, Any]) -> None:
@@ -16,22 +20,25 @@ class BaseStep[T: BaseStepConfig](ABC):
         t = get_generic_type(self.__class__)
         return cast(type[T], t)
 
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
-
     @abstractmethod
     def run(self) -> None:
         pass
 
 
-class BaseConfigStep[T: BaseStepConfig](BaseStep[T], metaclass=ABCMeta):
-    pass
+class ConfigurableBaseStep[PCT: ConfigurableBaseStepConfig, SCT: BaseConfig](BaseStep[PCT], metaclass=ABCMeta):
+    def __init__(self, context: PipelineContext, config: dict[str, Any]) -> None:
+        super().__init__(context, config)
 
+        self._config_registery = BaseConfigRegistery[SCT]()
 
-# copy config
-# dataset linking from workspace
-# add ref to state
-# write to wrorkspace
-# logging
-# config step
+        for sub_config in self._config.files:
+            configs = load_config(sub_config.path, self._subconfig_type)
+            filtered_configs = sub_config.filter(configs)
+            print(filtered_configs)
+            for cfg in filtered_configs:
+                self._config_registery.register(cfg, overwrite=sub_config.overwrite)
+
+    @property
+    def _subconfig_type(self) -> type[SCT]:
+        t = get_generic_type(self.__class__, 1)
+        return cast(type[SCT], t)
