@@ -42,3 +42,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 """
+
+from open_icu.pipeline.pipe import Pipeline
+
+__all__ = [
+    "Pipeline",
+]
