@@ -9,7 +9,7 @@ class StepRegistery(ABC):
         self._registry: dict[str, type[BaseStep]] = {}
 
     def register(self, key: str, value: type[BaseStep], overwrite: bool = False) -> None:
-        if overwrite or value.name in self._registry:
+        if overwrite or key not in self._registry:
             self._registry[key] = value
 
     def unregister(self, key: str) -> bool:
@@ -34,5 +34,5 @@ class StepRegistery(ABC):
 registery = StepRegistery()
 
 def register_step[T: BaseStep](step: type[T], overwrite: bool = False) -> type[T]:
-    registery.register(step.__class__.__name__, step, overwrite)
+    registery.register(step.__name__, step, overwrite)
     return step
