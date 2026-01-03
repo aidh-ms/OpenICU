@@ -14,6 +14,7 @@ class OpenICUProject(FilStorage):
         if not self._path.exists():
             self.datasets_path.mkdir(parents=True, exist_ok=True)
             self.workspace_path.mkdir(parents=True, exist_ok=True)
+            self.configs_path.mkdir(parents=True, exist_ok=True)
 
     @property
     def datasets_path(self) -> Path:
@@ -22,5 +23,9 @@ class OpenICUProject(FilStorage):
     @property
     def workspace_path(self) -> Path:
         return self._path / "workspace"
+
+    @property
+    def configs_path(self) -> Path:
+        return self._path / "configs"
 
 # add methods for creating datasets and workspace dir
