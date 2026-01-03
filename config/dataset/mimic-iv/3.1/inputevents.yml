@@ -1,5 +1,7 @@
 name: medications
 path: icu/inputevents.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes

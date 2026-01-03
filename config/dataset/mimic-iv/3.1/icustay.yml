@@ -1,5 +1,7 @@
 name: icustays
 path: icu/icustays.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes
@@ -23,7 +25,7 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times

@@ -1,5 +1,7 @@
 name: infusionDrug
 path: infusionDrug.csv
+version: "2.0"
+dataset: eicu
 
 fields:
   # general codes
@@ -27,7 +29,7 @@ fields:
     type: int64
   - name: src_db_id
     type: string
-    constant: eicu 
+    constant: eicu
   # db fields - times
   - name: infusionoffset
     type: int64
@@ -107,13 +109,13 @@ events:
   - name: patientweight
     fields:
       time: admission_timestamp
-      code: 
+      code:
         - patientweight_code
         - weight_uom
       text_value: patientweight
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: drugamount
@@ -125,39 +127,39 @@ events:
       numeric_value: drugamount
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - numeric_value
   - name: drugrate
     fields:
       time: event_timestamp
-      code: 
+      code:
         - drugrate_code
       text_value: drugrate
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: infusionrate
-    fields: 
+    fields:
       time: event_timestamp
       code:
         - infusionrate_code
       text_value: infusionrate
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - numeric_value
   - name: volumeoffluid
     fields:
       time: event_timestamp
-      code: 
+      code:
         - volumeoffluid_code
       text_value: volumeoffluid
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value

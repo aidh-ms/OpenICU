@@ -1,5 +1,7 @@
 name: services
 path: hosp/services.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes
@@ -45,14 +47,14 @@ event_defaults:
     stay_id: stay_id
     src_db_id: src_db_id
 
-events: 
+events:
   - name: prev_service
     fields:
-      code: 
+      code:
         - prev_service_code
         - prev_service
   - name: curr_service
     fields:
-      code: 
+      code:
         - curr_service_code
         - curr_service

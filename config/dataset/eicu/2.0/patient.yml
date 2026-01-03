@@ -1,5 +1,7 @@
 name: patient
 path: patient.csv
+version: "2.0"
+dataset: eicu
 
 fields:
   # general codes
@@ -143,8 +145,8 @@ events:
   - name: gender
     fields:
       # TODO: suggest and maybe change time birthdate
-      time: admission_timestamp 
-      code: # codes is null, when using gender and gender is empty string 
+      time: admission_timestamp
+      code: # codes is null, when using gender and gender is empty string
         - gender_code
         - gender
   - name: icu_admission
@@ -169,14 +171,14 @@ events:
   - name: admissionheight
     fields:
       time: admission_timestamp
-      code: 
+      code:
         - admissionheight_code
         - admissionheight_unit
       numeric_value: admissionheight
   - name: admissionweight
     fields:
       time: admission_timestamp
-      code: 
+      code:
         - admissionweight_code
         - weight_unit
       numeric_value: admissionweight
@@ -189,7 +191,7 @@ events:
   # - name: dischargeweight
   #   fields:
   #   time: discharge_timestamp
-  #   code: 
+  #   code:
   #     - dischargeweight_code
   #     - weight_unit
   #   numeric_value: dischargeweight

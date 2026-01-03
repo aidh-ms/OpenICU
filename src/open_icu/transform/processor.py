@@ -3,8 +3,8 @@ from pathlib import Path
 
 import polars as pl
 
-from open_icu.config.dataset.source.config.field import ConstantFieldConfig
-from open_icu.config.dataset.source.config.table import BaseTableConfig, TableConfig
+from open_icu.steps.extraction.config.field import ConstantFieldConfig
+from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 
 
 def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
@@ -22,7 +22,7 @@ def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
     for field in table.fields:
         if isinstance(field, ConstantFieldConfig):
             lf = lf.with_columns(
-                pl.lit(field.constant).cast(pl.String).alias(field.name)
+                pl.lit(field.constant).cast(field.dtype).alias(field.name)
             )
 
         if field.type == "datetime":

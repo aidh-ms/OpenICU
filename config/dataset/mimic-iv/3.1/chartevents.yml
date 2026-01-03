@@ -1,5 +1,7 @@
 name: chartevents
 path: icu/chartevents.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes
@@ -76,9 +78,9 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields: 
+    fields:
       time: storetime
-      code: 
+      code:
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: chartevent
@@ -98,6 +100,6 @@ events:
       numeric_value: warning
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - numeric_value
