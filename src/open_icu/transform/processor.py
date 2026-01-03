@@ -3,8 +3,8 @@ from pathlib import Path
 
 import polars as pl
 
-from open_icu.config.dataset.source.config.field import ConstantFieldConfig
-from open_icu.config.dataset.source.config.table import BaseTableConfig, TableConfig
+from open_icu.steps.extraction.config.field import ConstantFieldConfig
+from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 
 
 def _process_table(table: BaseTableConfig, path: Path) -> pl.LazyFrame:
