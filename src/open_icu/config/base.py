@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from pathlib import Path
 from typing import Self
-from uuid import UUID, uuid5
+from uuid import NAMESPACE_DNS, UUID, uuid5
 
 import yaml
 from pydantic import BaseModel, Field, computed_field
@@ -21,7 +21,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
     @property
     def uuid(self) -> UUID:
         """Generate a UUID based on the name and version of the config."""
-        return uuid5(uuid5.NAMESPACE_DNS, self.identifier)  # type: ignore[unresolved-attribute]
+        return uuid5(NAMESPACE_DNS, self.identifier)  # type: ignore[unresolved-attribute]
 
     @classmethod
     def build_identifier(cls, name: str, version: str) -> str:
