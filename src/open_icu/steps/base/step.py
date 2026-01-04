@@ -1,8 +1,10 @@
+import shutil
 from abc import ABC, ABCMeta, abstractmethod
+from pathlib import Path
 from typing import Any, cast
 
 from open_icu.config.base import BaseConfig
-from open_icu.config.registery import BaseConfigRegistery, load_config
+from open_icu.config.registery import BaseConfigRegistery
 from open_icu.pipeline.context import PipelineContext
 from open_icu.steps.base.config import BaseStepConfig, ConfigurableBaseStepConfig
 from open_icu.utils.type import get_generic_type
@@ -20,6 +22,18 @@ class BaseStep[T: BaseStepConfig](ABC):
         t = get_generic_type(self.__class__)
         return cast(type[T], t)
 
+    def setup(self) -> None:
+        pass
+
+    def teardown(self) -> None:
+        pass
+
+    def pre_run(self) -> None:
+        pass
+
+    def post_run(self) -> None:
+        pass
+
     @abstractmethod
     def run(self) -> None:
         pass
@@ -28,24 +42,42 @@ class BaseStep[T: BaseStepConfig](ABC):
 class ConfigurableBaseStep[PCT: ConfigurableBaseStepConfig, SCT: BaseConfig](BaseStep[PCT], metaclass=ABCMeta):
     def __init__(self, context: PipelineContext, config: dict[str, Any]) -> None:
         super().__init__(context, config)
-        self._load_subconfig()
+
+        self._config_registery = self._create_registry()
 
     @property
     def _subconfig_type(self) -> type[SCT]:
         t = get_generic_type(self.__class__, 1)
         return cast(type[SCT], t)
 
-    def _load_subconfig(self) -> None:
+    @property
+    def registery(self) -> BaseConfigRegistery[SCT]:
+        return self._config_registery
+
+    def _create_registry(self) -> BaseConfigRegistery[SCT]:
         class _Registry(BaseConfigRegistery[self._subconfig_type]):  # type: ignore[invalid-type-form]
             pass
+        return _Registry()
 
-        self._config_registery = _Registry()
-
+    def setup(self) -> None:
         for sub_config in self._config.files:
-            configs = load_config(sub_config.path, self._subconfig_type)
-            filtered_configs = sub_config.filter(configs)
-            print(filtered_configs)
-            for cfg in filtered_configs:
-                self._config_registery.register(cfg, overwrite=sub_config.overwrite)
+            for file_path in sub_config.path.rglob("*.*"):
+                if (
+                    not file_path.is_file()
+                    or file_path.suffix.lower() not in {".yml", ".yaml"}
+                ):
+                    continue
 
-        self._config_registery.save(self._context.project.configs_path)
+                try:
+                    config = self._subconfig_type.load(file_path)
+                except Exception:
+                    continue
+
+                if not sub_config.matches(config):
+                    continue
+
+                self._config_registery.register(config, overwrite=sub_config.overwrite)
+
+                project_config_path = Path(self._context.project.configs_path, *config.identifier_tuple).with_suffix(".yml")
+                project_config_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(file_path, project_config_path)
