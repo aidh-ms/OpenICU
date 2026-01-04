@@ -26,19 +26,25 @@ class SubStepConfig(BaseModel):
         default_factory=list, description="A list of filters to apply when selecting configs."
     )
 
+    def matches(self, config: BaseConfig) -> bool:
+        if not self.filters:
+            return True
+
+        for config_filter in self.filters:
+            if (
+                config.name == config_filter.name and
+                (config_filter.version is None or config.version == config_filter.version)
+            ):
+                return True
+        return False
+
     def filter[T: BaseConfig](self, configs: list[T]) -> list[T]:
         if not self.filters:
             return configs
 
         filtered_configs = []
         for config in configs:
-            for config_filter in self.filters:
-                if config.name != config_filter.name:
-                    continue
-
-                if config_filter.version is not None and config.version != config_filter.version:
-                    continue
-
+            if self.matches(config):
                 filtered_configs.append(config)
         return filtered_configs
 
