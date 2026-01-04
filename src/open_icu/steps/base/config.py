@@ -20,7 +20,6 @@ class BaseStepConfig(BaseModel, metaclass=ABCMeta):
     )
 
 
-
 class ConfigFilter(BaseModel):
     name: str = Field(..., description="The name of the config.")
     version: str | None = Field(

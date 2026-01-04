@@ -9,8 +9,6 @@ from open_icu.pipeline.context import PipelineContext
 from open_icu.steps.base.config import BaseStepConfig, ConfigurableBaseStepConfig
 from open_icu.utils.type import get_generic_type
 
-# create workspace
-# safe config
 
 class BaseStep[T: BaseStepConfig](ABC):
     def __init__(self, context: PipelineContext, config: dict[str, Any]) -> None:
