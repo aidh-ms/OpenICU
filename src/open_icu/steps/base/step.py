@@ -22,6 +22,10 @@ class BaseStep[T: BaseStepConfig](ABC):
         t = get_generic_type(self.__class__)
         return cast(type[T], t)
 
+    @property
+    def name(self) -> str:
+        return self.__class__.__name__
+
     def setup(self) -> None:
         pass
 
@@ -29,7 +33,14 @@ class BaseStep[T: BaseStepConfig](ABC):
         pass
 
     def pre_run(self) -> None:
-        pass
+        name = self._config.workspace.name
+        if name is None:
+            name = self.name
+
+        self._workspace = self._context.project.add_workspace_dir(
+            name=name,
+            overwrite=self._config.workspace.overwrite,
+        )
 
     def post_run(self) -> None:
         pass

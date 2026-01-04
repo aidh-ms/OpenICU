@@ -6,8 +6,19 @@ from pydantic import BaseModel, Field
 from open_icu.config.base import BaseConfig
 
 
+class WorkspaceDirConfig(BaseModel):
+    name: str | None = Field(None, description="The name of the workspace directory.")
+    overwrite: bool = Field(
+        False, description="Whether to overwrite the workspace dir if it already exists."
+    )
+
+
 class BaseStepConfig(BaseModel, metaclass=ABCMeta):
-    pass
+    workspace: WorkspaceDirConfig = Field(
+        default_factory=lambda: WorkspaceDirConfig(),
+        description="Configuration for the workspace directory."
+    )
+
 
 
 class ConfigFilter(BaseModel):
