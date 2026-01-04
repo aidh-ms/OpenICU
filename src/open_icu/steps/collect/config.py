@@ -11,8 +11,8 @@ class DatasetConfig(BaseModel):
         False,
         description="Whether to overwrite the existing MEDS dataset if it exists.",
     )
-    copy: bool = Field(
-        True,
+    link: bool = Field(
+        False,
         description="Whether to copy or symlink the files to the dataset.",
     )
 
