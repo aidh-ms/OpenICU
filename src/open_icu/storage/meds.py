@@ -46,7 +46,7 @@ class MEDSDataset(FilStorage):
     def write_codes(self) -> None:
         dfs = []
         for file_path in self.data_path.rglob("*.parquet"):
-            _df = pl.scan_parquet(file_path).select(pl.col("code")).unique().collect("streaming")
+            _df = pl.scan_parquet(file_path).select(pl.col("code")).unique().collect(engine="streaming")
             dfs.append(_df)
 
         codes_df = pl.DataFrame(

@@ -34,3 +34,6 @@ class CollectionStep(BaseStep[CollectionStepConfig]):
 
             # TODO: add option for symlinking
             shutil.copy(file_path, dest_path)
+
+        self._dataset.write_metadata(self._config.dataset.metadata)
+        self._dataset.write_codes()

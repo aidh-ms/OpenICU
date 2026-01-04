@@ -15,6 +15,10 @@ class DatasetConfig(BaseModel):
         False,
         description="Whether to copy or symlink the files to the dataset.",
     )
+    metadata: dict[str, str] = Field(
+        default_factory=dict,
+        description="Metadata to add to the collected dataset.",
+    )
 
 
 class CollectingStepConfig(BaseModel):
