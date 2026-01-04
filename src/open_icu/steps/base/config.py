@@ -29,6 +29,7 @@ class ConfigFilter(BaseModel):
 
 
 class SubStepConfig(BaseModel):
+    name: str = Field(..., description="The name of the config.")
     path: Path = Field(..., description="The path to the output file.")
     overwrite: bool = Field(
         False, description="Whether to overwrite the file if it already exists."
