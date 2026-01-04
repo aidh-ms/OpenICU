@@ -1,6 +1,8 @@
 from pathlib import Path
 
 from open_icu.storage.base import FilStorage
+from open_icu.storage.meds import MEDSDataset
+from open_icu.storage.workspace import WorkspaceDir
 
 
 class OpenICUProject(FilStorage):
@@ -16,6 +18,9 @@ class OpenICUProject(FilStorage):
             self.workspace_path.mkdir(parents=True, exist_ok=True)
             self.configs_path.mkdir(parents=True, exist_ok=True)
 
+        self._datasets = {}
+        self._workspace = {}
+
     @property
     def datasets_path(self) -> Path:
         return self._path / "datasets"
@@ -28,4 +33,24 @@ class OpenICUProject(FilStorage):
     def configs_path(self) -> Path:
         return self._path / "configs"
 
-# add methods for creating datasets and workspace dir
+    @property
+    def workspace(self) -> dict[str, WorkspaceDir]:
+        return self._workspace
+
+    @property
+    def datasets(self) -> dict[str, MEDSDataset]:
+        return self._datasets
+
+    def add_workspace_dir(self, name: str, overwrite: bool = False) -> WorkspaceDir:
+        dir_path = self.workspace_path / name
+
+        workspace_dir = WorkspaceDir(dir_path, overwrite=overwrite)
+        self._workspace[name] = workspace_dir
+        return workspace_dir
+
+    def add_dataset(self, name: str, overwrite: bool = False) -> MEDSDataset:
+        dataset_path = self.datasets_path / name
+
+        dataset = MEDSDataset(dataset_path, overwrite=overwrite)
+        self._datasets[name] = dataset
+        return dataset

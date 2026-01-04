@@ -11,7 +11,7 @@ class FilStorage:
         self._path = path
 
         # Remove existing project directory if overwrite is True
-        if overwrite and self._path.exists():
+        if overwrite:
             self.cleanup()
         self._path.mkdir(parents=True, exist_ok=True)
 
