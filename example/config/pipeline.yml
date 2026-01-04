@@ -18,9 +18,9 @@ steps:
           path: /workspaces/config/dataset/eicu/2.0/
           dataset_path: /workspaces/example/data/eicu/2.0/
 
-  # - name: CollectionStep
-  #   config:
-  #     dataset:
-  #       name: raw
-  #     collecting:
-  #       - name: extraction
+  - name: CollectionStep
+    config:
+      dataset:
+        name: raw
+      collecting:
+        - name: extraction
