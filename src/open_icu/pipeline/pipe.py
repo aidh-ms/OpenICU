@@ -39,3 +39,5 @@ class Pipeline:
             step.post_run()
 
         self.teardown()
+
+# discover steps from workspace and skip if already done
