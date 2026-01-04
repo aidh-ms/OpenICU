@@ -15,8 +15,8 @@ class WorkspaceDirConfig(BaseModel):
 
 class BaseStepConfig(BaseModel, metaclass=ABCMeta):
     workspace: WorkspaceDirConfig = Field(
-        default_factory=lambda: WorkspaceDirConfig(),
-        description="Configuration for the workspace directory."
+        default_factory=lambda: WorkspaceDirConfig(name=None, overwrite=False),
+        description="Configuration for the step's workspace directory.",
     )
 
 
