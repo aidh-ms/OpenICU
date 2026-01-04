@@ -22,6 +22,20 @@ class Pipeline:
         config = PipelineConfig.load(path)
         return cls(config)
 
-    def run(self) -> None:
+    def setup(self) -> None:
         for step in self._steps:
+            step.setup()
+
+    def teardown(self) -> None:
+        for step in self._steps:
+            step.teardown()
+
+    def run(self) -> None:
+        self.setup()
+
+        for step in self._steps:
+            step.pre_run()
             step.run()
+            step.post_run()
+
+        self.teardown()
