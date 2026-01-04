@@ -63,17 +63,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             for callback in post_callbacks:
                 lf = callback.call(lf)
 
-            # Process each event
-            # codes_path = output_path / "metadata" / "codes.parquet"
-            # codes_path.parent.mkdir(parents=True, exist_ok=True)
-            # if codes_path.exists():
-            #     codes_lf = pl.scan_parquet(codes_path)
-            # else:
-            #     codes_lf = pl.LazyFrame(
-            #         {"code": [], "description": [], "parent_codes": []},
-            #         schema={"code": pl.String, "description": pl.String, "parent_codes": pl.String}
-            #     )
-
             for event in table.events:
                 event_lf = lf
 
@@ -133,28 +122,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 event_lf.sink_parquet(
                     output_file,
                 )
+                del event_lf
 
-                # event_codes_lf = event_lf.select("code").unique()
-                # event_codes_lf = event_codes_lf.with_columns([
-                #     pl.lit(None).alias("description").cast(pl.String),
-                #     pl.lit(None).alias("parent_codes").cast(pl.String)
-                # ])
-
-                # del event_lf
-                # gc.collect()
-
-                # # Collect unique codes
-                # codes_lf = pl.concat([
-                #     codes_lf,
-                #     event_codes_lf,
-                # ]).unique(subset=["code"])
-
-                # temp_codes_path = output_path / "metadata" / "codes_temp.parquet"
-                # codes_lf.sink_parquet(
-                #     temp_codes_path,
-                # )
-                # temp_codes_path.replace(codes_path)
-
-                del lf
-                # del codes_lf
-                gc.collect()
+            del lf
+            gc.collect()
