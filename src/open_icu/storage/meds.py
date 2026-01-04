@@ -17,9 +17,8 @@ class MEDSDataset(FilStorage):
     ) -> None:
         super().__init__(dataset_path, overwrite)
         # Create the MEDS dataset directory if it doesn't exist
-        if not self._path.exists():
-            self.data_path.mkdir(parents=True, exist_ok=True)
-            self.metadata_path.mkdir(parents=True, exist_ok=True)
+        self.data_path.mkdir(parents=True, exist_ok=True)
+        self.metadata_path.mkdir(parents=True, exist_ok=True)
 
     @property
     def data_path(self) -> Path:
