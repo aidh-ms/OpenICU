@@ -49,9 +49,9 @@ class BaseConfigRegistery[T: BaseConfig](ABC):
             config.save(path)
 
 
-def load_config[T: BaseConfig](file_path, config_type: type[T]) -> list[T]:
+def load_config[T: BaseConfig](path: Path, config_type: type[T]) -> list[T]:
     configs = []
-    for file_path in file_path.rglob("*.*"):
+    for file_path in path.rglob("*.*"):
         if (
             not file_path.is_file()
             or file_path.suffix.lower() not in {".yml", ".yaml"}
