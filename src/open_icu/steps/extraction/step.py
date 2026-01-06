@@ -1,16 +1,22 @@
 import gc
+from pathlib import Path
 
 import polars as pl
 
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
-from open_icu.steps.extraction.config.step import ExtractionStepConfig
+from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
-from open_icu.steps.registery import register_step
+from open_icu.steps.extraction.registery import dataset_config_registery
+from open_icu.storage.project import OpenICUProject
 
 
-@register_step
-class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
+class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
+    @classmethod
+    def load(cls, project: OpenICUProject, config_path: Path) -> "ExtractionStep":
+        config = ExtractionConfig.load(config_path)
+        return cls(project, config, dataset_config_registery)
+
     def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
         lf = pl.scan_csv(
             path / table.path,
@@ -39,12 +45,12 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
         return lf
 
-    def run(self) -> None:
+    def extract(self) -> None:
         paths = {
-            cfg.name: cfg.dataset_path
-            for cfg in self._config.files
+            cfg.name: cfg.path
+            for cfg in self._config.config.data
         }
-        for table in self._config_registery.values():
+        for table in self._registery.values():
             path = paths[table.dataset]
             lf = self._read_table(table, path)
 
@@ -114,7 +120,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 ] + [pl.col(col).cast(pl.String) for col in event.fields.extension.keys()])
 
                 # Ensure output directory exists
-                output_data_path = self._workspace.path / table.dataset / table.name
+                assert self._workspace_dir is not None
+                output_data_path = self._workspace_dir.path / table.dataset / table.name
                 output_data_path.mkdir(parents=True, exist_ok=True)
 
                 # Write to parquet with streaming

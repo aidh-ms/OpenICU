@@ -1,15 +1,18 @@
-from pathlib import Path
+from pydantic import BaseModel, Field
 
-from pydantic import Field
-
-from open_icu.steps.base.config import ConfigurableBaseStepConfig, SubStepConfig
+from open_icu.steps.base.config import BaseStepConfig
 
 
-class DatasetConfig(SubStepConfig):
-    dataset_path: Path = Field(..., description="The path to the dataset.")
+class DatasetConfig(BaseModel):
+    name: str = Field(..., description="Name of the dataset.")
+    path: str = Field(..., description="Path to the dataset.")
 
 
-class ExtractionStepConfig(ConfigurableBaseStepConfig):
-    files: list[DatasetConfig] = Field(
-        default_factory=list, description="A list of dataset configurations."
+class CustomConfig(BaseModel):
+    data: list[DatasetConfig] = Field(
+        default_factory=list, description="List of datasets to be extracted."
     )
+
+
+class ExtractionConfig(BaseStepConfig[CustomConfig]):
+    pass
