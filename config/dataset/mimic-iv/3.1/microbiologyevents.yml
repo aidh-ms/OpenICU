@@ -1,5 +1,7 @@
 name: microbiologyevents
 path: hosp/microbiologyevents.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes
@@ -146,7 +148,7 @@ events:
       time: charttime
       code:
         - spec_code
-        - spec_type_desc   
+        - spec_type_desc
       numeric_value: spec_itemid
   - name: test_item
     fields:
@@ -202,7 +204,7 @@ events:
       text_value: comments
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: comments
@@ -213,16 +215,16 @@ events:
       text_value: comments
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - text_value
   - name: caregiver_store
-    fields: 
+    fields:
       time: storetime
-      code: 
+      code:
         - caregiver_store_code
     callbacks:
       - callback: drop_na
-        params: 
+        params:
           columns:
             - time

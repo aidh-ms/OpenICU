@@ -1,16 +1,40 @@
 """
-OpenICU: A Python package for analysing time series data in the ICU.
+OpenICU: A Python framework for extracting and analyzing ICU time series data.
 
-This package provides a set of tools for analysing time series data in the ICU.
-It is designed to be modular and extensible, allowing users to easily add new data
-sources, filters, and analyses.
+This package provides tools for extracting, preprocessing, and analyzing ICU time
+series data from diverse datasets (MIMIC, eICU, etc.). It converts heterogeneous
+ICU data into the standardized MEDS (Medical Event Data Standard) format, enabling
+reproducible research workflows.
 
-Modules:
--
+Key Features:
+- Support for multiple ICU data sources (MIMIC, eICU, custom datasets)
+- Declarative YAML-based configuration for data extraction
+- Export to MEDS format for standardized analysis
+- Fully offline operation for medical data privacy compliance
+- Modular and extensible architecture
+
+Main Modules:
+- callbacks: Data transformation callbacks for LazyFrames
+- config: Configuration management and registry system
+- storage: Project, dataset, and workspace management
+- steps: Processing steps (extraction, concept)
+- utils: Utility functions and helpers
 
 Usage:
 ```python
+from pathlib import Path
 
+from open_icu import OpenICUProject, ExtractionStep
+
+
+config_path = Path.cwd() / "config"
+project_path = Path.cwd() / "output" / "project"
+
+# Create a new OpenICU project
+with OpenICUProject(project_path) as project:
+    # Load and run an extraction step
+    extraction_step = ExtractionStep.load(project, config_path / "extraction.yml")
+    extraction_step.run()
 ```
 
 Author:
@@ -42,3 +66,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 """
+
+from open_icu.steps.extraction.step import ExtractionStep
+from open_icu.storage.project import OpenICUProject
+
+__all__ = [
+    "OpenICUProject",
+    "ExtractionStep",
+]

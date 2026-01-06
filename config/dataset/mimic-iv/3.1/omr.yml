@@ -1,5 +1,7 @@
 name: omr # online medical record
 path: hosp/omr.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes
@@ -19,7 +21,7 @@ fields:
     constant: -1
   - name: src_db_id
     type: string
-    constant: mimic 
+    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -40,7 +42,7 @@ events:
     fields:
       subject_id: subject_id
       time: chartdate
-      code: 
+      code:
         - src_table_code
         - omr_code
         - result_name
