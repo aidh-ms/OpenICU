@@ -43,8 +43,10 @@ SOFTWARE.
 ```
 """
 
-from open_icu.pipeline.pipe import Pipeline
+from open_icu.steps.extraction.step import ExtractionStep
+from open_icu.storage.project import OpenICUProject
 
 __all__ = [
-    "Pipeline",
+    "OpenICUProject",
+    "ExtractionStep",
 ]
