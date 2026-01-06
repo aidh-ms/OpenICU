@@ -6,61 +6,36 @@ from pydantic import BaseModel, Field
 from open_icu.config.base import BaseConfig
 
 
-class WorkspaceDirConfig(BaseModel):
-    name: str | None = Field(None, description="The name of the workspace directory.")
+class DatasetConfig(BaseModel):
+    metadata: dict[str, str] = Field(
+        default_factory=dict,
+        description="Metadata to be associated with the dataset.",
+    )
+
+
+class ConfigFileConfig(BaseModel):
+    path: Path = Field(..., description="The path to the configuration file.")
+    overwrite: bool = Field(
+        False, description="Whether to overwrite the configuration file if it already exists."
+    )
+    includes: list[str] | None = Field(
+        default=None, description="List of sections to include from the config file."
+    )
+    excludes: list[str] | None = Field(
+        default=None, description="List of sections to exclude from the config file."
+    )
+
+
+class BaseStepConfig[T: BaseModel](BaseConfig, metaclass=ABCMeta):
     overwrite: bool = Field(
         False, description="Whether to overwrite the workspace dir if it already exists."
     )
-
-
-class BaseStepConfig(BaseModel, metaclass=ABCMeta):
-    workspace: WorkspaceDirConfig = Field(
-        default_factory=lambda: WorkspaceDirConfig(name=None, overwrite=False),
-        description="Configuration for the step's workspace directory.",
+    config_files: list[ConfigFileConfig] = Field(
+        default_factory=list,
+        description="List of configuration files to be used by the step.",
     )
-
-
-class ConfigFilter(BaseModel):
-    name: str = Field(..., description="The name of the config.")
-    version: str | None = Field(
-        None, description="The version of the config, if applicable."
-    )
-
-
-class SubStepConfig(BaseModel):
-    name: str = Field(..., description="The name of the config.")
-    path: Path = Field(..., description="The path to the output file.")
-    overwrite: bool = Field(
-        False, description="Whether to overwrite the file if it already exists."
-    )
-    filters: list[ConfigFilter] = Field(
-        default_factory=list, description="A list of filters to apply when selecting configs."
-    )
-
-    def matches(self, config: BaseConfig) -> bool:
-        if not self.filters:
-            return True
-
-        for config_filter in self.filters:
-            if (
-                config.name == config_filter.name and
-                (config_filter.version is None or config.version == config_filter.version)
-            ):
-                return True
-        return False
-
-    def filter[T: BaseConfig](self, configs: list[T]) -> list[T]:
-        if not self.filters:
-            return configs
-
-        filtered_configs = []
-        for config in configs:
-            if self.matches(config):
-                filtered_configs.append(config)
-        return filtered_configs
-
-
-class ConfigurableBaseStepConfig(BaseStepConfig, metaclass=ABCMeta):
-    files: list[SubStepConfig] = Field(
-        default_factory=list, description="A list of sub-step configurations."
+    config: T  = Field(..., description="Additional configuration specific to the step.")
+    dataset: DatasetConfig = Field(
+        default_factory=DatasetConfig,
+        description="Configuration for the dataset produced by the step.",
     )

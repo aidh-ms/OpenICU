@@ -39,9 +39,21 @@ class BaseConfigRegistery[T: BaseConfig](ABC):
     def items(self) -> list[tuple[str, T]]:
         return list(self._registry.items())
 
-    def load(self, file_path: Path, overwrite: bool = False) -> None:
+    def load(
+        self,
+        file_path: Path,
+        overwrite: bool = False,
+        includes: list[str] | None = None,
+        excludes: list[str] | None = None,
+    ) -> None:
         for config in load_config(file_path, self._config_type):
+            if excludes is not None and config.name in excludes:
+                continue
+            if includes is not None and config.name not in includes:
+                continue
+
             self.register(config, overwrite=overwrite)
+
 
     def save(self, path: Path) -> None:
         path.mkdir(parents=True, exist_ok=True)
@@ -58,6 +70,10 @@ def load_config[T: BaseConfig](path: Path, config_type: type[T]) -> list[T]:
         ):
             continue
 
-        config = config_type.load(file_path)
+        try:
+            config = config_type.load(file_path)
+        except Exception:
+            continue  # TODO: log error
+
         configs.append(config)
     return configs

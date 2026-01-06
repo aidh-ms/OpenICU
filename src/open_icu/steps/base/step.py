@@ -1,92 +1,85 @@
 import shutil
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, cast
 
 from open_icu.config.base import BaseConfig
 from open_icu.config.registery import BaseConfigRegistery
-from open_icu.pipeline.context import PipelineContext
-from open_icu.steps.base.config import BaseStepConfig, ConfigurableBaseStepConfig
-from open_icu.utils.type import get_generic_type
+from open_icu.steps.base.config import BaseStepConfig
+from open_icu.storage.project import OpenICUProject
+from open_icu.storage.workspace import WorkspaceDir
 
 
-class BaseStep[T: BaseStepConfig](ABC):
-    def __init__(self, context: PipelineContext, config: dict[str, Any]) -> None:
-        self._context = context
-        self._config = self._config_type(**config)
+class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMeta):
+    def __init__(self, project: OpenICUProject, config: SCT, registery: BaseConfigRegistery[CT]) -> None:
+        self._project = project
+        self._config = config
+        self._registery = registery
+        self._workspace_dir = None
+        self._dataset = None
+        self._step_name = self._config.name.lower()
 
-    @property
-    def _config_type(self) -> type[T]:
-        t = get_generic_type(self.__class__)
-        return cast(type[T], t)
-
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
-
-    def setup(self) -> None:
-        pass
-
-    def teardown(self) -> None:
-        pass
-
-    def pre_run(self) -> None:
-        name = self._config.workspace.name
-        if name is None:
-            name = self.name
-
-        self._workspace = self._context.project.add_workspace_dir(
-            name=name,
-            overwrite=self._config.workspace.overwrite,
-        )
-
-    def post_run(self) -> None:
+    @classmethod
+    @abstractmethod
+    def load(cls, project: OpenICUProject, config_path: Path) -> "ConfigurableBaseStep[SCT, CT]":
         pass
 
     @abstractmethod
-    def run(self) -> None:
+    def extract(self) -> None:
         pass
 
+    def run(self) -> WorkspaceDir:
+        sikp = (
+            not self._config.overwrite
+            and (self._project.workspace_path / self._step_name).exists()
+            and (self._project.datasets_path / self._step_name).exists()
+        )
 
-class ConfigurableBaseStep[PCT: ConfigurableBaseStepConfig, SCT: BaseConfig](BaseStep[PCT], metaclass=ABCMeta):
-    def __init__(self, context: PipelineContext, config: dict[str, Any]) -> None:
-        super().__init__(context, config)
+        self.setup_config()
+        self.setup_project()
+        if not sikp:
+            self.extract()
+            self.hooks()
+            self.collect()
 
-        self._config_registery = self._create_registry()
+        assert isinstance(self._workspace_dir, WorkspaceDir)
+        return self._workspace_dir
 
-    @property
-    def _subconfig_type(self) -> type[SCT]:
-        t = get_generic_type(self.__class__, 1)
-        return cast(type[SCT], t)
+    def setup_config(self) -> None:
+        for config in self._config.config_files:
+            self._registery.load(
+                config.path,
+                overwrite=config.overwrite,
+                includes=config.includes,
+                excludes=config.excludes
+            )
 
-    @property
-    def registery(self) -> BaseConfigRegistery[SCT]:
-        return self._config_registery
+        self._registery.save(self._project.configs_path)
 
-    def _create_registry(self) -> BaseConfigRegistery[SCT]:
-        class _Registry(BaseConfigRegistery[self._subconfig_type]):  # type: ignore[invalid-type-form]
-            pass
-        return _Registry()
+    def setup_project(self) -> None:
+        self._workspace_dir = self._project.add_workspace_dir(
+            name=self._step_name,
+            overwrite=self._config.overwrite,
+        )
 
-    def setup(self) -> None:
-        for sub_config in self._config.files:
-            for file_path in sub_config.path.rglob("*.*"):
-                if (
-                    not file_path.is_file()
-                    or file_path.suffix.lower() not in {".yml", ".yaml"}
-                ):
-                    continue
+        self._dataset = self._project.add_dataset(
+            name=self._step_name,
+            overwrite=self._config.overwrite,
+        )
 
-                try:
-                    config = self._subconfig_type.load(file_path)
-                except Exception:
-                    continue
+    def hooks(self) -> None:
+        # TODO run hooks from registery after extraction
+        pass
 
-                if not sub_config.matches(config):
-                    continue
+    def collect(self) -> None:
+        if self._workspace_dir is None or self._dataset is None:
+            return
 
-                self._config_registery.register(config, overwrite=sub_config.overwrite)
+        for file_path in self._workspace_dir.content:
+            relative_path = file_path.relative_to(self._workspace_dir._path)
+            dest_path = self._dataset.data_path / relative_path
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
 
-                project_config_path = Path(self._context.project.configs_path, *config.identifier_tuple).with_suffix(".yml")
-                project_config_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy(file_path, project_config_path)
+            shutil.copy(file_path, dest_path)
+
+        self._dataset.write_metadata(self._config.dataset.metadata)
+        self._dataset.write_codes()
