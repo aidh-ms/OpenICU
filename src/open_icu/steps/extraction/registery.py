@@ -9,7 +9,7 @@ from open_icu.config.registery import BaseConfigRegistry
 from open_icu.steps.extraction.config.table import TableConfig
 
 
-class DatasetConfigRegistery(BaseConfigRegistry[TableConfig]):
+class DatasetConfigRegistry(BaseConfigRegistry[TableConfig]):
     """Registry for table configuration objects.
 
     Specialized registry for storing and retrieving TableConfig instances
@@ -19,5 +19,5 @@ class DatasetConfigRegistery(BaseConfigRegistry[TableConfig]):
 
     pass
 
-dataset_config_registery = DatasetConfigRegistery()
+dataset_config_registery = DatasetConfigRegistry()
 """Global singleton instance of the dataset configuration registry."""
