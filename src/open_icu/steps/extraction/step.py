@@ -1,3 +1,10 @@
+"""Extraction step implementation for converting ICU data to MEDS format.
+
+This module implements the ExtractionStep class that orchestrates the extraction
+of data from source CSV files, applies transformations via callbacks, performs
+joins, and outputs MEDS-compliant Parquet files.
+"""
+
 import gc
 from pathlib import Path
 
@@ -12,12 +19,39 @@ from open_icu.storage.project import OpenICUProject
 
 
 class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
+    """Data extraction step for transforming source ICU data to MEDS format.
+
+    Reads CSV files specified in TableConfig objects, applies pre/post callbacks,
+    performs table joins, extracts events with field mappings, and writes
+    MEDS-compliant Parquet files to the workspace directory.
+    """
     @classmethod
     def load(cls, project: OpenICUProject, config_path: Path) -> "ExtractionStep":
+        """Load an extraction step from a configuration file.
+
+        Args:
+            project: The OpenICU project to operate within
+            config_path: Path to the extraction configuration YAML file
+
+        Returns:
+            An initialized ExtractionStep instance
+        """
         config = ExtractionConfig.load(config_path)
         return cls(project, config, dataset_config_registery)
 
     def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
+        """Read and transform a table from CSV.
+
+        Scans the CSV file, applies schema overrides, executes pre-callbacks,
+        adds constant fields, converts datetime fields, and executes callbacks.
+
+        Args:
+            table: Configuration for the table to read
+            path: Base path to the data directory
+
+        Returns:
+            LazyFrame with the transformed table data
+        """
         lf = pl.scan_csv(
             path / table.path,
             schema_overrides=table.dtypes,
@@ -46,6 +80,17 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         return lf
 
     def extract(self) -> None:
+        """Execute the data extraction workflow.
+
+        For each table configuration in the registry:
+        1. Read the source table
+        2. Perform joins with related tables
+        3. Apply post-processing callbacks
+        4. Extract events with field mappings
+        5. Write MEDS-compliant Parquet files
+
+        The extracted data is written to workspace_dir/dataset/table/event.parquet
+        """
         paths = {
             cfg.name: cfg.path
             for cfg in self._config.config.data

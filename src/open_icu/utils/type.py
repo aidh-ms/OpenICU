@@ -1,3 +1,10 @@
+"""Type introspection utilities for generic type resolution.
+
+This module provides functions for extracting generic type parameters from
+classes at runtime, which is useful for implementing generic base classes
+that need to know their concrete type arguments.
+"""
+
 from types import get_original_bases
 from typing import Any, get_args
 

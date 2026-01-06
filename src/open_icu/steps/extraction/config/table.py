@@ -1,3 +1,9 @@
+"""Table configuration models for data extraction.
+
+This module defines configurations for source tables, including field definitions,
+callback transformations, join specifications, and event extraction rules.
+"""
+
 from abc import ABCMeta
 from enum import StrEnum, auto
 from typing import Any
@@ -12,10 +18,26 @@ from open_icu.steps.extraction.config.field import ConstantFieldConfig, FieldCon
 
 
 class TableType(StrEnum):
+    """Supported table file formats."""
+
     CSV = auto()
 
 
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
+    """Abstract base configuration for table extraction.
+
+    Defines fields, data types, and callback transformations for reading
+    and processing a source table.
+
+    Attributes:
+        path: File path to the table data relative to dataset root
+        type: Table file format (currently only CSV supported)
+        fields: List of field/column configurations
+        pre_callbacks: Callbacks to apply before field processing
+        callbacks: Callbacks to apply after field processing
+        post_callbacks: Callbacks to apply after all transformations
+        dtypes: Computed dictionary mapping field names to Polars types
+    """
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     path: str = Field(..., description="The file path to the table data.")
@@ -48,6 +70,17 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
 
 
 class JsonTableConfig(BaseTableConfig):
+    """Configuration for a table to join with the main table.
+
+    Extends BaseTableConfig with join specification parameters.
+
+    Attributes:
+        both_on: Columns to join on (same name in both tables)
+        left_on: Columns in the left (main) table for the join
+        right_on: Columns in the right (join) table for the join
+        how: Join type ("left", "inner", "outer", "right")
+        join_params: Computed dictionary of join parameters for Polars
+    """
     both_on: list[str] = Field(
         default_factory=list,
         description="List of fields to be used for joining table on both sides.",
@@ -80,6 +113,17 @@ class JsonTableConfig(BaseTableConfig):
 
 
 class TableConfig(BaseConfig, BaseTableConfig):
+    """Complete configuration for extracting MEDS events from a table.
+
+    Combines BaseConfig (for versioning/identification) with BaseTableConfig
+    (for table processing) and adds event extraction specifications. Event
+    field defaults can be specified to reduce repetition across events.
+
+    Attributes:
+        dataset: Name of the dataset this table belongs to
+        join: List of tables to join before event extraction
+        events: List of MEDS events to extract from this table
+    """
     dataset: str = Field(..., description="The dataset this table belongs to.")
     join: list[JsonTableConfig] = Field(
         default_factory=list,
