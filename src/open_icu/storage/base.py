@@ -8,7 +8,7 @@ from pathlib import Path
 from shutil import rmtree
 
 
-class FilStorage:
+class FileStorage:
     """Base class for file system storage management.
 
     Manages a directory path with support for initialization, cleanup,

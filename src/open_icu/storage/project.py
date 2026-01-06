@@ -7,12 +7,12 @@ and configuration files.
 
 from pathlib import Path
 
-from open_icu.storage.base import FilStorage
+from open_icu.storage.base import FileStorage
 from open_icu.storage.meds import MEDSDataset
 from open_icu.storage.workspace import WorkspaceDir
 
 
-class OpenICUProject(FilStorage):
+class OpenICUProject(FileStorage):
     """OpenICU project directory manager.
 
     Manages the complete OpenICU project structure with separate directories

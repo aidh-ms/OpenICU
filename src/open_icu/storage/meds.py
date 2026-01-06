@@ -13,10 +13,10 @@ import polars as pl
 from meds._version import __version__ as meds_version
 from meds.schema import DatasetMetadataSchema
 
-from open_icu.storage.base import FilStorage
+from open_icu.storage.base import FileStorage
 
 
-class MEDSDataset(FilStorage):
+class MEDSDataset(FileStorage):
     """MEDS format dataset storage manager.
 
     Manages a MEDS-compliant dataset directory structure with separate

@@ -6,10 +6,10 @@ directories used to store intermediate processing results.
 
 from pathlib import Path
 
-from open_icu.storage.base import FilStorage
+from open_icu.storage.base import FileStorage
 
 
-class WorkspaceDir(FilStorage):
+class WorkspaceDir(FileStorage):
     """Workspace directory for storing intermediate processing data.
 
     Extends FilStorage to provide specific functionality for workspace
