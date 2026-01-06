@@ -38,7 +38,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         _dataset: Output dataset for final results
         _step_name: Normalized name of this step (lowercase)
     """
-    def __init__(self, project: OpenICUProject, config: SCT, registery: BaseConfigRegistry[CT]) -> None:
+    def __init__(self, project: OpenICUProject, config: SCT, registry: BaseConfigRegistry[CT]) -> None:
         """Initialize the processing step.
 
         Args:
@@ -48,7 +48,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         """
         self._project = project
         self._config = config
-        self._registery = registery
+        self._registry = registry
         self._workspace_dir = None
         self._dataset = None
         self._step_name = self._config.name.lower()
@@ -117,14 +117,14 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         configs directory.
         """
         for config in self._config.config_files:
-            self._registery.load(
+            self._registry.load(
                 config.path,
                 overwrite=config.overwrite,
                 includes=config.includes,
                 excludes=config.excludes
             )
 
-        self._registery.save(self._project.configs_path)
+        self._registry.save(self._project.configs_path)
 
     def setup_project(self) -> None:
         """Create workspace and dataset directories for this step.

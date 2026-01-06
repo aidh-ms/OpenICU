@@ -95,7 +95,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             cfg.name: cfg.path
             for cfg in self._config.config.data
         }
-        for table in self._registery.values():
+        for table in self._registry.values():
             path = paths[table.dataset]
             lf = self._read_table(table, path)
 
