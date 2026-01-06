@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import BaseModel, Field
 
 from open_icu.steps.base.config import BaseStepConfig
@@ -5,7 +7,7 @@ from open_icu.steps.base.config import BaseStepConfig
 
 class DatasetConfig(BaseModel):
     name: str = Field(..., description="Name of the dataset.")
-    path: str = Field(..., description="Path to the dataset.")
+    path: Path = Field(..., description="Path to the dataset.")
 
 
 class CustomConfig(BaseModel):
