@@ -92,7 +92,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         Note:
             Skip execution if overwrite=False and both workspace and dataset exist
         """
-        sikp = (
+        skip = (
             not self._config.overwrite
             and (self._project.workspace_path / self._step_name).exists()
             and (self._project.datasets_path / self._step_name).exists()
@@ -100,7 +100,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
 
         self.setup_config()
         self.setup_project()
-        if not sikp:
+        if not skip:
             self.extract()
             self.hooks()
             self.collect()
