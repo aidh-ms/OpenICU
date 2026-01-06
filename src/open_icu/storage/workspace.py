@@ -7,4 +7,4 @@ class WorkspaceDir(FilStorage):
 
     @property
     def content(self) -> list[Path]:
-        return list(self._path.rglob("*.parquet"))
+        return list(self._path.rglob("*.parquet"))  # TODO: make more informative

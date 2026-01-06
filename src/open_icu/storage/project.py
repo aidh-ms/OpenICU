@@ -21,6 +21,12 @@ class OpenICUProject(FilStorage):
         self._datasets = {}
         self._workspace = {}
 
+    def __enter__(self) -> "OpenICUProject":
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        pass
+
     @property
     def datasets_path(self) -> Path:
         return self._path / "datasets"
