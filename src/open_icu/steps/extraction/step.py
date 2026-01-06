@@ -14,7 +14,7 @@ from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
-from open_icu.steps.extraction.registery import dataset_config_registery
+from open_icu.steps.extraction.registry import dataset_config_registery
 from open_icu.storage.project import OpenICUProject
 
 

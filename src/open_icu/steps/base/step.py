@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
 from open_icu.config.base import BaseConfig
-from open_icu.config.registery import BaseConfigRegistry
+from open_icu.config.registry import BaseConfigRegistry
 from open_icu.steps.base.config import BaseStepConfig
 from open_icu.storage.project import OpenICUProject
 from open_icu.storage.workspace import WorkspaceDir

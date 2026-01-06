@@ -5,7 +5,7 @@ used in the extraction step. The global dataset_config_registery instance
 stores all loaded table configurations.
 """
 
-from open_icu.config.registery import BaseConfigRegistry
+from open_icu.config.registry import BaseConfigRegistry
 from open_icu.steps.extraction.config.table import TableConfig
 
 
