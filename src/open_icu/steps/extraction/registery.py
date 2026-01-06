@@ -5,11 +5,11 @@ used in the extraction step. The global dataset_config_registery instance
 stores all loaded table configurations.
 """
 
-from open_icu.config.registery import BaseConfigRegistery
+from open_icu.config.registery import BaseConfigRegistry
 from open_icu.steps.extraction.config.table import TableConfig
 
 
-class DatasetConfigRegistery(BaseConfigRegistery[TableConfig]):
+class DatasetConfigRegistery(BaseConfigRegistry[TableConfig]):
     """Registry for table configuration objects.
 
     Specialized registry for storing and retrieving TableConfig instances

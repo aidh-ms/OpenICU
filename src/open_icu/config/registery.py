@@ -13,7 +13,7 @@ from open_icu.config.base import BaseConfig
 from open_icu.utils.type import get_generic_type
 
 
-class BaseConfigRegistery[T: BaseConfig](ABC):
+class BaseConfigRegistry[T: BaseConfig](ABC):
     """Generic registry for configuration objects.
 
     Stores configuration instances indexed by their unique identifiers.

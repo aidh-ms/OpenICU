@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
 from open_icu.config.base import BaseConfig
-from open_icu.config.registery import BaseConfigRegistery
+from open_icu.config.registery import BaseConfigRegistry
 from open_icu.steps.base.config import BaseStepConfig
 from open_icu.storage.project import OpenICUProject
 from open_icu.storage.workspace import WorkspaceDir
@@ -38,7 +38,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         _dataset: Output dataset for final results
         _step_name: Normalized name of this step (lowercase)
     """
-    def __init__(self, project: OpenICUProject, config: SCT, registery: BaseConfigRegistery[CT]) -> None:
+    def __init__(self, project: OpenICUProject, config: SCT, registery: BaseConfigRegistry[CT]) -> None:
         """Initialize the processing step.
 
         Args:
