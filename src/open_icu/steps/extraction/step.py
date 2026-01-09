@@ -11,6 +11,7 @@ from pathlib import Path
 import polars as pl
 
 from open_icu.steps.base.step import ConfigurableBaseStep
+from open_icu.steps.extraction.config.callback import CallbackConfig
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
@@ -60,7 +61,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         )
         lf = lf.select(table.dtypes.keys())
 
-        for callback in table.pre_callbacks:
+        for target, expression in table.pre_callbacks:
+            callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
             lf = callback.call(lf)
 
         for field in table.fields:
@@ -74,8 +76,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
                 )
 
-        for callback in table.callbacks:
-            lf = callback.call(lf)
+        for target, expression in table.callbacks:
+            callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
+            lf = callback.call(lf) # callback.call object, (lf) __call__(), ast
 
         return lf
 
@@ -111,7 +114,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 )
                 post_callbacks.extend(join_table.post_callbacks)
 
-            for callback in post_callbacks:
+            for target, expression in post_callbacks:
+                callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
                 lf = callback.call(lf)
 
             for event in table.events:
