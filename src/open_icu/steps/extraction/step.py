@@ -39,7 +39,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         config = ExtractionConfig.load(config_path)
         return cls(project, config, dataset_config_registery)
 
-    def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
+    def _read_table(self, table: BaseTableConfig, path: Path) -> pl.LazyFrame:
         """Read and transform a table from CSV.
 
         Scans the CSV file, applies schema overrides, executes pre-callbacks,
