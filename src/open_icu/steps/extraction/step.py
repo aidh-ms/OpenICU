@@ -115,7 +115,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     **join_table.join_params  # type: ignore[arg-type]
                 )
                 post_callbacks.extend(join_table.post_callbacks)
-
+            print(post_callbacks)
             for target, expression in post_callbacks:
                 print(target, expression)
                 callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
