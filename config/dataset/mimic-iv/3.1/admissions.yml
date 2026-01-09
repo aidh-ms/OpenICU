@@ -90,6 +90,9 @@ fields:
     type: string
   - name: race
     type: string
+post_callbacks: # example, to be removed later
+  - res: subtract(200,3)
+  - res: subtract(res,7)
 
 event_defaults:
   subject_id: subject_id
@@ -101,6 +104,12 @@ event_defaults:
     src_db_id: src_db_id
 
 events:
+  - name: testing
+    fields:
+      time: admittime
+      code:
+        - admission_code
+      numeric_value: res
   - name: admission
     fields:
       time: admittime
