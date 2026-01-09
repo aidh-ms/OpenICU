@@ -62,6 +62,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         lf = lf.select(table.dtypes.keys())
 
         for target, expression in table.pre_callbacks:
+            print(target, expression)
             callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
             lf = callback.call(lf)
 
@@ -77,6 +78,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 )
 
         for target, expression in table.callbacks:
+            print(target, expression)
             callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
             lf = callback.call(lf) # callback.call object, (lf) __call__(), ast
 
@@ -115,6 +117,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 post_callbacks.extend(join_table.post_callbacks)
 
             for target, expression in post_callbacks:
+                print(target, expression)
                 callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
                 lf = callback.call(lf)
 
