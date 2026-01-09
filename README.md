@@ -25,8 +25,8 @@ This is a project to unify and extract data from different ICU data sources.
     ```
 
 3. **Update environment variables:**
-    - Copy the `.devcontainer/local.env.example` file to `.devcontainer/local.env`.
-    - Modify the `.devcontainer/local.env` file to set any local environment variables, such as `DATA_FOLDER`.
+    - Copy the `.devcontainer/example.env` file to `.devcontainer/.env`.
+    - Modify the `.devcontainer/.env` file to set any local environment variables, such as `DATA_FOLDER`.
 
 
 4. **Reopen in Container:**
