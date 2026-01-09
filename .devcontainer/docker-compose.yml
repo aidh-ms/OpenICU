@@ -16,7 +16,6 @@ services:
       - NO_PROXY="127.0.0.1,localhost"
     env_file:
       - .env
-      - dev.env
       - path: local.env
         required: false
     volumes:

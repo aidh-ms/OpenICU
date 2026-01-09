@@ -24,7 +24,12 @@ This is a project to unify and extract data from different ICU data sources.
     code .
     ```
 
-3. **Reopen in Container:**
+3. **Update environment variables:**
+    - Copy the `.devcontainer/local.env.example` file to `.devcontainer/local.env`.
+    - Modify the `.devcontainer/local.env` file to set any local environment variables, such as `DATA_FOLDER`.
+
+
+4. **Reopen in Container:**
     - Press `F1` to open the command palette.
     - Type `Remote-Containers: Reopen in Container` and select it.
     - VS Code will build the Docker container defined in the `.devcontainer` folder and open the project inside the container.
