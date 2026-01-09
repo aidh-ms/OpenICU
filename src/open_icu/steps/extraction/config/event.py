@@ -103,6 +103,6 @@ class EventConfig(BaseModel):
     """
     name: str = Field(..., description="The name of the event.")
     fields: MEDSEventFieldConfig = Field(..., description="The field configuration for the event.")
-    callbacks: list[CallbackConfig] = Field(
+    callbacks: list[dict[str, str]] = Field(
         default_factory=list, description="The list of callback configurations for the event."
     )
