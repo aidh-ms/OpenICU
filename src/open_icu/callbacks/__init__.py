@@ -16,6 +16,8 @@ __all__ = [
 
     "FirstNotNull",
 
+    "AbstractSyntaxTree",
+
     "Add",
     "Sum",
     "Subtract",
