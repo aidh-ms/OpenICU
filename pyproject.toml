@@ -43,10 +43,10 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "jupyterlab>=4.4.3",
-    "mypy>=1.16.0",
     "pytest>=8.4.0",
     "pytest-cov>=6.2.1",
     "ruff>=0.11.13",
+    "ty>=0.0.1a29",
 ]
 docs = [
     "mkdocs>=1.6.1",
