@@ -16,7 +16,7 @@ services:
       - NO_PROXY="127.0.0.1,localhost"
     env_file:
       - dev.env
-      - path: env
+      - path: .env
         required: false
     volumes:
       - ..:/workspaces:cached
