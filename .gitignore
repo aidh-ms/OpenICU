@@ -163,3 +163,4 @@ cython_debug/
 # pipeline output
 examples/output/
 .env
+.claude/*
