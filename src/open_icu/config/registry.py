@@ -10,7 +10,10 @@ from pathlib import Path
 from typing import cast
 
 from open_icu.config.base import BaseConfig
+from open_icu.logging import get_logger
 from open_icu.utils.type import get_generic_type
+
+logger = get_logger(__name__)
 
 
 class BaseConfigRegistry[T: BaseConfig](ABC):
@@ -118,12 +121,15 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             excludes: If specified, skip configurations with these names
         """
         for config in load_config(file_path, self._config_type):
-            if excludes is not None and config.name in excludes:
-                continue
-            if includes is not None and config.name not in includes:
+            if (
+                (excludes is not None and config.name in excludes) or
+                (includes is not None and config.name not in includes)
+            ):
+                logger.info("Skip loading configuration: %s", config.identifier)
                 continue
 
             self.register(config, overwrite=overwrite)
+            logger.info("Loaded configuration: %s", config.identifier)
 
 
     def save(self, path: Path) -> None:
