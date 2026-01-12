@@ -10,12 +10,15 @@ from pathlib import Path
 
 import polars as pl
 
+from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registery
 from open_icu.storage.project import OpenICUProject
+
+logger = get_logger(__name__)
 
 
 class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
@@ -52,8 +55,12 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         Returns:
             LazyFrame with the transformed table data
         """
+        file_path = path / table.path
+        if not file_path.exists():
+            raise FileNotFoundError(f"file not found ({file_path})")
+
         lf = pl.scan_csv(
-            path / table.path,
+            file_path,
             schema_overrides=table.dtypes,
             infer_schema=False,
             low_memory=True,
@@ -96,21 +103,30 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             for cfg in self._config.config.data
         }
         for table in self._registry.values():
-            path = paths[table.dataset]
-            lf = self._read_table(table, path)
+            path = paths.get(table.dataset)
+            if path is None:
+                logger.warning("skipping table %s: dataset path not found (%s)", table.name, path)
+                continue
 
-            post_callbacks = [*table.post_callbacks]
-            for join_table in table.join:
-                # Use broadcast join with small right table
-                join_lf = self._read_table(join_table, path)
-                lf = lf.join(
-                    join_lf,
-                    how=join_table.how,  # type: ignore[arg-type]
-                    coalesce=True,  # Reduces memory by coalescing join keys
-                    **join_table.join_params  # type: ignore[arg-type]
-                )
-                post_callbacks.extend(join_table.post_callbacks)
+            try:
+                lf = self._read_table(table, path)
 
+                post_callbacks = [*table.post_callbacks]
+                for join_table in table.join:
+                    # Use broadcast join with small right table
+                    join_lf = self._read_table(join_table, path)
+                    lf = lf.join(
+                        join_lf,
+                        how=join_table.how,  # type: ignore[arg-type]
+                        coalesce=True,  # Reduces memory by coalescing join keys
+                        **join_table.join_params  # type: ignore[arg-type]
+                    )
+                    post_callbacks.extend(join_table.post_callbacks)
+            except FileNotFoundError as e:
+                logger.warning("skipping table %s: %s", table.name, e)
+                continue
+
+            logger.info("processing table %s", table.name)
             for callback in post_callbacks:
                 lf = callback.call(lf)
 
