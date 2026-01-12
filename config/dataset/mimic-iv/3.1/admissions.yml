@@ -1,5 +1,5 @@
 name: admissions
-path: hosp/admissions.csv
+path: hosp/admissions.csv.gz
 version: "3.1"
 dataset: mimic-iv
 

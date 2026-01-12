@@ -1,5 +1,5 @@
 name: services
-path: hosp/services.csv
+path: hosp/services.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
