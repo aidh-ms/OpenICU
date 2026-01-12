@@ -1,5 +1,8 @@
 name: diagnoses_icd
 path: hosp/diagnoses_icd.csv
+version: "3.1"
+dataset: mimic-iv
+
 fields:
   # general codes
   - name: src_table_code

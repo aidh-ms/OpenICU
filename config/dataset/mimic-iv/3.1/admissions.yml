@@ -1,5 +1,7 @@
 name: admissions
 path: hosp/admissions.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes

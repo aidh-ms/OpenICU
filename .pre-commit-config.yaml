@@ -18,8 +18,12 @@ repos:
       entry: uv run ruff check --fix
       language: system
       types: [python]
-    - id: mypy
-      name: mypy
-      entry: uv run mypy
+    - id: ty
+      name: ty
+      entry: uv run ty check
       language: system
       types: [python]
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.6.1
+    hooks:
+      - id: nbstripout

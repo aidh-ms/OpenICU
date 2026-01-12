@@ -1,5 +1,7 @@
 name: hcpcsevents
 path: hosp/hcpcsevents.csv
+version: "3.1"
+dataset: mimic-iv
 
 fields:
   # general codes
