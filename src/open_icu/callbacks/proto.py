@@ -73,22 +73,3 @@ class FrameCallback(CallbackProtocol):
             A transformed LazyFrame.
         """
         return self.as_field(lf)
-    
-class HybridCallback(ExpressionCallback, FrameCallback):
-    """Callback that supports both expression-level and frame-level usage.
-
-    Hybrid callbacks can be embedded in expression contexts (via
-    `as_expression`) and can also be applied directly to a `LazyFrame`
-    (via `as_field`).
-    """
-
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the frame-level transformation.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A transformed LazyFrame.
-        """
-        return self.as_field(lf)
