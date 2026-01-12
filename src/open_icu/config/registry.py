@@ -9,6 +9,8 @@ from abc import ABC
 from pathlib import Path
 from typing import cast
 
+from pydantic import ValidationError
+
 from open_icu.config.base import BaseConfig
 from open_icu.logging import get_logger
 from open_icu.utils.type import get_generic_type
@@ -170,8 +172,9 @@ def load_config[T: BaseConfig](path: Path, config_type: type[T]) -> list[T]:
 
         try:
             config = config_type.load(file_path)
-        except Exception:
-            continue  # TODO: log error
+        except ValidationError:
+            logger.warning("failed to load config from %s", file_path)
+            continue
 
         configs.append(config)
     return configs
