@@ -1,12 +1,12 @@
 import polars as pl
-from polars import LazyFrame
+from polars import LazyFrame, Expr
 
-from open_icu.callbacks.proto import CallbackProtocol
+from open_icu.callbacks.proto import CallbackProtocol, ExpressionCallback
 from open_icu.callbacks.registry import register_callback_class
 
 
 @register_callback_class
-class FirstNotNull(CallbackProtocol):
+class FirstNotNull(ExpressionCallback):
     """Create a column by selecting the first non-null value across columns.
 
     This callback evaluates a list of source columns row-wise and assigns the
@@ -39,3 +39,6 @@ class FirstNotNull(CallbackProtocol):
         return lf.with_columns(
             pl.coalesce([pl.col(col) for col in self.fields]).alias(self.result)
         )
+    
+    def as_expression(self) -> Expr:
+        return pl.coalesce([pl.col(col) for col in self.fields]).alias(self.result)
