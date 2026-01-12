@@ -61,10 +61,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         )
         lf = lf.select(table.dtypes.keys())
 
-        print("table.pre_callbacks", table.pre_callbacks)
         for callback_dict in table.pre_callbacks:
             (target, expression), = callback_dict.items()
-            print(target, expression)
             callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
             lf = callback.call(lf)
 
@@ -79,10 +77,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
                 )
 
-        print("table.callbacks", table.callbacks)
         for callback_dict in table.callbacks:
             (target, expression), = callback_dict.items()
-            print(target, expression)
             callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
             lf = callback.call(lf)
 
@@ -105,7 +101,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             for cfg in self._config.config.data
         }
         for table in self._registry.values():
-            print(table)
             path = paths[table.dataset]
             lf = self._read_table(table, path)
 
@@ -121,10 +116,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 )
                 post_callbacks.extend(join_table.post_callbacks)
 
-            print("post_callbacks", post_callbacks)
             for callback_dict in post_callbacks:
                 (target, expression), = callback_dict.items()
-                print(target, expression)
                 callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
                 lf = callback.call(lf)
 
@@ -165,11 +158,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 event_lf = event_lf.with_columns(code_expr)
                 event_lf = event_lf.drop(event.fields.code)
 
-                print("event.callbacks", event.callbacks)
                 # Apply event callbacks
                 for callback_dict in event.callbacks:
                     (target, expression), = callback_dict.items()
-                    print(target, expression)
                     callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
                     lf = callback.call(lf)
 
