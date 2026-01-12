@@ -1,5 +1,5 @@
 name: diagnoses_icd
-path: hosp/diagnoses_icd.csv
+path: hosp/diagnoses_icd.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
@@ -31,7 +31,7 @@ fields:
 
 join:
   - name: d_icd_diagnoses
-    path: hosp/d_icd_diagnoses.csv
+    path: hosp/d_icd_diagnoses.csv.gz
     fields:
       # general codes
       # codes
@@ -48,7 +48,7 @@ join:
       - icd_code
       - icd_version
   - name: admissions
-    path: hosp/admissions.csv
+    path: hosp/admissions.csv.gz
     fields:
       # general codes
       - name: hadm_id

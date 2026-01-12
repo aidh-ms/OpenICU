@@ -1,5 +1,5 @@
 name: procedureevents
-path: icu/procedureevents.csv
+path: icu/procedureevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
@@ -105,7 +105,7 @@ fields:
 
 join:
   - name: d_items
-    path: icu/d_items.csv
+    path: icu/d_items.csv.gz
     fields:
       # general codes
       # codes

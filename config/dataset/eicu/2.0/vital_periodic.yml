@@ -1,5 +1,5 @@
 name: vitalPeriodic
-path: vitalPeriodic.csv
+path: vitalPeriodic.csv.gz
 version: "2.0"
 dataset: eicu
 
@@ -118,7 +118,7 @@ post_callbacks:
 
 join:
   - name: patient
-    path: patient.csv
+    path: patient.csv.gz
     fields:
       # general codes
       # codes
