@@ -50,11 +50,6 @@ fields:
     type: string
     constant: kg
 post_callbacks:
-  # - callback: add_offset
-  #   params:
-  #     datetime: admission_timestamp
-  #     offset: infusionoffset
-  #     output: event_timestamp
   - add_offset(admission_timestamp, infusionoffset, event_timestamp)
 
 join:
@@ -88,14 +83,6 @@ join:
     both_on:
       - patientunitstayid
     callbacks:
-      # - callback: to_datetime
-      #   params:
-      #     year: hospitaldischargeyear
-      #     month: month
-      #     day: day
-      #     time: hospitaladmittime24
-      #     offset: hospitaladmitoffset
-      #     output: admission_timestamp
       - to_datetime(hospitaldischargeyear, month, day, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
 
 event_defaults:
@@ -116,10 +103,6 @@ events:
         - weight_uom
       text_value: patientweight
     callbacks:
-    #   # - callback: drop_na
-    #   #   params:
-    #   #     columns:
-    #   #       - text_value
       - drop_na([text_value])
   - name: drugamount
     fields:
@@ -128,46 +111,30 @@ events:
         - drugamount_code
         - drugname
       numeric_value: drugamount
-    # callbacks:
-    #   # - callback: drop_na
-    #   #   params:
-    #   #     columns:
-    #   #       - numeric_value
-    #   - drop_na(numeric_value)
+    callbacks:
+      - drop_na([numeric_value])
   - name: drugrate
     fields:
       time: event_timestamp
       code:
         - drugrate_code
       text_value: drugrate
-    # callbacks:
-    #   # - callback: drop_na
-    #   #   params:
-    #   #     columns:
-    #   #       - text_value
-    #   - drop_na(text_value)
+    callbacks:
+      - drop_na([text_value])
   - name: infusionrate
     fields:
       time: event_timestamp
       code:
         - infusionrate_code
       text_value: infusionrate
-    # callbacks:
-    #   # - callback: drop_na
-    #   #   params:
-    #   #     columns:
-    #   #       - numeric_value
-    #   - drop_na(numeric_value)
+    callbacks:
+      - drop_na([numeric_value])
   - name: volumeoffluid
     fields:
       time: event_timestamp
       code:
         - volumeoffluid_code
       text_value: volumeoffluid
-    # callbacks:
-    #   # - callback: drop_na
-    #   #   params:
-    #   #     columns:
-    #   #       - text_value
-    #   - drop_na(text_value)
+    callbacks:
+      - drop_na([text_value])
 

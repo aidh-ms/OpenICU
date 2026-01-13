@@ -98,8 +98,5 @@ events:
       code:
         - warning_code
       numeric_value: warning
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - numeric_value
+    callbacks:
+      - drop_na([numeric_value])

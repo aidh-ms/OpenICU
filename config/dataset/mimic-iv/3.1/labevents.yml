@@ -133,11 +133,8 @@ events:
       code:
         - order_provider_id_code
       text_value: order_provider_id
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - numeric_value
+    callbacks:
+      - drop_na([numeric_value])
   - name: labevent
     fields:
       time: charttime
@@ -147,73 +144,52 @@ events:
         - valueuom
       numeric_value: valuenum
       text_value: value
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - text_value
+    callbacks:
+      - drop_na([text_value])
   - name: ref_range_lower
     fields:
       time: charttime
       code:
         - ref_range_lower_code
       numeric_value: ref_range_lower
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - numeric_value
+    callbacks:
+      - drop_na([text_value])
   - name: ref_range_upper
     fields:
       time: charttime
       code:
         - ref_range_upper_code
       numeric_value: ref_range_upper
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - numeric_value
+    callbacks:
+      - drop_na([numeric_value])
   - name: flag
     fields:
       time: charttime
       code:
         - flag_code
       text_value: flag
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - text_value
+    callbacks:
+      - drop_na([text_value])
   - name: priority
     fields:
       time: charttime
       code:
         - priority_code
       text_value: priority
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - text_value
+    callbacks:
+      - drop_na([text_value])
   - name: comments
     fields:
       time: charttime
       code:
         - comments_code
       text_value: comments
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - text_value
+    callbacks:
+      - drop_na([text_value])
   - name: caregiver_store
     fields:
       time: storetime
       code:
         - caregiver_store_code
-    # callbacks:
-    #   - callback: drop_na
-    #     params:
-    #       columns:
-    #         - time
+    callbacks:
+      - drop_na([time])
