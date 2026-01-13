@@ -18,7 +18,7 @@ class ExpressionCallback(CallbackProtocol):
     to a `LazyFrame`, the expression is materialized as a new column.
     """
 
-    result: str
+    output: str
 
     def as_expression(self) -> Expr:
         """Return the callback logic as a Polars expression.
@@ -40,7 +40,7 @@ class ExpressionCallback(CallbackProtocol):
         Returns:
             A LazyFrame with the expression added as a column named `result`.
         """
-        return lf.with_columns(self.as_expression().alias(self.result))
+        return lf.with_columns(self.as_expression().alias(self.output))
 
 class FrameCallback(CallbackProtocol):
     """Callback that operates directly on a Polars LazyFrame.

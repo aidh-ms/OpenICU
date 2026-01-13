@@ -35,7 +35,7 @@ class AbstractSyntaxTree(CallbackProtocol):
             result: Name of the output column to be created.
         """
         self.expr = expr
-        self.result = output
+        self.output = output
     
     
     def __call__(self, lf: LazyFrame) -> LazyFrame:
@@ -64,8 +64,10 @@ class AbstractSyntaxTree(CallbackProtocol):
                         raise TypeError(f"Unknown callback type: {type(self.expr)}")
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args])(lf)
 
-        return lf.with_columns(self._ast_to_polars(node))
-        # return lf.with_columns(self._ast_to_polars(node).alias(self.result))
+        # return lf.with_columns(self._ast_to_polars(node))
+        temp = self._ast_to_polars(node)
+        print(self.output, type(self.output))
+        return lf.with_columns(temp.alias(self.output))
     
     def _ast_to_polars(self, node: ast.AST) -> Expr:
         """Translate an AST node into a Polars expression.
@@ -120,14 +122,18 @@ class AbstractSyntaxTree(CallbackProtocol):
         
         if isinstance(node, ast.Call):
             func_name = self._get_func_name(node.func)
+            output = node.args[-1].id
             args = [self._ast_to_polars(a) for a in node.args]
-
             registry = CallbackRegistry()
 
             if func_name in registry:
                 CallbackClass = registry[func_name]
                 if issubclass(CallbackClass, ExpressionCallback):
-                    return CallbackClass(*args).as_expression()
+                    callback = CallbackClass(*args)
+                    if callback.output is not None:
+                        self.output = output
+                        print(type(self.output))
+                    return callback.as_expression()
                 if issubclass(CallbackClass, FrameCallback):
                     raise TypeError(f"FrameCallback not allowed inside of abstract syntax tree: {node}")
         

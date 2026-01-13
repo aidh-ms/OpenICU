@@ -118,19 +118,8 @@ fields:
     constant: kg
 
 post_callbacks:
-  - callback: to_datetime
-    params:
-      year: hospitaldischargeyear
-      month: admission_month
-      day: admission_day
-      time: hospitaladmittime24
-      offset: hospitaladmitoffset
-      output: admission_timestamp
-  - callback: add_offset
-    params:
-      datetime: admission_timestamp
-      offset: unitdischargeoffset
-      output: discharge_timestamp
+  - to_datetime(hospitaldischargeyear, admission_month, admission_day, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+  - add_offset(admission_timestamp, unitdischargeoffset, discharge_timestamp)
 
 event_defaults:
   subject_id: patienthealthsystemstayid
