@@ -91,8 +91,8 @@ fields:
   - name: race
     type: string
 post_callbacks: # example, to be removed later
-  - res: subtract(200,3)
-  - res: subtract(res,7)
+  - subtract(200,3, res)
+  - subtract(res,7, res)
 
 event_defaults:
   subject_id: subject_id

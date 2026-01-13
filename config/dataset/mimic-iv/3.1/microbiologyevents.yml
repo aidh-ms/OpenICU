@@ -138,11 +138,11 @@ events:
       code:
         - order_provider_id_code
       text_value: order_provider_id
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - text_value
   - name: spec
     fields:
       time: charttime
@@ -179,52 +179,52 @@ events:
       text_value: dilution_text
       numeric_value: dilution_value
       # dilution_comparison
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
-            - text_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - numeric_value
+    #         - text_value
   - name: interpretation
     fields:
       time: charttime
       code:
         - interpretation_code
       text_value: interpretation
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - text_value
   - name: comments
     fields:
       time: charttime
       code:
         - comments_code
       text_value: comments
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - text_value
   - name: comments
     fields:
       time: charttime
       code:
         - comments_code
       text_value: comments
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - text_value
   - name: caregiver_store
     fields:
       time: storetime
       code:
         - caregiver_store_code
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - time
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - time

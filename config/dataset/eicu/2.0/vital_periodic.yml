@@ -109,12 +109,12 @@ fields:
     type: int64
 
 
-post_callbacks:
-  - callback: add_offset
-    params:
-      datetime: admission_timestamp
-      offset: observationoffset
-      output: event_timestamp
+# post_callbacks:
+#   - callback: add_offset
+#     params:
+#       datetime: admission_timestamp
+#       offset: observationoffset
+#       output: event_timestamp
 
 join:
   - name: patient
@@ -146,15 +146,15 @@ join:
       # db fields - values
     both_on:
       - patientunitstayid
-    callbacks:
-      - callback: to_datetime
-        params:
-          year: hospitaldischargeyear
-          month: month
-          day: day
-          time: hospitaladmittime24
-          offset: hospitaladmitoffset
-          output: admission_timestamp
+    # callbacks:
+    #   - callback: to_datetime
+    #     params:
+    #       year: hospitaldischargeyear
+    #       month: month
+    #       day: day
+    #       time: hospitaladmittime24
+    #       offset: hospitaladmitoffset
+    #       output: admission_timestamp
 
 event_defaults:
   subject_id: patienthealthsystemstayid

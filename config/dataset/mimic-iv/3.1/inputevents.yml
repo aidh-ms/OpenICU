@@ -73,11 +73,11 @@ events:
         - label
         - amountuom
       numeric_value: amount
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - numeric_value
   - name: rate
     fields:
       time: starttime
@@ -85,8 +85,8 @@ events:
         - label
         - rateuom
       numeric_value: rate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - numeric_value

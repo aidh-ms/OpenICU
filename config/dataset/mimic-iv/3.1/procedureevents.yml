@@ -158,11 +158,11 @@ events:
         - location_code
         - locationcategory
       text_value: location
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - text_value
   - name: order
     fields:
       time: endtime
@@ -216,8 +216,8 @@ events:
         - originalrate_code
         - label
       numeric_value: originalrate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+    # callbacks:
+    #   - callback: drop_na
+    #     params:
+    #       columns:
+    #         - numeric_value
