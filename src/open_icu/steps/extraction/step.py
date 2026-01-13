@@ -77,9 +77,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
                 )
 
-        for callback_dict in table.callbacks:
-            (target, expression), = callback_dict.items()
-            callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
+        for expression in table.callbacks:
+            callback = CallbackConfig(callback="abstract_syntax_tree", params={"expression": expression})
             lf = callback.call(lf)
 
         return lf

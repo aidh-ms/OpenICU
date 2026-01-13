@@ -2,14 +2,14 @@ import operator
 from numbers import Real
 
 import polars as pl
-from polars import Expr, LazyFrame
+from polars import Expr
 
-from open_icu.callbacks.proto import CallbackProtocol, HybridCallback, ExpressionCallback
+from open_icu.callbacks.proto import ExpressionCallback
 from open_icu.callbacks.registry import register_callback_class
 
 
 @register_callback_class
-class Add(HybridCallback):
+class Add(ExpressionCallback):
     """Add two columns or expressions.
 
     This hybrid callback supports both expression-level usage (e.g. inside
@@ -17,7 +17,7 @@ class Add(HybridCallback):
     as a new column.
     """
 
-    def __init__(self, augend: str, addend: str, sum: str | None = None) -> None:
+    def __init__(self, augend: str, addend: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -27,8 +27,8 @@ class Add(HybridCallback):
         """
         self.augend = augend
         self.addend = addend
-        if sum is not None:
-            self.result = sum
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the addition as a Polars expression.
@@ -38,25 +38,12 @@ class Add(HybridCallback):
         """
         return self.augend + self.addend  # type: ignore
 
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the addition and add the result as a new column.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A LazyFrame with the computed sum column added.
-        """
-        return lf.with_columns(
-            (pl.col(self.augend) + pl.col(self.addend)).alias(self.result)
-        )
-
 
 @register_callback_class
-class Sum(HybridCallback):
+class Sum(ExpressionCallback):
     """Compute the row-wise sum across multiple columns."""
 
-    def __init__(self, summands: list[str], sum: str | None = None) -> None:
+    def __init__(self, summands: list[str], output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -64,8 +51,8 @@ class Sum(HybridCallback):
             sum: Optional name of the output column.
         """
         self.summands = summands
-        if sum is not None:
-            self.result = sum
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the horizontal sum as a Polars expression.
@@ -75,25 +62,12 @@ class Sum(HybridCallback):
         """
         return pl.sum_horizontal(self.summands)
 
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the row-wise sum and add the result as a new column.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A LazyFrame with the computed sum column added.
-        """
-        return lf.with_columns(
-            pl.sum_horizontal([pl.col(c) for c in self.summands]).alias(self.result)
-        )
-
 
 @register_callback_class
-class Subtract(HybridCallback):
+class Subtract(ExpressionCallback):
     """Subtract one column or expression from another."""
 
-    def __init__(self, minuend: str, subtrahend: str, difference: str | None = None) -> None:
+    def __init__(self, minuend: str, subtrahend: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -103,8 +77,8 @@ class Subtract(HybridCallback):
         """
         self.minuend = minuend
         self.subtrahend = subtrahend
-        if difference is not None:
-            self.result = difference
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the subtraction as a Polars expression.
@@ -114,25 +88,12 @@ class Subtract(HybridCallback):
         """
         return self.minuend - self.subtrahend  # type: ignore
 
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the subtraction and add the result as a new column.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A LazyFrame with the computed difference column added.
-        """
-        return lf.with_columns(
-            (pl.col(self.minuend) - pl.col(self.subtrahend)).alias(self.result)
-        )
-
 
 @register_callback_class
-class Multiply(HybridCallback):
+class Multiply(ExpressionCallback):
     """Multiply two columns or expressions."""
 
-    def __init__(self, multiplicand: str, multiplier: str, product: str | None = None) -> None:
+    def __init__(self, multiplicand: str, multiplier: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -142,8 +103,8 @@ class Multiply(HybridCallback):
         """
         self.multiplicand = multiplicand
         self.multiplier = multiplier
-        if product is not None:
-            self.result = product
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the multiplication as a Polars expression.
@@ -153,22 +114,9 @@ class Multiply(HybridCallback):
         """
         return self.multiplicand * self.multiplier  # type: ignore
 
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the multiplication and add the result as a new column.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A LazyFrame with the computed product column added.
-        """
-        return lf.with_columns(
-            (pl.col(self.multiplicand) * pl.col(self.multiplier)).alias(self.result)
-        )
-
 
 @register_callback_class
-class Product(HybridCallback):
+class Product(ExpressionCallback):
     """Compute the row-wise product across multiple columns.
 
     Note:
@@ -176,7 +124,7 @@ class Product(HybridCallback):
         materialization is currently not implemented.
     """
 
-    def __init__(self, factors: list[str], product: str | None = None) -> None:
+    def __init__(self, factors: list[str], output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -184,8 +132,8 @@ class Product(HybridCallback):
             product: Optional name of the output column.
         """
         self.factors = factors
-        if product is not None:
-            self.result = product
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the horizontal product as a Polars expression.
@@ -197,21 +145,14 @@ class Product(HybridCallback):
             acc=pl.lit(1),
             function=operator.mul,
             exprs=self.factors,
-        )
-
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        return lf.with_columns(
-            (pl.fold(acc=pl.lit(1), function=operator.mul, exprs=[pl.col(factor) for factor in self.factors]).alias(self.result))
-        )
-
-        
+        )        
 
 
 @register_callback_class
-class Divide(HybridCallback):
+class Divide(ExpressionCallback):
     """Divide one column or expression by another."""
 
-    def __init__(self, dividend: str, divisor: str, quotient: str | None = None) -> None:
+    def __init__(self, dividend: str, divisor: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -221,8 +162,8 @@ class Divide(HybridCallback):
         """
         self.dividend = dividend
         self.divisor = divisor
-        if quotient is not None:
-            self.result = quotient
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the division as a Polars expression.
@@ -232,25 +173,12 @@ class Divide(HybridCallback):
         """
         return self.dividend / self.divisor  # type: ignore
 
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the division and add the result as a new column.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A LazyFrame with the computed quotient column added.
-        """
-        return lf.with_columns(
-            (pl.col(self.dividend) / pl.col(self.divisor)).alias(self.result)
-        )
-
 
 @register_callback_class
-class Pow(HybridCallback):
+class Pow(ExpressionCallback):
     """Raise a column or expression to a power."""
 
-    def __init__(self, base: str, exponent: str, power: str | None = None) -> None:
+    def __init__(self, base: str, exponent: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -260,8 +188,8 @@ class Pow(HybridCallback):
         """
         self.base = base
         self.exponent = exponent
-        if power is not None:
-            self.result = power
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the power operation as a Polars expression.
@@ -272,20 +200,6 @@ class Pow(HybridCallback):
         return self.base ** self.exponent  # type: ignore
 
 
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the power operation and add the result as a new column.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A LazyFrame with the computed power column added.
-        """
-        return lf.with_columns(
-            (pl.col(self.base) ** pl.col(self.exponent)).alias(self.result)
-        )
-
-
 @register_callback_class
 class Root(ExpressionCallback):
     """Compute the signed n-th root of a column.
@@ -294,7 +208,7 @@ class Root(ExpressionCallback):
     negative numbers for odd indices.
     """
 
-    def __init__(self, radicand: str, index: Real, root: str | None = None) -> None:
+    def __init__(self, radicand: str, index: Real, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -304,8 +218,8 @@ class Root(ExpressionCallback):
         """
         self.radicand = radicand
         self.index = index
-        if root is not None:
-            self.result = root
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the root operation as a Polars expression.
@@ -314,30 +228,13 @@ class Root(ExpressionCallback):
             A Polars expression computing the signed n-th root.
         """
         return (self.radicand.sign() * self.radicand.abs() ** (1 / self.index)) # type: ignore
-
-    # # Hybrid-/FrameCallback
-    # def as_field(self, lf: LazyFrame) -> LazyFrame:
-    #     """Apply the root operation and add the result as a new column.
-
-    #     Args:
-    #         lf: Input LazyFrame.
-
-    #     Returns:
-    #         A LazyFrame with the computed root column added.
-    #     """
-    #     return lf.with_columns(
-    #         (
-    #             pl.col(self.radicand).sign()
-    #             * (pl.col(self.radicand).abs() ** (1 / self.index))
-    #         ).alias(self.result)
-    #     )
-
+    
 
 @register_callback_class
-class Modulo(HybridCallback):
+class Modulo(ExpressionCallback):
     """Compute the modulo (remainder) of two columns or expressions."""
 
-    def __init__(self, dividend: str, divisor: str, remainder: str | None = None) -> None:
+    def __init__(self, dividend: str, divisor: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -347,8 +244,8 @@ class Modulo(HybridCallback):
         """
         self.dividend = dividend
         self.divisor = divisor
-        if remainder is not None:
-            self.result = remainder
+        if output is not None:
+            self.output = output
 
     def as_expression(self) -> Expr:
         """Return the modulo operation as a Polars expression.
@@ -357,16 +254,3 @@ class Modulo(HybridCallback):
             A Polars expression representing `dividend % divisor`.
         """
         return self.dividend % self.divisor  # type: ignore
-
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the modulo operation and add the result as a new column.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A LazyFrame with the computed remainder column added.
-        """
-        return lf.with_columns(
-            (pl.col(self.dividend) % pl.col(self.divisor)).alias(self.result)
-        )

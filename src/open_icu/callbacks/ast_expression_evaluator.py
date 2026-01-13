@@ -27,14 +27,14 @@ class AbstractSyntaxTree(CallbackProtocol):
         - Built-ins: `mean(...)`, `sum(...)`, `prod(...)`, `root(radicand, index)`
     """
 
-    def __init__(self, expression: str, result: str) -> None:
+    def __init__(self, expr: str, result: str) -> None:
         """Initialize the callback.
 
         Args:
             expression: AST expression to parse and evaluate.
             result: Name of the output column to be created.
         """
-        self.expression = expression
+        self.expr = expr
         self.result = result
     
     
@@ -53,7 +53,7 @@ class AbstractSyntaxTree(CallbackProtocol):
             A new LazyFrame after either executing a `FrameCallback` or adding
             the evaluated expression as a column.
         """
-        node = ast.parse(self.expression, mode="eval").body
+        node = ast.parse(self.expr, mode="eval").body
         registry = CallbackRegistry()
 
         if isinstance(node, ast.Call) and \
@@ -61,8 +61,8 @@ class AbstractSyntaxTree(CallbackProtocol):
                 CallbackClass = registry[func_name]
                 if not issubclass(CallbackClass, ExpressionCallback):
                     if not issubclass(CallbackClass, FrameCallback):
-                        raise TypeError(f"Unknown callback type: {type(self.expression)}")
-                    return CallbackClass(*[self._ast_to_polars(a) for a in node.args]).__call__(lf)
+                        raise TypeError(f"Unknown callback type: {type(self.expr)}")
+                    return CallbackClass(*[self._ast_to_polars(a) for a in node.args])(lf)
 
         return lf.with_columns(self._ast_to_polars(node).alias(self.result))
     
@@ -79,8 +79,12 @@ class AbstractSyntaxTree(CallbackProtocol):
             NotImplementedError: If the node type or operator/function is not supported.
             TypeError: If a `FrameCallback` is used inside an expression context.
         """
+
         if isinstance(node, ast.Constant):
-            return pl.lit(node.value)
+            value = node.value
+            if isinstance(value, str) and value.lower() in {"none", "null"}:
+                value = None
+            return pl.lit(value)
         
         if(isinstance(node, ast.Name)):
             return pl.col(node.id)

@@ -1,7 +1,7 @@
 import polars as pl
-from polars import LazyFrame, Expr
+from polars import Expr
 
-from open_icu.callbacks.proto import CallbackProtocol, ExpressionCallback
+from open_icu.callbacks.proto import ExpressionCallback
 from open_icu.callbacks.registry import register_callback_class
 
 
@@ -13,20 +13,8 @@ class ToDatetime(ExpressionCallback):
         self.day = day
         self.time = time
         self.offset = offset
-        self.output = output
-
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
-        datetime_expr = (
-            pl.col(self.year).cast(pl.Utf8).str.zfill(4) + pl.lit("-") +
-            pl.col(self.month).cast(pl.Utf8).str.zfill(2) + pl.lit("-") +
-            pl.col(self.day).cast(pl.Utf8).str.zfill(2) + pl.lit(" ") +
-            pl.col(self.time).cast(pl.Utf8)
-        ).str.to_datetime()
-        offset_expr = pl.duration(minutes=pl.col(self.offset).abs())
-
-        return lf.with_columns(
-            (datetime_expr + offset_expr).alias(self.output)
-        )
+        if output is not None:
+            self.output = output
     
     def as_expression(self) -> Expr:
         datetime_expr = (
@@ -38,8 +26,6 @@ class ToDatetime(ExpressionCallback):
         offset_expr = pl.duration(minutes=pl.col(self.offset).abs())
 
         return (datetime_expr + offset_expr).alias(self.output)
-    
-    
 
 
 @register_callback_class
@@ -47,14 +33,8 @@ class AddOffset(ExpressionCallback):
     def __init__(self, datetime: str, offset: str, output: str) -> None:
         self.datetime = datetime
         self.offset = offset
-        self.output = output
-
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
-        offset_expr = pl.duration(minutes=pl.col(self.offset).abs())
-
-        return lf.with_columns(
-            (pl.col(self.datetime) + offset_expr).alias(self.output)
-        )
+        if output is not None:
+            self.output = output
     
     def as_expression(self) -> Expr:
         offset_expr = pl.duration(minutes=pl.col(self.offset).abs())
