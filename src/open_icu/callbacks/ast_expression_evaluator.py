@@ -27,7 +27,7 @@ class AbstractSyntaxTree(CallbackProtocol):
         - Built-ins: `mean(...)`, `sum(...)`, `prod(...)`, `root(radicand, index)`
     """
 
-    def __init__(self, expr: str, output: str = None) -> None:
+    def __init__(self, expr: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
