@@ -115,7 +115,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 post_callbacks.extend(join_table.post_callbacks)
 
             for expr in post_callbacks:
-                print(expr)
                 callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
                 lf = callback.call(lf)
 
