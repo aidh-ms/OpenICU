@@ -61,9 +61,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         )
         lf = lf.select(table.dtypes.keys())
 
-        for callback_dict in table.pre_callbacks:
-            (target, expression), = callback_dict.items()
-            callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
+        for expr in table.pre_callbacks:
+            callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
             lf = callback.call(lf)
 
         for field in table.fields:
@@ -77,8 +76,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
                 )
 
-        for expression in table.callbacks:
-            callback = CallbackConfig(callback="abstract_syntax_tree", params={"expression": expression})
+        for expr in table.callbacks:
+            callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
             lf = callback.call(lf)
 
         return lf
@@ -115,9 +114,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 )
                 post_callbacks.extend(join_table.post_callbacks)
 
-            for callback_dict in post_callbacks:
-                (target, expression), = callback_dict.items()
-                callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
+            for expr in post_callbacks:
+                callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
                 lf = callback.call(lf)
 
             for event in table.events:
@@ -158,9 +156,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 event_lf = event_lf.drop(event.fields.code)
 
                 # Apply event callbacks
-                for callback_dict in event.callbacks:
-                    (target, expression), = callback_dict.items()
-                    callback = CallbackConfig(callback="abstract_syntax_tree", params={"result": target, "expression": expression})
+                for expr in event.callbacks:
+                    callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
                     lf = callback.call(lf)
 
                 # Reorder columns
