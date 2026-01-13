@@ -27,7 +27,7 @@ class AbstractSyntaxTree(CallbackProtocol):
         - Built-ins: `mean(...)`, `sum(...)`, `prod(...)`, `root(radicand, index)`
     """
 
-    def __init__(self, expr: str, result: str) -> None:
+    def __init__(self, expr: str, output: str = None) -> None:
         """Initialize the callback.
 
         Args:
@@ -35,7 +35,7 @@ class AbstractSyntaxTree(CallbackProtocol):
             result: Name of the output column to be created.
         """
         self.expr = expr
-        self.result = result
+        self.result = output
     
     
     def __call__(self, lf: LazyFrame) -> LazyFrame:
@@ -64,7 +64,8 @@ class AbstractSyntaxTree(CallbackProtocol):
                         raise TypeError(f"Unknown callback type: {type(self.expr)}")
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args])(lf)
 
-        return lf.with_columns(self._ast_to_polars(node).alias(self.result))
+        return lf.with_columns(self._ast_to_polars(node))
+        # return lf.with_columns(self._ast_to_polars(node).alias(self.result))
     
     def _ast_to_polars(self, node: ast.AST) -> Expr:
         """Translate an AST node into a Polars expression.
