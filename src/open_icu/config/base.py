@@ -96,7 +96,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         """
         with open(file_path, "r") as f:
             data = yaml.safe_load(f)
-
+            
         return cls(**data)
 
     def save(self, path: Path) -> None:

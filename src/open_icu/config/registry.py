@@ -171,6 +171,7 @@ def load_config[T: BaseConfig](path: Path, config_type: type[T]) -> list[T]:
         try:
             config = config_type.load(file_path)
         except Exception:
+            print("Exception for", file_path)
             continue  # TODO: log error
 
         configs.append(config)

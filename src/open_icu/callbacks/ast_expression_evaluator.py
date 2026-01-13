@@ -55,15 +55,15 @@ class AbstractSyntaxTree(CallbackProtocol):
         """
         node = ast.parse(self.expr, mode="eval").body
         registry = CallbackRegistry()
-
         if isinstance(node, ast.Call) and \
             (func_name := self._get_func_name(node.func)) in registry:
                 CallbackClass = registry[func_name]
                 if not issubclass(CallbackClass, ExpressionCallback):
                     if not issubclass(CallbackClass, FrameCallback):
                         raise TypeError(f"Unknown callback type: {type(self.expr)}")
+                    print("frame", self.expr)
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args])(lf)
-
+        print("expr", self.expr)
         return lf.with_columns(self._ast_to_polars(node).alias(self.output))
     
     def _ast_to_polars(self, node: ast.AST) -> Expr:
