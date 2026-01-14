@@ -158,7 +158,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 # Apply event callbacks
                 for expr in event.callbacks:
                     callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
-                    lf = callback.call(lf)
+                    lf = callback.call(event_lf)
 
                 # Reorder columns
                 event_lf = event_lf.select([
