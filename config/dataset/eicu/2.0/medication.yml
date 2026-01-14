@@ -1,0 +1,89 @@
+name: medication
+path: medication.csv.gz
+version: "2.0"
+dataset: eicu
+
+fields:
+  # general codes
+  - name: src_table_code
+    type: string
+    constant: lab
+  # codes
+  # subject_id and extentions
+  - name: patientunitstayid
+    type: int64
+  - name: src_db_id
+    type: string
+    constant: eicu
+  # db fields - times
+  - name: drugstartoffset
+    type: int64
+  # db fields - values
+  - name: drugname
+    type: str
+  - name: dosage
+    type: str
+
+post_callbacks:
+  - callback: add_offset
+    params:
+      datetime: admission_timestamp
+      offset: drugstartoffset
+      output: event_timestamp
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    fields:
+      # general codes
+      # codes
+      # subject_id and extentions
+      - name: hadm_id
+        type: int64
+        constant: -1
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      # db fields - times
+      - name: day
+        type: int64
+        constant: 1
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+      - name: month
+        type: int64
+        constant: 1
+      # db fields - values
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - callback: to_datetime
+        params:
+          year: hospitaldischargeyear
+          month: month
+          day: day
+          time: hospitaladmittime24
+          offset: hospitaladmitoffset
+          output: admission_timestamp
+
+event_defaults:
+  subject_id: patienthealthsystemstayid
+  time: event_timestamp
+  code_prefix:
+    - src_table_code
+  extension:
+    hadm_id: hadm_id
+    stay_id: patientunitstayid
+    src_db_id: src_db_id
+
+events:
+  - name: drug
+    fields:
+      code:
+        - drugname
+      text_value: dosage
