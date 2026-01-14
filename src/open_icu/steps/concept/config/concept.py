@@ -1,5 +1,7 @@
 
 
+from typing import Literal
+
 from pydantic import Field, computed_field
 
 from open_icu.config.base import BaseConfig
@@ -17,6 +19,9 @@ class ConceptConfig(BaseConfig):
         unit: Unit of measurement for the concept values
     """
     unit: str = Field(..., description="Unit of measurement for the concept values.")
+    type: Literal["base", "derived"] = Field(
+        "base", description="Type of concept: 'base' or 'derived'."
+    )
 
     @computed_field
     @property
