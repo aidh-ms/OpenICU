@@ -12,7 +12,6 @@ import polars as pl
 
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.callback import CallbackConfig
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
@@ -20,6 +19,7 @@ from open_icu.steps.extraction.registry import dataset_config_registery
 from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
+
 
 class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
     """Data extraction step for transforming source ICU data to MEDS format.
@@ -42,7 +42,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         config = ExtractionConfig.load(config_path)
         return cls(project, config, dataset_config_registery)
 
-    def _read_table(self, table: BaseTableConfig, path: Path) -> pl.LazyFrame:
+    def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
         """Read and transform a table from CSV.
 
         Scans the CSV file, applies schema overrides, executes pre-callbacks,
@@ -60,15 +60,14 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             raise FileNotFoundError(f"file not found ({file_path})")
 
         lf = pl.scan_csv(
-            path / table.path,
+            file_path,
             schema_overrides=table.dtypes,
             infer_schema=False,
             low_memory=True,
         )
         lf = lf.select(table.dtypes.keys())
 
-        for expr in table.pre_callbacks:
-            callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
+        for callback in table.pre_callbacks:
             lf = callback.call(lf)
 
         for field in table.fields:
@@ -82,8 +81,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
                 )
 
-        for expr in table.callbacks:
-            callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
+        for callback in table.callbacks:
             lf = callback.call(lf)
 
         return lf
@@ -129,8 +127,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 continue
 
             logger.info("processing table %s", table.name)
-            for expr in post_callbacks:
-                callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
+            for callback in post_callbacks:
                 lf = callback.call(lf)
 
             for event in table.events:
@@ -171,8 +168,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 event_lf = event_lf.drop(event.fields.code)
 
                 # Apply event callbacks
-                for expr in event.callbacks:
-                    callback = CallbackConfig(callback="abstract_syntax_tree", params={"expr": expr})
+                for callback in event.callbacks:
                     event_lf = callback.call(event_lf)
 
                 # Reorder columns
