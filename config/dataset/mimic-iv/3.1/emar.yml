@@ -1,5 +1,5 @@
 name: emar
-path: hosp/emar.csv
+path: hosp/emar.csv.gz
 version: "3.1"
 dataset: mimic-iv
 

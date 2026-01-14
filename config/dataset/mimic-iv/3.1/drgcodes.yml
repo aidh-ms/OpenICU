@@ -1,5 +1,5 @@
 name: drgcodes
-path: hosp/drgcodes.csv
+path: hosp/drgcodes.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
@@ -44,7 +44,7 @@ fields:
 
 join:
   - name: admissions
-    path: hosp/admissions.csv
+    path: hosp/admissions.csv.gz
     fields:
       # general codes
       # codes

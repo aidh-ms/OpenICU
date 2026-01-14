@@ -1,5 +1,5 @@
 name: prescriptions
-path: hosp/prescriptions.csv
+path: hosp/prescriptions.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
@@ -85,7 +85,7 @@ fields:
 
 join:
   - name: pharmacy
-    path: hosp/pharmacy.csv
+    path: hosp/pharmacy.csv.gz
     fields:
       # general codes
       # codes
