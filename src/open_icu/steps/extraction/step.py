@@ -13,7 +13,7 @@ import polars as pl
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
-from open_icu.steps.extraction.config.step import ExtractionConfig
+from open_icu.steps.extraction.config.step import ExtractionStepConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registry
 from open_icu.storage.project import OpenICUProject
@@ -21,7 +21,7 @@ from open_icu.storage.project import OpenICUProject
 logger = get_logger(__name__)
 
 
-class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
+class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
     """Data extraction step for transforming source ICU data to MEDS format.
 
     Reads CSV files specified in TableConfig objects, applies pre/post callbacks,
@@ -39,7 +39,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         Returns:
             An initialized ExtractionStep instance
         """
-        config = ExtractionConfig.load(config_path)
+        config = ExtractionStepConfig.load(config_path)
         return cls(project, config, dataset_config_registry)
 
     def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:

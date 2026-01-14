@@ -36,7 +36,7 @@ class CustomConfig(BaseModel):
     )
 
 
-class ExtractionConfig(BaseStepConfig[CustomConfig]):
+class ExtractionStepConfig(BaseStepConfig[CustomConfig]):
     """Complete configuration for the extraction step.
 
     Combines base step configuration with extraction-specific settings.
