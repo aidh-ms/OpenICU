@@ -64,6 +64,8 @@ class AbstractSyntaxTree(CallbackProtocol):
                     print("frame", self.expr)
                     return CallbackClass(*[self._ast_to_polars(a) for a in node.args])(lf)
         print("expr", self.expr)
+        if self.output is None:
+                raise ValueError("Missing output column")
         return lf.with_columns(self._ast_to_polars(node).alias(self.output))
     
     def _ast_to_polars(self, node: ast.AST) -> Expr:
