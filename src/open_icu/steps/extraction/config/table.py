@@ -120,6 +120,11 @@ class TableConfig(BaseConfig, BaseTableConfig):
     field defaults can be specified to reduce repetition across events.
 
     Attributes:
+        name: Human-readable name of the configuration
+        version: Version string for the configuration
+        identifier: Computed hierarchical identifier (e.g., "openicu.config.classname.version.name")
+        identifier_tuple: Tuple of (class_name, version, name)
+        uuid: UUID generated from the identifier
         dataset: Name of the dataset this table belongs to
         join: List of tables to join before event extraction
         events: List of MEDS events to extract from this table
