@@ -15,7 +15,7 @@ from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
-from open_icu.steps.extraction.registry import dataset_config_registery
+from open_icu.steps.extraction.registry import dataset_config_registry
 from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
@@ -40,7 +40,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             An initialized ExtractionStep instance
         """
         config = ExtractionConfig.load(config_path)
-        return cls(project, config, dataset_config_registery)
+        return cls(project, config, dataset_config_registry)
 
     def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
         """Read and transform a table from CSV.

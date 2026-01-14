@@ -19,5 +19,5 @@ class DatasetConfigRegistry(BaseConfigRegistry[TableConfig]):
 
     pass
 
-dataset_config_registery = DatasetConfigRegistry()
+dataset_config_registry = DatasetConfigRegistry()
 """Global singleton instance of the dataset configuration registry."""
