@@ -125,6 +125,11 @@ class AbstractSyntaxTree(CallbackProtocol):
                 return radicand.sign() * (radicand.abs() ** (1 / index))
 
             raise NotImplementedError(f"Function {func_name!r} not implemented")
+        
+        if isinstance(node, ast.List):
+            if not node.elts:
+                raise ValueError("Empty list literals are not supported (type is ambiguous)")
+            return pl.concat_list([self._ast_to_polars(e) for e in node.elts])
 
         raise NotImplementedError(f"Unsupported AST node: {type(node)}")
 
