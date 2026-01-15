@@ -134,7 +134,7 @@ events:
         - order_provider_id_code
       text_value: order_provider_id
     callbacks:
-      - drop_na([numeric_value])
+      - drop_na([text_value])
   - name: labevent
     fields:
       time: charttime
@@ -153,7 +153,7 @@ events:
         - ref_range_lower_code
       numeric_value: ref_range_lower
     callbacks:
-      - drop_na([text_value])
+      - drop_na([numeric_value])
   - name: ref_range_upper
     fields:
       time: charttime
