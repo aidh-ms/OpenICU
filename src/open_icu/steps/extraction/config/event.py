@@ -8,8 +8,6 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from open_icu.steps.extraction.config.callback import CallbackConfig
-
 
 class MEDSEventFieldConfig(BaseModel):
     """Field mapping configuration for a MEDS event.

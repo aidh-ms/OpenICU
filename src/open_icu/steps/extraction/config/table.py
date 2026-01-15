@@ -12,7 +12,6 @@ from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseConfig
-from open_icu.steps.extraction.config.callback import CallbackConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
 from open_icu.steps.extraction.config.field import ConstantFieldConfig, FieldConfig
 
