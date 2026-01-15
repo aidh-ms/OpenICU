@@ -9,55 +9,50 @@ from open_icu.callbacks.registry import CallbackRegistry, register_callback_clas
 
 @register_callback_class
 class AbstractSyntaxTree(CallbackProtocol):
-    """Evaluate an expression via Python AST and translate it to Polars.
+    """Parse and execute a Python-like expression using Polars.
 
-    The callback parses a Python-like expression string (e.g. `"a + b * 2"`)
-    into an AST and converts supported nodes into a Polars `Expr`. The resulting
-    expression is added to the input `LazyFrame` as a new column.
+    The expression is parsed via Python AST. A top-level `FrameCallback` call
+    is executed on the `LazyFrame`; otherwise the expression is translated into
+    a Polars expression and written to `output`.
 
-    In addition, if the *top-level* expression is a call to a registered
-    `FrameCallback`, that callback is executed on the frame directly.
-
-    Supported constructs:
-    - Constants and column names
-    - Unary operations: `+x`, `-x`
-    - Binary operations: `+`, `-`, `*`, `/`, `**`, `%`
-    - Function calls:
-        - Registered `ExpressionCallback`s (via `as_expression()`)
-        - Built-ins: `mean(...)`, `sum(...)`, `prod(...)`, `root(radicand, index)`
+    Supported:
+    - Literals and column names
+    - Unary ops: +x, -x
+    - Binary ops: +, -, *, /, **, %
+    - Calls:
+        - Registered `ExpressionCallback`s
+        - Built-ins: mean, sum, prod, root
     """
 
     def __init__(self, expr: str, output: str | None = None) -> None:
         """Initialize the callback.
 
         Args:
-            expression: AST expression to parse and evaluate.
-            output: Name of the output column to be created.
+            expr: Expression string to parse.
+            output: Output column name.
         """
         self.expr = expr
         self.output = output
+        self.registry = CallbackRegistry()
     
     
     def __call__(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the transformation to a Polars LazyFrame.
-
-        If the top-level AST node is a call to a registered `FrameCallback`,
-        that callback is invoked and its result returned. Otherwise, the
-        expression is translated into a Polars `Expr` and appended as a new
-        column named `output`.
+        """Apply the AST expression to a LazyFrame.
 
         Args:
             lf: Input LazyFrame.
 
         Returns:
-            A new LazyFrame after either executing a `FrameCallback` or adding
-            the evaluated expression as a column.
+            Transformed LazyFrame.
+
+        Raises:
+            ValueError: If no output column is specified.
+            TypeError: If an invalid callback type is encountered.
         """
         node = ast.parse(self.expr, mode="eval").body
-        registry = CallbackRegistry()
         if isinstance(node, ast.Call) and \
-            (func_name := self._get_func_name(node.func)) in registry:
-                CallbackClass = registry[func_name]
+            (func_name := self._get_func_name(node.func)) in self.registry:
+                CallbackClass = self.registry[func_name]
                 if not issubclass(CallbackClass, ExpressionCallback):
                     if not issubclass(CallbackClass, FrameCallback):
                         raise TypeError(f"Unknown callback type: {type(self.expr)}")
@@ -68,17 +63,17 @@ class AbstractSyntaxTree(CallbackProtocol):
         return lf.with_columns(expr.alias(self.output))
     
     def _ast_to_polars(self, node: ast.AST) -> Expr:
-        """Translate an AST node into a Polars expression.
+        """Convert an AST node to a Polars expression.
 
         Args:
-            node: AST node produced by parsing the expression.
+            node: AST node to translate.
 
         Returns:
-            A Polars `Expr` equivalent to the given AST node.
+            Polars expression equivalent to the AST node.
 
         Raises:
-            NotImplementedError: If the node type or operator/function is not supported.
-            TypeError: If a `FrameCallback` is used inside an expression context.
+            NotImplementedError: Unsupported node, operator, or function.
+            TypeError: If a `FrameCallback` is used in an expression context.
         """
 
         if isinstance(node, ast.Constant):
@@ -123,10 +118,9 @@ class AbstractSyntaxTree(CallbackProtocol):
             if isinstance(node.args[-1], ast.Name):
                 output = node.args[-1].id
             args = [self._ast_to_polars(a) for a in node.args]
-            registry = CallbackRegistry()
 
-            if func_name in registry:
-                CallbackClass = registry[func_name]
+            if func_name in self.registry:
+                CallbackClass = self.registry[func_name]
                 if issubclass(CallbackClass, ExpressionCallback):
                     callback = CallbackClass(*args)
                     if callback.output is not None:
@@ -155,17 +149,16 @@ class AbstractSyntaxTree(CallbackProtocol):
     
 
     def _get_func_name(self, node: ast.AST) -> str:
-        """Extract the function identifier from an AST function node.
+        """Resolve the function name from an AST call node.
 
         Args:
-            node: AST node representing the function part of a call.
+            node: Function AST node.
 
         Returns:
-            The resolved function name.
+            Resolved function name.
 
         Raises:
-            NotImplementedError: If the function node uses unsupported constructs
-                (e.g. illegal attribute calls or unknown node shapes).
+            NotImplementedError: Unsupported or illegal function node.
         """
         if isinstance(node, ast.Name):
             return node.id
