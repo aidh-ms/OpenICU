@@ -8,7 +8,7 @@ from open_icu.callbacks.registry import CallbackRegistry, register_callback_clas
 
 
 @register_callback_class
-class ASTInterpreter(CallbackProtocol):
+class AstInterpreter(CallbackProtocol):
     
     def __init__(self, expr: str) -> None:
         self.expr = expr
