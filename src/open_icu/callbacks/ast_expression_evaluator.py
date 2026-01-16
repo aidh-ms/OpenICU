@@ -3,7 +3,7 @@ import ast
 
 from polars import LazyFrame
 
-from open_icu.callbacks.proto import CallbackProtocol
+from open_icu.callbacks.proto import CallbackProtocol, ExpressionCallback, FrameCallback
 from open_icu.callbacks.registry import CallbackRegistry, register_callback_class
 
 
@@ -18,7 +18,7 @@ class AstInterpreter(CallbackProtocol):
 
         callback = interpreter.eval(self.expr)
 
-        if not isinstance(callback, CallbackProtocol):
+        if not isinstance(callback, ExpressionCallback) and not isinstance(callback, FrameCallback):
             raise TypeError("Top-level expression must be a Callback")
 
         lf = callback(lf)
