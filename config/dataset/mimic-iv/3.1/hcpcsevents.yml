@@ -9,7 +9,7 @@ fields:
     type: string
     constant: hosp/hcpcsevents
   # codes
-  - name: hcspsevents_code
+  - name: hcpcsevents_code
     type: string
     constant: HCPCS
   # subject_id and extentions
@@ -37,13 +37,13 @@ fields:
     type: string
 
 events:
-  - name: hpcsevent
+  - name: hcpcsevent
     fields:
       subject_id: subject_id
       time: chartdate
       code:
         - src_table_code
-        - hcspsevents_code
+        - hcpcsevents_code
         - hcpcs_cd
       numeric_value: seq_num
       text_value: short_description
