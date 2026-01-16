@@ -17,7 +17,7 @@ class AstInterpreter(CallbackProtocol):
         interpreter = ExprInterpreter()
 
         callback = interpreter.eval(self.expr)
-
+        print("test", self.expr, callback)
         if not isinstance(callback, ExpressionCallback) and not isinstance(callback, FrameCallback):
             raise TypeError("Top-level expression must be a Callback")
 
