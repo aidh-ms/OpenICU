@@ -17,7 +17,7 @@ class AstInterpreter(CallbackProtocol):
         interpreter = ExprInterpreter()
 
         callback = interpreter.eval(self.expr)
-        print("test", self.expr, callback)
+
         if not isinstance(callback, ExpressionCallback) and not isinstance(callback, FrameCallback):
             raise TypeError("Top-level expression must be a Callback")
 
@@ -30,6 +30,7 @@ class AstInterpreter(CallbackProtocol):
 class ExprInterpreter(ast.NodeVisitor):
     def eval(self, expr: str):
         tree = ast.parse(expr, mode="eval")
+        print(tree.body)
         return self.visit(tree.body)
     
     def visit_constant(self, node):
