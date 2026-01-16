@@ -15,9 +15,9 @@ class AstInterpreter(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         interpreter = ExprInterpreter()
-
+        print("expr", self.expr)
         callback = interpreter.eval(self.expr)
-
+        print("callback", callback)
         if not isinstance(callback, CallbackProtocol):
             raise TypeError("Top-level expression must be a Callback")
 
@@ -30,26 +30,24 @@ class AstInterpreter(CallbackProtocol):
 class ExprInterpreter(ast.NodeVisitor):
     def eval(self, expr: str):
         tree = ast.parse(expr, mode="eval")
-        
+        print("tree", tree, tree.body)
         return self.visit(tree.body)
     
-    def visit_constant(self, node):
+    def visit_Constant(self, node):
         return node.value
     
-    def visit_list(self, node):
+    def visit_List(self, node):
         return [self.visit(e) for e in node.elts]
     
-    def visit_name(self, node):
+    def visit_Name(self, node):
         # return pl.col(node.id)
         return node.id
         raise NameError(f"Unknown name: {node.id}")
     
-    def visit_keyword(self, node):
-        if node.arg is None:
-            raise TypeError("Argument name must not be None")
+    def visit_Keyword(self, node):
         return node.arg, self.visit(node.value)
     
-    def visit_call(self, node):
+    def visit_Call(self, node):
         name = self._get_name(node.func)
 
         if name not in CallbackRegistry():
@@ -58,15 +56,15 @@ class ExprInterpreter(ast.NodeVisitor):
         cls = CallbackRegistry()[name]
 
         args = [self.visit(a) for a in node.args]
-        kwargs = dict(self.visit_keyword(k) for k in node.keywords)
+        kwargs = dict(self.visit_keyword(k) for k in node.keywords if k.arg is not None)
 
         # positional args → kwargs erzwingen
-        if args:
-            raise TypeError("Only keyword arguments allowed")
+        # if args:
+        #     raise TypeError("Only keyword arguments allowed")
 
-        return cls(**kwargs)
+        return cls(*args, **kwargs)
     
-    def visit_bin_op(self, node):
+    def visit_BinOp(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
 
@@ -81,7 +79,7 @@ class ExprInterpreter(ast.NodeVisitor):
 
         raise NotImplementedError(node.op)
     
-    def visit_compare(self, node):
+    def visit_Compare(self, node):
         left = self.visit(node.left)
         right = self.visit(node.comparators[0])
 
