@@ -1,6 +1,6 @@
 from typing import Any, Protocol, runtime_checkable
 
-from polars import Expr, LazyFrame
+from polars import LazyFrame
 
 
 @runtime_checkable
