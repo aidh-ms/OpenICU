@@ -3,7 +3,7 @@ import ast
 
 from polars import LazyFrame
 
-from open_icu.callbacks.proto import CallbackProtocol, ExpressionCallback, FrameCallback
+from open_icu.callbacks.proto import CallbackProtocol
 from open_icu.callbacks.registry import CallbackRegistry, register_callback_class
 
 
@@ -18,7 +18,7 @@ class AstInterpreter(CallbackProtocol):
 
         callback = interpreter.eval(self.expr)
 
-        if not isinstance(callback, ExpressionCallback) and not isinstance(callback, FrameCallback):
+        if not isinstance(callback, CallbackProtocol):
             raise TypeError("Top-level expression must be a Callback")
 
         lf = callback(lf)
@@ -30,7 +30,7 @@ class AstInterpreter(CallbackProtocol):
 class ExprInterpreter(ast.NodeVisitor):
     def eval(self, expr: str):
         tree = ast.parse(expr, mode="eval")
-        print(tree.body)
+        
         return self.visit(tree.body)
     
     def visit_constant(self, node):
@@ -41,6 +41,7 @@ class ExprInterpreter(ast.NodeVisitor):
     
     def visit_name(self, node):
         # return pl.col(node.id)
+        return node.id
         raise NameError(f"Unknown name: {node.id}")
     
     def visit_keyword(self, node):
