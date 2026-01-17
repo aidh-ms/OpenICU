@@ -3,12 +3,12 @@ from typing import Tuple
 
 from polars import Expr, LazyFrame
 
-from open_icu.callbacks.algebra import Add, Divide, Multiply, Subtract
+from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
-from open_icu.callbacks.registry import CallbackRegistry, register_callback_class
+from open_icu.callbacks.registry import register_callback_cls, registery
 
 
-@register_callback_class
+@register_callback_cls
 class AstInterpreter:
     def __init__(self, expr: str) -> None:
         self.expr = expr
@@ -38,7 +38,7 @@ class ExprInterpreter(ast.NodeVisitor):
         return node.value
 
     def visit_List(self, node) -> AstValue:
-        return [self.visit(e) for e in node.elts]  # type: ignore[return-value]
+        return [self.visit(e) for e in node.elts]
 
     def visit_Name(self, node) -> AstValue:
         # DSL: bare names are column references
@@ -52,16 +52,17 @@ class ExprInterpreter(ast.NodeVisitor):
     def visit_Call(self, node) -> AstValue:
         name = self._get_name(node.func)
 
-        if name not in CallbackRegistry():
+        if name not in registery:
             raise ValueError(f"Unknown callback: {name}")
 
-        cls = CallbackRegistry()[name]
+        cls = registery.get(name)
+        assert cls is not None
 
         args = [self.visit(a) for a in node.args]
         kwargs = dict(self.visit_Keyword(k) for k in node.keywords if k.arg is not None)
 
         try:
-            return cls(*args, **kwargs)
+            return cls(*args, **kwargs)  # type: ignore[invalid-return-type]
         except TypeError as e:
             raise TypeError(f"Bad arguments for {name}(*{args}, **{kwargs}): {e}") from e
 

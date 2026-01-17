@@ -10,7 +10,7 @@ from typing import Any, Callable
 from polars import LazyFrame
 from pydantic import BaseModel, Field, computed_field
 
-from open_icu.callbacks.registry import CallbackRegistry
+from open_icu.callbacks.registry import registery
 
 
 class CallbackConfig(BaseModel):
@@ -39,14 +39,14 @@ class CallbackConfig(BaseModel):
         Raises:
             ValueError: If the callback name is not found in CallbackRegistry
         """
-        if self.callback not in CallbackRegistry():
+        if self.callback not in registery:
             raise ValueError(
                 f"Callback '{self.callback}' is not registered in the CallbackRegistry."
             )
 
         return super().model_post_init(context)
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def call(self) -> Callable[[LazyFrame], LazyFrame]:
         """Get the instantiated callback function.
@@ -57,6 +57,6 @@ class CallbackConfig(BaseModel):
         Returns:
             A callable that takes a LazyFrame and returns a transformed LazyFrame
         """
-        callback_class = CallbackRegistry().get(self.callback)
+        callback_class = registery.get(self.callback)
         assert callback_class is not None
-        return callback_class(**self.params)
+        return callback_class(**self.params)  # type: ignore[invalid-return-type]

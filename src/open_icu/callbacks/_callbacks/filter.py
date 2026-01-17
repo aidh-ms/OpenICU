@@ -3,10 +3,10 @@ from typing import Sequence
 from polars import LazyFrame
 
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_col_name
-from open_icu.callbacks.registry import register_callback_class
+from open_icu.callbacks.registry import register_callback_cls
 
 
-@register_callback_class
+@register_callback_cls
 class DropNa(CallbackProtocol):
     def __init__(self, *columns: AstValue) -> None:
         if len(columns) == 1 and isinstance(columns[0], list):

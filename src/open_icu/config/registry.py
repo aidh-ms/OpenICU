@@ -32,6 +32,19 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         """Initialize the registry storage."""
         self._registry: dict[str, T] = {}
 
+    def __len__(self) -> int:
+        """Return the number of registered items."""
+        return len(self._registry)
+
+    def __contains__(self, identifiers: tuple[str, ...]) -> bool:
+        """Check if key exists using 'in' operator."""
+        identifier = self._config_type.build_identifier(identifiers)
+        return identifier in self._registry
+
+    def __repr__(self) -> str:
+        """Return string representation of the registry."""
+        return f"{self.__class__.__name__}(entries={len(self._registry)})"
+
     @property
     def _config_type(self) -> type[T]:
         """Get the configuration type from the generic type parameter.
@@ -52,17 +65,18 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         if overwrite or value.identifier not in self._registry:
             self._registry[value.identifier] = value
 
-    def unregister(self, key: str) -> bool:
+    def unregister(self, identifiers: tuple[str, ...]) -> bool:
         """Remove a configuration by identifier.
 
         Args:
-            key: The configuration identifier to remove
+            identifiers: The configuration identifier to remove
 
         Returns:
             True if the configuration was removed, False if not found
         """
-        if key in self._registry:
-            del self._registry[key]
+        identifier = self._config_type.build_identifier(identifiers)
+        if identifier in self._registry:
+            del self._registry[identifier]
             return True
         return False
 
@@ -102,6 +116,10 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             List of (identifier, configuration) tuples
         """
         return list(self._registry.items())
+
+    def clear(self) -> None:
+        """Remove all entries from the registry."""
+        self._registry.clear()
 
     def load(
         self,

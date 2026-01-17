@@ -5,10 +5,10 @@ import polars as pl
 from polars import LazyFrame
 
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_expr
-from open_icu.callbacks.registry import register_callback_class
+from open_icu.callbacks.registry import register_callback_cls
 
 
-@register_callback_class
+@register_callback_cls
 class Add(CallbackProtocol):
     def __init__(self, augend: AstValue, addend: AstValue, output: Optional[str] = None) -> None:
         self.augend = augend
@@ -20,7 +20,7 @@ class Add(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Sum(CallbackProtocol):
     def __init__(self, *summands: AstValue, output: Optional[str] = None) -> None:
         if len(summands) == 1 and isinstance(summands[0], list):
@@ -40,7 +40,7 @@ class Sum(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Subtract(CallbackProtocol):
     def __init__(self, minuend: AstValue, subtrahend: AstValue, output: Optional[str] = None) -> None:
         self.minuend = minuend
@@ -52,7 +52,7 @@ class Subtract(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Multiply(CallbackProtocol):
     def __init__(self, multiplicand: AstValue, multiplier: AstValue, output: Optional[str] = None) -> None:
         self.multiplicand = multiplicand
@@ -64,7 +64,7 @@ class Multiply(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Product(CallbackProtocol):
     def __init__(self, *factors: AstValue, output: Optional[str] = None) -> None:
         if len(factors) == 1 and isinstance(factors[0], list):
@@ -84,7 +84,7 @@ class Product(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Divide(CallbackProtocol):
     def __init__(self, dividend: AstValue, divisor: AstValue, output: Optional[str] = None) -> None:
         self.dividend = dividend
@@ -96,7 +96,7 @@ class Divide(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Pow(CallbackProtocol):
     def __init__(self, base: AstValue, exponent: AstValue, output: Optional[str] = None) -> None:
         self.base = base
@@ -108,7 +108,7 @@ class Pow(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Root(CallbackProtocol):
     def __init__(self, radicand: AstValue, index: AstValue, output: Optional[str] = None) -> None:
         self.radicand = radicand
@@ -122,7 +122,7 @@ class Root(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class Modulo(CallbackProtocol):
     def __init__(self, dividend: AstValue, divisor: AstValue, output: Optional[str] = None) -> None:
         self.dividend = dividend

@@ -4,10 +4,10 @@ import polars as pl
 from polars import LazyFrame
 
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_expr
-from open_icu.callbacks.registry import register_callback_class
+from open_icu.callbacks.registry import register_callback_cls
 
 
-@register_callback_class
+@register_callback_cls
 class ToDatetime(CallbackProtocol):
     def __init__(
         self,
@@ -40,7 +40,7 @@ class ToDatetime(CallbackProtocol):
         return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
-@register_callback_class
+@register_callback_cls
 class AddOffset(CallbackProtocol):
     def __init__(self, datetime: AstValue, offset: AstValue, output: Optional[str] = None) -> None:
         self.datetime = datetime
