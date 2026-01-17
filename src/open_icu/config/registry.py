@@ -137,13 +137,13 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         Args:
             file_path: Directory path to search for configuration files
             overwrite: If True, replace existing configurations with same identifier
-            includes: If specified, only load configurations with these names
-            excludes: If specified, skip configurations with these names
+            includes: If specified, only load configurations with these identifiers
+            excludes: If specified, skip configurations with these identifiers
         """
         for config in load_config(file_path, self._config_type):
             if (
-                (excludes is not None and config.name in excludes) or
-                (includes is not None and config.name not in includes)
+                (excludes is not None and config.identifier in excludes) or
+                (includes is not None and config.identifier not in includes)
             ):
                 logger.info("Skip loading configuration: %s", config.identifier)
                 continue
