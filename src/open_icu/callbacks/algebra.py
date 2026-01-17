@@ -11,7 +11,7 @@ from open_icu.callbacks.registry import register_callback_class
 
 @register_callback_class
 class Add(CallbackProtocol):
-    def __init__(self, augend: str, addend: str, output: Optional[str]) -> None:
+    def __init__(self, augend: str, addend: str, output: Optional[str] = None) -> None:
         self.augend = augend
         self.addend = addend
         self.output = output
