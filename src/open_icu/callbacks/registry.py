@@ -83,6 +83,7 @@ class BaseRegistry[T](ABC, metaclass=SingletonABCMeta):
             raise ValueError(f"Key {key} is already registered")
 
         self._registry[key] = value
+
     def get(self, key: Hashable, default: T | None = None) -> T | None:
         """Retrieve a value by key.
 
@@ -162,18 +163,17 @@ class BaseRegistry[T](ABC, metaclass=SingletonABCMeta):
         return f"{self.__class__.__name__}(entries={len(self._registry)})"
 
 
+CAMEL_CASE_PATTERN = re.compile(r"(?<!^)(?=[A-Z])")
 
-
-
-CAMEL_CASE_PATTERN = re.compile(r'(?<!^)(?=[A-Z])')
 
 def register_callback_class(cls: type[CallbackProtocol]) -> Callable[..., CallbackProtocol]:
-    name = CAMEL_CASE_PATTERN.sub('_', cls.__name__).lower()
+    name = CAMEL_CASE_PATTERN.sub("_", cls.__name__).lower()
     CallbackRegistry().register(name, cls)
 
     @wraps(cls)
     def wrapper(*args: Any, **kwargs: Any) -> CallbackProtocol:
         return cls(*args, **kwargs)
+
     return wrapper
 
 

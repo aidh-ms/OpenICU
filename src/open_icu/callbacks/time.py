@@ -1,42 +1,54 @@
-import polars as pl
-from polars import Expr
+from typing import Optional
 
-from open_icu.callbacks.proto import ExpressionCallback
+import polars as pl
+from polars import LazyFrame
+
+from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_expr
 from open_icu.callbacks.registry import register_callback_class
 
 
 @register_callback_class
-class ToDatetime(ExpressionCallback):
-    def __init__(self, year: str, month: str, day: str, time: str, offset: str, output: str | None = None) -> None:
+class ToDatetime(CallbackProtocol):
+    def __init__(
+        self,
+        year: AstValue,
+        month: AstValue,
+        day: AstValue,
+        time: AstValue,
+        offset: AstValue,
+        output: Optional[str] = None,
+    ) -> None:
         self.year = year
         self.month = month
         self.day = day
         self.time = time
         self.offset = offset
-        if output is not None:
-            self.output = output
-    
-    def as_expression(self) -> Expr:
-        datetime_expr = (
-            self.year.cast(pl.Utf8).str.zfill(4) + pl.lit("-") +
-            self.month.cast(pl.Utf8).str.zfill(2) + pl.lit("-") +
-            self.day.cast(pl.Utf8).str.zfill(2) + pl.lit(" ") +
-            self.time.cast(pl.Utf8)
-        ).str.to_datetime()
-        offset_expr = pl.duration(minutes=self.offset.abs())
+        self.output = output
 
-        return (datetime_expr + offset_expr)
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        datetime_expr = (
+            to_expr(lf, self.year).cast(pl.Utf8).str.zfill(4)
+            + pl.lit("-")
+            + to_expr(lf, self.month).cast(pl.Utf8).str.zfill(2)
+            + pl.lit("-")
+            + to_expr(lf, self.day).cast(pl.Utf8).str.zfill(2)
+            + pl.lit(" ")
+            + to_expr(lf, self.time).cast(pl.Utf8)
+        ).str.to_datetime()
+        offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
+        expr = datetime_expr + offset_expr
+        return expr if self.output is None else lf.with_columns(expr.alias(self.output))
 
 
 @register_callback_class
-class AddOffset(ExpressionCallback):
-    def __init__(self, datetime: str, offset: str, output: str | None = None) -> None:
+class AddOffset(CallbackProtocol):
+    def __init__(self, datetime: AstValue, offset: AstValue, output: Optional[str] = None) -> None:
         self.datetime = datetime
         self.offset = offset
-        if output is not None:
-            self.output = output
-    
-    def as_expression(self) -> Expr:
-        offset_expr = pl.duration(minutes=self.offset.abs())
+        self.output = output
 
-        return self.datetime + offset_expr
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
+        expr = to_expr(lf, self.datetime) + offset_expr
+
+        return expr if self.output is None else lf.with_columns(expr.alias(self.output))

@@ -1,5 +1,5 @@
 from open_icu.callbacks.algebra import Add, Divide, Modulo, Multiply, Pow, Product, Root, Subtract, Sum
-from open_icu.callbacks.ast_expression_evaluator import AbstractSyntaxTree
+from open_icu.callbacks.ast_expression_evaluator import AstInterpreter
 from open_icu.callbacks.filter import DropNa
 from open_icu.callbacks.proto import CallbackProtocol
 from open_icu.callbacks.registry import CallbackRegistry, register_callback_class
@@ -17,7 +17,7 @@ __all__ = [
 
     "FirstNotNull",
 
-    "AbstractSyntaxTree",
+    "AstInterpreter",
 
     "Add",
     "Sum",

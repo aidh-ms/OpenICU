@@ -1,75 +1,44 @@
-from typing import Any, Protocol
+from typing import Any, Protocol, Union, runtime_checkable
 
-from polars import LazyFrame, Expr
+import polars as pl
+from polars import LazyFrame
+
+CallbackResult = Union[LazyFrame, pl.Expr]
 
 
+@runtime_checkable
 class CallbackProtocol(Protocol):
-    def __init__(self, **kwargs: Any) -> None:
-        ...
+    def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
-        ...
+    def __call__(self, lf: LazyFrame) -> CallbackResult: ...
 
-class ExpressionCallback(CallbackProtocol):
-    """Callback that produces a Polars expression.
 
-    Expression callbacks are intended to be embedded in higher-level
-    expression contexts, such as an abstract syntax tree (AST). When applied
-    to a `LazyFrame`, the expression is materialized as a new column.
-    """
+AstAtom = Union[int, float, bool, str, None]
+AstValue = Union[AstAtom, pl.Expr, CallbackProtocol, list["AstValue"]]
 
-    output: str
 
-    def as_expression(self) -> Expr:
-        """Return the callback logic as a Polars expression.
+def to_expr(lf: LazyFrame, value: AstValue) -> pl.Expr:
+    if isinstance(value, pl.Expr):
+        return value
 
-        Returns:
-            A Polars `Expr` representing the transformation.
+    if isinstance(value, str):
+        return pl.col(value)
 
-        Raises:
-            NotImplementedError: If the subclass does not implement this method.
-        """
-        raise NotImplementedError("Subclasses must implement this method.")
+    if isinstance(value, (int, float, bool)) or value is None:
+        return pl.lit(value)
 
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
-        """Materialize the expression as a new column on the LazyFrame.
+    if isinstance(value, CallbackProtocol):
+        out = value(lf)
+        if not isinstance(out, pl.Expr):
+            raise TypeError(
+                f"Nested callback '{type(value).__name__}' must return polars.pl.Expr, but returned {type(out).__name__}."
+            )
+        return out
 
-        Args:
-            lf: Input LazyFrame.
+    raise TypeError(f"Cannot convert {type(value).__name__} to polars.pl.Expr")
 
-        Returns:
-            A LazyFrame with the expression added as a column named `result`.
-        """
-        return lf.with_columns(self.as_expression().alias(self.output))
 
-class FrameCallback(CallbackProtocol):
-    """Callback that operates directly on a Polars LazyFrame.
-
-    Frame callbacks apply transformations at the frame level and therefore
-    cannot be embedded inside expression-based DSLs or ASTs.
-    """
-
-    def as_field(self, lf: LazyFrame) -> LazyFrame:
-        """Apply the transformation directly to the LazyFrame.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A transformed LazyFrame.
-
-        Raises:
-            NotImplementedError: If the subclass does not implement this method.
-        """
-        raise NotImplementedError("Subclasses must implement this method.")
-
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
-        """Invoke the frame-level transformation.
-
-        Args:
-            lf: Input LazyFrame.
-
-        Returns:
-            A transformed LazyFrame.
-        """
-        return self.as_field(lf)
+def to_col_name(v: AstValue) -> str:
+    if isinstance(v, str):
+        return v
+    raise TypeError(f"Expected column name (str), got {type(v).__name__}")
