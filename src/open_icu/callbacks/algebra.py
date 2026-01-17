@@ -1,24 +1,30 @@
 import operator
 from numbers import Real
+from typing import Optional
 
 import polars as pl
 from polars import LazyFrame
 
-from open_icu.callbacks.proto import CallbackProtocol
+from open_icu.callbacks.proto import CallbackResult, CallbackProtocol, to_expr
 from open_icu.callbacks.registry import register_callback_class
 
 
 @register_callback_class
 class Add(CallbackProtocol):
-    def __init__(self, augend: str, addend: str, output: str) -> None:
+    def __init__(self, augend: str, addend: str, output: Optional[str]) -> None:
         self.augend = augend
         self.addend = addend
         self.output = output
 
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
-        return lf.with_columns(
-            (pl.col(self.augend) + pl.col(self.addend)).alias(self.output)
-        )
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        expr = to_expr(lf, self.augend) + to_expr(lf, self.addend)
+
+        if self.output is None:
+            # Expression mode (nesting)
+            return expr
+
+        # Frame mode (write column)
+        return lf.with_columns(expr.alias(self.output))
 
 @register_callback_class
 class Sum(CallbackProtocol):

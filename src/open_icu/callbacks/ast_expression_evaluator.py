@@ -1,53 +1,57 @@
 
 import ast
+from typing import Tuple
 
-from polars import LazyFrame
+from polars import LazyFrame, Expr
 
-from open_icu.callbacks.proto import CallbackProtocol
+from open_icu.callbacks.proto import CallbackProtocol, AstValue
 from open_icu.callbacks.registry import CallbackRegistry, register_callback_class
 
 
 @register_callback_class
-class AstInterpreter(CallbackProtocol):
-    
+class AstInterpreter:
     def __init__(self, expr: str) -> None:
         self.expr = expr
 
     def __call__(self, lf: LazyFrame) -> LazyFrame:
         interpreter = ExprInterpreter()
-        print("expr", self.expr)
-        callback = interpreter.eval(self.expr)
-        print("callback", callback)
-        if not isinstance(callback, CallbackProtocol):
-            raise TypeError("Top-level expression must be a Callback")
+        value = interpreter.eval(self.expr)
 
-        lf = callback(lf)
+        if not isinstance(value, CallbackProtocol):
+            raise TypeError("Top-level expression must evaluate to a Callback")
 
-        return lf
+        out = value(lf)
+
+        if isinstance(out, Expr):
+            # Top-level Expr => apply as with_columns
+            return lf.with_columns(out)
+
+        return out
+
 
 
     
 class ExprInterpreter(ast.NodeVisitor):
-    def eval(self, expr: str):
+    def eval(self, expr: str) -> AstValue:
         tree = ast.parse(expr, mode="eval")
-        print("tree", tree, tree.body)
         return self.visit(tree.body)
     
-    def visit_Constant(self, node):
+    def visit_Constant(self, node) -> AstValue:
         return node.value
     
-    def visit_List(self, node):
-        return [self.visit(e) for e in node.elts]
+    def visit_List(self, node) -> AstValue:
+        return [self.visit(e) for e in node.elts] # type: ignore[return-value]
     
-    def visit_Name(self, node):
-        # return pl.col(node.id)
+    def visit_Name(self, node) -> AstValue:
+        # DSL: bare names are column references
         return node.id
-        raise NameError(f"Unknown name: {node.id}")
     
-    def visit_Keyword(self, node):
+    def visit_Keyword(self, node) -> Tuple[str, AstValue]:
+        if node.arg is None:
+            raise TypeError("**kwargs syntax is not supported")
         return node.arg, self.visit(node.value)
     
-    def visit_Call(self, node):
+    def visit_Call(self, node) -> AstValue:
         name = self._get_name(node.func)
 
         if name not in CallbackRegistry():
@@ -58,13 +62,12 @@ class ExprInterpreter(ast.NodeVisitor):
         args = [self.visit(a) for a in node.args]
         kwargs = dict(self.visit_keyword(k) for k in node.keywords if k.arg is not None)
 
-        # positional args → kwargs erzwingen
-        # if args:
-        #     raise TypeError("Only keyword arguments allowed")
-
-        return cls(*args, **kwargs)
+        try:
+            return cls(*args, **kwargs)
+        except TypeError as e:
+            raise TypeError(f"Bad arguments for {name}(*{args}, **{kwargs}): {e}") from e
     
-    def visit_BinOp(self, node):
+    def visit_BinOp(self, node) -> AstValue:
         left = self.visit(node.left)
         right = self.visit(node.right)
 
@@ -79,7 +82,7 @@ class ExprInterpreter(ast.NodeVisitor):
 
         raise NotImplementedError(node.op)
     
-    def visit_Compare(self, node):
+    def visit_Compare(self, node) -> AstValue:
         left = self.visit(node.left)
         right = self.visit(node.comparators[0])
 
@@ -88,7 +91,7 @@ class ExprInterpreter(ast.NodeVisitor):
 
         raise NotImplementedError(node.ops[0])
     
-    def _get_name(self, node):
+    def _get_name(self, node) -> str:
         if isinstance(node, ast.Name):
             return node.id
         raise ValueError("Only simple calls allowed")
