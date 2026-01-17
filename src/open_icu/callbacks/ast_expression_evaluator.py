@@ -1,10 +1,10 @@
-
 import ast
 from typing import Tuple
 
-from polars import LazyFrame, Expr
+from polars import Expr, LazyFrame
 
-from open_icu.callbacks.proto import CallbackProtocol, AstValue
+from open_icu.callbacks.algebra import Add, Divide, Multiply, Subtract
+from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
 from open_icu.callbacks.registry import CallbackRegistry, register_callback_class
 
 
@@ -13,7 +13,7 @@ class AstInterpreter:
     def __init__(self, expr: str) -> None:
         self.expr = expr
 
-    def __call__(self, lf: LazyFrame) -> LazyFrame:
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
         interpreter = ExprInterpreter()
         value = interpreter.eval(self.expr)
 
@@ -29,28 +29,26 @@ class AstInterpreter:
         return out
 
 
-
-    
 class ExprInterpreter(ast.NodeVisitor):
     def eval(self, expr: str) -> AstValue:
         tree = ast.parse(expr, mode="eval")
         return self.visit(tree.body)
-    
+
     def visit_Constant(self, node) -> AstValue:
         return node.value
-    
+
     def visit_List(self, node) -> AstValue:
-        return [self.visit(e) for e in node.elts] # type: ignore[return-value]
-    
+        return [self.visit(e) for e in node.elts]  # type: ignore[return-value]
+
     def visit_Name(self, node) -> AstValue:
         # DSL: bare names are column references
         return node.id
-    
+
     def visit_Keyword(self, node) -> Tuple[str, AstValue]:
         if node.arg is None:
             raise TypeError("**kwargs syntax is not supported")
         return node.arg, self.visit(node.value)
-    
+
     def visit_Call(self, node) -> AstValue:
         name = self._get_name(node.func)
 
@@ -66,31 +64,31 @@ class ExprInterpreter(ast.NodeVisitor):
             return cls(*args, **kwargs)
         except TypeError as e:
             raise TypeError(f"Bad arguments for {name}(*{args}, **{kwargs}): {e}") from e
-    
+
     def visit_BinOp(self, node) -> AstValue:
         left = self.visit(node.left)
         right = self.visit(node.right)
 
         if isinstance(node.op, ast.Add):
-            return left + right
+            return Add(left, right)
         if isinstance(node.op, ast.Mult):
-            return left * right
+            return Multiply(left, right)
         if isinstance(node.op, ast.Sub):
-            return left - right
+            return Subtract(left, right)
         if isinstance(node.op, ast.Div):
-            return left / right
+            return Divide(left, right)
 
         raise NotImplementedError(node.op)
-    
+
     def visit_Compare(self, node) -> AstValue:
         left = self.visit(node.left)
         right = self.visit(node.comparators[0])
 
         if isinstance(node.ops[0], ast.Gt):
-            return left > right
+            return left > right  # Callback has to be implemented and called'
 
         raise NotImplementedError(node.ops[0])
-    
+
     def _get_name(self, node) -> str:
         if isinstance(node, ast.Name):
             return node.id
