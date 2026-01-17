@@ -60,7 +60,7 @@ class ExprInterpreter(ast.NodeVisitor):
         cls = CallbackRegistry()[name]
 
         args = [self.visit(a) for a in node.args]
-        kwargs = dict(self.visit_keyword(k) for k in node.keywords if k.arg is not None)
+        kwargs = dict(self.visit_Keyword(k) for k in node.keywords if k.arg is not None)
 
         try:
             return cls(*args, **kwargs)
