@@ -1,11 +1,11 @@
 import operator
 from numbers import Real
-from typing import Optional
+from typing import Optional, Sequence
 
 import polars as pl
 from polars import LazyFrame
 
-from open_icu.callbacks.proto import CallbackResult, CallbackProtocol, to_expr
+from open_icu.callbacks.proto import CallbackResult, CallbackProtocol, AstValue, to_expr
 from open_icu.callbacks.registry import register_callback_class
 
 
@@ -26,12 +26,17 @@ class Add(CallbackProtocol):
 
 @register_callback_class
 class Sum(CallbackProtocol):
-    def __init__(self, summands: list[str], output: Optional[str] = None) -> None:
-        self.summands = summands
+    def __init__(self, *summands: AstValue, output: Optional[str] = None) -> None:
+        if len(summands) == 1 and isinstance(summands[0], list):
+            self. summands: Sequence[AstValue] = summands[0]
+        else:
+            self.summands = summands
         self.output = output
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
-        expr = to_expr(lf, pl.sum_horizontal([pl.col(c) for c in self.summands]))
+        exprs = [to_expr(lf, s) for s in self.summands]
+        expr = pl.sum_horizontal(exprs)
+        
         if self.output is None:
             return expr
         
