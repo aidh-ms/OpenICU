@@ -13,7 +13,7 @@ import polars as pl
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.field import ConstantFieldConfig
+from open_icu.steps.extraction.config.field import ConstantcolumnConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registery
@@ -47,7 +47,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         """Read and transform a table from CSV.
 
         Scans the CSV file, applies schema overrides, executes pre-callbacks,
-        adds constant fields, converts datetime fields, and executes callbacks.
+        adds constant columns, converts datetime columns, and executes callbacks.
 
         Args:
             table: Configuration for the table to read
@@ -71,8 +71,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         for expr in table.pre_callbacks:
             lf = lf.with_columns(parse_expr(lf, expr))
 
-        for field in table.fields:
-            if isinstance(field, ConstantFieldConfig):
+        for field in table.columns:
+            if isinstance(field, ConstantcolumnConfig):
                 lf = lf.with_columns(
                     pl.lit(field.constant).cast(field.dtype).alias(field.name)
                 )
@@ -135,17 +135,17 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 event_lf = lf
 
                 # Add missing columns
-                if event.fields.text_value is None:
+                if event.columns.text_value is None:
                     event_lf = event_lf.with_columns(pl.lit(None).alias("text_value"))
-                if event.fields.numeric_value is None:
+                if event.columns.numeric_value is None:
                     event_lf = event_lf.with_columns(pl.lit(None).alias("numeric_value"))
 
                 # Rename columns
-                fields = event.fields.model_dump()
-                extension = fields.pop("extension")
+                columns = event.columns.model_dump()
+                extension = columns.pop("extension")
                 mapping = {
                     field: name
-                    for name, field in fields.items()
+                    for name, field in columns.items()
                     if field is not None and not isinstance(field, list)
                 } | {
                     field: name
@@ -154,19 +154,19 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 }
                 event_lf = event_lf.rename(mapping)
 
-                # Create code column by concatenating code fields
-                if len(event.fields.code) > 1:
+                # Create code column by concatenating code columns
+                if len(event.columns.code) > 1:
                     code_expr = pl.concat_str(
-                        [pl.col(field) for field in event.fields.code],
+                        [pl.col(field) for field in event.columns.code],
                         separator="//",
                         ignore_nulls=True
                     ).alias("code")
                 else:
-                    code_expr = pl.col(event.fields.code[0]).fill_null("").alias("code")
+                    code_expr = pl.col(event.columns.code[0]).fill_null("").alias("code")
 
-                # Add code column and drop original code fields
+                # Add code column and drop original code columns
                 event_lf = event_lf.with_columns(code_expr)
-                event_lf = event_lf.drop(event.fields.code)
+                event_lf = event_lf.drop(event.columns.code)
 
                 # Apply event callbacks
                 for expr in event.callbacks:
@@ -182,7 +182,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col("code").cast(pl.String),
                     pl.col("numeric_value").cast(pl.Float32),
                     pl.col("text_value").cast(pl.String),
-                ] + [pl.col(col).cast(pl.String) for col in event.fields.extension.keys()])
+                ] + [pl.col(col).cast(pl.String) for col in event.columns.extension.keys()])
 
                 # Ensure output directory exists
                 assert self._workspace_dir is not None

@@ -1,7 +1,7 @@
 """Event configuration models for MEDS field mappings.
 
 This module defines Pydantic models for configuring how source table columns
-map to MEDS event fields (subject_id, time, code, numeric_value, text_value).
+map to MEDS event columns (subject_id, time, code, numeric_value, text_value).
 """
 
 from typing import Any
@@ -21,7 +21,7 @@ class MEDSEventFieldConfig(BaseModel):
         code: List of column names to concatenate for the event code
         numeric_value: Column name for numeric measurement value (optional)
         text_value: Column name for text value (optional)
-        extension: Dictionary mapping MEDS extension fields to source columns
+        extension: Dictionary mapping MEDS extension columns to source columns
     """
     subject_id: str = Field(..., description="The subject identifier field name.")
     time: str = Field(..., description="The timestamp field name.")
@@ -35,7 +35,7 @@ class MEDSEventFieldDefaultConfig(BaseModel):
     """Default field mapping configuration for events in a table.
 
     Provides default values for field mappings that can be inherited by
-    individual events. Supports prefixes and suffixes for code fields.
+    individual events. Supports prefixes and suffixes for code columns.
 
     Attributes:
         subject_id: Default column name for subject identifier
@@ -96,11 +96,11 @@ class EventConfig(BaseModel):
 
     Attributes:
         name: Name of the event (used in output filename)
-        fields: Field mapping configuration for this event
+        columns: Column mapping configuration for this event
         callbacks: List of callbacks to apply to the event data
     """
     name: str = Field(..., description="The name of the event.")
-    fields: MEDSEventFieldConfig = Field(..., description="The field configuration for the event.")
+    columns: MEDSEventFieldConfig = Field(..., description="The column configuration for the event.")
     callbacks: list[str] = Field(
         default_factory=list, description="The list of callback configurations for the event."
     )

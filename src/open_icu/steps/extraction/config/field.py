@@ -1,7 +1,7 @@
 """Field configuration models for table columns.
 
 This module defines configurations for table field definitions including
-type specifications and constant value fields.
+type specifications and constant value columns.
 """
 
 from typing import Any
@@ -12,11 +12,11 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field
 from open_icu.steps.extraction.config.dtype import DTYPES
 
 
-class FieldConfig(BaseModel):
-    """Configuration for a table field/column.
+class ColumnConfig(BaseModel):
+    """Configuration for a table column.
 
     Attributes:
-        name: Name of the field/column
+        name: Name of the column
         type: String type name (must be in DTYPES mapping)
         params: Additional parameters for type conversion
         dtype: Computed Polars data type
@@ -36,12 +36,12 @@ class FieldConfig(BaseModel):
         return DTYPES[self.type]
 
 
-class ConstantFieldConfig(FieldConfig):
-    """Configuration for a field with a constant value.
+class ConstantcolumnConfig(ColumnConfig):
+    """Configuration for a column with a constant value.
 
     Used to add columns with constant values to tables during extraction.
 
     Attributes:
         constant: The constant value to use for all rows
     """
-    constant: Any = Field(..., description="The constant value for the field.")
+    constant: Any = Field(..., description="The constant value for the column.")

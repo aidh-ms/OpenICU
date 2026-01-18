@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
-from open_icu.steps.extraction.config.field import ConstantFieldConfig, FieldConfig
+from open_icu.steps.extraction.config.field import ColumnConfig, ConstantcolumnConfig
 
 
 class TableType(StrEnum):
@@ -25,13 +25,13 @@ class TableType(StrEnum):
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     """Abstract base configuration for table extraction.
 
-    Defines fields, data types, and callback transformations for reading
+    Defines columns, data types, and callback transformations for reading
     and processing a source table.
 
     Attributes:
         path: File path to the table data relative to dataset root
         type: Table file format (currently only CSV supported)
-        fields: List of field/column configurations
+        columns: List of column configurations
         pre_callbacks: Callbacks to apply before field processing
         callbacks: Callbacks to apply after field processing
         post_callbacks: Callbacks to apply after all transformations
@@ -41,9 +41,9 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
 
     path: str = Field(..., description="The file path to the table data.")
     type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
-    fields: list[ConstantFieldConfig | FieldConfig] = Field(
+    columns: list[ConstantcolumnConfig | ColumnConfig] = Field(
         default_factory=list,
-        description="The list of field configurations for the table."
+        description="The list of column configurations for the table."
     )
     pre_callbacks: list[str] = Field(
         default_factory=list, description="The list of pre-processing callback configurations for the table."
@@ -59,8 +59,8 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     @property
     def dtypes(self) -> dict[str, DataTypeClass]:
         dtype_map = {}
-        for field in self.fields:
-            if isinstance(field, ConstantFieldConfig):
+        for field in self.columns:
+            if isinstance(field, ConstantcolumnConfig):
                 continue
 
             dtype_map[field.name] = field.dtype
@@ -82,15 +82,15 @@ class JsonTableConfig(BaseTableConfig):
     """
     both_on: list[str] = Field(
         default_factory=list,
-        description="List of fields to be used for joining table on both sides.",
+        description="List of columns to be used for joining table on both sides.",
     )
     left_on: list[str] = Field(
         default_factory=list,
-        description="List of fields to be used for joining table on the left side.",
+        description="List of columns to be used for joining table on the left side.",
     )
     right_on: list[str] = Field(
         default_factory=list,
-        description="List of fields to be used for joining table on the right side.",
+        description="List of columns to be used for joining table on the right side.",
     )
     how: str = Field(
         "left",
@@ -138,7 +138,7 @@ class TableConfig(BaseConfig, BaseTableConfig):
 
         events = data.pop("events", [])
         for event in events:
-            event["fields"] = event_defaults.apply_defaults(event.get("fields", {}))
+            event["columns"] = event_defaults.apply_defaults(event.get("columns", {}))
         data["events"] = events
 
         super().__init__(**data)
