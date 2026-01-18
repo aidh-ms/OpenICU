@@ -133,8 +133,8 @@ events:
       code:
         - order_provider_id_code
       text_value: order_provider_id
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: labevent
     fields:
       time: charttime
@@ -144,52 +144,52 @@ events:
         - valueuom
       numeric_value: valuenum
       text_value: value
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: ref_range_lower
     fields:
       time: charttime
       code:
         - ref_range_lower_code
       numeric_value: ref_range_lower
-    callbacks:
-      - drop_na([numeric_value])
+    filters:
+      - drop_na(numeric_value)
   - name: ref_range_upper
     fields:
       time: charttime
       code:
         - ref_range_upper_code
       numeric_value: ref_range_upper
-    callbacks:
-      - drop_na([numeric_value])
+    filters:
+      - drop_na(numeric_value)
   - name: flag
     fields:
       time: charttime
       code:
         - flag_code
       text_value: flag
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: priority
     fields:
       time: charttime
       code:
         - priority_code
       text_value: priority
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: comments
     fields:
       time: charttime
       code:
         - comments_code
       text_value: comments
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: caregiver_store
     fields:
       time: storetime
       code:
         - caregiver_store_code
-    callbacks:
-      - drop_na([time])
+    filters:
+      - drop_na(time)

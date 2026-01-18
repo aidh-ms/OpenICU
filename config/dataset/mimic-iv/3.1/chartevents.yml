@@ -98,5 +98,5 @@ events:
       code:
         - warning_code
       numeric_value: warning
-    callbacks:
-      - drop_na([numeric_value])
+    filters:
+      - drop_na(numeric_value)

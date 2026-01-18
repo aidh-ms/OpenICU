@@ -3,7 +3,9 @@ from typing import Any, Protocol, Union, runtime_checkable
 import polars as pl
 from polars import LazyFrame
 
-CallbackResult = Union[LazyFrame, pl.Expr]
+AstAtom = Union[int, float, bool, str, None]
+AstValue = Union[AstAtom, pl.Expr, "CallbackProtocol", list["AstValue"]]
+CallbackResult = pl.Expr
 
 
 @runtime_checkable
@@ -11,10 +13,6 @@ class CallbackProtocol(Protocol):
     def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
     def __call__(self, lf: LazyFrame) -> CallbackResult: ...
-
-
-AstAtom = Union[int, float, bool, str, None]
-AstValue = Union[AstAtom, pl.Expr, CallbackProtocol, list["AstValue"]]
 
 
 def to_expr(lf: LazyFrame, value: AstValue) -> pl.Expr:

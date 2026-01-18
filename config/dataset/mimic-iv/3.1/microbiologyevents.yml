@@ -139,7 +139,7 @@ events:
         - order_provider_id_code
       text_value: order_provider_id
     callbacks:
-      - drop_na([text_value])
+      - drop_na(text_value)
   - name: spec
     fields:
       time: charttime
@@ -176,36 +176,37 @@ events:
       text_value: dilution_text
       numeric_value: dilution_value
       # dilution_comparison
-    callbacks:
-      - drop_na([numeric_value, text_value])
+    filters:
+      - drop_na(numeric_value)
+      - drop_na(text_value)
   - name: interpretation
     fields:
       time: charttime
       code:
         - interpretation_code
       text_value: interpretation
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: comments
     fields:
       time: charttime
       code:
         - comments_code
       text_value: comments
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: comments
     fields:
       time: charttime
       code:
         - comments_code
       text_value: comments
-    callbacks:
-      - drop_na([text_value])
+    filters:
+      - drop_na(text_value)
   - name: caregiver_store
     fields:
       time: storetime
       code:
         - caregiver_store_code
-    callbacks:
-      - drop_na([time])
+    filters:
+      - drop_na(time)

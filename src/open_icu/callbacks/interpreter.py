@@ -3,30 +3,9 @@ from typing import Tuple
 
 from polars import Expr, LazyFrame
 
-from open_icu.callbacks.algebra import Add, Divide, Multiply, Subtract
-from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
-from open_icu.callbacks.registry import CallbackRegistry, register_callback_class
-
-
-@register_callback_class
-class AstInterpreter:
-    def __init__(self, expr: str) -> None:
-        self.expr = expr
-
-    def __call__(self, lf: LazyFrame) -> CallbackResult:
-        interpreter = ExprInterpreter()
-        value = interpreter.eval(self.expr)
-
-        if not isinstance(value, CallbackProtocol):
-            raise TypeError("Top-level expression must evaluate to a Callback")
-
-        out = value(lf)
-
-        if isinstance(out, Expr):
-            # Top-level Expr => apply as with_columns
-            return lf.with_columns(out)
-
-        return out
+from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
+from open_icu.callbacks.proto import AstValue, CallbackProtocol
+from open_icu.callbacks.registry import registry
 
 
 class ExprInterpreter(ast.NodeVisitor):
@@ -38,7 +17,7 @@ class ExprInterpreter(ast.NodeVisitor):
         return node.value
 
     def visit_List(self, node) -> AstValue:
-        return [self.visit(e) for e in node.elts]  # type: ignore[return-value]
+        return [self.visit(e) for e in node.elts]
 
     def visit_Name(self, node) -> AstValue:
         # DSL: bare names are column references
@@ -52,16 +31,17 @@ class ExprInterpreter(ast.NodeVisitor):
     def visit_Call(self, node) -> AstValue:
         name = self._get_name(node.func)
 
-        if name not in CallbackRegistry():
+        if name not in registry:
             raise ValueError(f"Unknown callback: {name}")
 
-        cls = CallbackRegistry()[name]
+        cls = registry.get(name)
+        assert cls is not None
 
         args = [self.visit(a) for a in node.args]
         kwargs = dict(self.visit_Keyword(k) for k in node.keywords if k.arg is not None)
 
         try:
-            return cls(*args, **kwargs)
+            return cls(*args, **kwargs)  # type: ignore[invalid-return-type]
         except TypeError as e:
             raise TypeError(f"Bad arguments for {name}(*{args}, **{kwargs}): {e}") from e
 
@@ -93,3 +73,13 @@ class ExprInterpreter(ast.NodeVisitor):
         if isinstance(node, ast.Name):
             return node.id
         raise ValueError("Only simple calls allowed")
+
+
+def parse_expr(lf : LazyFrame, expr: str) -> Expr:
+    interpreter = ExprInterpreter()
+    callback = interpreter.eval(expr)
+
+    assert isinstance(callback, CallbackProtocol)
+    pl_expr = callback(lf)
+
+    return pl_expr

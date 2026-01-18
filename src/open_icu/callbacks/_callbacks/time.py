@@ -4,10 +4,10 @@ import polars as pl
 from polars import LazyFrame
 
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_expr
-from open_icu.callbacks.registry import register_callback_class
+from open_icu.callbacks.registry import register_callback_cls
 
 
-@register_callback_class
+@register_callback_cls
 class ToDatetime(CallbackProtocol):
     def __init__(
         self,
@@ -37,10 +37,12 @@ class ToDatetime(CallbackProtocol):
         ).str.to_datetime()
         offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
         expr = datetime_expr + offset_expr
-        return expr if self.output is None else lf.with_columns(expr.alias(self.output))
+        if self.output is None:
+            return expr
+        return expr.alias(self.output)
 
 
-@register_callback_class
+@register_callback_cls
 class AddOffset(CallbackProtocol):
     def __init__(self, datetime: AstValue, offset: AstValue, output: Optional[str] = None) -> None:
         self.datetime = datetime
@@ -51,4 +53,6 @@ class AddOffset(CallbackProtocol):
         offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
         expr = to_expr(lf, self.datetime) + offset_expr
 
-        return expr if self.output is None else lf.with_columns(expr.alias(self.output))
+        if self.output is None:
+            return expr
+        return expr.alias(self.output)

@@ -73,8 +73,8 @@ events:
         - label
         - amountuom
       numeric_value: amount
-    callbacks:
-      - drop_na([numeric_value])
+    filters:
+      - drop_na(numeric_value)
   - name: rate
     fields:
       time: starttime
@@ -82,5 +82,5 @@ events:
         - label
         - rateuom
       numeric_value: rate
-    callbacks:
-      - drop_na([numeric_value])
+    filters:
+      - drop_na(numeric_value)
