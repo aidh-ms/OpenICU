@@ -17,7 +17,6 @@ class Add(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.augend) + to_expr(lf, self.addend)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -37,10 +36,12 @@ class Sum(CallbackProtocol):
 
         if not exprs:
             expr = pl.lit(0)
-            return expr if self.output is None else lf.with_columns(expr.alias(self.output))
+            if self.output is None:
+                return expr
+            return expr.alias(self.output)
+
 
         expr = pl.sum_horizontal(exprs)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -55,7 +56,6 @@ class Subtract(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.minuend) - to_expr(lf, self.subtrahend)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output)
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -70,7 +70,6 @@ class Multiply(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.multiplicand) * to_expr(lf, self.multiplier)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -90,10 +89,12 @@ class Product(CallbackProtocol):
 
         if not exprs:
             expr = pl.lit(1)
-            return expr if self.output is None else lf.with_columns(expr.alias(self.output))
+            if self.output is None:
+                return expr
+            return expr.alias(self.output)
+
 
         expr = pl.fold(acc=pl.lit(1), function=operator.mul, exprs=exprs)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -108,7 +109,6 @@ class Divide(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.dividend) / to_expr(lf, self.divisor)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -123,7 +123,6 @@ class Pow(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.base) ** to_expr(lf, self.exponent)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -140,7 +139,6 @@ class Root(CallbackProtocol):
         radicand_expr = to_expr(lf, self.radicand)
         idx_expr = to_expr(lf, self.index)
         expr = radicand_expr.sign() * radicand_expr.abs() ** (pl.lit(1) / idx_expr)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -155,7 +153,6 @@ class Modulo(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.dividend) % to_expr(lf, self.divisor)
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)

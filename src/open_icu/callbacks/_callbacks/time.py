@@ -37,7 +37,6 @@ class ToDatetime(CallbackProtocol):
         ).str.to_datetime()
         offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
         expr = datetime_expr + offset_expr
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -54,7 +53,6 @@ class AddOffset(CallbackProtocol):
         offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
         expr = to_expr(lf, self.datetime) + offset_expr
 
-        # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
         if self.output is None:
             return expr
         return expr.alias(self.output)
