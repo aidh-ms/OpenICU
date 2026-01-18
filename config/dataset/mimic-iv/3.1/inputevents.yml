@@ -3,7 +3,7 @@ path: icu/inputevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -43,7 +43,7 @@ fields:
 join:
   - name: d_items
     path: icu/d_items.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extentions
@@ -67,7 +67,7 @@ event_defaults:
 
 events:
   - name: dosage
-    fields:
+    columns:
       time: endtime
       code:
         - label
@@ -76,7 +76,7 @@ events:
     filters:
       - drop_na(numeric_value)
   - name: rate
-    fields:
+    columns:
       time: starttime
       code:
         - label

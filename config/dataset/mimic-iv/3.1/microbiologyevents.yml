@@ -3,7 +3,7 @@ path: hosp/microbiologyevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -121,19 +121,19 @@ event_defaults:
 
 events:
   - name: microevent_id
-    fields:
+    columns:
       time: charttime
       code:
         - microevent_id_code
       numeric_value: microevent_id
   - name: specimen_id
-    fields:
+    columns:
       time: charttime
       code:
         - micro_specimen_id_code
       numeric_value: micro_specimen_id
   - name: order_provider_id
-    fields:
+    columns:
       time: charttime
       code:
         - order_provider_id_code
@@ -141,35 +141,35 @@ events:
     callbacks:
       - drop_na(text_value)
   - name: spec
-    fields:
+    columns:
       time: charttime
       code:
         - spec_code
         - spec_type_desc
       numeric_value: spec_itemid
   - name: test_item
-    fields:
+    columns:
       time: charttime
       code:
         - test_item_code
         - test_name
       numeric_value: test_itemid
   - name: organism
-    fields:
+    columns:
       time: charttime
       code:
         - organism_item_code
         - org_name
       numeric_value: org_itemid
   - name: antibiotic
-    fields:
+    columns:
       time: charttime
       code:
         - antibiotic_item_code
         - ab_name
       numeric_value: ab_itemid
   - name: dilution
-    fields:
+    columns:
       time: charttime
       code:
         - dilution_code
@@ -180,7 +180,7 @@ events:
       - drop_na(numeric_value)
       - drop_na(text_value)
   - name: interpretation
-    fields:
+    columns:
       time: charttime
       code:
         - interpretation_code
@@ -188,7 +188,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: comments
-    fields:
+    columns:
       time: charttime
       code:
         - comments_code
@@ -196,7 +196,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: comments
-    fields:
+    columns:
       time: charttime
       code:
         - comments_code
@@ -204,7 +204,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: caregiver_store
-    fields:
+    columns:
       time: storetime
       code:
         - caregiver_store_code

@@ -3,7 +3,7 @@ path: icu/datetimeevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -52,7 +52,7 @@ fields:
 join:
   - name: d_items
     path: icu/d_items.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extentions
@@ -76,13 +76,13 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields:
+    columns:
       time: storetime
       code:
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: datetimeevent
-    fields:
+    columns:
       time: charttime
       code:
         - chartevent_code
@@ -92,7 +92,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: warning
-    fields:
+    columns:
       time: storetime
       code:
         - warning_code

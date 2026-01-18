@@ -3,7 +3,7 @@ path: hosp/labevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -88,7 +88,7 @@ fields:
 join:
   - name: d_labitems
     path: hosp/d_labitems.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extentions
@@ -116,19 +116,19 @@ event_defaults:
 
 events:
   - name: labevent_id
-    fields:
+    columns:
       time: charttime
       code:
         - labevent_id_code
       numeric_value: labevent_id
   - name: specimen_id
-    fields:
+    columns:
       time: charttime
       code:
         - specimen_id_code
       numeric_value: specimen_id
   - name: order_provider_id
-    fields:
+    columns:
       time: charttime
       code:
         - order_provider_id_code
@@ -136,7 +136,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: labevent
-    fields:
+    columns:
       time: charttime
       code:
         - labevent_code
@@ -147,7 +147,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: ref_range_lower
-    fields:
+    columns:
       time: charttime
       code:
         - ref_range_lower_code
@@ -155,7 +155,7 @@ events:
     filters:
       - drop_na(numeric_value)
   - name: ref_range_upper
-    fields:
+    columns:
       time: charttime
       code:
         - ref_range_upper_code
@@ -163,7 +163,7 @@ events:
     filters:
       - drop_na(numeric_value)
   - name: flag
-    fields:
+    columns:
       time: charttime
       code:
         - flag_code
@@ -171,7 +171,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: priority
-    fields:
+    columns:
       time: charttime
       code:
         - priority_code
@@ -179,7 +179,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: comments
-    fields:
+    columns:
       time: charttime
       code:
         - comments_code
@@ -187,7 +187,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: caregiver_store
-    fields:
+    columns:
       time: storetime
       code:
         - caregiver_store_code

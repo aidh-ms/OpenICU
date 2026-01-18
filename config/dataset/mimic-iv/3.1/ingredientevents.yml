@@ -3,7 +3,7 @@ path: icu/ingredientevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -86,7 +86,7 @@ fields:
 join:
   - name: d_items
     path: icu/d_items.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extensions
@@ -110,13 +110,13 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields:
+    columns:
       time: storetime
       code:
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: rate_start
-    fields:
+    columns:
       time: starttime
       code:
         - rate_start_code
@@ -126,7 +126,7 @@ events:
     filters:
       - drop_na(numeric_value)
   - name: rate_end
-    fields:
+    columns:
       time: endtime
       code:
         - rate_end_code
@@ -136,7 +136,7 @@ events:
     filters:
       - drop_na(numeric_value)
   - name: dosage
-    fields:
+    columns:
       time: endtime
       code:
         - amount_code
@@ -144,25 +144,25 @@ events:
         - amountuom
       numeric_value: amount
   - name: order
-    fields:
+    columns:
       time: endtime
       code:
         - order_code
       numeric_value: orderid
   - name: linkorder
-    fields:
+    columns:
       time: endtime
       code:
         - linkorder_code
       numeric_value: linkorderid
   - name: statusdescription
-    fields:
+    columns:
       time: endtime
       code:
         - statusdescription_code
         - statusdescription
   - name: originalrate
-    fields:
+    columns:
       time: starttime
       code:
         - originalrate_code

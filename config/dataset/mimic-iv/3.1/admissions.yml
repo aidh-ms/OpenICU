@@ -3,7 +3,7 @@ path: hosp/admissions.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -102,7 +102,7 @@ event_defaults:
 
 events:
   - name: admission
-    fields:
+    columns:
       time: admittime
       code:
         - admission_code
@@ -110,52 +110,52 @@ events:
         - admission_type
         - admit_provider_id
   - name: discharge
-    fields:
+    columns:
       time: dischtime
       code:
         - discharge_code
         - discharge_location
   - name: dod
-    fields:
+    columns:
       time: deathtime
       code:
         - death_code
   - name: insurance
-    fields:
+    columns:
       time: admittime
       code:
         - insurance_code
         - insurance
   - name: language
-    fields:
+    columns:
       time: admittime
       code:
         - language_code
         - language
   - name: marital_status
-    fields:
+    columns:
       time: admittime
       code:
         - marital_status_code
         - marital_status
   - name: race
-    fields:
+    columns:
       time: admittime
       code:
         - race_code
         - race
   - name: emergency_department_registration
-    fields:
+    columns:
       time: edregtime
       code:
         - edreg_code
   - name: emergency_department_discharge
-    fields:
+    columns:
       time: edouttime
       code:
         - edout_code
   - name: hospital_expire_flag
-    fields:
+    columns:
       time: dischtime
       code:
         - hospital_expire_flag_code

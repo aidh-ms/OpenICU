@@ -3,7 +3,7 @@ path: icu/procedureevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -106,7 +106,7 @@ fields:
 join:
   - name: d_items
     path: icu/d_items.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extensions
@@ -130,13 +130,13 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields:
+    columns:
       time: storetime
       code:
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: event_start
-    fields:
+    columns:
       time: starttime
       code:
         - event_start_code
@@ -144,7 +144,7 @@ events:
         - valueuom
       numeric_value: value
   - name: event_end
-    fields:
+    columns:
       time: endtime
       code:
         - event_end_code
@@ -152,7 +152,7 @@ events:
         - valueuom
       numeric_value: value
   - name: location
-    fields:
+    columns:
       time: endtime
       code:
         - location_code
@@ -161,45 +161,45 @@ events:
     filters:
       - drop_na(text_value)
   - name: order
-    fields:
+    columns:
       time: endtime
       code:
         - order_code
         - ordercategoryname
       numeric_value: orderid
   - name: linkorder
-    fields:
+    columns:
       time: endtime
       code:
         - linkorder_code
       numeric_value: linkorderid
   - name: weight
-    fields:
+    columns:
       time: starttime
       code:
         - weight_code
         - weightuom
       numeric_value: patientweight
   - name: isopenbag
-    fields:
+    columns:
       time: starttime
       code:
         - isopenbag_code
       numeric_value: isopenbag
   - name: continueinnextdept
-    fields:
+    columns:
       time: endtime
       code:
         - continueinnextdept_code
         - continueinnextdept
   - name: statusdescription
-    fields:
+    columns:
       time: endtime
       code:
         - statusdescription_code
         - statusdescription
   - name: originalamount
-    fields:
+    columns:
       time: starttime
       code:
         - originalamount_code
@@ -207,7 +207,7 @@ events:
         - valueuom
       numeric_value: originalamount
   - name: originalrate
-    fields:
+    columns:
       time: starttime
       code:
         - originalrate_code

@@ -3,7 +3,7 @@ path: hosp/emar.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -63,13 +63,13 @@ event_defaults:
 
 events:
   - name: diagnoses
-    fields:
+    columns:
       time: charttime
       code:
         - medication
       text_value: event_txt
   - name: scheduletime
-    fields:
+    columns:
       time: scheduletime
       code:
         - scheduletime_code

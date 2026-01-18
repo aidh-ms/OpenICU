@@ -3,7 +3,7 @@ path: hosp/services.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -49,12 +49,12 @@ event_defaults:
 
 events:
   - name: prev_service
-    fields:
+    columns:
       code:
         - prev_service_code
         - prev_service
   - name: curr_service
-    fields:
+    columns:
       code:
         - curr_service_code
         - curr_service

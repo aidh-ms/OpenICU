@@ -3,7 +3,7 @@ path: patient.csv.gz
 version: "2.0"
 dataset: eicu
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -132,53 +132,53 @@ event_defaults:
 
 events:
   - name: gender
-    fields:
+    columns:
       # TODO: suggest and maybe change time birthdate
       time: admission_timestamp
       code: # codes is null, when using gender and gender is empty string
         - gender_code
         - gender
   - name: icu_admission
-    fields:
+    columns:
       time: admission_timestamp
       code:
         - in_code
         - unittype
   - name: age
-    fields:
+    columns:
       time: admission_timestamp
       code:
         - age_code
         - age_unit
       text_value: age
   - name: ethnicity
-    fields:
+    columns:
       time: admission_timestamp
       code:
         - ethnicity_code
         - ethnicity
   - name: admissionheight
-    fields:
+    columns:
       time: admission_timestamp
       code:
         - admissionheight_code
         - admissionheight_unit
       numeric_value: admissionheight
   - name: admissionweight
-    fields:
+    columns:
       time: admission_timestamp
       code:
         - admissionweight_code
         - weight_unit
       numeric_value: admissionweight
   - name: icu_discharge
-    fields:
+    columns:
       time: discharge_timestamp
       code:
         - out_code
         - unittype
   # - name: dischargeweight
-  #   fields:
+  #   columns:
   #   time: discharge_timestamp
   #   code:
   #     - dischargeweight_code

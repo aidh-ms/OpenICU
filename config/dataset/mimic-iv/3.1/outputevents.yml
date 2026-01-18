@@ -3,7 +3,7 @@ path: icu/outputevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -47,7 +47,7 @@ fields:
 join:
   - name: d_items
     path: icu/d_items.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # db fields - times
@@ -71,13 +71,13 @@ event_defaults:
 
 events:
   - name: caregiver_store
-    fields:
+    columns:
       time: storetime
       code:
         - caregiver_store_code
       numeric_value: caregiver_id
   - name: dosage
-    fields:
+    columns:
       time: charttime
       code:
         - dosage_code

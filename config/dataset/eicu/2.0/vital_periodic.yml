@@ -3,7 +3,7 @@ path: vitalPeriodic.csv.gz
 version: "2.0"
 dataset: eicu
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -115,7 +115,7 @@ post_callbacks:
 join:
   - name: patient
     path: patient.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extentions
@@ -157,88 +157,88 @@ event_defaults:
 
 events:
   - name: heartrate
-    fields:
+    columns:
       code:
         - heartrate_code
         - heartrate_uom
       numeric_value: heartrate
   - name: vitalperiodicid
-    fields:
+    columns:
       code:
         - vitalperiodicid_code
       numeric_value: observationoffset
   - name: temperature
-    fields:
+    columns:
       code:
         - temperature_code
       numeric_value: temperature
   - name: sao2
-    fields:
+    columns:
       code:
         - sao2_code
       numeric_value: sao2
   - name: respiration
-    fields:
+    columns:
       code:
         - respiration_code
       numeric_value: respiration
   - name: cvp
-    fields:
+    columns:
       code:
         - cvp_code
       numeric_value: cvp
   - name: etco2
-    fields:
+    columns:
       code:
         - etco2_code
       numeric_value: etco2
   - name: systemicsystolic
-    fields:
+    columns:
       code:
         - systemicsystolic_code
       numeric_value: systemicsystolic
   - name: systemicdiastolic
-    fields:
+    columns:
       code:
         - systemicdiastolic_code
       numeric_value: systemicdiastolic
   - name: systemicmean
-    fields:
+    columns:
       code:
         - systemicmean_code
       numeric_value: systemicmean
   - name: pasystolic
-    fields:
+    columns:
       code:
         - pasystolic_code
       numeric_value: pasystolic
   - name: padiastolic
-    fields:
+    columns:
       code:
         - padiastolic_code
       numeric_value: padiastolic
   - name: pamean
-    fields:
+    columns:
       code:
         - pamean_code
       numeric_value: pamean
   - name: st1
-    fields:
+    columns:
       code:
         - st1_code
       numeric_value: st1
   - name: st2
-    fields:
+    columns:
       code:
         - st2_code
       numeric_value: st2
   - name: st3
-    fields:
+    columns:
       code:
         - st3_code
       numeric_value: st3
   - name: icp
-    fields:
+    columns:
       code:
         - icp_code
       numeric_value: icp

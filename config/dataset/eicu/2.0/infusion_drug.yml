@@ -3,7 +3,7 @@ path: infusionDrug.csv.gz
 version: "2.0"
 dataset: eicu
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -55,7 +55,7 @@ post_callbacks:
 join:
   - name: patient
     path: patient.csv.gz
-    fields:
+    columns:
         # general codes
         # codes
         # subject_id and extentions
@@ -96,7 +96,7 @@ event_defaults:
 
 events:
   - name: patientweight
-    fields:
+    columns:
       time: admission_timestamp
       code:
         - patientweight_code
@@ -105,7 +105,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: drugamount
-    fields:
+    columns:
       time: event_timestamp
       code:
         - drugamount_code
@@ -114,7 +114,7 @@ events:
     filters:
       - drop_na(numeric_value)
   - name: drugrate
-    fields:
+    columns:
       time: event_timestamp
       code:
         - drugrate_code
@@ -122,7 +122,7 @@ events:
     filters:
       - drop_na(text_value)
   - name: infusionrate
-    fields:
+    columns:
       time: event_timestamp
       code:
         - infusionrate_code
@@ -130,7 +130,7 @@ events:
     filters:
       - drop_na(numeric_value)
   - name: volumeoffluid
-    fields:
+    columns:
       time: event_timestamp
       code:
         - volumeoffluid_code

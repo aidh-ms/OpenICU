@@ -3,7 +3,7 @@ path: hosp/diagnoses_icd.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -32,7 +32,7 @@ fields:
 join:
   - name: d_icd_diagnoses
     path: hosp/d_icd_diagnoses.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extentions
@@ -49,7 +49,7 @@ join:
       - icd_version
   - name: admissions
     path: hosp/admissions.csv.gz
-    fields:
+    columns:
       # general codes
       - name: hadm_id
         type: int64
@@ -67,7 +67,7 @@ join:
 
 events:
   - name: diagnoses
-    fields:
+    columns:
       subject_id: subject_id
       time: dischtime
       code:

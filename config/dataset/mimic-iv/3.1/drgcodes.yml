@@ -3,7 +3,7 @@ path: hosp/drgcodes.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -45,7 +45,7 @@ fields:
 join:
   - name: admissions
     path: hosp/admissions.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       # subject_id and extensions
@@ -77,17 +77,17 @@ event_defaults:
 
 events:
   - name: drg_code
-    fields:
+    columns:
       code:
         - drg_code_code
       text_value: description
   - name: drg_severity
-    fields:
+    columns:
       code:
         - drg_severity_code
       numeric_value: drg_severity
   - name: drg_mortality
-    fields:
+    columns:
       code:
         - drg_mortality_code
       numeric_value: drg_mortality

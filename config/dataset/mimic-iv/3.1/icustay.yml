@@ -3,7 +3,7 @@ path: icu/icustays.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -59,19 +59,19 @@ event_defaults:
 
 events:
   - name: icu_admission
-    fields:
+    columns:
       time: intime
       code:
         - in_code
         - first_careunit
   - name: icu_discharge
-    fields:
+    columns:
       time: outtime
       code:
         - out_code
         - last_careunit
   - name: icu_length_of_stay
-    fields:
+    columns:
       time: outtime
       code:
         - los_code

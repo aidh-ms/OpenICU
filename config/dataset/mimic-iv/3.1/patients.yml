@@ -3,7 +3,7 @@ path: hosp/patients.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -74,17 +74,17 @@ event_defaults:
 
 events:
   - name: dob
-    fields:
+    columns:
       time: dob
       code:
         - dob_code
   - name: dod
-    fields:
+    columns:
       time: dod
       code:
         - dod_code
   - name: gender
-    fields:
+    columns:
       time: dob
       code:
         - gender_code

@@ -3,7 +3,7 @@ path: hosp/prescriptions.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -86,7 +86,7 @@ fields:
 join:
   - name: pharmacy
     path: hosp/pharmacy.csv.gz
-    fields:
+    columns:
       # general codes
       # codes
       - name: caregiver_store_code
@@ -158,7 +158,7 @@ event_defaults:
 
 events:
   - name: medication_start
-    fields:
+    columns:
       time: starttime
       code:
         - medication_start_code
@@ -168,36 +168,36 @@ events:
         - drug_type
         - prod_strength
   - name: status
-    fields:
+    columns:
       time: stoptime
       code:
         - status_code
       text_value: status
   # - name: verifiedtime
-  #   fields:
+  #   columns:
   #     time: verifiedtime
   #     code:
   #       - verifiedtime_code
   - name: frequency
-    fields:
+    columns:
       time: starttime
       code:
         - frequency_code
         - frequency
   - name: sliding_scale
-    fields:
+    columns:
       time: starttime
       code:
         - sliding_scale_code
         - sliding_scale
   - name: lockout_interval
-    fields:
+    columns:
       time: starttime
       code:
         - lockout_interval_code
         - lockout_interval
   - name: medication_stop
-    fields:
+    columns:
       time: stoptime
       code:
         - medication_stop_code
@@ -207,7 +207,7 @@ events:
         - drug_type
         - prod_strength
   # - name: caregiver_store
-  #   fields:
+  #   columns:
   #     time: entertime
   #     code:
   #       - caregiver_store_code

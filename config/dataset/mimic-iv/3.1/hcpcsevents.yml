@@ -3,7 +3,7 @@ path: hosp/hcpcsevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
+columns:
   # general codes
   - name: src_table_code
     type: string
@@ -38,7 +38,7 @@ fields:
 
 events:
   - name: hcpcsevent
-    fields:
+    columns:
       subject_id: subject_id
       time: chartdate
       code:
