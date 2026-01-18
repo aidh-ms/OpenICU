@@ -6,15 +6,7 @@ from open_icu.utils.name import camel_to_snake
 
 
 class CallbackRegistry:
-    """Generic registry for configuration objects.
-
-    Stores configuration instances indexed by their unique identifiers.
-    Provides methods for registration, retrieval, and batch loading/saving
-    from/to YAML files.
-
-    Type Parameters:
-        T: The type of configuration objects to store (must inherit from BaseConfig)
-    """
+    """registry for callbacks."""
     def __init__(self) -> None:
         """Initialize the registry storage."""
         self._registry: dict[str, CallbackProtocol] = {}
@@ -32,24 +24,24 @@ class CallbackRegistry:
         return f"{self.__class__.__name__}(entries={len(self._registry)})"
 
     def register(self, key: str, value: CallbackProtocol, overwrite: bool = False) -> None:
-        """Register a configuration object.
+        """Register a callbacks object.
 
         Args:
-            key: Unique identifier for the configuration object
-            value: Configuration object to register
-            overwrite: If True, replace existing configuration with same identifier
+            key: Unique identifier for the callbacks object
+            value: Callbacks object to register
+            overwrite: If True, replace existing callbacks with same key
         """
         if overwrite or key not in self._registry:
             self._registry[key] = value
 
     def unregister(self, key: str) -> bool:
-        """Remove a configuration by identifier.
+        """Remove a callbacks by key.
 
         Args:
-            key: The configuration identifier to remove
+            key: The callbacks key to remove
 
         Returns:
-            True if the configuration was removed, False if not found
+            True if the callbacks was removed, False if not found
         """
         if key in self._registry:
             del self._registry[key]
@@ -57,38 +49,37 @@ class CallbackRegistry:
         return False
 
     def get(self, key: str, default: CallbackProtocol | None = None) -> CallbackProtocol | None:
-        """Retrieve a configuration by its identifier components.
+        """Retrieve a callbacks by its key.
 
         Args:
-            identifiers: Tuple of identifier components (e.g., (class_name, version, name))
-            default: Default value if configuration not found
-
+            key: The callbacks key to retrieve
+            default: Default value if callbacks not found
         Returns:
-            The configuration object or default if not found
+            The callbacks object or default if not found
         """
         return self._registry.get(key, default)
 
     def keys(self) -> list[str]:
-        """Get all registered configuration identifiers.
+        """Get all registered callbacks identifiers.
 
         Returns:
-            List of configuration identifier strings
+            List of callbacks identifier strings
         """
         return list(self._registry.keys())
 
     def values(self) -> list[CallbackProtocol]:
-        """Get all registered configuration objects.
+        """Get all registered callbacks objects.
 
         Returns:
-            List of configuration instances
+            List of callbacks instances
         """
         return list(self._registry.values())
 
     def items(self) -> list[tuple[str, CallbackProtocol]]:
-        """Get all identifier-configuration pairs.
+        """Get all key-callbacks pairs.
 
         Returns:
-            List of (identifier, configuration) tuples
+            List of (identifier, callbacks) tuples
         """
         return list(self._registry.items())
 
