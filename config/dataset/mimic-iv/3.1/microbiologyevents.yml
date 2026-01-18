@@ -209,4 +209,4 @@ events:
       code:
         - caregiver_store_code
     callbacks:
-      - drop_na([time])
+      - drop_na(time)
