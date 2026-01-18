@@ -12,7 +12,6 @@ from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseConfig
-from open_icu.steps.extraction.config.callback import CallbackConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
 from open_icu.steps.extraction.config.field import ConstantFieldConfig, FieldConfig
 
@@ -46,13 +45,13 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
         default_factory=list,
         description="The list of field configurations for the table."
     )
-    pre_callbacks: list[CallbackConfig] = Field(
+    pre_callbacks: list[str] = Field(
         default_factory=list, description="The list of pre-processing callback configurations for the table."
     )
-    callbacks: list[CallbackConfig] = Field(
+    callbacks: list[str] = Field(
         default_factory=list, description="The list of callback configurations for the table."
     )
-    post_callbacks: list[CallbackConfig] = Field(
+    post_callbacks: list[str] = Field(
         default_factory=list, description="The list of post-processing callback configurations for the table."
     )
 

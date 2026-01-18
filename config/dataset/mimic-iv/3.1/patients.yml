@@ -61,14 +61,7 @@ fields:
     type: string
 
 post_callbacks:
-  - callback: to_datetime
-    params:
-      year: anchor_year
-      month: month
-      day: day
-      time: basetime
-      offset: anchor_age
-      output: dob
+  - to_datetime(anchor_year, month, day, basetime, anchor_age, dob)
 
 event_defaults:
   subject_id: subject_id

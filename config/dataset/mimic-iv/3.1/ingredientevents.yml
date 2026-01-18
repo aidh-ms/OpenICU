@@ -123,11 +123,8 @@ events:
         - label
         - rateuom
       numeric_value: rate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+    filters:
+      - drop_na(numeric_value)
   - name: rate_end
     fields:
       time: endtime
@@ -136,11 +133,8 @@ events:
         - label
         - rateuom
       numeric_value: rate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+    filters:
+      - drop_na(numeric_value)
   - name: dosage
     fields:
       time: endtime
@@ -175,8 +169,5 @@ events:
         - label
         - rateuom
       numeric_value: originalrate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+    filters:
+      - drop_na(numeric_value)

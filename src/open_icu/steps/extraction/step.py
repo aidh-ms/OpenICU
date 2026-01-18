@@ -10,6 +10,7 @@ from pathlib import Path
 
 import polars as pl
 
+from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
@@ -67,8 +68,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         )
         lf = lf.select(table.dtypes.keys())
 
-        for callback in table.pre_callbacks:
-            lf = callback.call(lf)
+        for expr in table.pre_callbacks:
+            lf = lf.with_columns(parse_expr(lf, expr))
 
         for field in table.fields:
             if isinstance(field, ConstantFieldConfig):
@@ -81,8 +82,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
                 )
 
-        for callback in table.callbacks:
-            lf = callback.call(lf)
+        for expr in table.callbacks:
+            lf = lf.with_columns(parse_expr(lf, expr))
 
         return lf
 
@@ -127,8 +128,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 continue
 
             logger.info("processing table %s", table.name)
-            for callback in post_callbacks:
-                lf = callback.call(lf)
+            for expr in post_callbacks:
+                lf = lf.with_columns(parse_expr(lf, expr))
 
             for event in table.events:
                 event_lf = lf
@@ -168,8 +169,11 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 event_lf = event_lf.drop(event.fields.code)
 
                 # Apply event callbacks
-                for callback in event.callbacks:
-                    event_lf = callback.call(event_lf)
+                for expr in event.callbacks:
+                    event_lf = event_lf.with_columns(parse_expr(event_lf, expr))
+
+                for expr in event.filters:
+                    event_lf = event_lf.filter(parse_expr(event_lf, expr))
 
                 # Reorder columns
                 event_lf = event_lf.select([
