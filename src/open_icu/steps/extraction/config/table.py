@@ -1,6 +1,6 @@
 """Table configuration models for data extraction.
 
-This module defines configurations for source tables, including field definitions,
+This module defines configurations for source tables, including column definitions,
 callback transformations, join specifications, and event extraction rules.
 """
 
@@ -12,8 +12,8 @@ from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseConfig
+from open_icu.steps.extraction.config.column import ColumnConfig, ConstantColumnConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
-from open_icu.steps.extraction.config.field import ColumnConfig, ConstantColumnConfig
 
 
 class TableType(StrEnum):
@@ -32,10 +32,10 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
         path: File path to the table data relative to dataset root
         type: Table file format (currently only CSV supported)
         columns: List of column configurations
-        pre_callbacks: Callbacks to apply before field processing
-        callbacks: Callbacks to apply after field processing
+        pre_callbacks: Callbacks to apply before column processing
+        callbacks: Callbacks to apply after column processing
         post_callbacks: Callbacks to apply after all transformations
-        dtypes: Computed dictionary mapping field names to Polars types
+        dtypes: Computed dictionary mapping column names to Polars types
     """
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -59,11 +59,11 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     @property
     def dtypes(self) -> dict[str, DataTypeClass]:
         dtype_map = {}
-        for field in self.columns:
-            if isinstance(field, ConstantColumnConfig):
+        for col in self.columns:
+            if isinstance(col, ConstantColumnConfig):
                 continue
 
-            dtype_map[field.name] = field.dtype
+            dtype_map[col.name] = col.dtype
 
         return dtype_map
 
@@ -116,7 +116,7 @@ class TableConfig(BaseConfig, BaseTableConfig):
 
     Combines BaseConfig (for versioning/identification) with BaseTableConfig
     (for table processing) and adds event extraction specifications. Event
-    field defaults can be specified to reduce repetition across events.
+    columns defaults can be specified to reduce repetition across events.
 
     Attributes:
         dataset: Name of the dataset this table belongs to

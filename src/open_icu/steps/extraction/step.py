@@ -13,7 +13,7 @@ import polars as pl
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.field import ConstantColumnConfig
+from open_icu.steps.extraction.config.column import ConstantColumnConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registery
@@ -26,7 +26,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
     """Data extraction step for transforming source ICU data to MEDS format.
 
     Reads CSV files specified in TableConfig objects, applies pre/post callbacks,
-    performs table joins, extracts events with field mappings, and writes
+    performs table joins, extracts events with column mappings, and writes
     MEDS-compliant Parquet files to the workspace directory.
     """
     @classmethod
@@ -71,15 +71,15 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         for expr in table.pre_callbacks:
             lf = lf.with_columns(parse_expr(lf, expr))
 
-        for field in table.columns:
-            if isinstance(field, ConstantColumnConfig):
+        for col in table.columns:
+            if isinstance(col, ConstantColumnConfig):
                 lf = lf.with_columns(
-                    pl.lit(field.constant).cast(field.dtype).alias(field.name)
+                    pl.lit(col.constant).cast(col.dtype).alias(col.name)
                 )
 
-            if field.type == "datetime":
+            if col.type == "datetime":
                 lf = lf.with_columns(
-                    pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
+                    pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
                 )
 
         for expr in table.callbacks:
@@ -94,7 +94,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         1. Read the source table
         2. Perform joins with related tables
         3. Apply post-processing callbacks
-        4. Extract events with field mappings
+        4. Extract events with column mappings
         5. Write MEDS-compliant Parquet files
 
         The extracted data is written to workspace_dir/dataset/table/event.parquet
@@ -144,20 +144,20 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 columns = event.columns.model_dump()
                 extension = columns.pop("extension")
                 mapping = {
-                    field: name
-                    for name, field in columns.items()
-                    if field is not None and not isinstance(field, list)
+                    col: name
+                    for name, col in columns.items()
+                    if col is not None and not isinstance(col, list)
                 } | {
-                    field: name
-                    for name, field in extension.items()
-                    if field is not None
+                    col: name
+                    for name, col in extension.items()
+                    if col is not None
                 }
                 event_lf = event_lf.rename(mapping)
 
                 # Create code column by concatenating code columns
                 if len(event.columns.code) > 1:
                     code_expr = pl.concat_str(
-                        [pl.col(field) for field in event.columns.code],
+                        [pl.col(col) for col in event.columns.code],
                         separator="//",
                         ignore_nulls=True
                     ).alias("code")
