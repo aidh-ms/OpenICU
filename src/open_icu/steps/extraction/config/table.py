@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
-from open_icu.steps.extraction.config.field import ColumnConfig, ConstantcolumnConfig
+from open_icu.steps.extraction.config.field import ColumnConfig, ConstantColumnConfig
 
 
 class TableType(StrEnum):
@@ -41,7 +41,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
 
     path: str = Field(..., description="The file path to the table data.")
     type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
-    columns: list[ConstantcolumnConfig | ColumnConfig] = Field(
+    columns: list[ConstantColumnConfig | ColumnConfig] = Field(
         default_factory=list,
         description="The list of column configurations for the table."
     )
@@ -60,7 +60,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     def dtypes(self) -> dict[str, DataTypeClass]:
         dtype_map = {}
         for field in self.columns:
-            if isinstance(field, ConstantcolumnConfig):
+            if isinstance(field, ConstantColumnConfig):
                 continue
 
             dtype_map[field.name] = field.dtype

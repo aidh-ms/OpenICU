@@ -36,7 +36,7 @@ class ColumnConfig(BaseModel):
         return DTYPES[self.type]
 
 
-class ConstantcolumnConfig(ColumnConfig):
+class ConstantColumnConfig(ColumnConfig):
     """Configuration for a column with a constant value.
 
     Used to add columns with constant values to tables during extraction.

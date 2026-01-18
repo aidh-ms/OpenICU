@@ -13,7 +13,7 @@ import polars as pl
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.field import ConstantcolumnConfig
+from open_icu.steps.extraction.config.field import ConstantColumnConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registery
@@ -72,7 +72,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             lf = lf.with_columns(parse_expr(lf, expr))
 
         for field in table.columns:
-            if isinstance(field, ConstantcolumnConfig):
+            if isinstance(field, ConstantColumnConfig):
                 lf = lf.with_columns(
                     pl.lit(field.constant).cast(field.dtype).alias(field.name)
                 )
