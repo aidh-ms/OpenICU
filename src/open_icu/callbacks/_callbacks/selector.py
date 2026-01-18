@@ -48,7 +48,10 @@ class FirstNotNull(CallbackProtocol):
         if not cols:
             # With no inputs, output is always null.
             expr = pl.lit(None)
-            return expr if self.output is None else lf.with_columns(expr.alias(self.output))
+            # return expr if self.output is None else lf.with_columns(expr.alias(self.output))
+            if self.output is None:
+                return expr
+            return expr.alias(self.output)
 
         expr = pl.coalesce([pl.col(c) for c in cols])
 
