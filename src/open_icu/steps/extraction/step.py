@@ -176,6 +176,10 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
                     event_lf = callback.call(event_lf)
 
+                for expr in event.filters:
+                    callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
+                    event_lf = callback.call(event_lf)
+
                 # Reorder columns
                 event_lf = event_lf.select([
                     pl.col("subject_id").cast(pl.Int64),

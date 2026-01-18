@@ -97,12 +97,12 @@ class CallbackRegistry:
         self._registry.clear()
 
 
-registery = CallbackRegistry()
+registry = CallbackRegistry()
 
 
 def register_callback_cls[T: type[CallbackProtocol]](cls: T) -> Callable[..., T]:
     name = camel_to_snake(cls.__name__)
-    registery.register(name, cls)
+    registry.register(name, cls)
 
     @wraps(cls)
     def wrapper(*args: Any, **kwargs: Any) -> T:

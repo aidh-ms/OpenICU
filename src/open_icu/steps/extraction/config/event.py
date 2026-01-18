@@ -104,3 +104,6 @@ class EventConfig(BaseModel):
     callbacks: list[str] = Field(
         default_factory=list, description="The list of callback configurations for the event."
     )
+    filters: list[str] = Field(
+        default_factory=list, description="The list of filter configurations for the event."
+    )

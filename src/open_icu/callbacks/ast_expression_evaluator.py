@@ -5,7 +5,7 @@ from polars import Expr, LazyFrame
 
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
-from open_icu.callbacks.registry import register_callback_cls, registery
+from open_icu.callbacks.registry import register_callback_cls, registry
 
 
 @register_callback_cls
@@ -52,10 +52,10 @@ class ExprInterpreter(ast.NodeVisitor):
     def visit_Call(self, node) -> AstValue:
         name = self._get_name(node.func)
 
-        if name not in registery:
+        if name not in registry:
             raise ValueError(f"Unknown callback: {name}")
 
-        cls = registery.get(name)
+        cls = registry.get(name)
         assert cls is not None
 
         args = [self.visit(a) for a in node.args]

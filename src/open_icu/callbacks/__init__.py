@@ -4,10 +4,10 @@ from open_icu.callbacks._callbacks.selector import FirstNotNull
 from open_icu.callbacks._callbacks.time import AddOffset, ToDatetime
 from open_icu.callbacks.ast_expression_evaluator import AstInterpreter
 from open_icu.callbacks.proto import CallbackProtocol
-from open_icu.callbacks.registry import register_callback_cls, registery
+from open_icu.callbacks.registry import register_callback_cls, registry
 
 __all__ = [
-    "registery",
+    "registry",
     "register_callback_cls",
     "CallbackProtocol",
 
