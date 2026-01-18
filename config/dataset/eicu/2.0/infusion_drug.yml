@@ -103,7 +103,7 @@ events:
         - weight_uom
       text_value: patientweight
     callbacks:
-      - drop_na([text_value])
+      - drop_na(text_value)
   - name: drugamount
     fields:
       time: event_timestamp
@@ -112,7 +112,7 @@ events:
         - drugname
       numeric_value: drugamount
     callbacks:
-      - drop_na([numeric_value])
+      - drop_na(numeric_value)
   - name: drugrate
     fields:
       time: event_timestamp
@@ -120,7 +120,7 @@ events:
         - drugrate_code
       text_value: drugrate
     callbacks:
-      - drop_na([text_value])
+      - drop_na(text_value)
   - name: infusionrate
     fields:
       time: event_timestamp
@@ -128,7 +128,7 @@ events:
         - infusionrate_code
       text_value: infusionrate
     callbacks:
-      - drop_na([numeric_value])
+      - drop_na(numeric_value)
   - name: volumeoffluid
     fields:
       time: event_timestamp
@@ -136,5 +136,4 @@ events:
         - volumeoffluid_code
       text_value: volumeoffluid
     callbacks:
-      - drop_na([text_value])
-
+      - drop_na(text_value)

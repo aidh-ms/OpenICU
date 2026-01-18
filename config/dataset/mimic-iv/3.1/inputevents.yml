@@ -74,7 +74,7 @@ events:
         - amountuom
       numeric_value: amount
     callbacks:
-      - drop_na([numeric_value])
+      - drop_na(numeric_value)
   - name: rate
     fields:
       time: starttime
@@ -83,4 +83,4 @@ events:
         - rateuom
       numeric_value: rate
     callbacks:
-      - drop_na([numeric_value])
+      - drop_na(numeric_value)
