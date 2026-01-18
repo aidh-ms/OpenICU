@@ -10,9 +10,9 @@ from pathlib import Path
 
 import polars as pl
 
+from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.callback import CallbackConfig
 from open_icu.steps.extraction.config.field import ConstantFieldConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
@@ -69,8 +69,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         lf = lf.select(table.dtypes.keys())
 
         for expr in table.pre_callbacks:
-            callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-            lf = lf.with_columns(callback.call(lf))
+            lf = lf.with_columns(parse_expr(lf, expr))
 
         for field in table.fields:
             if isinstance(field, ConstantFieldConfig):
@@ -84,8 +83,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 )
 
         for expr in table.callbacks:
-            callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-            lf = lf.with_columns(callback.call(lf))
+            lf = lf.with_columns(parse_expr(lf, expr))
 
         return lf
 
@@ -131,8 +129,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
 
             logger.info("processing table %s", table.name)
             for expr in post_callbacks:
-                callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-                lf = lf.with_columns(callback.call(lf))
+                lf = lf.with_columns(parse_expr(lf, expr))
 
             for event in table.events:
                 event_lf = lf
@@ -173,12 +170,10 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
 
                 # Apply event callbacks
                 for expr in event.callbacks:
-                    callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-                    event_lf = event_lf.with_columns(callback.call(event_lf))
+                    event_lf = event_lf.with_columns(parse_expr(event_lf, expr))
 
                 for expr in event.filters:
-                    callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-                    event_lf = event_lf.filter(callback.call(event_lf))
+                    event_lf = event_lf.filter(parse_expr(event_lf, expr))
 
                 # Reorder columns
                 event_lf = event_lf.select([

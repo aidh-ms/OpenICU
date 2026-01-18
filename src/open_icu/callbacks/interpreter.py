@@ -1,32 +1,11 @@
 import ast
 from typing import Tuple
 
-from polars import LazyFrame
+from polars import Expr, LazyFrame
 
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
-from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
-from open_icu.callbacks.registry import register_callback_cls, registry
-
-
-@register_callback_cls
-class AstInterpreter:
-    def __init__(self, expr: str) -> None:
-        self.expr = expr
-
-    def __call__(self, lf: LazyFrame) -> CallbackResult:
-        interpreter = ExprInterpreter()
-        value = interpreter.eval(self.expr)
-
-        if not isinstance(value, CallbackProtocol):
-            raise TypeError("Top-level expression must evaluate to a Callback")
-
-        out = value(lf)
-
-        # if isinstance(out, Expr):
-        #     # Top-level Expr => apply as with_columns
-        #     return lf.with_columns(out)
-
-        return out
+from open_icu.callbacks.proto import AstValue, CallbackProtocol
+from open_icu.callbacks.registry import registry
 
 
 class ExprInterpreter(ast.NodeVisitor):
@@ -94,3 +73,13 @@ class ExprInterpreter(ast.NodeVisitor):
         if isinstance(node, ast.Name):
             return node.id
         raise ValueError("Only simple calls allowed")
+
+
+def parse_expr(lf : LazyFrame, expr: str) -> Expr:
+    interpreter = ExprInterpreter()
+    callback = interpreter.eval(expr)
+
+    assert isinstance(callback, CallbackProtocol)
+    pl_expr = callback(lf)
+
+    return pl_expr
