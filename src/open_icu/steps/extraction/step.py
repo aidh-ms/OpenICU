@@ -167,7 +167,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
 
                 # Add code column and drop original code columns
                 event_lf = event_lf.with_columns(code_expr)
-                event_lf = event_lf.drop(event.columns.code)
 
                 # Apply event callbacks
                 for expr in event.callbacks:
