@@ -133,7 +133,7 @@ events:
       code:
         - order_provider_id_code
       text_value: order_provider_id
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: labevent
     fields:
@@ -144,7 +144,7 @@ events:
         - valueuom
       numeric_value: valuenum
       text_value: value
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: ref_range_lower
     fields:
@@ -152,7 +152,7 @@ events:
       code:
         - ref_range_lower_code
       numeric_value: ref_range_lower
-    callbacks:
+    filters:
       - drop_na(numeric_value)
   - name: ref_range_upper
     fields:
@@ -160,7 +160,7 @@ events:
       code:
         - ref_range_upper_code
       numeric_value: ref_range_upper
-    callbacks:
+    filters:
       - drop_na(numeric_value)
   - name: flag
     fields:
@@ -168,7 +168,7 @@ events:
       code:
         - flag_code
       text_value: flag
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: priority
     fields:
@@ -176,7 +176,7 @@ events:
       code:
         - priority_code
       text_value: priority
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: comments
     fields:
@@ -184,12 +184,12 @@ events:
       code:
         - comments_code
       text_value: comments
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: caregiver_store
     fields:
       time: storetime
       code:
         - caregiver_store_code
-    callbacks:
-      - drop_na([time])
+    filters:
+      - drop_na(time)

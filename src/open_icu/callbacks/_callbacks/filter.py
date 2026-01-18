@@ -12,4 +12,4 @@ class DropNa(CallbackProtocol):
         self.column = to_col_name(column)
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
-        return pl.col(self.column).drop_nulls()
+        return pl.col(self.column).is_not_null()

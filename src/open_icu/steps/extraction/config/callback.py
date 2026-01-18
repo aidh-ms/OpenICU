@@ -7,7 +7,7 @@ with parameters.
 
 from typing import Any, Callable
 
-from polars import LazyFrame
+from polars import Expr, LazyFrame
 from pydantic import BaseModel, Field, computed_field
 
 from open_icu.callbacks.registry import registry
@@ -48,7 +48,7 @@ class CallbackConfig(BaseModel):
 
     @computed_field
     @property
-    def call(self) -> Callable[[LazyFrame], LazyFrame]:
+    def call(self) -> Callable[[LazyFrame], Expr]:
         """Get the instantiated callback function.
 
         Retrieves the callback class from the registry and instantiates it

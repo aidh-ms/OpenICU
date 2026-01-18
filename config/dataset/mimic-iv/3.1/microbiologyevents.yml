@@ -176,7 +176,7 @@ events:
       text_value: dilution_text
       numeric_value: dilution_value
       # dilution_comparison
-    callbacks:
+    filters:
       - drop_na(numeric_value)
       - drop_na(text_value)
   - name: interpretation
@@ -185,7 +185,7 @@ events:
       code:
         - interpretation_code
       text_value: interpretation
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: comments
     fields:
@@ -193,7 +193,7 @@ events:
       code:
         - comments_code
       text_value: comments
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: comments
     fields:
@@ -201,12 +201,12 @@ events:
       code:
         - comments_code
       text_value: comments
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: caregiver_store
     fields:
       time: storetime
       code:
         - caregiver_store_code
-    callbacks:
-      - drop_na([time])
+    filters:
+      - drop_na(time)

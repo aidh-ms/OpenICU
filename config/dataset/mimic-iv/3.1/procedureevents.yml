@@ -158,7 +158,7 @@ events:
         - location_code
         - locationcategory
       text_value: location
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: order
     fields:
@@ -213,5 +213,5 @@ events:
         - originalrate_code
         - label
       numeric_value: originalrate
-    callbacks:
+    filters:
       - drop_na(numeric_value)

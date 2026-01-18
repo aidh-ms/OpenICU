@@ -89,7 +89,7 @@ events:
         - label
         - valueuom
       text_value: value
-    callbacks:
+    filters:
       - drop_na(text_value)
   - name: warning
     fields:
@@ -97,5 +97,5 @@ events:
       code:
         - warning_code
       numeric_value: warning
-    callbacks:
+    filters:
       - drop_na(numeric_value)

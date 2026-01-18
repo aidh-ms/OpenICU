@@ -1,7 +1,7 @@
 import ast
 from typing import Tuple
 
-from polars import Expr, LazyFrame
+from polars import LazyFrame
 
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
@@ -22,9 +22,9 @@ class AstInterpreter:
 
         out = value(lf)
 
-        if isinstance(out, Expr):
-            # Top-level Expr => apply as with_columns
-            return lf.with_columns(out)
+        # if isinstance(out, Expr):
+        #     # Top-level Expr => apply as with_columns
+        #     return lf.with_columns(out)
 
         return out
 

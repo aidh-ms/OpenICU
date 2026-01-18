@@ -70,7 +70,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
 
         for expr in table.pre_callbacks:
             callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-            lf = callback.call(lf)
+            lf = lf.with_columns(callback.call(lf))
 
         for field in table.fields:
             if isinstance(field, ConstantFieldConfig):
@@ -85,7 +85,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
 
         for expr in table.callbacks:
             callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-            lf = callback.call(lf)
+            lf = lf.with_columns(callback.call(lf))
 
         return lf
 
@@ -132,7 +132,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             logger.info("processing table %s", table.name)
             for expr in post_callbacks:
                 callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-                lf = callback.call(lf)
+                lf = lf.with_columns(callback.call(lf))
 
             for event in table.events:
                 event_lf = lf
@@ -174,11 +174,11 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 # Apply event callbacks
                 for expr in event.callbacks:
                     callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-                    event_lf = callback.call(event_lf)
+                    event_lf = event_lf.with_columns(callback.call(event_lf))
 
                 for expr in event.filters:
                     callback = CallbackConfig(callback="ast_interpreter", params={"expr": expr})
-                    event_lf = callback.call(event_lf)
+                    event_lf = event_lf.filter(callback.call(event_lf))
 
                 # Reorder columns
                 event_lf = event_lf.select([
