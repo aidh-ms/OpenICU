@@ -39,6 +39,7 @@
 				"github.vscode-github-actions",
 				"GitHub.github-vscode-theme",
 				"charliermarsh.ruff",
+				"astral-sh.ty",
 				"tamasfe.even-better-toml",
 				"redhat.vscode-yaml",
 				"esbenp.prettier-vscode",
