@@ -23,7 +23,8 @@ columns:
     type: string
 
 post_callbacks:
-  - to_datetime(anchor_year, 1, 1, "00:00:00", anchor_age, dob)
+  - const("00:00:00", hour)
+  - to_datetime(anchor_year, 1, 1, hour, anchor_age, dob)
 
 event_defaults:
   subject_id: col(subject_id)
