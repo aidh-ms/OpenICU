@@ -1,4 +1,4 @@
-name: medications
+name: inputevents
 path: icu/inputevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
