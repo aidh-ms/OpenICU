@@ -18,7 +18,6 @@ config_files:
       - openicu.config.dataset.mimic-iv.3.1.procedureevents
       - openicu.config.dataset.mimic-iv.3.1.chartevents
       - openicu.config.dataset.mimic-iv.3.1.ingredientevents
-      - openicu.config.dataset.mimic-iv.3.1.medications
       - openicu.config.dataset.mimic-iv.3.1.diagnoses_icd
       - openicu.config.dataset.mimic-iv.3.1.admissions
       - openicu.config.dataset.mimic-iv.3.1.labevents
