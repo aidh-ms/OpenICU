@@ -126,8 +126,8 @@ events:
         - const(unittype)
   - name: dischargeweight
     columns:
-    time: col(discharge_timestamp)
-    code:
-      - const("DISCHARGE_WEIGHT")
-      - const("kg")
-    numeric_value: col(dischargeweight)
+      time: col(discharge_timestamp)
+      code:
+        - const("DISCHARGE_WEIGHT")
+        - const("kg")
+      numeric_value: col(dischargeweight)
