@@ -4,53 +4,9 @@ version: "3.1"
 dataset: mimic-iv
 
 columns:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/microbiologyevents
-  # codes (unique identifiers)
-  - name: antibiotic_item_code
-    type: string
-    constant: ANTIBIOTIC_ITEM
-  - name: caregiver_store_code
-    type: string
-    constant: CG_ST
-  - name: comments_code
-    type: string
-    constant: COMMENTS
-  - name: dilution_code
-    type: string
-    constant: DILUTION
-  - name: interpretation_code
-    type: string
-    constant: INTERPRETATION
-  - name: microevent_id_code
-    type: string
-    constant: MICROEVENT_ID
-  - name: micro_specimen_id_code
-    type: string
-    constant: MICRO_SPECIMEN_ID
-  - name: order_provider_id_code
-    type: string
-    constant: ORDER_PROVIDER_ID
-  - name: organism_item_code
-    type: string
-    constant: ORGANISM_ITEM
-  - name: spec_code
-    type: string
-    constant: SPEC
-  - name: test_item_code
-    type: string
-    constant: TEST_ITEM
   # subject_id and extensions
   - name: hadm_id
     type: int64
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -111,102 +67,102 @@ columns:
     type: string
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("hosp/microbiologyevents")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+    src_db_id: const("mimic")
 
 events:
   - name: microevent_id
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - microevent_id_code
-      numeric_value: microevent_id
+        - const("MICROEVENT_ID")
+      numeric_value: col(microevent_id)
   - name: specimen_id
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - micro_specimen_id_code
-      numeric_value: micro_specimen_id
+        - const("MICRO_SPECIMEN_ID")
+      numeric_value: col(micro_specimen_id)
   - name: order_provider_id
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - order_provider_id_code
-      text_value: order_provider_id
+        - const("ORDER_PROVIDER_ID")
+      text_value: col(order_provider_id)
     callbacks:
       - drop_na(text_value)
   - name: spec
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - spec_code
-        - spec_type_desc
-      numeric_value: spec_itemid
+        - const("SPEC")
+        - col(spec_type_desc)
+      numeric_value: col(spec_itemid)
   - name: test_item
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - test_item_code
-        - test_name
-      numeric_value: test_itemid
+        - const("TEST_ITEM")
+        - col(test_name)
+      numeric_value: col(test_itemid)
   - name: organism
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - organism_item_code
-        - org_name
-      numeric_value: org_itemid
+        - const("ORGANISM_ITEM")
+        - col(org_name)
+      numeric_value: col(org_itemid)
   - name: antibiotic
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - antibiotic_item_code
-        - ab_name
-      numeric_value: ab_itemid
+        - const("ANTIBIOTIC_ITEM")
+        - col(ab_name)
+      numeric_value: col(ab_itemid)
   - name: dilution
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - dilution_code
-      text_value: dilution_text
-      numeric_value: dilution_value
+        - const("DILUTION")
+      text_value: col(dilution_text)
+      numeric_value: col(dilution_value)
       # dilution_comparison
     filters:
       - drop_na(numeric_value)
       - drop_na(text_value)
   - name: interpretation
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - interpretation_code
-      text_value: interpretation
+        - const("INTERPRETATION")
+      text_value: col(interpretation)
     filters:
       - drop_na(text_value)
   - name: comments
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - comments_code
-      text_value: comments
+        - const("COMMENTS")
+      text_value: col(comments)
     filters:
       - drop_na(text_value)
   - name: comments
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - comments_code
-      text_value: comments
+        - const("COMMENTS")
+      text_value: col(comments)
     filters:
       - drop_na(text_value)
   - name: caregiver_store
     columns:
-      time: storetime
+      time: col(storetime)
       code:
-        - caregiver_store_code
+        - const("CG_ST")
     filters:
       - drop_na(time)

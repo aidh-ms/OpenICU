@@ -4,55 +4,11 @@ version: "3.1"
 dataset: mimic-iv
 
 columns:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: icu/proceureevents
-  # codes
-  - name: caregiver_store_code
-    type: string
-    constant: CG_ST # caregiver_storetime
-  - name: continueinnextdept_code
-    type: string
-    constant: CONTINUEINNEXTDEPT
-  - name: event_end_code
-    type: string
-    constant: EVENT_END
-  - name: event_start_code
-    type: string
-    constant: EVENT_START
-  - name: isopenbag_code
-    type: string
-    constant: ISOPENBAG
-  - name: linkorder_code
-    type: string
-    constant: LINKORDER
-  - name: location_code
-    type: string
-    constant: LOCATION
-  - name: order_code
-    type: string
-    constant: ORDER
-  - name: originalamount_code
-    type: string
-    constant: ORIGINAL_AMOUNT
-  - name: originalrate_code
-    type: string
-    constant: ORIGINALRATE
-  - name: statusdescription_code
-    type: string
-    constant: STATUSDESCRIPTION
-  - name: weight_code
-    type: string
-    constant: WEIGHT
   # subject_id and extensions
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -99,16 +55,11 @@ columns:
     type: float32
   - name: valueuom
     type: string
-  - name: weightuom
-    type: string
-    constant: kg
 
 join:
   - name: d_items
     path: icu/d_items.csv.gz
     columns:
-      # general codes
-      # codes
       # subject_id and extensions
       # db fields - times
       # db fields - values
@@ -120,98 +71,98 @@ join:
       - itemid
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("icu/proceureevents")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+    src_db_id: const("mimic")
 
 events:
   - name: caregiver_store
     columns:
-      time: storetime
+      time: col(storetime)
       code:
-        - caregiver_store_code
-      numeric_value: caregiver_id
+        - const("CG_ST")
+      numeric_value: col(caregiver_id)
   - name: event_start
     columns:
-      time: starttime
+      time: col(starttime)
       code:
-        - event_start_code
-        - label
-        - valueuom
-      numeric_value: value
-  - name: event_end
+        - const("EVENT_START")
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(value)
+  - name: col(event_end)
     columns:
-      time: endtime
+      time: col(endtime)
       code:
-        - event_end_code
-        - label
-        - valueuom
-      numeric_value: value
+        - const("EVENT_END")
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(value)
   - name: location
     columns:
-      time: endtime
+      time: col(endtime)
       code:
-        - location_code
-        - locationcategory
-      text_value: location
+        - const("LOCATION")
+        - col(locationcategory)
+      text_value: col(location)
     filters:
       - drop_na(text_value)
   - name: order
     columns:
-      time: endtime
+      time: col(endtime)
       code:
-        - order_code
-        - ordercategoryname
-      numeric_value: orderid
+        - const("ORDER")
+        - col(ordercategoryname)
+      numeric_value: col(orderid)
   - name: linkorder
     columns:
-      time: endtime
+      time: col(endtime)
       code:
-        - linkorder_code
-      numeric_value: linkorderid
+        - const("LINKORDER")
+      numeric_value: col(linkorderid)
   - name: weight
     columns:
-      time: starttime
+      time: col(starttime)
       code:
-        - weight_code
-        - weightuom
-      numeric_value: patientweight
+        - const("WEIGHT")
+        - const("kg")
+      numeric_value: col(patientweight)
   - name: isopenbag
     columns:
-      time: starttime
+      time: col(starttime)
       code:
-        - isopenbag_code
-      numeric_value: isopenbag
+        - const("ISOPENBAG")
+      numeric_value: col(isopenbag)
   - name: continueinnextdept
     columns:
-      time: endtime
+      time: col(endtime)
       code:
-        - continueinnextdept_code
-        - continueinnextdept
+        - const("CONTINUEINNEXTDEPT")
+        - col(continueinnextdept)
   - name: statusdescription
     columns:
-      time: endtime
+      time: col(endtime)
       code:
-        - statusdescription_code
-        - statusdescription
+        - const("STATUSDESCRIPTION")
+        - col(statusdescription)
   - name: originalamount
     columns:
-      time: starttime
+      time: col(starttime)
       code:
-        - originalamount_code
-        - label
-        - valueuom
-      numeric_value: originalamount
+        - const("ORIGINAL_AMOUNT")
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(originalamount)
   - name: originalrate
     columns:
-      time: starttime
+      time: col(starttime)
       code:
-        - originalrate_code
-        - label
-      numeric_value: originalrate
+        - const("ORIGINALRATE")
+        - col(label)
+      numeric_value: col(originalrate)
     filters:
       - drop_na(numeric_value)

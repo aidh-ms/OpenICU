@@ -51,19 +51,19 @@ join:
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   code_prefix:
-    - const(infusionDrug)
+    - const("infusionDrug")
   extension:
     hadm_id: const(-1)
     stay_id: col(patientunitstayid)
-    src_db_id: const(eicu)
+    src_db_id: const("eicu")
 
 events:
   - name: patientweight
     columns:
       time: col(admission_timestamp)
       code:
-        - const(WEIGHT)
-        - const(kg)
+        - const("WEIGHT")
+        - const("kg")
       text_value: col(patientweight)
     filters:
       - drop_na(text_value)
@@ -71,7 +71,7 @@ events:
     columns:
       time: col(event_timestamp)
       code:
-        - const(AMOUNT)
+        - const("AMOUNT")
         - col(drugname)
       numeric_value: col(drugamount)
     filters:
@@ -80,7 +80,7 @@ events:
     columns:
       time: col(event_timestamp)
       code:
-        - const(RATE)
+        - const("RATE")
       text_value: col(drugrate)
     filters:
       - drop_na(text_value)
@@ -88,7 +88,7 @@ events:
     columns:
       time: col(event_timestamp)
       code:
-        - const(INFUSION_RATE)
+        - const("INFUSION_RATE")
       text_value: col(infusionrate)
     filters:
       - drop_na(text_value)
@@ -96,7 +96,7 @@ events:
     columns:
       time: col(event_timestamp)
       code:
-        - const(VOLUME_OF_FLUID)
+        - const("VOLUME_OF_FLUID")
       text_value: col(volumeoffluid)
     filters:
       - drop_na(text_value)

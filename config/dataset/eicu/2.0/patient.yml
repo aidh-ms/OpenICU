@@ -4,53 +4,12 @@ version: "2.0"
 dataset: eicu
 
 columns:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: patient
-  # codes
-  - name: admissionheight_code
-    type: string
-    constant: HEIGHT
-  - name: admissionweight_code
-    type: string
-    constant: ADMISSION_WEIGHT
-  - name: age_code
-    type: string
-    constant: AGE
-  - name: dischargeweight_code
-    type: string
-    constant: DISCHARGE_WEIGHT
-  - name: ethnicity_code
-    type: string
-    constant: ETHNICITY
-  - name: gender_code
-    type: string
-    constant: GENDER
-  - name: in_code
-    type: string
-    constant: ICU_ADMISSION
-  - name: out_code
-    type: string
-    constant: icu_discharge
-  # subject_id and extensions
-  - name: hadm_id
-    type: int64
-    constant: -1
+  # subject_id and extension
   - name: patienthealthsystemstayid
     type: int64
   - name: patientunitstayid
     type: int64
-  - name: src_db_id
-    type: string
-    constant: eicu
   # db fields - times
-  - name: admission_day
-    type: int64
-    constant: 1
-  - name: admission_month
-    type: int64
-    constant: 1
   - name: hospitaladmitoffset
     type: int64
   - name: hospitaladmittime24
@@ -68,19 +27,10 @@ columns:
   # db fields - values
   - name: admissionheight
     type: float64 # decimal(x,y) # decimal(10,2)
-  - name: admissionheight_unit
-    type: string
-    constant: cm
   - name: admissionweight
     type: float64 # decimal(x,y)
-  - name: admissionwight_uom
-    type: string
-    constant: kg
   - name: age
     type: string
-  - name: age_unit
-    type: string
-    constant: y
   - name: apacheadmissiondx
     type: string
   - name: dischargeweight
@@ -113,74 +63,71 @@ columns:
     type: string
   - name: wardid
     type: int64
-  - name: weight_unit
-    type: string
-    constant: kg
 
 post_callbacks:
-  - to_datetime(hospitaldischargeyear, admission_month, admission_day, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+  - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, discharge_timestamp)
 
 event_defaults:
-  subject_id: patienthealthsystemstayid
+  subject_id: col(patienthealthsystemstayid)
   code_prefix:
-    - src_table_code
+    - const("patient")
   extension:
-    hadm_id: hadm_id
-    stay_id: patientunitstayid
-    src_db_id: src_db_id
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+    src_db_id: const("eicu")
 
 events:
   - name: gender
     columns:
       # TODO: suggest and maybe change time birthdate
-      time: admission_timestamp
+      time: col(admission_timestamp)
       code: # codes is null, when using gender and gender is empty string
-        - gender_code
-        - gender
+        - const("GENDER")
+        - col(gender)
   - name: icu_admission
     columns:
-      time: admission_timestamp
+      time: col(admission_timestamp)
       code:
-        - in_code
-        - unittype
+        - const("ICU_ADMISSION")
+        - col(unittype)
   - name: age
     columns:
-      time: admission_timestamp
+      time: col(admission_timestamp)
       code:
-        - age_code
-        - age_unit
-      text_value: age
+        - const("AGE")
+        - const("y")
+      text_value: col(age)
   - name: ethnicity
     columns:
-      time: admission_timestamp
+      time: col(admission_timestamp)
       code:
-        - ethnicity_code
-        - ethnicity
+        - const("ETHNICITY")
+        - col(ethnicity)
   - name: admissionheight
     columns:
-      time: admission_timestamp
+      time: col(admission_timestamp)
       code:
-        - admissionheight_code
-        - admissionheight_unit
-      numeric_value: admissionheight
+        - const("HEIGHT")
+        - const("cm")
+      numeric_value: col(admissionheight)
   - name: admissionweight
     columns:
-      time: admission_timestamp
+      time: col(admission_timestamp)
       code:
-        - admissionweight_code
-        - weight_unit
-      numeric_value: admissionweight
+        - const("ADMISSION_WEIGHT")
+        - const("kg")
+      numeric_value: col(admissionweight)
   - name: icu_discharge
     columns:
-      time: discharge_timestamp
+      time: col(discharge_timestamp)
       code:
-        - out_code
-        - unittype
-  # - name: dischargeweight
-  #   columns:
-  #   time: discharge_timestamp
-  #   code:
-  #     - dischargeweight_code
-  #     - weight_unit
-  #   numeric_value: dischargeweight
+        - const("icu_discharge")
+        - const(unittype)
+  - name: dischargeweight
+    columns:
+    time: col(discharge_timestamp)
+    code:
+      - const("DISCHARGE_WEIGHT")
+      - const("kg")
+    numeric_value: col(dischargeweight)

@@ -4,25 +4,11 @@ version: "3.1"
 dataset: mimic-iv
 
 columns:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: icu/outputevents
-  # codes
-  - name: caregiver_store_code
-    type: string
-    constant: CG_ST # caregiver_storetime
-  - name: dosage_code
-    type: string
-    constant: DOSAGE
   # subject_id and extentions
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -48,8 +34,6 @@ join:
   - name: d_items
     path: icu/d_items.csv.gz
     columns:
-      # general codes
-      # codes
       # db fields - times
       # db fields - values
       # subject_id and extentions
@@ -61,26 +45,26 @@ join:
       - itemid
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("icu/outputevents")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+    src_db_id: const("mimic")
 
 events:
   - name: caregiver_store
     columns:
-      time: storetime
+      time: col(storetime)
       code:
-        - caregiver_store_code
-      numeric_value: caregiver_id
+        - const("CG_ST")
+      numeric_value: col(caregiver_id)
   - name: dosage
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - dosage_code
-        - label
-        - valueuom
-      numeric_value: value
+        - const("DOSAGE")
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(value)

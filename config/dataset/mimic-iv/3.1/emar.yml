@@ -4,23 +4,9 @@ version: "3.1"
 dataset: mimic-iv
 
 columns:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/emar
-  # codes
-  - name: scheduletime_code
-    type: string
-    constant: SCHEDULETIME
   # subject_id and extentions
   - name: hadm_id
     type: int64
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -53,23 +39,23 @@ columns:
     type: string
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("hosp/emar")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+    src_db_id: const("mimic")
 
 events:
   - name: diagnoses
     columns:
-      time: charttime
+      time: col(charttime)
       code:
-        - medication
-      text_value: event_txt
+        - col(medication)
+      text_value: col(event_txt)
   - name: scheduletime
     columns:
-      time: scheduletime
+      time: col(scheduletime)
       code:
-        - scheduletime_code
+        - const("SCHEDULETIME")
