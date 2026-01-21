@@ -3,39 +3,10 @@ path: hosp/prescriptions.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/prescriptions
-  # codes
-  - name: frequency_code
-    type: string
-    constant: FREQUENCY
-  - name: lockout_interval_code
-    type: string
-    constant: LOCKOUT_INTERVAL
-  - name: medication_start_code
-    type: string
-    constant: MEDICATION_START
-  - name: medication_stop_code
-    type: string
-    constant: MEDICATION_STOP
-  - name: sliding_scale_code
-    type: string
-    constant: SLIDING_SCALE
-  - name: status_code
-    type: string
-    constant: STATUS
+columns:
   # subject_id and extentions
   - name: hadm_id # should be identical field in pharmacy
     type: int64
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id  # should be identical field in pharmacy
     type: int64
   # db fields - times
@@ -86,15 +57,7 @@ fields:
 join:
   - name: pharmacy
     path: hosp/pharmacy.csv.gz
-    fields:
-      # general codes
-      # codes
-      - name: caregiver_store_code
-        type: string
-        constant: CG_ST
-      - name: verifiedtime_code
-        type: string
-        constant: VERIFIEDTIME
+    columns:
       # subject_id and extentions
       # db fields - times
       # - name: entertime
@@ -148,66 +111,66 @@ join:
       - pharmacy_id
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("hosp/prescriptions")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+    src_db_id: const("mimic")
 
 events:
   - name: medication_start
-    fields:
-      time: starttime
+    columns:
+      time: col(starttime)
       code:
-        - medication_start_code
-        - medication
-        - infusion_type
-        - drug
-        - drug_type
-        - prod_strength
+        - const("MEDICATION_START")
+        - col(medication)
+        - col(infusion_type)
+        - col(drug)
+        - col(drug_type)
+        - col(prod_strength)
   - name: status
-    fields:
-      time: stoptime
+    columns:
+      time: col(stoptime)
       code:
-        - status_code
-      text_value: status
+        - const("STATUS")
+      text_value: col(status)
   # - name: verifiedtime
-  #   fields:
+  #   columns:
   #     time: verifiedtime
   #     code:
-  #       - verifiedtime_code
+  #       - const("VERIFIEDTIME")
   - name: frequency
-    fields:
-      time: starttime
+    columns:
+      time: col(starttime)
       code:
-        - frequency_code
-        - frequency
+        - const("FREQUENCY")
+        - col(frequency)
   - name: sliding_scale
-    fields:
-      time: starttime
+    columns:
+      time: col(starttime)
       code:
-        - sliding_scale_code
-        - sliding_scale
+        - const("SLIDING_SCALE")
+        - col(sliding_scale)
   - name: lockout_interval
-    fields:
-      time: starttime
+    columns:
+      time: col(starttime)
       code:
-        - lockout_interval_code
-        - lockout_interval
+        - const("LOCKOUT_INTERVAL")
+        - col(lockout_interval)
   - name: medication_stop
-    fields:
-      time: stoptime
+    columns:
+      time: col(stoptime)
       code:
-        - medication_stop_code
-        - medication
-        - infusion_type
-        - drug
-        - drug_type
-        - prod_strength
+        - const("MEDICATION_STOP")
+        - col(medication)
+        - col(infusion_type)
+        - col(drug)
+        - col(drug_type)
+        - col(prod_strength)
   # - name: caregiver_store
-  #   fields:
+  #   columns:
   #     time: entertime
   #     code:
-  #       - caregiver_store_code
+  #       - const("CG_ST")

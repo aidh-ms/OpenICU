@@ -3,37 +3,8 @@ path: hosp/patients.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/patients
-  # codes
-  - name: age_code
-    type: string
-    constant: AGE
-  - name: dob_code
-    type: string
-    constant: DOB
-  - name: dod_code
-    type: string
-    constant: DOD
-  - name: gender_code
-    type: string
-    constant: SEX
-  - name: patient_code
-    type: string
-    constant: PATIENT
+columns:
   # subject_id and extentions
-  - name: hadm_id
-    type: int64
-    constant: -1
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -43,49 +14,41 @@ fields:
     type: int64
   - name: anchor_year_group
     type: string
-  - name: basetime  # if using "time" as name, duplication error appears
-    type: string
-    constant: "00:00:00"
   - name: dod
     type: datetime
     params:
       format: "%Y-%m-%d"
-  - name: month
-    type: int64
-    constant: 1
-  - name: day
-    type: int64
-    constant: 1
   # db fields - values
   - name: gender
     type: string
 
 post_callbacks:
-  - to_datetime(anchor_year, month, day, basetime, anchor_age, dob)
+  - const("00:00:00", hour)
+  - to_datetime(anchor_year, 1, 1, hour, anchor_age, dob)
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("hosp/patients")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: const(-1)
+    stay_id: const("-1")
+    src_db_id: const("mimic")
 
 events:
   - name: dob
-    fields:
-      time: dob
+    columns:
+      time: col(dob)
       code:
-        - dob_code
+        - const("DOB")
   - name: dod
-    fields:
-      time: dod
+    columns:
+      time: col(dod)
       code:
-        - dod_code
+        - const("DOD")
   - name: gender
-    fields:
-      time: dob
+    columns:
+      time: col(dob)
       code:
-        - gender_code
-        - gender
+        - const("SEX")
+        - col(gender)

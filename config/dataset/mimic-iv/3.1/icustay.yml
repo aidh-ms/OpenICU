@@ -3,29 +3,12 @@ path: icu/icustays.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/icustays
-  # codes
-  - name: in_code
-    type: string
-    constant: ICU_ADMISSION
-  - name: los_code
-    type: string
-    constant: ICU_LENGTH_OF_STAY
-  - name: out_code
-    type: string
-    constant: ICU_DISCHARGE
+columns:
   # subject_id and extentions
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -44,36 +27,33 @@ fields:
     type: string
   - name: los
     type: float32
-  - name: los_unit
-    type: string
-    constant: d
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("hosp/icustays")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+    src_db_id: const("mimic")
 
 events:
   - name: icu_admission
-    fields:
-      time: intime
+    columns:
+      time: col(intime)
       code:
-        - in_code
-        - first_careunit
+        - const("ICU_ADMISSION")
+        - col(first_careunit)
   - name: icu_discharge
-    fields:
-      time: outtime
+    columns:
+      time: col(outtime)
       code:
-        - out_code
-        - last_careunit
+        - const("ICU_DISCHARGE")
+        - col(last_careunit)
   - name: icu_length_of_stay
-    fields:
-      time: outtime
+    columns:
+      time: col(outtime)
       code:
-        - los_code
-        - los_unit
-      numeric_value: los
+        - const("ICU_LENGTH_OF_STAY")
+        - const("d")
+      numeric_value: col(los)

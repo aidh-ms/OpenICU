@@ -3,51 +3,10 @@ path: hosp/admissions.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/admissions
-  # codes
-  - name: admission_code
-    type: string
-    constant: ADMISSION_TIME
-  - name: death_code
-    type: string
-    constant: DOD
-  - name: discharge_code
-    type: string
-    constant: DISCHARGE_TIME
-  - name: edreg_code
-    type: string
-    constant: EDREGTIME
-  - name: edout_code
-    type: string
-    constant: EDOUTTIME
-  - name: hospital_expire_flag_code
-    type: string
-    constant: HOSPITAL_EXPIRE_FLAG
-  - name: insurance_code
-    type: string
-    constant: INSURANCE
-  - name: language_code
-    type: string
-    constant: LANGUAGE
-  - name: marital_status_code
-    type: string
-    constant: MARITAL_STATUS
-  - name: race_code
-    type: string
-    constant: RACE
+columns:
   # subject_id and extentions
   - name: hadm_id
     type: int64
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -92,71 +51,71 @@ fields:
     type: string
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("hosp/admissions")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+    src_db_id: const("mimic")
 
 events:
   - name: admission
-    fields:
-      time: admittime
+    columns:
+      time: col(admittime)
       code:
-        - admission_code
-        - admission_location
-        - admission_type
-        - admit_provider_id
+        - const("ADMISSION_TIME")
+        - col(admission_location)
+        - col(admission_type)
+        - col(admit_provider_id)
   - name: discharge
-    fields:
-      time: dischtime
+    columns:
+      time: col(dischtime)
       code:
-        - discharge_code
-        - discharge_location
+        - const("DISCHARGE_TIME")
+        - col(discharge_location)
   - name: dod
-    fields:
-      time: deathtime
+    columns:
+      time: col(deathtime)
       code:
-        - death_code
+        - const("DOD")
   - name: insurance
-    fields:
-      time: admittime
+    columns:
+      time: col(admittime)
       code:
-        - insurance_code
-        - insurance
+        - const("INSURANCE")
+        - col(insurance)
   - name: language
-    fields:
-      time: admittime
+    columns:
+      time: col(admittime)
       code:
-        - language_code
-        - language
+        - const("LANGUAGE")
+        - col(language)
   - name: marital_status
-    fields:
-      time: admittime
+    columns:
+      time: col(admittime)
       code:
-        - marital_status_code
-        - marital_status
+        - const("MARITAL_STATUS")
+        - col(marital_status)
   - name: race
-    fields:
-      time: admittime
+    columns:
+      time: col(admittime)
       code:
-        - race_code
-        - race
+        - const("RACE")
+        - col(race)
   - name: emergency_department_registration
-    fields:
-      time: edregtime
+    columns:
+      time: col(edregtime)
       code:
-        - edreg_code
+        - const("EDREGTIME")
   - name: emergency_department_discharge
-    fields:
-      time: edouttime
+    columns:
+      time: col(edouttime)
       code:
-        - edout_code
+        - const("EDOUTTIME")
   - name: hospital_expire_flag
-    fields:
-      time: dischtime
+    columns:
+      time: col(dischtime)
       code:
-        - hospital_expire_flag_code
-      numeric_value: hospital_expire_flag
+        - const("HOSPITAL_EXPIRE_FLAG")
+      numeric_value: col(hospital_expire_flag)

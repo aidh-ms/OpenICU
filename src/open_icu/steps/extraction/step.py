@@ -13,7 +13,7 @@ import polars as pl
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.field import ConstantFieldConfig
+from open_icu.steps.extraction.config.column import ConstantColumnConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registery
@@ -26,7 +26,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
     """Data extraction step for transforming source ICU data to MEDS format.
 
     Reads CSV files specified in TableConfig objects, applies pre/post callbacks,
-    performs table joins, extracts events with field mappings, and writes
+    performs table joins, extracts events with column mappings, and writes
     MEDS-compliant Parquet files to the workspace directory.
     """
     @classmethod
@@ -47,7 +47,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         """Read and transform a table from CSV.
 
         Scans the CSV file, applies schema overrides, executes pre-callbacks,
-        adds constant fields, converts datetime fields, and executes callbacks.
+        adds constant columns, converts datetime columns, and executes callbacks.
 
         Args:
             table: Configuration for the table to read
@@ -71,15 +71,15 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         for expr in table.pre_callbacks:
             lf = lf.with_columns(parse_expr(lf, expr))
 
-        for field in table.fields:
-            if isinstance(field, ConstantFieldConfig):
+        for col in table.columns:
+            if isinstance(col, ConstantColumnConfig):
                 lf = lf.with_columns(
-                    pl.lit(field.constant).cast(field.dtype).alias(field.name)
+                    pl.lit(col.constant).cast(col.dtype).alias(col.name)
                 )
 
-            if field.type == "datetime":
+            if col.type == "datetime":
                 lf = lf.with_columns(
-                    pl.col(field.name).str.to_datetime(**field.params).alias(field.name)
+                    pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
                 )
 
         for expr in table.callbacks:
@@ -94,7 +94,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         1. Read the source table
         2. Perform joins with related tables
         3. Apply post-processing callbacks
-        4. Extract events with field mappings
+        4. Extract events with column mappings
         5. Write MEDS-compliant Parquet files
 
         The extracted data is written to workspace_dir/dataset/table/event.parquet
@@ -135,38 +135,38 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 event_lf = lf
 
                 # Add missing columns
-                if event.fields.text_value is None:
+                if event.columns.text_value is None:
                     event_lf = event_lf.with_columns(pl.lit(None).alias("text_value"))
-                if event.fields.numeric_value is None:
+                if event.columns.numeric_value is None:
                     event_lf = event_lf.with_columns(pl.lit(None).alias("numeric_value"))
 
                 # Rename columns
-                fields = event.fields.model_dump()
-                extension = fields.pop("extension")
+                columns = event.columns.model_dump()
+                extension = columns.pop("extension")
                 mapping = {
-                    field: name
-                    for name, field in fields.items()
-                    if field is not None and not isinstance(field, list)
+                    col_expr: col_name
+                    for col_name, col_expr in columns.items()
+                    if col_expr is not None and not isinstance(col_expr, list)
                 } | {
-                    field: name
-                    for name, field in extension.items()
-                    if field is not None
+                    col_expr: col_name
+                    for col_name, col_expr in extension.items()
+                    if col_expr is not None
                 }
-                event_lf = event_lf.rename(mapping)
+                for col_expr, col_name in mapping.items():
+                    event_lf = event_lf.with_columns(parse_expr(event_lf, col_expr).alias(col_name))
 
-                # Create code column by concatenating code fields
-                if len(event.fields.code) > 1:
+                # Create code column by concatenating code columns
+                if len(event.columns.code) > 1:
                     code_expr = pl.concat_str(
-                        [pl.col(field) for field in event.fields.code],
+                        [parse_expr(event_lf, col_expr) for col_expr in event.columns.code],
                         separator="//",
                         ignore_nulls=True
                     ).alias("code")
                 else:
-                    code_expr = pl.col(event.fields.code[0]).fill_null("").alias("code")
+                    code_expr = parse_expr(event_lf, event.columns.code[0]).fill_null("").alias("code")
 
-                # Add code column and drop original code fields
+                # Add code column and drop original code columns
                 event_lf = event_lf.with_columns(code_expr)
-                event_lf = event_lf.drop(event.fields.code)
 
                 # Apply event callbacks
                 for expr in event.callbacks:
@@ -182,7 +182,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     pl.col("code").cast(pl.String),
                     pl.col("numeric_value").cast(pl.Float32),
                     pl.col("text_value").cast(pl.String),
-                ] + [pl.col(col).cast(pl.String) for col in event.fields.extension.keys()])
+                ] + [pl.col(col).cast(pl.String) for col in event.columns.extension.keys()])
 
                 # Ensure output directory exists
                 assert self._workspace_dir is not None

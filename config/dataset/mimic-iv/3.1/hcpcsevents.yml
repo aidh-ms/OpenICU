@@ -3,24 +3,10 @@ path: hosp/hcpcsevents.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/hcpcsevents
-  # codes
-  - name: hcpcsevents_code
-    type: string
-    constant: HCPCS
+columns:
   # subject_id and extentions
   - name: hadm_id
     type: int64
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -38,16 +24,16 @@ fields:
 
 events:
   - name: hcpcsevent
-    fields:
-      subject_id: subject_id
-      time: chartdate
+    columns:
+      subject_id: col(subject_id)
+      time: col(chartdate)
       code:
-        - src_table_code
-        - hcpcsevents_code
-        - hcpcs_cd
-      numeric_value: seq_num
-      text_value: short_description
+        - const("hosp/hcpcsevents")
+        - const("HCPCS")
+        - col(hcpcs_cd)
+      numeric_value: col(seq_num)
+      text_value: col(short_description)
       extension:
-          hadm_id: hadm_id
-          stay_id: stay_id
-          src_db_id: src_db_id
+          hadm_id: col(hadm_id)
+          stay_id: const("-1")
+          src_db_id: const("mimic")
