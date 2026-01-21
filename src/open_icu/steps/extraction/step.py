@@ -13,7 +13,6 @@ import polars as pl
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.column import ConstantColumnConfig
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registery
@@ -72,11 +71,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             lf = lf.with_columns(parse_expr(lf, expr))
 
         for col in table.columns:
-            if isinstance(col, ConstantColumnConfig):
-                lf = lf.with_columns(
-                    pl.lit(col.constant).cast(col.dtype).alias(col.name)
-                )
-
             if col.type == "datetime":
                 lf = lf.with_columns(
                     pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
@@ -118,9 +112,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     join_lf = self._read_table(join_table, path)
                     lf = lf.join(
                         join_lf,
-                        how=join_table.how,  # type: ignore[arg-type]
+                        how=join_table.how,
                         coalesce=True,  # Reduces memory by coalescing join keys
-                        **join_table.join_params  # type: ignore[arg-type]
+                        **join_table.join_params
                     )
                     post_callbacks.extend(join_table.post_callbacks)
             except FileNotFoundError as e:
