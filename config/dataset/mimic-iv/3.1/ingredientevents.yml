@@ -1,47 +1,14 @@
 name: ingredientevents
-path: icu/ingredientevents.csv
+path: icu/ingredientevents.csv.gz
+version: "3.1"
+dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: icu/ingredientevents
-  # codes
-  - name: amount_code
-    type: string
-    constant: DOSAGE
-  - name: caregiver_store_code
-    type: string
-    constant: CG_ST # caregiver_storetime
-  - name: linkorder_code
-    type: string
-    constant: LINKORDER
-  - name: order_code
-    type: string
-    constant: ORDER
-  - name: originalamount_code
-    type: string
-    constant: ORIGINAL_DOSAGE
-  - name: originalrate_code
-    type: string
-    constant: ORIGINALRATE
-  - name: rate_end_code
-    type: string
-    constant: RATE_END
-  - name: rate_start_code
-    type: string
-    constant: RATE_START
-  - name: statusdescription_code
-    type: string
-    constant: STATUSDESCRIPTION
+columns:
   # subject_id and extensions
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
     # db fields - times
@@ -73,20 +40,18 @@ fields:
   - name: originalamount
     type: int64
   - name: originalrate
-    type: float32 
+    type: float32
   - name: rate
     type: float32
   - name: rateuom
     type: string
   - name: statusdescription
     type: string
-    
+
 join:
   - name: d_items
-    path: icu/d_items.csv
-    fields:
-      # general codes
-      # codes
+    path: icu/d_items.csv.gz
+    columns:
       # subject_id and extensions
       # db fields - times
       # db fields - values
@@ -98,83 +63,74 @@ join:
       - itemid
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("icu/ingredientevents")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+    src_db_id: const("mimic")
 
 events:
   - name: caregiver_store
-    fields: 
-      time: storetime
-      code: 
-        - caregiver_store_code
-      numeric_value: caregiver_id
+    columns:
+      time: col(storetime)
+      code:
+        - const("CG_ST")
+      numeric_value: col(caregiver_id)
   - name: rate_start
-    fields:
-      time: starttime
+    columns:
+      time: col(starttime)
       code:
-        - rate_start_code
-        - label
-        - rateuom
-      numeric_value: rate 
-    callbacks:
-      - callback: drop_na
-        params: 
-          columns:
-            - numeric_value
+        - const("RATE_START")
+        - col(label)
+        - col(rateuom)
+      numeric_value: col(rate)
+    filters:
+      - drop_na(numeric_value)
   - name: rate_end
-    fields:
-      time: endtime
+    columns:
+      time: col(endtime)
       code:
-        - rate_end_code
-        - label
-        - rateuom
-      numeric_value: rate
-    callbacks:
-      - callback: drop_na
-        params: 
-          columns:
-            - numeric_value
+        - const("RATE_END")
+        - col(label)
+        - col(rateuom)
+      numeric_value: col(rate)
+    filters:
+      - drop_na(numeric_value)
   - name: dosage
-    fields:
-      time: endtime
-      code: 
-        - amount_code
-        - label
-        - amountuom
-      numeric_value: amount
+    columns:
+      time: col(endtime)
+      code:
+        - const("DOSAGE")
+        - col(label)
+        - col(amountuom)
+      numeric_value: col(amount)
   - name: order
-    fields:
-      time: endtime
+    columns:
+      time: col(endtime)
       code:
-        - order_code
-      numeric_value: orderid
+        - const("ORDER")
+      numeric_value: col(orderid)
   - name: linkorder
-    fields: 
-      time: endtime
-      code: 
-        - linkorder_code
-      numeric_value: linkorderid  
-  - name: statusdescription
-    fields:
-      time: endtime
-      code: 
-        - statusdescription_code
-        - statusdescription
-  - name: originalrate
-    fields:
-      time: starttime
+    columns:
+      time: col(endtime)
       code:
-        - originalrate_code
-        - label
-        - rateuom
-      numeric_value: originalrate
-    callbacks:
-      - callback: drop_na
-        params: 
-          columns:
-            - numeric_value
+        - const("LINKORDER")
+      numeric_value: col(linkorderid)
+  - name: statusdescription
+    columns:
+      time: col(endtime)
+      code:
+        - const("STATUSDESCRIPTION")
+        - col(statusdescription)
+  - name: originalrate
+    columns:
+      time: col(starttime)
+      code:
+        - const("ORIGINALRATE")
+        - col(label)
+        - col(rateuom)
+      numeric_value: col(originalrate)
+    filters:
+      - drop_na(numeric_value)

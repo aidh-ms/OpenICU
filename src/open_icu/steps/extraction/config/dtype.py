@@ -1,3 +1,10 @@
+"""Data type mappings from string names to Polars types.
+
+This module provides a dictionary mapping human-readable type names to their
+corresponding Polars data type objects. Used for specifying column types in
+YAML configurations.
+"""
+
 import polars as pl
 
 DTYPES = {

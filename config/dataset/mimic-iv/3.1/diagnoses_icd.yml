@@ -1,20 +1,12 @@
 name: diagnoses_icd
-path: hosp/diagnoses_icd.csv
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/diagnoses_icd
-  # codes
-  - name: diagnoses_code
-    type: string
-    constant: DIAGNOSES
+path: hosp/diagnoses_icd.csv.gz
+version: "3.1"
+dataset: mimic-iv
+
+columns:
   # subject_id and extentions
   - name: hadm_id
     type: int64
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -28,10 +20,8 @@ fields:
 
 join:
   - name: d_icd_diagnoses
-    path: hosp/d_icd_diagnoses.csv
-    fields:
-      # general codes
-      # codes
+    path: hosp/d_icd_diagnoses.csv.gz
+    columns:
       # subject_id and extentions
       # db fields - times
       # db fields - values
@@ -45,16 +35,11 @@ join:
       - icd_code
       - icd_version
   - name: admissions
-    path: hosp/admissions.csv
-    fields:
-      # general codes
+    path: hosp/admissions.csv.gz
+    columns:
+      # subject_id and extentions
       - name: hadm_id
         type: int64
-      - name: stay_id
-        type: int64
-        constant: -1
-      # codes
-      # subject_id and extentions
       # db fields - times
       - name: dischtime
         type: datetime
@@ -64,16 +49,16 @@ join:
 
 events:
   - name: diagnoses
-    fields:
-      subject_id: subject_id
-      time: dischtime
+    columns:
+      subject_id: col(subject_id)
+      time: col(dischtime)
       code:
-        - src_table_code
-        - diagnoses_code
-        - icd_code
-        - icd_version
-      numeric_value: seq_num
+        - const("hosp/diagnoses_icd")
+        - const("DIAGNOSES")
+        - col(icd_code)
+        - col(icd_version)
+      numeric_value: col(seq_num)
       extension:
-        hadm_id: hadm_id
-        stay_id: stay_id
-        src_db_id: src_db_id
+        hadm_id: col(hadm_id)
+        stay_id: const("-1")
+        src_db_id: const("mimic")

@@ -1,51 +1,12 @@
 name: labevents
-path: hosp/labevents.csv
+path: hosp/labevents.csv.gz
+version: "3.1"
+dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/labevents
-  # codes
-  - name: caregiver_store_code
-    type: string
-    constant: CG_ST # caregiver_storetime
-  - name: comments_code
-    type: string
-    constant: COMMENTS
-  - name: flag_code
-    type: string
-    constant: FLAG
-  - name: labevent_code
-    type: string
-    constant: LABEVENT
-  - name: labevent_id_code
-    type: string
-    constant: LABEVENT_ID
-  - name: order_provider_id_code
-    type: string
-    constant: ORDER_PROVIDER_ID
-  - name: priority_code
-    type: string
-    constant: PRIORITY
-  - name: ref_range_lower_code
-    type: string
-    constant: REF_RANGE_LOWER
-  - name: ref_range_upper_code
-    type: string
-    constant: REF_RANGE_UPPER
-  - name: specimen_id_code
-    type: string
-    constant: SPECIMEN_ID
+columns:
   # subject_id and extentions
   - name: hadm_id
     type: int64
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -85,10 +46,8 @@ fields:
 
 join:
   - name: d_labitems
-    path: hosp/d_labitems.csv
-    fields:
-      # general codes
-      # codes
+    path: hosp/d_labitems.csv.gz
+    columns:
       # subject_id and extentions
       # db fields - times
       # db fields - values
@@ -104,114 +63,90 @@ join:
       - itemid
 
 event_defaults:
-  subject_id: subject_id
+  subject_id: col(subject_id)
   code_prefix:
-    - src_table_code
+    - const("hosp/labevents")
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+    src_db_id: const("mimic")
 
 events:
   - name: labevent_id
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - labevent_id_code
-      numeric_value: labevent_id
+        - const("LABEVENT_ID")
+      numeric_value: col(labevent_id)
   - name: specimen_id
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - specimen_id_code
-      numeric_value: specimen_id
+        - const("SPECIMEN_ID")
+      numeric_value: col(specimen_id)
   - name: order_provider_id
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - order_provider_id_code
-      text_value: order_provider_id
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+        - const("ORDER_PROVIDER_ID")
+      text_value: col(order_provider_id)
+    filters:
+      - drop_na(text_value)
   - name: labevent
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - labevent_code
-        - label
-        - valueuom
-      numeric_value: valuenum
-      text_value: value
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+        - const("LABEVENT")
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(valuenum)
+      text_value: col(value)
+    filters:
+      - drop_na(text_value)
   - name: ref_range_lower
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - ref_range_lower_code
-      numeric_value: ref_range_lower
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+        - const("REF_RANGE_LOWER")
+      numeric_value: col(ref_range_lower)
+    filters:
+      - drop_na(numeric_value)
   - name: ref_range_upper
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - ref_range_upper_code
-      numeric_value: ref_range_upper
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+        - const("REF_RANGE_UPPER")
+      numeric_value: col(ref_range_upper)
+    filters:
+      - drop_na(numeric_value)
   - name: flag
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - flag_code
-      text_value: flag
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+        - const("FLAG")
+      text_value: col(flag)
+    filters:
+      - drop_na(text_value)
   - name: priority
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - priority_code
-      text_value: priority
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+        - const("PRIORITY")
+      text_value: col(priority)
+    filters:
+      - drop_na(text_value)
   - name: comments
-    fields:
-      time: charttime
+    columns:
+      time: col(charttime)
       code:
-        - comments_code
-      text_value: comments
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+        - const("COMMENTS")
+      text_value: col(comments)
+    filters:
+      - drop_na(text_value)
   - name: caregiver_store
-    fields:
-      time: storetime
+    columns:
+      time: col(storetime)
       code:
-        - caregiver_store_code
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - time
+        - const("CG_ST")
+    filters:
+      - drop_na(time)

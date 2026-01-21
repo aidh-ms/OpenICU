@@ -15,12 +15,11 @@ services:
       - no_proxy="127.0.0.1,localhost"
       - NO_PROXY="127.0.0.1,localhost"
     env_file:
-      - .env
       - dev.env
-      - path: local.env
+      - path: .env
         required: false
     volumes:
       - ..:/workspaces:cached
-      - ${DATA_FOLDER}:/workspaces/example/data
+      - ${DATA_FOLDER:-/home/$USER/}:/workspaces/example/data
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity

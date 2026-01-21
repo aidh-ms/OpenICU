@@ -1,25 +1,10 @@
 name: omr # online medical record
-path: hosp/omr.csv
+path: hosp/omr.csv.gz
+version: "3.1"
+dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/omr
-  # codes
-  - name: omr_code
-    type: string
-    constant: OMR
+columns:
   # subject_id and extentions
-  - name: hadm_id
-    type: int64
-    constant: -1
-  - name: stay_id
-    type: int64
-    constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic 
   - name: subject_id
     type: int64
   # db fields - times
@@ -37,16 +22,16 @@ fields:
 
 events:
   - name: value
-    fields:
-      subject_id: subject_id
-      time: chartdate
-      code: 
-        - src_table_code
-        - omr_code
-        - result_name
-      text_value: result_value
-      numeric_value: seq_num
+    columns:
+      subject_id: col(subject_id)
+      time: col(chartdate)
+      code:
+        - const("hosp/omr")
+        - const("OMR")
+        - col(result_name)
+      text_value: col(result_value)
+      numeric_value: col(seq_num)
       extension:
-        hadm_id: hadm_id
-        stay_id: stay_id
-        src_db_id: src_db_id
+        hadm_id: const(-1)
+        stay_id: const("-1")
+        src_db_id: const("mimic")
