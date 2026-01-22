@@ -1,8 +1,8 @@
-from dataclasses import dataclass, field
-from typing import Set, Dict, Optional, Any, List
-from pathlib import Path
 import json
+from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 _statistics: Optional["OpenICUStatistics"] = None
 
@@ -65,7 +65,7 @@ class OpenICUStatistics:
 
     def __new__(cls) -> "OpenICUStatistics":
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
+            cls._instance: "OpenICUStatistics" = super().__new__(cls)
             cls._instance._init_metrics()
         return cls._instance
 
@@ -100,9 +100,9 @@ class OpenICUStatistics:
 
     def _load_from_file(self) -> None:
         with self.filename.open("r", encoding="utf-8") as f:
-            data = json.load(f)
+            data: Any = json.load(f)
 
         for artifact in OpenICUStatistics.ordering:
             metric = Metric()
-            metric.names = set(data[artifact]["names"])
+            metric.names: set[str] = set(data[artifact]["names"])
             self.metrics[artifact] = metric
