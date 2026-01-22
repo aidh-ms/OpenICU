@@ -12,7 +12,7 @@ from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseConfig
-from open_icu.steps.extraction.config.column import ColumnConfig, ConstantColumnConfig
+from open_icu.steps.extraction.config.column import ColumnConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
 
 
@@ -41,7 +41,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
 
     path: str = Field(..., description="The file path to the table data.")
     type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
-    columns: list[ConstantColumnConfig | ColumnConfig] = Field(
+    columns: list[ColumnConfig] = Field(
         default_factory=list,
         description="The list of column configurations for the table."
     )
@@ -55,14 +55,11 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
         default_factory=list, description="The list of post-processing callback configurations for the table."
     )
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def dtypes(self) -> dict[str, DataTypeClass]:
         dtype_map = {}
         for col in self.columns:
-            if isinstance(col, ConstantColumnConfig):
-                continue
-
             dtype_map[col.name] = col.dtype
 
         return dtype_map
@@ -97,7 +94,7 @@ class JsonTableConfig(BaseTableConfig):
         description="Type of join to be performed (e.g. inner, left, right, outer).",
     )
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def join_params(self) -> dict[str, list[str]]:
         params = {}

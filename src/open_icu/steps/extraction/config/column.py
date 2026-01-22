@@ -30,18 +30,7 @@ class ColumnConfig(BaseModel):
         description="Additional parameters for the column."
     )
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def dtype(self) -> DataTypeClass:
         return DTYPES[self.type]
-
-
-class ConstantColumnConfig(ColumnConfig):
-    """Configuration for a column with a constant value.
-
-    Used to add columns with constant values to tables during extraction.
-
-    Attributes:
-        constant: The constant value to use for all rows
-    """
-    constant: Any = Field(..., description="The constant value for the column.")

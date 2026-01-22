@@ -19,10 +19,10 @@ def to_expr(lf: LazyFrame, value: AstValue) -> pl.Expr:
     if isinstance(value, pl.Expr):
         return value
 
-    if isinstance(value, str):
+    if isinstance(value, str) and value in lf.collect_schema():
         return pl.col(value)
 
-    if isinstance(value, (int, float, bool)) or value is None:
+    if isinstance(value, (int, float, bool, str)) or value is None:
         return pl.lit(value)
 
     if isinstance(value, CallbackProtocol):
