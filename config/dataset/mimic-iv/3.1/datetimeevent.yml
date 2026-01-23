@@ -48,12 +48,9 @@ join:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("icu/datetimeevents")
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
-    src_db_id: const("mimic")
 
 events:
   - name: caregiver_store

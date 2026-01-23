@@ -42,13 +42,11 @@ event_defaults:
   subject_id: col(subject_id)
   time: col(admittime)
   code_prefix:
-    - const("hosp/drgcodes")
     - col(drg_type)
     - col(drg_code)
   extension:
     hadm_id: col(hadm_id)
     stay_id: const("-1")
-    src_db_id: const("mimic")
 
 events:
   - name: drg_code

@@ -30,12 +30,9 @@ columns:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("hosp/icustays")
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
-    src_db_id: const("mimic")
 
 events:
   - name: icu_admission

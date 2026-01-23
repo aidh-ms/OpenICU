@@ -4,7 +4,7 @@ version: "3.1"
 dataset: mimic-iv
 
 columns:
-  
+
   # subject_id and extentions
   - name: hadm_id
     type: int64
@@ -51,12 +51,9 @@ join:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("icu/chartevents")
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
-    src_db_id: const("mimic")
 
 events:
   - name: caregiver_store
