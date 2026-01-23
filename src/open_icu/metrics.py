@@ -111,6 +111,9 @@ class OpenICUMetrics:
 
         self.filename.parent.mkdir(parents=True, exist_ok=True)
 
+        for i in self.ordering:
+            print(i)
+
         with self.filename.open("w", encoding="utf-8") as f:
             json.dump(self.to_dict(), f, indent=2)
 
