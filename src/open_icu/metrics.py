@@ -83,7 +83,6 @@ class OpenICUMetrics:
             self._load_from_file()
     
     def add(self, artifact: str, name: str, save: bool = True) -> None:
-        print(name)
         self.metrics[artifact].add(name)
         if save: 
             self.save() 
@@ -109,10 +108,7 @@ class OpenICUMetrics:
         if not hasattr(self, "filename"):
             raise RuntimeError("Metrics not configured. Call basicConfig().")
 
-        self.filename.parent.mkdir(parents=True, exist_ok=True)
-
-        for i in self.ordering:
-            print(i)
+        self.filename.parent.mkdir(parents=True, exist_ok=True) 
 
         with self.filename.open("w", encoding="utf-8") as f:
             json.dump(self.to_dict(), f, indent=2)
