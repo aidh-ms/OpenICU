@@ -4,17 +4,9 @@ version: "2.0"
 dataset: eicu
 
 fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: lab
-  # codes
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
-  - name: src_db_id
-    type: string
-    constant: eicu
   # db fields - times
   - name: labresultoffset
     type: int64
@@ -29,61 +21,39 @@ fields:
     type: str
 
 post_callbacks:
-  - callback: add_offset
-    params:
-      datetime: admission_timestamp
-      offset: labresultoffset
-      output: event_timestamp
+  - add_offset(admission_timestamp, labresultoffset, event_timestamp)
 
 join:
   - name: patient
     path: patient.csv.gz
     fields:
-      # general codes
-      # codes
       # subject_id and extentions
-      - name: hadm_id
-        type: int64
-        constant: -1
       - name: patienthealthsystemstayid
         type: int64
       - name: patientunitstayid
         type: int64
       # db fields - times
-      - name: day
-        type: int64
-        constant: 1
       - name: hospitaladmitoffset
         type: int64
       - name: hospitaladmittime24
         type: string
       - name: hospitaldischargeyear
         type: int64
-      - name: month
-        type: int64
-        constant: 1
       # db fields - values
     both_on:
       - patientunitstayid
     callbacks:
-      - callback: to_datetime
-        params:
-          year: hospitaldischargeyear
-          month: month
-          day: day
-          time: hospitaladmittime24
-          offset: hospitaladmitoffset
-          output: admission_timestamp
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
 
 event_defaults:
   subject_id: patienthealthsystemstayid
   time: event_timestamp
   code_prefix:
-    - src_table_code
+    - const("lab")
   extension:
-    hadm_id: hadm_id
+    hadm_id: const(-1)
     stay_id: patientunitstayid
-    src_db_id: src_db_id
+    src_db_id: const("eicu")
 
 events:
   - name: labevent
