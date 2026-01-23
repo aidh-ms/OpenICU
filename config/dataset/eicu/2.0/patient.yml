@@ -70,12 +70,9 @@ post_callbacks:
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
-  code_prefix:
-    - const("patient")
   extension:
     hadm_id: const(-1)
     stay_id: col(patientunitstayid)
-    src_db_id: const("eicu")
 
 events:
   - name: gender
