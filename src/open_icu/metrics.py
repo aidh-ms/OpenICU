@@ -10,6 +10,7 @@ def get_metrics() -> "OpenICUMetrics":
     global _metrics
     if _metrics is None:
         _metrics = OpenICUMetrics()
+        _metrics.basicConfig("/workspaces/metrics/metrics.json")
     return _metrics
 
 @dataclass
@@ -75,7 +76,7 @@ class OpenICUMetrics:
             cls._instance._init_metrics()
         return cls._instance
 
-    def basicConfig(self, filename: str, load_if_exists: bool = True,) -> None:
+    def basicConfig(self, filename: str, load_if_exists: bool = True) -> None:
         self.filename = Path(filename)
 
         if load_if_exists and self.filename.exists():
