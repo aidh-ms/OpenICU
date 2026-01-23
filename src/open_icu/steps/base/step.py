@@ -128,6 +128,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
             )
         
         metrics.set(PipelineArtifact.SRC_CONFIGS_AVAILABLE, set(self._registry.keys()))
+        metrics.save()
         self._registry.save(self._project.configs_path)
 
     def setup_project(self) -> None:
