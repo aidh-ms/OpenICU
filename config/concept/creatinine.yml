@@ -1,3 +1,11 @@
 name: creatinine
 version: 1.0.0
 unit: mg/dL
+
+mappings:
+  - dataset: eicu
+    version: 2.0
+    table:
+    event:
+    code:
+    unit:
