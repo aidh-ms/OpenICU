@@ -3,69 +3,10 @@ path: vitalPeriodic.csv.gz
 version: "2.0"
 dataset: eicu
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: vitalPeriodic
-  # codes
-  - name: cvp_code
-    type: string
-    constant: CVP
-  - name: etco2_code
-    type: string
-    constant: ETCO2
-  - name: heartrate_code
-    type: string
-    constant: HEARTRATE
-  - name: icp_code
-    type: string
-    constant: ICP
-  - name: padiastolic_code
-    type: string
-    constant: PADIASTOLIC
-  - name: pamean_code
-    type: string
-    constant: PAMEAN
-  - name: pasystolic_code
-    type: string
-    constant: PASYSTOLIC
-  - name: respiration_code
-    type: string
-    constant: RESPIRATION
-  - name: sao2_code
-    type: string
-    constant: SAO2
-  - name: st1_code
-    type: string
-    constant: ST1
-  - name: st2_code
-    type: string
-    constant: ST2
-  - name: st3_code
-    type: string
-    constant: ST3
-  - name: systemicdiastolic_code
-    type: string
-    constant: SYSTEMICDIASTOLIC
-  - name: systemicmean_code
-    type: string
-    constant: SYSTEMICMEAN
-  - name: systemicsystolic_code
-    type: string
-    constant: SYSTEMICSYSTOLIC
-  - name: temperature_code
-    type: string
-    constant: TEMPERATURE
-  - name: vitalperiodicid_code
-    type: string
-    constant: VITAL_PERIODIC_ID
+columns:
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
-  - name: src_db_id
-    type: string
-    constant: eicu
   # db fields - times
   - name: observationoffset
     type: int64
@@ -76,9 +17,6 @@ fields:
     type: int64
   - name: heartrate
     type: float64 # decimal(x,y)
-  - name: heartrate_uom
-    type: string
-    constant: BPM
   - name: padiastolic
     type: int64
   - name: pamean
@@ -110,146 +48,124 @@ fields:
 
 
 post_callbacks:
-  - callback: add_offset
-    params:
-      datetime: admission_timestamp
-      offset: observationoffset
-      output: event_timestamp
+  - add_offset(admission_timestamp, observationoffset, event_timestamp)
 
 join:
   - name: patient
     path: patient.csv.gz
-    fields:
-      # general codes
-      # codes
+    columns:
       # subject_id and extentions
-      - name: hadm_id
-        type: int64
-        constant: -1
       - name: patienthealthsystemstayid
         type: int64
       - name: patientunitstayid
         type: int64
       # db fields - times
-      - name: day
-        type: int64
-        constant: 1
       - name: hospitaladmitoffset
         type: int64
       - name: hospitaladmittime24
         type: string
       - name: hospitaldischargeyear
         type: int64
-      - name: month
-        type: int64
-        constant: 1
       # db fields - values
     both_on:
       - patientunitstayid
     callbacks:
-      - callback: to_datetime
-        params:
-          year: hospitaldischargeyear
-          month: month
-          day: day
-          time: hospitaladmittime24
-          offset: hospitaladmitoffset
-          output: admission_timestamp
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
 
 event_defaults:
-  subject_id: patienthealthsystemstayid
-  time: event_timestamp
+  subject_id: col(patienthealthsystemstayid)
+  time: col(event_timestamp)
   code_prefix:
-    - src_table_code
+    - const("vitalPeriodic")
   extension:
-    hadm_id: hadm_id
-    stay_id: patientunitstayid
-    src_db_id: src_db_id
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+    src_db_id: const("eicu")
 
 events:
-  - name: heartrate
-    fields:
+  - name: col(heartrate)
+    columns:
       code:
-        - heartrate_code
-        - heartrate_uom
-      numeric_value: heartrate
+        - const("HEARTRATE")
+        - const("BPM")
+      numeric_value: col(heartrate)
   - name: vitalperiodicid
-    fields:
+    columns:
       code:
-        - vitalperiodicid_code
-      numeric_value: observationoffset
+        - const("VITAL_PERIODIC_ID")
+      numeric_value: col(observationoffset)
   - name: temperature
-    fields:
+    columns:
       code:
-        - temperature_code
-      numeric_value: temperature
+        - const("TEMPERATURE")
+      numeric_value: col(temperature)
   - name: sao2
-    fields:
+    columns:
       code:
-        - sao2_code
-      numeric_value: sao2
+        - const("SAO2")
+      numeric_value: col(sao2)
   - name: respiration
-    fields:
+    columns:
       code:
-        - respiration_code
-      numeric_value: respiration
+        - const("RESPIRATION")
+      numeric_value: col(respiration)
   - name: cvp
-    fields:
+    columns:
       code:
-        - cvp_code
-      numeric_value: cvp
+        - const("CVP")
+      numeric_value: col(cvp)
   - name: etco2
-    fields:
+    columns:
       code:
-        - etco2_code
-      numeric_value: etco2
+        - const("ETCO2")
+      numeric_value: col(etco2)
   - name: systemicsystolic
-    fields:
+    columns:
       code:
-        - systemicsystolic_code
-      numeric_value: systemicsystolic
+        - const("SYSTEMICSYSTOLIC")
+      numeric_value: col(systemicsystolic)
   - name: systemicdiastolic
-    fields:
+    columns:
       code:
-        - systemicdiastolic_code
-      numeric_value: systemicdiastolic
+        - const("SYSTEMICDIASTOLIC")
+      numeric_value: col(systemicdiastolic)
   - name: systemicmean
-    fields:
+    columns:
       code:
-        - systemicmean_code
-      numeric_value: systemicmean
+        - const("SYSTEMICMEAN")
+      numeric_value: col(systemicmean)
   - name: pasystolic
-    fields:
+    columns:
       code:
-        - pasystolic_code
-      numeric_value: pasystolic
+        - const("PASYSTOLIC")
+      numeric_value: col(pasystolic)
   - name: padiastolic
-    fields:
+    columns:
       code:
-        - padiastolic_code
-      numeric_value: padiastolic
+        - const("PADIASTOLIC")
+      numeric_value: col(padiastolic)
   - name: pamean
-    fields:
+    columns:
       code:
-        - pamean_code
-      numeric_value: pamean
+        - const("PAMEAN")
+      numeric_value: col(pamean)
   - name: st1
-    fields:
+    columns:
       code:
-        - st1_code
-      numeric_value: st1
+        - const("ST1")
+      numeric_value: col(st1)
   - name: st2
-    fields:
+    columns:
       code:
-        - st2_code
-      numeric_value: st2
+        - const("ST2")
+      numeric_value: col(st2)
   - name: st3
-    fields:
+    columns:
       code:
-        - st3_code
-      numeric_value: st3
+        - const("ST3")
+      numeric_value: col(st3)
   - name: icp
-    fields:
+    columns:
       code:
-        - icp_code
-      numeric_value: icp
+        - const("ICP")
+      numeric_value: col(icp)

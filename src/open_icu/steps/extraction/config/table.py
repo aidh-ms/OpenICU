@@ -1,6 +1,6 @@
 """Table configuration models for data extraction.
 
-This module defines configurations for source tables, including field definitions,
+This module defines configurations for source tables, including column definitions,
 callback transformations, join specifications, and event extraction rules.
 """
 
@@ -12,9 +12,8 @@ from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseConfig
-from open_icu.steps.extraction.config.callback import CallbackConfig
+from open_icu.steps.extraction.config.column import ColumnConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
-from open_icu.steps.extraction.config.field import ConstantFieldConfig, FieldConfig
 
 
 class TableType(StrEnum):
@@ -26,45 +25,42 @@ class TableType(StrEnum):
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     """Abstract base configuration for table extraction.
 
-    Defines fields, data types, and callback transformations for reading
+    Defines columns, data types, and callback transformations for reading
     and processing a source table.
 
     Attributes:
         path: File path to the table data relative to dataset root
         type: Table file format (currently only CSV supported)
-        fields: List of field/column configurations
-        pre_callbacks: Callbacks to apply before field processing
-        callbacks: Callbacks to apply after field processing
+        columns: List of column configurations
+        pre_callbacks: Callbacks to apply before column processing
+        callbacks: Callbacks to apply after column processing
         post_callbacks: Callbacks to apply after all transformations
-        dtypes: Computed dictionary mapping field names to Polars types
+        dtypes: Computed dictionary mapping column names to Polars types
     """
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     path: str = Field(..., description="The file path to the table data.")
     type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
-    fields: list[ConstantFieldConfig | FieldConfig] = Field(
+    columns: list[ColumnConfig] = Field(
         default_factory=list,
-        description="The list of field configurations for the table."
+        description="The list of column configurations for the table."
     )
-    pre_callbacks: list[CallbackConfig] = Field(
+    pre_callbacks: list[str] = Field(
         default_factory=list, description="The list of pre-processing callback configurations for the table."
     )
-    callbacks: list[CallbackConfig] = Field(
+    callbacks: list[str] = Field(
         default_factory=list, description="The list of callback configurations for the table."
     )
-    post_callbacks: list[CallbackConfig] = Field(
+    post_callbacks: list[str] = Field(
         default_factory=list, description="The list of post-processing callback configurations for the table."
     )
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def dtypes(self) -> dict[str, DataTypeClass]:
         dtype_map = {}
-        for field in self.fields:
-            if isinstance(field, ConstantFieldConfig):
-                continue
-
-            dtype_map[field.name] = field.dtype
+        for col in self.columns:
+            dtype_map[col.name] = col.dtype
 
         return dtype_map
 
@@ -83,22 +79,22 @@ class JsonTableConfig(BaseTableConfig):
     """
     both_on: list[str] = Field(
         default_factory=list,
-        description="List of fields to be used for joining table on both sides.",
+        description="List of columns to be used for joining table on both sides.",
     )
     left_on: list[str] = Field(
         default_factory=list,
-        description="List of fields to be used for joining table on the left side.",
+        description="List of columns to be used for joining table on the left side.",
     )
     right_on: list[str] = Field(
         default_factory=list,
-        description="List of fields to be used for joining table on the right side.",
+        description="List of columns to be used for joining table on the right side.",
     )
     how: str = Field(
         "left",
         description="Type of join to be performed (e.g. inner, left, right, outer).",
     )
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def join_params(self) -> dict[str, list[str]]:
         params = {}
@@ -117,7 +113,7 @@ class TableConfig(BaseConfig, BaseTableConfig):
 
     Combines BaseConfig (for versioning/identification) with BaseTableConfig
     (for table processing) and adds event extraction specifications. Event
-    field defaults can be specified to reduce repetition across events.
+    columns defaults can be specified to reduce repetition across events.
 
     Attributes:
         name: Human-readable name of the configuration
@@ -144,7 +140,7 @@ class TableConfig(BaseConfig, BaseTableConfig):
 
         events = data.pop("events", [])
         for event in events:
-            event["fields"] = event_defaults.apply_defaults(event.get("fields", {}))
+            event["columns"] = event_defaults.apply_defaults(event.get("columns", {}))
         data["events"] = events
 
         super().__init__(**data)

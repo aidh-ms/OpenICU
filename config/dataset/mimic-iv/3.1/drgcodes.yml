@@ -3,30 +3,10 @@ path: hosp/drgcodes.csv.gz
 version: "3.1"
 dataset: mimic-iv
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: hosp/drgcodes
-  # codes
-  - name: drg_code_code
-    type: string
-    constant: DRG_CODE
-  - name: drg_mortality_code
-    type: string
-    constant: DRG_MORTALITY
-  - name: drg_severity_code
-    type: string
-    constant: DRG_SEVERITY
+columns:
   # subject_id and extentions
   - name: hadm_id
     type: int64
-  # - name: stay_id#PanicException: dtype is unknown; consider supplying data-types for all operations
-  #   type: int64
-  #   constant: -1
-  - name: src_db_id
-    type: string
-    constant: mimic
   - name: subject_id
     type: int64
   # db fields - times
@@ -45,15 +25,10 @@ fields:
 join:
   - name: admissions
     path: hosp/admissions.csv.gz
-    fields:
-      # general codes
-      # codes
+    columns:
       # subject_id and extensions
       - name: subject_id
         type: int64
-      - name: stay_id
-        type: int64
-        constant: -1
       # db fields - times
       - name: admittime
         type: datetime
@@ -64,30 +39,30 @@ join:
       - subject_id
 
 event_defaults:
-  subject_id: subject_id
-  time: admittime
+  subject_id: col(subject_id)
+  time: col(admittime)
   code_prefix:
-    - src_table_code
-    - drg_type
-    - drg_code
+    - const("hosp/drgcodes")
+    - col(drg_type)
+    - col(drg_code)
   extension:
-    hadm_id: hadm_id
-    stay_id: stay_id
-    src_db_id: src_db_id
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+    src_db_id: const("mimic")
 
 events:
   - name: drg_code
-    fields:
+    columns:
       code:
-        - drg_code_code
-      text_value: description
+        - const("DRG_CODE")
+      text_value: col(description)
   - name: drg_severity
-    fields:
+    columns:
       code:
-        - drg_severity_code
-      numeric_value: drg_severity
+        - const("DRG_SEVERITY")
+      numeric_value: col(drg_severity)
   - name: drg_mortality
-    fields:
+    columns:
       code:
-        - drg_mortality_code
-      numeric_value: drg_mortality
+        - const("DRG_MORTALITY")
+      numeric_value: col(drg_mortality)

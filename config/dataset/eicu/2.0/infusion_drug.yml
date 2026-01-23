@@ -3,33 +3,10 @@ path: infusionDrug.csv.gz
 version: "2.0"
 dataset: eicu
 
-fields:
-  # general codes
-  - name: src_table_code
-    type: string
-    constant: infusionDrug
-  # codes
-  - name: patientweight_code
-    type: string
-    constant: WEIGHT
-  - name: drugamount_code
-    type: string
-    constant: AMOUNT
-  - name: drugrate_code
-    type: string
-    constant: RATE
-  - name: infusionrate_code
-    type: string
-    constant: INFUSION_RATE
-  - name: volumeoffluid_code
-    type: string
-    constant: VOLUME_OF_FLUID
+columns:
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
-  - name: src_db_id
-    type: string
-    constant: eicu
   # db fields - times
   - name: infusionoffset
     type: int64
@@ -46,120 +23,80 @@ fields:
     type: string
   - name: volumeoffluid
     type: string
-  - name: weight_uom
-    type: string
-    constant: kg
 post_callbacks:
-  - callback: add_offset
-    params:
-      datetime: admission_timestamp
-      offset: infusionoffset
-      output: event_timestamp
+  - add_offset(admission_timestamp, infusionoffset, event_timestamp)
 
 join:
   - name: patient
     path: patient.csv.gz
-    fields:
-        # general codes
-        # codes
-        # subject_id and extentions
-      - name: hadm_id
-        type: int64
-        constant: -1
+    columns:
+      # subject_id and extentions
       - name: patienthealthsystemstayid
         type: int64
       - name: patientunitstayid
         type: int64
       # db fields - times
-      - name: day
-        type: int64
-        constant: 1
       - name: hospitaladmitoffset
         type: int64
       - name: hospitaladmittime24
         type: string
       - name: hospitaldischargeyear
         type: int64
-      - name: month
-        type: int64
-        constant: 1
       # db fields - values
     both_on:
       - patientunitstayid
     callbacks:
-      - callback: to_datetime
-        params:
-          year: hospitaldischargeyear
-          month: month
-          day: day
-          time: hospitaladmittime24
-          offset: hospitaladmitoffset
-          output: admission_timestamp
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
 
 event_defaults:
-  subject_id: patienthealthsystemstayid
+  subject_id: col(patienthealthsystemstayid)
   code_prefix:
-    - src_table_code
+    - const("infusionDrug")
   extension:
-    hadm_id: hadm_id
-    stay_id: patientunitstayid
-    src_db_id: src_db_id
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+    src_db_id: const("eicu")
 
 events:
   - name: patientweight
-    fields:
-      time: admission_timestamp
+    columns:
+      time: col(admission_timestamp)
       code:
-        - patientweight_code
-        - weight_uom
-      text_value: patientweight
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+        - const("WEIGHT")
+        - const("kg")
+      text_value: col(patientweight)
+    filters:
+      - drop_na(text_value)
   - name: drugamount
-    fields:
-      time: event_timestamp
+    columns:
+      time: col(event_timestamp)
       code:
-        - drugamount_code
-        - drugname
-      numeric_value: drugamount
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+        - const("AMOUNT")
+        - col(drugname)
+      numeric_value: col(drugamount)
+    filters:
+      - drop_na(numeric_value)
   - name: drugrate
-    fields:
-      time: event_timestamp
+    columns:
+      time: col(event_timestamp)
       code:
-        - drugrate_code
-      text_value: drugrate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+        - const("RATE")
+      text_value: col(drugrate)
+    filters:
+      - drop_na(text_value)
   - name: infusionrate
-    fields:
-      time: event_timestamp
+    columns:
+      time: col(event_timestamp)
       code:
-        - infusionrate_code
-      text_value: infusionrate
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - numeric_value
+        - const("INFUSION_RATE")
+      text_value: col(infusionrate)
+    filters:
+      - drop_na(text_value)
   - name: volumeoffluid
-    fields:
-      time: event_timestamp
+    columns:
+      time: col(event_timestamp)
       code:
-        - volumeoffluid_code
-      text_value: volumeoffluid
-    callbacks:
-      - callback: drop_na
-        params:
-          columns:
-            - text_value
+        - const("VOLUME_OF_FLUID")
+      text_value: col(volumeoffluid)
+    filters:
+      - drop_na(text_value)
