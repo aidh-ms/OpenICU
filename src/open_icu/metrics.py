@@ -6,11 +6,13 @@ from typing import Any, Dict, List, Optional, Set
 
 _metrics: Optional["OpenICUMetrics"] = None
 
-def get_metrics() -> "OpenICUMetrics":
+def get_metrics(reset: bool = False) -> "OpenICUMetrics":
     global _metrics
     if _metrics is None:
         _metrics = OpenICUMetrics()
-        _metrics.basicConfig("/workspaces/output/metrics/metrics.json")
+        _metrics.basicConfig("/workspaces/example_tobi/output/project/metrics/metrics.json")
+    if reset:
+        _metrics.reset()
     return _metrics
 
 @dataclass
