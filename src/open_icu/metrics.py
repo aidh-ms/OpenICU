@@ -98,7 +98,7 @@ class OpenICUMetrics:
     def summary(self) -> Dict[str, Any] | str | List[Any]:
         return {artifact: self.metrics[artifact].count for artifact in self.metrics}
     
-    def reset(self, save: bool: bool = True) -> None:
+    def reset(self, save: bool = True) -> None:
         for artifact in self.metrics:
             self.metrics[artifact].reset()
         if save: 
