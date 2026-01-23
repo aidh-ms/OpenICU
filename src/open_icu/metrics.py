@@ -1,16 +1,16 @@
 import json
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
-_statistics: Optional["OpenICUStatistics"] = None
+_metrics: Optional["OpenICUMetrics"] = None
 
-def get_statistics() -> "OpenICUStatistics":
-    global _statistics
-    if _statistics is None:
-        _statistics = OpenICUStatistics()
-    return _statistics
+def get_metrics() -> "OpenICUMetrics":
+    global _metrics
+    if _metrics is None:
+        _metrics = OpenICUMetrics()
+    return _metrics
 
 @dataclass
 class Metric:
@@ -22,6 +22,9 @@ class Metric:
 
     def add(self, name: str) -> None:
         self.names.add(name)
+
+    def set(self, names: Set[str]) -> None:
+        self.names = names
 
     def reset(self) -> None:
         self.names.clear()
@@ -35,41 +38,43 @@ class Metric:
     def summary(self) -> Dict[str, Any] | str | List[Any]:
         return str(self.count)
 
-class PipelineArtifacts(Enum):
-    SRC_CONFIG_AVAILABLE = "src_config_available"
-    SRC_CONFIG_USED = "src_config_used"
-    SRC_TABLE_AVAILABLE = "src_table_available"
-    SRC_TABLE_USED = "src_table_used"
-    EVENT_AVAILABLE = "event_available"
-    EVENT_CREATED = "event_created"
+class PipelineArtifact(StrEnum):
+    SRC_CONFIGS_AVAILABLE = "src_configs_available"
+    SRC_CONFIGS_USED = "src_configs_used"
+    SRC_FILES_AVAILABLE = "src_files_available"
+    SRC_FILES_USED = "src_files_used"
+    EVENTS_AVAILABLE = "events_available"
+    EVENTS_CREATED = "events_created"
+    CONCEPT_CONFIGS_AVAILABLE = "concept_configs_available"
+    CONCEPT_CONFIGS_USED = "concept_configs_used"
+    CONCEPTS_CREATED = "concepts_created"
 
-    def __str__(self) -> str:
-        return self.value
-
-class OpenICUStatistics:
+class OpenICUMetrics:
     """Global metrics"""
 
-    _instance: Optional["OpenICUStatistics"] = None
+    _instance: Optional["OpenICUMetrics"] = None
     
     ordering: List[str] = [str(artifact) for artifact in (
-        PipelineArtifacts.SRC_CONFIG_AVAILABLE,
-        PipelineArtifacts.SRC_CONFIG_USED,
-        PipelineArtifacts.SRC_TABLE_AVAILABLE,
-        PipelineArtifacts.SRC_TABLE_USED,
-        PipelineArtifacts.EVENT_AVAILABLE,
-        PipelineArtifacts.EVENT_CREATED,
+        PipelineArtifact.SRC_CONFIGS_AVAILABLE,
+        PipelineArtifact.SRC_CONFIGS_USED,
+        PipelineArtifact.SRC_FILES_AVAILABLE,
+        PipelineArtifact.SRC_FILES_USED,
+        PipelineArtifact.EVENTS_AVAILABLE,
+        PipelineArtifact.EVENTS_CREATED,
+        PipelineArtifact.CONCEPT_CONFIGS_AVAILABLE,
+        PipelineArtifact.CONCEPT_CONFIGS_USED,
+        PipelineArtifact.CONCEPTS_CREATED,
     )]
 
     def _init_metrics(self) -> None:
-        self.metrics: Dict[str, Metric] = {artifact: Metric() for artifact in OpenICUStatistics.ordering}
+        self.metrics: Dict[str, Metric] = {artifact: Metric() for artifact in OpenICUMetrics.ordering}
 
-    def __new__(cls) -> "OpenICUStatistics":
+    def __new__(cls) -> "OpenICUMetrics":
         if cls._instance is None:
-            cls._instance: "OpenICUStatistics" = super().__new__(cls)
+            cls._instance: "OpenICUMetrics" = super().__new__(cls)
             cls._instance._init_metrics()
         return cls._instance
 
-    
     def basicConfig(self, filename: str, load_if_exists: bool = True,) -> None:
         self.filename = Path(filename)
 
@@ -78,6 +83,9 @@ class OpenICUStatistics:
     
     def add(self, artifact: str, name: str) -> None:
         self.metrics[artifact].add(name)
+
+    def set(self, artifact: str, names: Set[str]) -> None:
+        self.metrics[artifact].set(names)
 
     def to_dict(self) -> Dict[str, Any] | str | List[Any]:
         return {artifact: self.metrics[artifact].to_dict() for artifact in self.metrics}
@@ -91,7 +99,7 @@ class OpenICUStatistics:
 
     def save(self) -> None:
         if not hasattr(self, "filename"):
-            raise RuntimeError("Statistics not configured. Call basicConfig().")
+            raise RuntimeError("Metrics not configured. Call basicConfig().")
 
         self.filename.parent.mkdir(parents=True, exist_ok=True)
 
@@ -102,7 +110,7 @@ class OpenICUStatistics:
         with self.filename.open("r", encoding="utf-8") as f:
             data: Any = json.load(f)
 
-        for artifact in OpenICUStatistics.ordering:
+        for artifact in OpenICUMetrics.ordering:
             metric = Metric()
             metric.names: set[str] = set(data[artifact]["names"])
             self.metrics[artifact] = metric

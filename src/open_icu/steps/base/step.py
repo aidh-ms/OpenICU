@@ -9,11 +9,14 @@ import shutil
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
+from open_icu.metrics import get_metrics
 from open_icu.config.base import BaseConfig
 from open_icu.config.registry import BaseConfigRegistry
 from open_icu.steps.base.config import BaseStepConfig
 from open_icu.storage.project import OpenICUProject
 from open_icu.storage.workspace import WorkspaceDir
+
+metrics = get_metrics()
 
 
 class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMeta):
@@ -123,7 +126,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
                 includes=config.includes,
                 excludes=config.excludes
             )
-
+        metrics.set(self._registry.keys())
         self._registry.save(self._project.configs_path)
 
     def setup_project(self) -> None:
