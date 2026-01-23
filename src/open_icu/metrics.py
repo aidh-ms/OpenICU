@@ -10,7 +10,7 @@ def get_metrics() -> "OpenICUMetrics":
     global _metrics
     if _metrics is None:
         _metrics = OpenICUMetrics()
-        _metrics.basicConfig("/workspaces/metrics/metrics.json")
+        _metrics.basicConfig("/workspaces/output/metrics/metrics.json")
     return _metrics
 
 @dataclass
@@ -82,11 +82,15 @@ class OpenICUMetrics:
         if load_if_exists and self.filename.exists():
             self._load_from_file()
     
-    def add(self, artifact: str, name: str) -> None:
+    def add(self, artifact: str, name: str, save: bool = True) -> None:
         self.metrics[artifact].add(name)
+        if save: 
+            self.save() 
 
-    def set(self, artifact: str, names: Set[str]) -> None:
+    def set(self, artifact: str, names: Set[str], save: bool = True) -> None:
         self.metrics[artifact].set(names)
+        if save: 
+            self.save()
 
     def to_dict(self) -> Dict[str, Any] | str | List[Any]:
         return {artifact: self.metrics[artifact].to_dict() for artifact in self.metrics}
@@ -94,9 +98,11 @@ class OpenICUMetrics:
     def summary(self) -> Dict[str, Any] | str | List[Any]:
         return {artifact: self.metrics[artifact].count for artifact in self.metrics}
     
-    def reset(self) -> None:
+    def reset(self, save: bool: bool = True) -> None:
         for artifact in self.metrics:
             self.metrics[artifact].reset()
+        if save: 
+            self.save()
 
     def save(self) -> None:
         if not hasattr(self, "filename"):

@@ -127,9 +127,8 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
                 excludes=config.excludes
             )
         
-        metrics.set(PipelineArtifact.SRC_CONFIGS_AVAILABLE, set(self._registry.keys()))
-        metrics.save()
         self._registry.save(self._project.configs_path)
+        metrics.set(PipelineArtifact.SRC_CONFIGS_AVAILABLE, set(self._registry.keys()))
 
     def setup_project(self) -> None:
         """Create workspace and dataset directories for this step.
