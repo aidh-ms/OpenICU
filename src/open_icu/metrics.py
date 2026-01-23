@@ -83,6 +83,7 @@ class OpenICUMetrics:
             self._load_from_file()
     
     def add(self, artifact: str, name: str, save: bool = True) -> None:
+        print(name)
         self.metrics[artifact].add(name)
         if save: 
             self.save() 
