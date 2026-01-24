@@ -31,6 +31,9 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
     name: str = Field(..., description="Name of the configuration.")
     version: str = Field(..., description="Version of the configuration.")
 
+    def __str__(self) -> str:
+        return self.identifier
+
     @computed_field
     @property
     def identifier(self) -> str:
