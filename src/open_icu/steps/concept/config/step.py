@@ -12,10 +12,10 @@ class CustomConfig(BaseModel):
     """Custom configuration specific to the extraction step.
 
     Attributes:
-        extraction: Name of the extraction step
+        extraction_step: Name of the extraction step
     """
 
-    extraction: str = Field(description="Name of the extraction step.")
+    extraction_step: str = Field(description="Name of the extraction step.")
 
 
 
