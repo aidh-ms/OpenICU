@@ -43,7 +43,7 @@ join:
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
-  time: event_timestamp
+  time: col(event_timestamp)
   extension:
     hadm_id: const(-1)
     stay_id: col(patientunitstayid)
