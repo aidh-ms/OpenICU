@@ -8,7 +8,7 @@ settings.
 from abc import ABCMeta
 from pathlib import Path
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field
 
 from open_icu.config.base import BaseConfig
 
@@ -40,6 +40,7 @@ class ConfigFileConfig(BaseModel):
         includes: If specified, only load configurations with these names
         excludes: If specified, skip configurations with these names
     """
+    __open_icu_config_type__: str = "config_file"
 
     path: Path = Field(..., description="The path to the configuration file.")
     overwrite: bool = Field(
@@ -81,8 +82,3 @@ class BaseStepConfig[T: BaseModel](BaseConfig, metaclass=ABCMeta):
         default_factory=DatasetConfig,
         description="Configuration for the dataset produced by the step.",
     )
-
-    @computed_field
-    @property
-    def identifier_tuple(self) -> tuple[str, ...]:
-        return "step", self.name, self.version

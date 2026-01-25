@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import Field, computed_field
+from pydantic import Field
 
 from open_icu.config.base import BaseConfig
 
@@ -18,12 +18,9 @@ class ConceptConfig(BaseConfig):
         uuid: UUID generated from the identifier
         unit: Unit of measurement for the concept values
     """
+    __open_icu_config_type__ = "concept"
+
     unit: str = Field(..., description="Unit of measurement for the concept values.")
     type: Literal["base", "derived"] = Field(
         "base", description="Type of concept: 'base' or 'derived'."
     )
-
-    @computed_field
-    @property
-    def identifier_tuple(self) -> tuple[str, ...]:
-        return "concept", self.name, self.version

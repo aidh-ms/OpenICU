@@ -125,6 +125,8 @@ class TableConfig(BaseConfig, BaseTableConfig):
         join: List of tables to join before event extraction
         events: List of MEDS events to extract from this table
     """
+    __open_icu_config_type__: str = "dataset"
+
     dataset: str = Field(..., description="The dataset this table belongs to.")
     join: list[JsonTableConfig] = Field(
         default_factory=list,
@@ -148,4 +150,4 @@ class TableConfig(BaseConfig, BaseTableConfig):
     @computed_field
     @property
     def identifier_tuple(self) -> tuple[str, ...]:
-        return "dataset", self.dataset, self.version, self.name
+        return self.__open_icu_config_type__, self.dataset, self.version, self.name
