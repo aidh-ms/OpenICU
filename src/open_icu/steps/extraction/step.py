@@ -152,14 +152,16 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
                 # Create code column by concatenating code columns
                 code_prefix = pl.lit("//".join(event_identifier))
-                if len(event.columns.code) > 1:
-                    code_expr = code_prefix + pl.concat_str(
+                if len(event.columns.code) == 1:
+                    code_expr = (code_prefix + parse_expr(event_lf, event.columns.code[0]).fill_null("")).alias("code")
+                elif len(event.columns.code) > 1:
+                    code_expr = (code_prefix + pl.concat_str(
                         [parse_expr(event_lf, col_expr) for col_expr in event.columns.code],
                         separator="//",
                         ignore_nulls=True
-                    ).alias("code")
+                    )).alias("code")
                 else:
-                    code_expr = code_prefix + parse_expr(event_lf, event.columns.code[0]).fill_null("").alias("code")
+                    code_expr = code_prefix.alias("code")
 
                 # Add code column and drop original code columns
                 event_lf = event_lf.with_columns(code_expr)

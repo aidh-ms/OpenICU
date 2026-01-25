@@ -8,4 +8,4 @@ mappings:
     table: medications
     event:
     code: bactrim|cipro|flagyl|metronidazole|zithromax|zosyn|(((amika|cleo|ofloxa)|(azithro|clinda|tobra|vanco)my)c|(ampi|oxa|peni|pipera)cill|cefazol|levaqu|rifamp)in
-    unit:
+    regex:
