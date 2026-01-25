@@ -28,7 +28,6 @@ events:
       subject_id: col(subject_id)
       time: col(chartdate)
       code:
-        - const("HCPCS")
         - col(hcpcs_cd)
       numeric_value: col(seq_num)
       text_value: col(short_description)

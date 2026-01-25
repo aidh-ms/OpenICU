@@ -59,14 +59,11 @@ events:
   - name: caregiver_store
     columns:
       time: col(storetime)
-      code:
-        - const("CG_ST")
       numeric_value: col(caregiver_id)
   - name: chartevent
     columns:
       time: col(charttime)
       code:
-        - const("chartevent")
         - col(label)
         - col(valueuom)
       numeric_value: col(valuenum)
@@ -74,8 +71,6 @@ events:
   - name: warning
     columns:
       time: col(storetime)
-      code:
-        - const("WARNING")
       numeric_value: col(warning)
     filters:
       - drop_na(numeric_value)

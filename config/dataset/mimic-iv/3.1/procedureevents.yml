@@ -80,14 +80,11 @@ events:
   - name: caregiver_store
     columns:
       time: col(storetime)
-      code:
-        - const("CG_ST")
       numeric_value: col(caregiver_id)
   - name: event_start
     columns:
       time: col(starttime)
       code:
-        - const("EVENT_START")
         - col(label)
         - col(valueuom)
       numeric_value: col(value)
@@ -95,7 +92,6 @@ events:
     columns:
       time: col(endtime)
       code:
-        - const("EVENT_END")
         - col(label)
         - col(valueuom)
       numeric_value: col(value)
@@ -103,7 +99,6 @@ events:
     columns:
       time: col(endtime)
       code:
-        - const("LOCATION")
         - col(locationcategory)
       text_value: col(location)
     filters:
@@ -112,45 +107,36 @@ events:
     columns:
       time: col(endtime)
       code:
-        - const("ORDER")
         - col(ordercategoryname)
       numeric_value: col(orderid)
   - name: linkorder
     columns:
       time: col(endtime)
-      code:
-        - const("LINKORDER")
       numeric_value: col(linkorderid)
   - name: weight
     columns:
       time: col(starttime)
       code:
-        - const("WEIGHT")
         - const("kg")
       numeric_value: col(patientweight)
   - name: isopenbag
     columns:
       time: col(starttime)
-      code:
-        - const("ISOPENBAG")
       numeric_value: col(isopenbag)
   - name: continueinnextdept
     columns:
       time: col(endtime)
       code:
-        - const("CONTINUEINNEXTDEPT")
         - col(continueinnextdept)
   - name: statusdescription
     columns:
       time: col(endtime)
       code:
-        - const("STATUSDESCRIPTION")
         - col(statusdescription)
   - name: originalamount
     columns:
       time: col(starttime)
       code:
-        - const("ORIGINAL_AMOUNT")
         - col(label)
         - col(valueuom)
       numeric_value: col(originalamount)
@@ -158,7 +144,6 @@ events:
     columns:
       time: col(starttime)
       code:
-        - const("ORIGINALRATE")
         - col(label)
       numeric_value: col(originalrate)
     filters:

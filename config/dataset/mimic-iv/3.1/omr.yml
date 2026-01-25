@@ -26,7 +26,6 @@ events:
       subject_id: col(subject_id)
       time: col(chartdate)
       code:
-        - const("OMR")
         - col(result_name)
       text_value: col(result_value)
       numeric_value: col(seq_num)

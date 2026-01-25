@@ -35,16 +35,11 @@ events:
   - name: dob
     columns:
       time: col(dob)
-      code:
-        - const("DOB")
   - name: dod
     columns:
       time: col(dod)
-      code:
-        - const("DOD")
   - name: gender
     columns:
       time: col(dob)
       code:
-        - const("SEX")
         - col(gender)

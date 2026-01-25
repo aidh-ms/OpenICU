@@ -53,7 +53,6 @@ events:
       subject_id: col(subject_id)
       time: col(dischtime)
       code:
-        - const("DIAGNOSES")
         - col(icd_code)
         - col(icd_version)
       numeric_value: col(seq_num)

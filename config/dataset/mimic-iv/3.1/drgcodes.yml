@@ -51,16 +51,10 @@ event_defaults:
 events:
   - name: drg_code
     columns:
-      code:
-        - const("DRG_CODE")
       text_value: col(description)
   - name: drg_severity
     columns:
-      code:
-        - const("DRG_SEVERITY")
       numeric_value: col(drg_severity)
   - name: drg_mortality
     columns:
-      code:
-        - const("DRG_MORTALITY")
       numeric_value: col(drg_mortality)

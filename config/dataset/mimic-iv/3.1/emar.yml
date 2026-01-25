@@ -54,5 +54,3 @@ events:
   - name: scheduletime
     columns:
       time: col(scheduletime)
-      code:
-        - const("SCHEDULETIME")

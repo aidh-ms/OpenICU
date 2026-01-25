@@ -61,7 +61,6 @@ events:
     columns:
       time: col(admittime)
       code:
-        - const("ADMISSION_TIME")
         - col(admission_location)
         - col(admission_type)
         - col(admit_provider_id)
@@ -69,50 +68,37 @@ events:
     columns:
       time: col(dischtime)
       code:
-        - const("DISCHARGE_TIME")
         - col(discharge_location)
   - name: dod
     columns:
       time: col(deathtime)
-      code:
-        - const("DOD")
   - name: insurance
     columns:
       time: col(admittime)
       code:
-        - const("INSURANCE")
         - col(insurance)
   - name: language
     columns:
       time: col(admittime)
       code:
-        - const("LANGUAGE")
         - col(language)
   - name: marital_status
     columns:
       time: col(admittime)
       code:
-        - const("MARITAL_STATUS")
         - col(marital_status)
   - name: race
     columns:
       time: col(admittime)
       code:
-        - const("RACE")
         - col(race)
   - name: emergency_department_registration
     columns:
       time: col(edregtime)
-      code:
-        - const("EDREGTIME")
   - name: emergency_department_discharge
     columns:
       time: col(edouttime)
-      code:
-        - const("EDOUTTIME")
   - name: hospital_expire_flag
     columns:
       time: col(dischtime)
-      code:
-        - const("HOSPITAL_EXPIRE_FLAG")
       numeric_value: col(hospital_expire_flag)

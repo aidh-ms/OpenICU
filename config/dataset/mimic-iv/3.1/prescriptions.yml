@@ -130,8 +130,6 @@ events:
   - name: status
     columns:
       time: col(stoptime)
-      code:
-        - const("STATUS")
       text_value: col(status)
   # - name: verifiedtime
   #   columns:
@@ -142,25 +140,21 @@ events:
     columns:
       time: col(starttime)
       code:
-        - const("FREQUENCY")
         - col(frequency)
   - name: sliding_scale
     columns:
       time: col(starttime)
       code:
-        - const("SLIDING_SCALE")
         - col(sliding_scale)
   - name: lockout_interval
     columns:
       time: col(starttime)
       code:
-        - const("LOCKOUT_INTERVAL")
         - col(lockout_interval)
   - name: medication_stop
     columns:
       time: col(stoptime)
       code:
-        - const("MEDICATION_STOP")
         - col(medication)
         - col(infusion_type)
         - col(drug)

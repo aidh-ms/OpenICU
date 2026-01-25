@@ -31,10 +31,8 @@ events:
   - name: prev_service
     columns:
       code:
-        - const("PREV_SERVICE")
         - col(prev_service)
   - name: curr_service
     columns:
       code:
-        - const("PREV_SERVICE")
         - col(curr_service)
