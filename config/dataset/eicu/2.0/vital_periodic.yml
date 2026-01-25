@@ -80,7 +80,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: col(heartrate)
+  - name: heartrate
     columns:
       code:
         - const("HEARTRATE")

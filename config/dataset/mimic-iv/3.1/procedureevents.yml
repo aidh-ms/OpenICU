@@ -91,7 +91,7 @@ events:
         - col(label)
         - col(valueuom)
       numeric_value: col(value)
-  - name: col(event_end)
+  - name: event_end
     columns:
       time: col(endtime)
       code:
