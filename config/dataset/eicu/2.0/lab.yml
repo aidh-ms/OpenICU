@@ -3,14 +3,14 @@ path: lab.csv.gz
 version: "2.0"
 dataset: eicu
 
-fields:
+columns:
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
-  # db fields - times
+  # db columns - times
   - name: labresultoffset
     type: int64
-  # db fields - values
+  # db columns - values
   - name: labname
     type: str
   - name: labmeasurenamesystem
@@ -26,20 +26,20 @@ post_callbacks:
 join:
   - name: patient
     path: patient.csv.gz
-    fields:
+    columns:
       # subject_id and extentions
       - name: patienthealthsystemstayid
         type: int64
       - name: patientunitstayid
         type: int64
-      # db fields - times
+      # db columns - times
       - name: hospitaladmitoffset
         type: int64
       - name: hospitaladmittime24
         type: string
       - name: hospitaldischargeyear
         type: int64
-      # db fields - values
+      # db columns - values
     both_on:
       - patientunitstayid
     callbacks:
@@ -53,7 +53,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 events:
   - name: labevent
-    fields:
+    columns:
       code:
         - col(labname)
         - col(labmeasurenamesystem)
