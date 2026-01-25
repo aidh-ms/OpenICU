@@ -1,5 +1,3 @@
-
-
 from typing import Literal
 
 from pydantic import Field
@@ -23,4 +21,9 @@ class ConceptConfig(BaseConfig):
     unit: str = Field(..., description="Unit of measurement for the concept values.")
     type: Literal["base", "derived"] = Field(
         "base", description="Type of concept: 'base' or 'derived'."
+    )
+
+    extension_columns: list[str] = Field(
+        default_factory=list,
+        description="List of extension columns to include in the concept table.",
     )
