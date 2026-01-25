@@ -42,15 +42,15 @@ join:
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
 
 event_defaults:
-  subject_id: patienthealthsystemstayid
+  subject_id: col(patienthealthsystemstayid)
   time: event_timestamp
   extension:
     hadm_id: const(-1)
-    stay_id: patientunitstayid
+    stay_id: col(patientunitstayid)
 
 events:
   - name: drug
     fields:
       code:
-        - drugname
-      text_value: dosage
+        - col(drugname)
+      text_value: col(dosage)

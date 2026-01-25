@@ -46,17 +46,16 @@ join:
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
 
 event_defaults:
-  subject_id: patienthealthsystemstayid
+  subject_id: col(patienthealthsystemstayid)
   time: event_timestamp
   extension:
     hadm_id: const(-1)
-    stay_id: patientunitstayid
-
+    stay_id: col(patientunitstayid)
 events:
   - name: labevent
     fields:
       code:
-        - labname
-        - labmeasurenamesystem
-      numeric_value: labresult
-      text_value: labresulttext
+        - col(labname)
+        - col(labmeasurenamesystem)
+      numeric_value: col(labresult)
+      text_value: col(labresulttext)
