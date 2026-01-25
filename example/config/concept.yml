@@ -1,0 +1,10 @@
+name: Concept
+version: 1.0.0
+
+config_files:
+  - path: /workspaces/config/concept/medication/
+    includes:
+      - openicu.config.concept.antibiotics.1.0.0
+
+config:
+  extraction_step: Extraction
