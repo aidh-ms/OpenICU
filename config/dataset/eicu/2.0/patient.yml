@@ -80,51 +80,43 @@ events:
       # TODO: suggest and maybe change time birthdate
       time: col(admission_timestamp)
       code: # codes is null, when using gender and gender is empty string
-        - const("GENDER")
         - col(gender)
   - name: icu_admission
     columns:
       time: col(admission_timestamp)
       code:
-        - const("ICU_ADMISSION")
         - col(unittype)
   - name: age
     columns:
       time: col(admission_timestamp)
       code:
-        - const("AGE")
         - const("y")
       text_value: col(age)
   - name: ethnicity
     columns:
       time: col(admission_timestamp)
       code:
-        - const("ETHNICITY")
         - col(ethnicity)
   - name: admissionheight
     columns:
       time: col(admission_timestamp)
       code:
-        - const("HEIGHT")
         - const("cm")
       numeric_value: col(admissionheight)
   - name: admissionweight
     columns:
       time: col(admission_timestamp)
       code:
-        - const("ADMISSION_WEIGHT")
         - const("kg")
       numeric_value: col(admissionweight)
   - name: icu_discharge
     columns:
       time: col(discharge_timestamp)
       code:
-        - const("icu_discharge")
         - const(unittype)
   - name: dischargeweight
     columns:
       time: col(discharge_timestamp)
       code:
-        - const("DISCHARGE_WEIGHT")
         - const("kg")
       numeric_value: col(dischargeweight)
