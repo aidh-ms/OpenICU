@@ -8,8 +8,8 @@ class MappingColumnConfig(BaseModel):
         numeric_value: Column name for numeric values
         text_value: Column name for text values
     """
-    numeric_value: str = Field(..., description="Column name for numeric values.")
-    text_value: str = Field(..., description="Column name for text values.")
+    numeric_value: str | None = Field(None, description="Column name for numeric values.")
+    text_value: str | None = Field(None, description="Column name for text values.")
 
 
 class MappingPatternConfig(BaseModel):
@@ -38,7 +38,7 @@ class MappingConfig(BaseModel):
         if self.pattern.regex is not None:
             return self.pattern.regex
 
-        return "\/\/".join(
+        return "//".join(
             (
                 self.pattern.dataset or "(.+?)",
                 self.pattern.version or "(.+?)",

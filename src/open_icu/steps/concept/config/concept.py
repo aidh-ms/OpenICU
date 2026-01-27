@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import Field
 
 from open_icu.config.base import BaseConfig
+from open_icu.steps.concept.config.mapping import MappingConfig
 
 
 class ConceptConfig(BaseConfig):
@@ -27,3 +28,5 @@ class ConceptConfig(BaseConfig):
         default_factory=list,
         description="List of extension columns to include in the concept table.",
     )
+
+    mappings: list[MappingConfig] = Field(default_factory=list, description="List of concept mappings.")
