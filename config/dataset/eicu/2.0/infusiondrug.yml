@@ -75,17 +75,23 @@ events:
     columns:
       time: col(event_timestamp)
       text_value: col(drugrate)
+      code:
+        - col(drugname)
     filters:
       - drop_na(text_value)
   - name: infusionrate
     columns:
       time: col(event_timestamp)
       text_value: col(infusionrate)
+      code:
+        - col(drugname)
     filters:
       - drop_na(text_value)
   - name: volumeoffluid
     columns:
       time: col(event_timestamp)
       text_value: col(volumeoffluid)
+      code:
+        - col(drugname)
     filters:
       - drop_na(text_value)
