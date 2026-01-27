@@ -7,9 +7,17 @@ extension_columns: []
 mappings:
   - pattern:
       dataset: eicu
-      version: 2.0
       table: infusiondrug
-      code: bactrim|cipro|flagyl|metronidazole|zithromax|zosyn|(((amika|cleo|ofloxa)|(azithro|clinda|tobra|vanco)my)c|(ampi|oxa|peni|pipera)cill|cefazol|levaqu|rifamp)in
+      event: drugrate
+      code: .*?(bactrim|cipro|flagyl|metronidazole|zithromax|zosyn|(((amika|cleo|ofloxa)|(azithro|clinda|tobra|vanco)my)c|(ampi|oxa|peni|pipera)cill|cefazol|levaqu|rifamp)in)
+    columns:
+      numeric_value: const(1)
+      text_value: const("true")
+  - pattern:
+      dataset: eicu
+      table: medication
+      event: drug
+      code: .*?(cipro|flagyl|maxipime|metronidazole|tazobactam|zosyn|cef(azolin|epime)|(((azithro|clinda|vanco)my|ofloxa|vanco)c|levaqu|piperacill|roceph)in)
     columns:
       numeric_value: const(1)
       text_value: const("true")
