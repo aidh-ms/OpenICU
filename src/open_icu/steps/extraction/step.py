@@ -104,7 +104,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 logger.warning("skipping table %s: dataset path not found (%s)", table.name, path)
                 continue
             
-            metrics.add(PipelineArtifact.SRC_FILES_AVAILABLE, path / table.name, save=False)  # here
+            metrics.add(PipelineArtifact.SRC_FILES_AVAILABLE, str(path / table.name), save=False)  # here
 
             try:
                 lf = self._read_table(table, path)
@@ -197,5 +197,5 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             del lf
             gc.collect()
             
-            metrics.add(PipelineArtifact.SRC_CONFIGS_USED, path / table.path, save=False)
-            metrics.add(PipelineArtifact.SRC_FILES_USED, path / table.name)
+            metrics.add(PipelineArtifact.SRC_CONFIGS_USED, str(path / table.path), save=False)
+            metrics.add(PipelineArtifact.SRC_FILES_USED, str(path / table.name))
