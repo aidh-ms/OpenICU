@@ -121,5 +121,5 @@ class OpenICUMetrics:
 
         for artifact in OpenICUMetrics.ordering:
             metric = Metric()
-            metric.names: set[str] = set(data[artifact]["names"])
+            metric.names = set(data[artifact]["names"])
             self.metrics[artifact] = metric
