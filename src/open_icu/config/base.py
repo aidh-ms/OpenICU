@@ -7,14 +7,16 @@ and YAML serialization capabilities.
 
 from abc import ABCMeta
 from pathlib import Path
-from typing import Self
+from typing import Any, Self
 from uuid import NAMESPACE_DNS, UUID, uuid5
 
 import yaml
 from pydantic import BaseModel, Field, computed_field
 
+from open_icu.representation import Representable
 
-class BaseConfig(BaseModel, metaclass=ABCMeta):
+
+class BaseConfig(BaseModel, Representable, metaclass=ABCMeta):
     """Abstract base class for configuration objects.
 
     Provides automatic identifier and UUID generation based on name and version,
@@ -114,3 +116,9 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
 
         with open(path, "w") as f:
             yaml.safe_dump(self.model_dump(mode="json", exclude_computed_fields=True), f)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"name": self.name, "version": self.version, "identifier": self.identifier, "uuid": self.uuid}
+
+    def to_summary(self) -> dict[str, Any]:
+        return {"name": self.name, "version": self.version}

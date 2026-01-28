@@ -83,7 +83,7 @@ event_defaults:
     src_db_id: const("eicu")
 
 events:
-  - name: col(heartrate)
+  - name: heartrate
     columns:
       code:
         - const("HEARTRATE")

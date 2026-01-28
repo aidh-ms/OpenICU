@@ -11,9 +11,12 @@ from pathlib import Path
 
 from open_icu.config.base import BaseConfig
 from open_icu.config.registry import BaseConfigRegistry
+from open_icu.metrics import PipelineArtifact, get_metrics
 from open_icu.steps.base.config import BaseStepConfig
 from open_icu.storage.project import OpenICUProject
 from open_icu.storage.workspace import WorkspaceDir
+
+metrics = get_metrics()
 
 
 class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMeta):
@@ -123,8 +126,9 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
                 includes=config.includes,
                 excludes=config.excludes
             )
-
+        
         self._registry.save(self._project.configs_path)
+        metrics.set(PipelineArtifact.SRC_CONFIGS_AVAILABLE, set(self._registry.keys()))
 
     def setup_project(self) -> None:
         """Create workspace and dataset directories for this step.

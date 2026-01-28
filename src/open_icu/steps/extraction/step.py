@@ -12,6 +12,7 @@ import polars as pl
 
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
+from open_icu.metrics import PipelineArtifact, get_metrics
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.step import ExtractionConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
@@ -19,7 +20,7 @@ from open_icu.steps.extraction.registry import dataset_config_registery
 from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
-
+metrics = get_metrics()
 
 class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
     """Data extraction step for transforming source ICU data to MEDS format.
@@ -102,6 +103,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
             if path is None:
                 logger.warning("skipping table %s: dataset path not found (%s)", table.name, path)
                 continue
+            
+            metrics.add(PipelineArtifact.SRC_FILES_AVAILABLE, str(path / table.path), save=False)  # here
 
             try:
                 lf = self._read_table(table, path)
@@ -189,6 +192,10 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     output_file,
                 )
                 del event_lf
+                metrics.add(PipelineArtifact.EVENTS_CREATED, table.dataset + "/" + table.name + "/" + event.name, False)
 
             del lf
             gc.collect()
+            
+            metrics.add(PipelineArtifact.SRC_CONFIGS_USED, table.name, save=False)
+            metrics.add(PipelineArtifact.SRC_FILES_USED, str(path / table.path))
