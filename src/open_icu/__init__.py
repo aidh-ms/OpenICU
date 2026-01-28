@@ -67,10 +67,12 @@ SOFTWARE.
 ```
 """
 
+from open_icu.steps.concept.step import ConceptStep
 from open_icu.steps.extraction.step import ExtractionStep
 from open_icu.storage.project import OpenICUProject
 
 __all__ = [
     "OpenICUProject",
     "ExtractionStep",
+    "ConceptStep",
 ]
