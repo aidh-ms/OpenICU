@@ -47,3 +47,7 @@ class MappingConfig(BaseModel):
                 self.pattern.code or "(.+?)",
             )
         )
+
+    filters: list[str] = Field(
+        default_factory=list, description="The list of filter configurations for the mapping."
+    )

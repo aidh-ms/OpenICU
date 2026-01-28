@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, computed_field
 
 from open_icu.config.base import BaseConfig
 from open_icu.steps.concept.config.mapping import MappingConfig
@@ -24,9 +24,15 @@ class ConceptConfig(BaseConfig):
         "base", description="Type of concept: 'base' or 'derived'."
     )
 
-    extension_columns: list[str] = Field(
-        default_factory=list,
+    extension_columns: dict[str, str] = Field(
+        default_factory=dict,
         description="List of extension columns to include in the concept table.",
     )
 
     mappings: list[MappingConfig] = Field(default_factory=list, description="List of concept mappings.")
+
+    @computed_field
+    @property
+    def code(self) -> str:
+        """Return the code column name based on concept type."""
+        return f"{self.name}//{self.unit}"
