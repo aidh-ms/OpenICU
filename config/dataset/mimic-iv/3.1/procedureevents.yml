@@ -25,8 +25,6 @@ columns:
     params:
       strict: false
   # db fields - values
-  - name: caregiver_id
-    type: int64
   - name: continueinnextdept
     type: int64
   - name: isopenbag
@@ -77,10 +75,6 @@ event_defaults:
     stay_id: col(stay_id)
 
 events:
-  - name: caregiver_store
-    columns:
-      time: col(storetime)
-      numeric_value: col(caregiver_id)
   - name: event_start
     columns:
       time: col(starttime)

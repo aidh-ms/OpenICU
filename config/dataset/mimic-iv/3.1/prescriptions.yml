@@ -160,8 +160,3 @@ events:
         - col(drug)
         - col(drug_type)
         - col(prod_strength)
-  # - name: caregiver_store
-  #   columns:
-  #     time: entertime
-  #     code:
-  #       - const("CG_ST")

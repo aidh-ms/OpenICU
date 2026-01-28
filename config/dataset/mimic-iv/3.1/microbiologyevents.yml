@@ -138,8 +138,3 @@ events:
       text_value: col(comments)
     filters:
       - drop_na(text_value)
-  - name: caregiver_store
-    columns:
-      time: col(storetime)
-    filters:
-      - drop_na(time)

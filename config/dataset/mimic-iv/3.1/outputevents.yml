@@ -21,8 +21,6 @@ columns:
     params:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
-  - name: caregiver_id
-    type: int64
   - name: itemid
     type: int64
   - name: value
@@ -51,10 +49,6 @@ event_defaults:
     stay_id: col(stay_id)
 
 events:
-  - name: caregiver_store
-    columns:
-      time: col(storetime)
-      numeric_value: col(caregiver_id)
   - name: dosage
     columns:
       time: col(charttime)

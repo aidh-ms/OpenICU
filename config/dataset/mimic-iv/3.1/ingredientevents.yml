@@ -29,8 +29,6 @@ columns:
     type: float32
   - name: amountuom
     type: string
-  - name: caregiver_id
-    type: int64
   - name: itemid
     type: int64
   - name: linkorderid
@@ -69,10 +67,6 @@ event_defaults:
     stay_id: col(stay_id)
 
 events:
-  - name: caregiver_store
-    columns:
-      time: col(storetime)
-      numeric_value: col(caregiver_id)
   - name: rate_start
     columns:
       time: col(starttime)
