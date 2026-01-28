@@ -42,45 +42,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         config = ExtractionStepConfig.load(config_path)
         return cls(project, config, dataset_config_registry)
 
-    def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
-        """Read and transform a table from CSV.
-
-        Scans the CSV file, applies schema overrides, executes pre-callbacks,
-        adds constant columns, converts datetime columns, and executes callbacks.
-
-        Args:
-            table: Configuration for the table to read
-            path: Base path to the data directory
-
-        Returns:
-            LazyFrame with the transformed table data
-        """
-        file_path = path / table.path
-        if not file_path.exists():
-            raise FileNotFoundError(f"file not found ({file_path})")
-
-        lf = pl.scan_csv(
-            file_path,
-            schema_overrides=table.dtypes,
-            infer_schema=False,
-            low_memory=True,
-        )
-        lf = lf.select(table.dtypes.keys())
-
-        for expr in table.pre_callbacks:
-            lf = lf.with_columns(parse_expr(lf, expr))
-
-        for col in table.columns:
-            if col.type == "datetime":
-                lf = lf.with_columns(
-                    pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
-                )
-
-        for expr in table.callbacks:
-            lf = lf.with_columns(parse_expr(lf, expr))
-
-        return lf
-
     def extract(self) -> None:
         """Execute the data extraction workflow.
 
@@ -196,3 +157,42 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
             del lf
             gc.collect()
+
+    def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
+        """Read and transform a table from CSV.
+
+        Scans the CSV file, applies schema overrides, executes pre-callbacks,
+        adds constant columns, converts datetime columns, and executes callbacks.
+
+        Args:
+            table: Configuration for the table to read
+            path: Base path to the data directory
+
+        Returns:
+            LazyFrame with the transformed table data
+        """
+        file_path = path / table.path
+        if not file_path.exists():
+            raise FileNotFoundError(f"file not found ({file_path})")
+
+        lf = pl.scan_csv(
+            file_path,
+            schema_overrides=table.dtypes,
+            infer_schema=False,
+            low_memory=True,
+        )
+        lf = lf.select(table.dtypes.keys())
+
+        for expr in table.pre_callbacks:
+            lf = lf.with_columns(parse_expr(lf, expr))
+
+        for col in table.columns:
+            if col.type == "datetime":
+                lf = lf.with_columns(
+                    pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
+                )
+
+        for expr in table.callbacks:
+            lf = lf.with_columns(parse_expr(lf, expr))
+
+        return lf
