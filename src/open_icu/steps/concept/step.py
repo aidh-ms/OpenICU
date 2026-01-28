@@ -55,6 +55,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         codes_df = pl.read_parquet(extraction_dataset.metadata_path / "codes.parquet")
 
         for concept in self._registry.values():
+            logger.info("extracting concept: %s", concept.name)
             for mapping in concept.mappings:
                 self.extract_mapping(
                     concept,
@@ -70,7 +71,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         codes_df: pl.DataFrame,
         dataset_path: Path,
     ) -> None:
-        mapping_codes = codes_df.filter(pl.col("code").str.contains(mapping.regex))["codes"]
+        mapping_codes = codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
 
         for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
             data_path = dataset_path / dataset / version / table / f"{event}.parquet"
@@ -96,12 +97,12 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             if mapping.columns.text_value is None:
                 lf = lf.with_columns(pl.lit(None).alias("text_value"))
             else:
-                lf = lf.with_columns(pl.col(mapping.columns.text_value).alias("text_value"))
+                lf = lf.with_columns(parse_expr(lf, mapping.columns.text_value).alias("text_value"))
 
             if mapping.columns.numeric_value is None:
                 lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
             else:
-                lf = lf.with_columns(pl.col(mapping.columns.numeric_value).alias("numeric_value"))
+                lf = lf.with_columns(parse_expr(lf, mapping.columns.numeric_value).alias("numeric_value"))
 
             # code column
             lf = lf.with_columns(pl.lit(concept.code).alias("code"))
