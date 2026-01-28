@@ -67,7 +67,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         Returns:
             Tuple of (class_name, version, name)
         """
-        return self.__open_icu_config_type__, self.__class__.__name__, self.version, self.name
+        return self.__open_icu_config_type__, self.name, self.version
 
     @computed_field
     @property
