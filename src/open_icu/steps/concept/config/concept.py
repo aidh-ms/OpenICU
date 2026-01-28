@@ -16,6 +16,9 @@ class ConceptConfig(BaseConfig):
         identifier_tuple: Tuple of (class_name, version, name)
         uuid: UUID generated from the identifier
         unit: Unit of measurement for the concept values
+        type: Type of concept: 'base' or 'derived'
+        extension_columns: Dictionary of extension columns to include in the concept table
+        mappings: List of MappingConfig objects defining how to extract concept data
     """
     __open_icu_config_type__ = "concept"
 
@@ -26,7 +29,7 @@ class ConceptConfig(BaseConfig):
 
     extension_columns: dict[str, str] = Field(
         default_factory=dict,
-        description="List of extension columns to include in the concept table.",
+        description="Dictionary of extension columns to include in the concept table.",
     )
 
     mappings: list[MappingConfig] = Field(default_factory=list, description="List of concept mappings.")

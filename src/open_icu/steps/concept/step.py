@@ -1,6 +1,6 @@
-"""Extraction step implementation for converting ICU data to MEDS format.
+"""Concept step implementation for converting ICU data to MEDS format.
 
-This module implements the ExtractionStep class that orchestrates the extraction
+This module implements the ConceptStep class that orchestrates the extraction
 of data from source CSV files, applies transformations via callbacks, performs
 joins, and outputs MEDS-compliant Parquet files.
 """
@@ -22,22 +22,22 @@ logger = get_logger(__name__)
 
 
 class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
-    """Data extraction step for transforming source ICU data to MEDS format.
+    """Concept step for extracting MEDS concept events from ICU data.
 
-    Reads CSV files specified in TableConfig objects, applies pre/post callbacks,
-    performs table joins, extracts events with field mappings, and writes
-    MEDS-compliant Parquet files to the workspace directory.
+    Reads extracted MEDS data specified in ConceptConfig objects, applies
+    mappings based on code patterns, and writes MEDS-compliant Parquet files
+    to the workspace directory.
     """
     @classmethod
     def load(cls, project: OpenICUProject, config_path: Path) -> "ConceptStep":
-        """Load an extraction step from a configuration file.
+        """Load a concept step from a configuration file.
 
         Args:
             project: The OpenICU project to operate within
-            config_path: Path to the extraction configuration YAML file
+            config_path: Path to the concept configuration YAML file
 
         Returns:
-            An initialized ExtractionStep instance
+            An initialized ConceptStep instance
         """
         config = ConceptStepConfig.load(config_path)
         return cls(project, config, concept_config_registry)

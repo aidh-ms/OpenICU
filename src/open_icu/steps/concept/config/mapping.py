@@ -16,7 +16,12 @@ class MappingPatternConfig(BaseModel):
     """Configuration for concept mapping patterns.
 
     Attributes:
-
+        dataset: Dataset name to match.
+        version: Dataset version to match.
+        table: Table name to match.
+        event: Event name to match.
+        code: Code value to match.
+        regex: Regular expression pattern to match.
     """
     dataset: str | None = Field(None, description="Dataset name to match.")
     version: str | None = Field(None, description="Dataset version to match.")
@@ -28,6 +33,13 @@ class MappingPatternConfig(BaseModel):
 
 
 class MappingConfig(BaseModel):
+    """Configuration for a concept mapping.
+
+    Attributes:
+        pattern: Pattern configuration for concept mapping.
+        columns: Column configuration for concept mapping.
+        filters: The list of filter configurations for the mapping.
+    """
     pattern: MappingPatternConfig = Field(..., description="Pattern configuration for concept mapping.")
     columns: MappingColumnConfig = Field(..., description="Column configuration for concept mapping.")
 

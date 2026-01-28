@@ -1,6 +1,6 @@
-"""Extraction step configuration models.
+"""Concept step configuration models.
 
-This module defines the configuration structure for the extraction step,
+This module defines the configuration structure for the concept step,
 including dataset path specifications and custom extraction settings.
 """
 from pydantic import BaseModel, Field
@@ -9,7 +9,7 @@ from open_icu.steps.base.config import BaseStepConfig
 
 
 class CustomConfig(BaseModel):
-    """Custom configuration specific to the extraction step.
+    """Custom configuration specific to the concept step.
 
     Attributes:
         extraction_step: Name of the extraction step
@@ -20,9 +20,9 @@ class CustomConfig(BaseModel):
 
 
 class ConceptStepConfig(BaseStepConfig[CustomConfig]):
-    """Complete configuration for the extraction step.
+    """Complete configuration for the concept step.
 
-    Combines base step configuration with extraction-specific settings.
+    Combines base step configuration with concept-specific settings.
     """
 
     pass
