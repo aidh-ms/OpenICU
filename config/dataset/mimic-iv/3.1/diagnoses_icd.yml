@@ -53,12 +53,9 @@ events:
       subject_id: col(subject_id)
       time: col(dischtime)
       code:
-        - const("hosp/diagnoses_icd")
-        - const("DIAGNOSES")
         - col(icd_code)
         - col(icd_version)
       numeric_value: col(seq_num)
       extension:
         hadm_id: col(hadm_id)
         stay_id: const("-1")
-        src_db_id: const("mimic")

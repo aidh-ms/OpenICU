@@ -27,27 +27,19 @@ post_callbacks:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("hosp/patients")
   extension:
     hadm_id: const(-1)
     stay_id: const("-1")
-    src_db_id: const("mimic")
 
 events:
   - name: dob
     columns:
       time: col(dob)
-      code:
-        - const("DOB")
   - name: dod
     columns:
       time: col(dod)
-      code:
-        - const("DOD")
   - name: gender
     columns:
       time: col(dob)
       code:
-        - const("SEX")
         - col(gender)

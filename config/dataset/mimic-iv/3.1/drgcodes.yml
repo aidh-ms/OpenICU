@@ -42,27 +42,19 @@ event_defaults:
   subject_id: col(subject_id)
   time: col(admittime)
   code_prefix:
-    - const("hosp/drgcodes")
     - col(drg_type)
     - col(drg_code)
   extension:
     hadm_id: col(hadm_id)
     stay_id: const("-1")
-    src_db_id: const("mimic")
 
 events:
   - name: drg_code
     columns:
-      code:
-        - const("DRG_CODE")
       text_value: col(description)
   - name: drg_severity
     columns:
-      code:
-        - const("DRG_SEVERITY")
       numeric_value: col(drg_severity)
   - name: drg_mortality
     columns:
-      code:
-        - const("DRG_MORTALITY")
       numeric_value: col(drg_mortality)

@@ -1,4 +1,4 @@
-name: infusionDrug
+name: infusiondrug
 path: infusionDrug.csv.gz
 version: "2.0"
 dataset: eicu
@@ -50,19 +50,15 @@ join:
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
-  code_prefix:
-    - const("infusionDrug")
   extension:
     hadm_id: const(-1)
     stay_id: col(patientunitstayid)
-    src_db_id: const("eicu")
 
 events:
   - name: patientweight
     columns:
       time: col(admission_timestamp)
       code:
-        - const("WEIGHT")
         - const("kg")
       text_value: col(patientweight)
     filters:
@@ -71,7 +67,6 @@ events:
     columns:
       time: col(event_timestamp)
       code:
-        - const("AMOUNT")
         - col(drugname)
       numeric_value: col(drugamount)
     filters:
@@ -79,24 +74,24 @@ events:
   - name: drugrate
     columns:
       time: col(event_timestamp)
-      code:
-        - const("RATE")
       text_value: col(drugrate)
+      code:
+        - col(drugname)
     filters:
       - drop_na(text_value)
   - name: infusionrate
     columns:
       time: col(event_timestamp)
-      code:
-        - const("INFUSION_RATE")
       text_value: col(infusionrate)
+      code:
+        - col(drugname)
     filters:
       - drop_na(text_value)
   - name: volumeoffluid
     columns:
       time: col(event_timestamp)
-      code:
-        - const("VOLUME_OF_FLUID")
       text_value: col(volumeoffluid)
+      code:
+        - col(drugname)
     filters:
       - drop_na(text_value)

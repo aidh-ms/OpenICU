@@ -27,6 +27,8 @@ config_files:
       - openicu.config.dataset.eicu.2.0.patient
       - openicu.config.dataset.eicu.2.0.vitalperiodic
       - openicu.config.dataset.eicu.2.0.infusiondrug
+      - openicu.config.dataset.eicu.2.0.medication
+      - openicu.config.dataset.eicu.2.0.lab
 
 config:
   data:

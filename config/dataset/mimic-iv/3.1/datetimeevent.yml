@@ -21,8 +21,6 @@ columns:
     params:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
-  - name: caregiver_id
-    type: int64
   - name: itemid
     type: int64
   - name: value
@@ -48,20 +46,11 @@ join:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("icu/datetimeevents")
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
-    src_db_id: const("mimic")
 
 events:
-  - name: caregiver_store
-    columns:
-      time: col(storetime)
-      code:
-        - const("CG_ST")
-      numeric_value: col(caregiver_id)
   - name: datetimeevent
     columns:
       time: col(charttime)
@@ -75,8 +64,6 @@ events:
   - name: warning
     columns:
       time: col(storetime)
-      code:
-        - const("WARNING")
       numeric_value: col(warning)
     filters:
       - drop_na(numeric_value)

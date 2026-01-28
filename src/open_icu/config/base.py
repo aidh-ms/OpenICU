@@ -7,7 +7,7 @@ and YAML serialization capabilities.
 
 from abc import ABCMeta
 from pathlib import Path
-from typing import Self
+from typing import ClassVar, Self
 from uuid import NAMESPACE_DNS, UUID, uuid5
 
 import yaml
@@ -28,8 +28,23 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         identifier_tuple: Tuple of (class_name, version, name)
         uuid: UUID generated from the identifier
     """
+    __open_icu_config_type__: ClassVar[str] = "config"
+
     name: str = Field(..., description="Name of the configuration.")
     version: str = Field(..., description="Version of the configuration.")
+
+    def __str__(self) -> str:
+        return self.identifier
+
+    @computed_field
+    @property
+    def config_type(self) -> str:
+        """Get the configuration type.
+
+        Returns:
+            The configuration type string
+        """
+        return self.__open_icu_config_type__
 
     @computed_field
     @property
@@ -52,7 +67,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         Returns:
             Tuple of (class_name, version, name)
         """
-        return self.__class__.__name__, self.version, self.name
+        return self.__open_icu_config_type__, self.name, self.version
 
     @computed_field
     @property
@@ -65,7 +80,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         Returns:
             A UUID uniquely identifying this configuration
         """
-        return uuid5(NAMESPACE_DNS, self.identifier)  # type: ignore[unresolved-attribute]
+        return uuid5(NAMESPACE_DNS, self.identifier)
 
     @classmethod
     def build_identifier(cls, t: tuple[str, ...]) -> str:

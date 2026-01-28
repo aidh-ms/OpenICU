@@ -28,12 +28,9 @@ events:
       subject_id: col(subject_id)
       time: col(chartdate)
       code:
-        - const("hosp/hcpcsevents")
-        - const("HCPCS")
         - col(hcpcs_cd)
       numeric_value: col(seq_num)
       text_value: col(short_description)
       extension:
           hadm_id: col(hadm_id)
           stay_id: const("-1")
-          src_db_id: const("mimic")

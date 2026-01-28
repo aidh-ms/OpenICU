@@ -40,6 +40,7 @@ class ConfigFileConfig(BaseModel):
         includes: If specified, only load configurations with these names
         excludes: If specified, skip configurations with these names
     """
+    __open_icu_config_type__: str = "config_file"
 
     path: Path = Field(..., description="The path to the configuration file.")
     overwrite: bool = Field(

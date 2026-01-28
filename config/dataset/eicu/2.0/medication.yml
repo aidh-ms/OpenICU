@@ -1,0 +1,56 @@
+name: medication
+path: medication.csv.gz
+version: "2.0"
+dataset: eicu
+
+columns:
+  # subject_id and extentions
+  - name: patientunitstayid
+    type: int64
+  # db columns - times
+  - name: drugstartoffset
+    type: int64
+  # db columns - values
+  - name: drugname
+    type: str
+  - name: dosage
+    type: str
+
+post_callbacks:
+  - add_offset(admission_timestamp, drugstartoffset, event_timestamp)
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    columns:
+      # subject_id and extentions
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      # db columns - times
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+      # db columns - values
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+
+event_defaults:
+  subject_id: col(patienthealthsystemstayid)
+  time: col(event_timestamp)
+  extension:
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+
+events:
+  - name: drug
+    columns:
+      code:
+        - col(drugname)
+      text_value: col(dosage)

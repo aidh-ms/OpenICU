@@ -68,31 +68,22 @@ columns:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("hosp/microbiologyevents")
   extension:
     hadm_id: col(hadm_id)
     stay_id: const("-1")
-    src_db_id: const("mimic")
 
 events:
   - name: microevent_id
     columns:
       time: col(charttime)
-      code:
-        - const("MICROEVENT_ID")
       numeric_value: col(microevent_id)
   - name: specimen_id
     columns:
       time: col(charttime)
-      code:
-        - const("MICRO_SPECIMEN_ID")
       numeric_value: col(micro_specimen_id)
   - name: order_provider_id
     columns:
       time: col(charttime)
-      code:
-        - const("ORDER_PROVIDER_ID")
       text_value: col(order_provider_id)
     callbacks:
       - drop_na(text_value)
@@ -100,35 +91,29 @@ events:
     columns:
       time: col(charttime)
       code:
-        - const("SPEC")
         - col(spec_type_desc)
       numeric_value: col(spec_itemid)
   - name: test_item
     columns:
       time: col(charttime)
       code:
-        - const("TEST_ITEM")
         - col(test_name)
       numeric_value: col(test_itemid)
   - name: organism
     columns:
       time: col(charttime)
       code:
-        - const("ORGANISM_ITEM")
         - col(org_name)
       numeric_value: col(org_itemid)
   - name: antibiotic
     columns:
       time: col(charttime)
       code:
-        - const("ANTIBIOTIC_ITEM")
         - col(ab_name)
       numeric_value: col(ab_itemid)
   - name: dilution
     columns:
       time: col(charttime)
-      code:
-        - const("DILUTION")
       text_value: col(dilution_text)
       numeric_value: col(dilution_value)
       # dilution_comparison
@@ -138,31 +123,18 @@ events:
   - name: interpretation
     columns:
       time: col(charttime)
-      code:
-        - const("INTERPRETATION")
       text_value: col(interpretation)
     filters:
       - drop_na(text_value)
   - name: comments
     columns:
       time: col(charttime)
-      code:
-        - const("COMMENTS")
       text_value: col(comments)
     filters:
       - drop_na(text_value)
   - name: comments
     columns:
       time: col(charttime)
-      code:
-        - const("COMMENTS")
       text_value: col(comments)
     filters:
       - drop_na(text_value)
-  - name: caregiver_store
-    columns:
-      time: col(storetime)
-      code:
-        - const("CG_ST")
-    filters:
-      - drop_na(time)

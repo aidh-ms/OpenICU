@@ -29,8 +29,6 @@ columns:
     type: float32
   - name: amountuom
     type: string
-  - name: caregiver_id
-    type: int64
   - name: itemid
     type: int64
   - name: linkorderid
@@ -64,25 +62,15 @@ join:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("icu/ingredientevents")
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
-    src_db_id: const("mimic")
 
 events:
-  - name: caregiver_store
-    columns:
-      time: col(storetime)
-      code:
-        - const("CG_ST")
-      numeric_value: col(caregiver_id)
   - name: rate_start
     columns:
       time: col(starttime)
       code:
-        - const("RATE_START")
         - col(label)
         - col(rateuom)
       numeric_value: col(rate)
@@ -92,7 +80,6 @@ events:
     columns:
       time: col(endtime)
       code:
-        - const("RATE_END")
         - col(label)
         - col(rateuom)
       numeric_value: col(rate)
@@ -102,33 +89,26 @@ events:
     columns:
       time: col(endtime)
       code:
-        - const("DOSAGE")
         - col(label)
         - col(amountuom)
       numeric_value: col(amount)
   - name: order
     columns:
       time: col(endtime)
-      code:
-        - const("ORDER")
       numeric_value: col(orderid)
   - name: linkorder
     columns:
       time: col(endtime)
-      code:
-        - const("LINKORDER")
       numeric_value: col(linkorderid)
   - name: statusdescription
     columns:
       time: col(endtime)
       code:
-        - const("STATUSDESCRIPTION")
         - col(statusdescription)
   - name: originalrate
     columns:
       time: col(starttime)
       code:
-        - const("ORIGINALRATE")
         - col(label)
         - col(rateuom)
       numeric_value: col(originalrate)

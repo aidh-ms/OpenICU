@@ -13,15 +13,15 @@ import polars as pl
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.extraction.config.step import ExtractionConfig
+from open_icu.steps.extraction.config.step import ExtractionStepConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
-from open_icu.steps.extraction.registry import dataset_config_registery
+from open_icu.steps.extraction.registry import dataset_config_registry
 from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
 
 
-class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
+class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
     """Data extraction step for transforming source ICU data to MEDS format.
 
     Reads CSV files specified in TableConfig objects, applies pre/post callbacks,
@@ -39,47 +39,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
         Returns:
             An initialized ExtractionStep instance
         """
-        config = ExtractionConfig.load(config_path)
-        return cls(project, config, dataset_config_registery)
-
-    def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
-        """Read and transform a table from CSV.
-
-        Scans the CSV file, applies schema overrides, executes pre-callbacks,
-        adds constant columns, converts datetime columns, and executes callbacks.
-
-        Args:
-            table: Configuration for the table to read
-            path: Base path to the data directory
-
-        Returns:
-            LazyFrame with the transformed table data
-        """
-        file_path = path / table.path
-        if not file_path.exists():
-            raise FileNotFoundError(f"file not found ({file_path})")
-
-        lf = pl.scan_csv(
-            file_path,
-            schema_overrides=table.dtypes,
-            infer_schema=False,
-            low_memory=True,
-        )
-        lf = lf.select(table.dtypes.keys())
-
-        for expr in table.pre_callbacks:
-            lf = lf.with_columns(parse_expr(lf, expr))
-
-        for col in table.columns:
-            if col.type == "datetime":
-                lf = lf.with_columns(
-                    pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
-                )
-
-        for expr in table.callbacks:
-            lf = lf.with_columns(parse_expr(lf, expr))
-
-        return lf
+        config = ExtractionStepConfig.load(config_path)
+        return cls(project, config, dataset_config_registry)
 
     def extract(self) -> None:
         """Execute the data extraction workflow.
@@ -126,6 +87,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                 lf = lf.with_columns(parse_expr(lf, expr))
 
             for event in table.events:
+                event_identifier: tuple[str, ...] = table.identifier_tuple[1:] + (event.name,)
                 event_lf = lf
 
                 # Add missing columns
@@ -150,14 +112,17 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
                     event_lf = event_lf.with_columns(parse_expr(event_lf, col_expr).alias(col_name))
 
                 # Create code column by concatenating code columns
-                if len(event.columns.code) > 1:
-                    code_expr = pl.concat_str(
+                code_prefix = pl.lit("//".join(event_identifier))
+                if len(event.columns.code) == 1:
+                    code_expr = (code_prefix + "//" + parse_expr(event_lf, event.columns.code[0]).fill_null("")).alias("code")
+                elif len(event.columns.code) > 1:
+                    code_expr = (code_prefix + "//" + pl.concat_str(
                         [parse_expr(event_lf, col_expr) for col_expr in event.columns.code],
                         separator="//",
                         ignore_nulls=True
-                    ).alias("code")
+                    )).alias("code")
                 else:
-                    code_expr = parse_expr(event_lf, event.columns.code[0]).fill_null("").alias("code")
+                    code_expr = code_prefix.alias("code")
 
                 # Add code column and drop original code columns
                 event_lf = event_lf.with_columns(code_expr)
@@ -180,7 +145,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
 
                 # Ensure output directory exists
                 assert self._workspace_dir is not None
-                output_data_path = self._workspace_dir.path / table.dataset / table.name
+                output_data_path = Path(self._workspace_dir.path, *event_identifier[:-1])
                 output_data_path.mkdir(parents=True, exist_ok=True)
 
                 # Write to parquet with streaming
@@ -192,3 +157,42 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionConfig, TableConfig]):
 
             del lf
             gc.collect()
+
+    def _read_table(self, table: BaseTableConfig, path) -> pl.LazyFrame:
+        """Read and transform a table from CSV.
+
+        Scans the CSV file, applies schema overrides, executes pre-callbacks,
+        adds constant columns, converts datetime columns, and executes callbacks.
+
+        Args:
+            table: Configuration for the table to read
+            path: Base path to the data directory
+
+        Returns:
+            LazyFrame with the transformed table data
+        """
+        file_path = path / table.path
+        if not file_path.exists():
+            raise FileNotFoundError(f"file not found ({file_path})")
+
+        lf = pl.scan_csv(
+            file_path,
+            schema_overrides=table.dtypes,
+            infer_schema=False,
+            low_memory=True,
+        )
+        lf = lf.select(table.dtypes.keys())
+
+        for expr in table.pre_callbacks:
+            lf = lf.with_columns(parse_expr(lf, expr))
+
+        for col in table.columns:
+            if col.type == "datetime":
+                lf = lf.with_columns(
+                    pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
+                )
+
+        for expr in table.callbacks:
+            lf = lf.with_columns(parse_expr(lf, expr))
+
+        return lf

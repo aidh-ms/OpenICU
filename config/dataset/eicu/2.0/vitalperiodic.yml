@@ -1,4 +1,4 @@
-name: vitalPeriodic
+name: vitalperiodic
 path: vitalPeriodic.csv.gz
 version: "2.0"
 dataset: eicu
@@ -75,97 +75,62 @@ join:
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
-  code_prefix:
-    - const("vitalPeriodic")
   extension:
     hadm_id: const(-1)
     stay_id: col(patientunitstayid)
-    src_db_id: const("eicu")
 
 events:
-  - name: col(heartrate)
+  - name: heartrate
     columns:
       code:
-        - const("HEARTRATE")
         - const("BPM")
       numeric_value: col(heartrate)
   - name: vitalperiodicid
     columns:
       code:
-        - const("VITAL_PERIODIC_ID")
       numeric_value: col(observationoffset)
   - name: temperature
     columns:
-      code:
-        - const("TEMPERATURE")
       numeric_value: col(temperature)
   - name: sao2
     columns:
-      code:
-        - const("SAO2")
       numeric_value: col(sao2)
   - name: respiration
     columns:
-      code:
-        - const("RESPIRATION")
       numeric_value: col(respiration)
   - name: cvp
     columns:
-      code:
-        - const("CVP")
       numeric_value: col(cvp)
   - name: etco2
     columns:
-      code:
-        - const("ETCO2")
       numeric_value: col(etco2)
   - name: systemicsystolic
     columns:
-      code:
-        - const("SYSTEMICSYSTOLIC")
       numeric_value: col(systemicsystolic)
   - name: systemicdiastolic
     columns:
-      code:
-        - const("SYSTEMICDIASTOLIC")
       numeric_value: col(systemicdiastolic)
   - name: systemicmean
     columns:
-      code:
-        - const("SYSTEMICMEAN")
       numeric_value: col(systemicmean)
   - name: pasystolic
     columns:
-      code:
-        - const("PASYSTOLIC")
       numeric_value: col(pasystolic)
   - name: padiastolic
     columns:
-      code:
-        - const("PADIASTOLIC")
       numeric_value: col(padiastolic)
   - name: pamean
     columns:
-      code:
-        - const("PAMEAN")
       numeric_value: col(pamean)
   - name: st1
     columns:
-      code:
-        - const("ST1")
       numeric_value: col(st1)
   - name: st2
     columns:
-      code:
-        - const("ST2")
       numeric_value: col(st2)
   - name: st3
     columns:
-      code:
-        - const("ST3")
       numeric_value: col(st3)
   - name: icp
     columns:
-      code:
-        - const("ICP")
       numeric_value: col(icp)

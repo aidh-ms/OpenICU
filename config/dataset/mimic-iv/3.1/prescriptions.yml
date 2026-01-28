@@ -112,12 +112,9 @@ join:
 
 event_defaults:
   subject_id: col(subject_id)
-  code_prefix:
-    - const("hosp/prescriptions")
   extension:
     hadm_id: col(hadm_id)
     stay_id: const("-1")
-    src_db_id: const("mimic")
 
 events:
   - name: medication_start
@@ -133,8 +130,6 @@ events:
   - name: status
     columns:
       time: col(stoptime)
-      code:
-        - const("STATUS")
       text_value: col(status)
   # - name: verifiedtime
   #   columns:
@@ -145,32 +140,23 @@ events:
     columns:
       time: col(starttime)
       code:
-        - const("FREQUENCY")
         - col(frequency)
   - name: sliding_scale
     columns:
       time: col(starttime)
       code:
-        - const("SLIDING_SCALE")
         - col(sliding_scale)
   - name: lockout_interval
     columns:
       time: col(starttime)
       code:
-        - const("LOCKOUT_INTERVAL")
         - col(lockout_interval)
   - name: medication_stop
     columns:
       time: col(stoptime)
       code:
-        - const("MEDICATION_STOP")
         - col(medication)
         - col(infusion_type)
         - col(drug)
         - col(drug_type)
         - col(prod_strength)
-  # - name: caregiver_store
-  #   columns:
-  #     time: entertime
-  #     code:
-  #       - const("CG_ST")
