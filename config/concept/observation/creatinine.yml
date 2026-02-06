@@ -2,10 +2,18 @@ name: creatinine
 version: 1.0.0
 unit: mg/dL
 
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
+
 mappings:
-  - dataset: eicu
-    version: 2.0
-    table:
-    event:
-    code:
-    unit:
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: labevents
+      event: labevent
+      code: .*?(Creatinine)
+      # unit: mg/dL
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
