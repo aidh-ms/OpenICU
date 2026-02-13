@@ -28,7 +28,7 @@ class MappingPatternConfig(BaseModel):
     table: str | None = Field(None, description="Table name to match.")
     event: str | None = Field(None, description="Event name to match.")
     code: str | None = Field(None, description="Code value to match.")
-    unit: str | None = Field(default=None, description="unit to match.")
+    unit: str | None = Field(None, description="unit to match.")
     regex: str | None = Field(None, description="Regular expression pattern to match.")
 
 
