@@ -28,6 +28,7 @@ class MappingPatternConfig(BaseModel):
     table: str | None = Field(None, description="Table name to match.")
     event: str | None = Field(None, description="Event name to match.")
     code: str | None = Field(None, description="Code value to match.")
+    unit: str | None = Field(None, description="unit to match.")
     regex: str | None = Field(None, description="Regular expression pattern to match.")
 
 
@@ -50,15 +51,17 @@ class MappingConfig(BaseModel):
         if self.pattern.regex is not None:
             return self.pattern.regex
 
-        return "//".join(
-            (
-                self.pattern.dataset or "(.+?)",
-                self.pattern.version or "(.+?)",
-                self.pattern.table or "(.+?)",
-                self.pattern.event or "(.+?)",
-                self.pattern.code or "(.+?)",
-            )
-        )
+        regex_parts = [
+            self.pattern.dataset or "(.+?)",
+            self.pattern.version or "(.+?)",
+            self.pattern.table or "(.+?)",
+            self.pattern.event or "(.+?)",
+            self.pattern.code or "(.+?)",
+        ]
+        if self.pattern.unit:
+            regex_parts += [self.pattern.unit]
+
+        return "(?i)" + "//".join(regex_parts)
 
     filters: list[str] = Field(
         default_factory=list, description="The list of filter configurations for the mapping."

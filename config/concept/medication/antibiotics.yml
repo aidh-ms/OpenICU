@@ -23,3 +23,19 @@ mappings:
     columns:
       numeric_value: const(1)
       text_value: const("true")
+  - pattern:
+      dataset: mimic-iv
+      table: prescriptions
+      event: medication_start
+      code: (aztreonam|bactrim|cephalexin|chloramphenicol|cipro|flagyl|metronidazole|nitrofurantoin|tazobactam|rifampin|sulfadiazine|timentin|trimethoprim|(amika|gentami|vanco)cin|(amoxi|ampi|dicloxa|naf|oxa|peni|pipera)cillin|(azithro|clarithro|erythro|clinda|strepto|tobra|vanco)mycin|cef(azolin|tazidime|adroxil|epime|otetan|otaxime|podoxime|uroxime)|(doxy|mino|tetra)cycline|(levofl|moxifl|ofl)oxacin|macro(bid|dantin)|(una|zo)syn)
+    columns:
+      numeric_value: const(1)
+      text_value: const("true")
+  - pattern:
+      dataset: mimic-iv
+      table: inputevents
+      event: rate
+      code: (Vancomycin|Acyclovir|Ambisome|Amikacin|Ampicillin|Ampicillin/Sulbactam (Unasyn)|Atovaquone|Azithromycin|Aztreonam|Caspofungin|Cefazolin|Cefepime|Ceftazidime|Ceftriaxone|Chloroquine|Ciprofloxacin|Clindamycin|Colistin|Daptomycin|Doxycycline|Erythromycin|Ethambutol|Fluconazole|Foscarnet|Gancyclovir|Gentamicin|Imipenem/Cilastatin|Isoniazid|Levofloxacin|Linezolid|Mefloquine|Meropenem|Metronidazole|Micafungin|Moxifloxacin|Nafcillin|Oxacillin|Penicillin G potassium|Piperacillin|Piperacillin/Tazobactam (Zosyn)|Pyrazinamide|Quinine|Ribavirin|Rifampin|Bactrim (SMX/TMP)|Dalfopristin/Quinupristin (Synercid)|Tobramycin|Valgancyclovir|Voriconazole|Keflex|Tamiflu)
+    columns:
+      numeric_value: const(1)
+      text_value: const("true")
