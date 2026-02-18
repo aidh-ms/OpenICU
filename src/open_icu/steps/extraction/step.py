@@ -73,9 +73,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     join_lf = self._read_table(join_table, path)
                     lf = lf.join(
                         join_lf,
-                        how=join_table.how,
+                        how=join_table.how,  # type: ignore[invalid-argument-type]
                         coalesce=True,  # Reduces memory by coalescing join keys
-                        **join_table.join_params
+                        **join_table.join_params  # type: ignore[invalid-argument-type]
                     )
                     post_callbacks.extend(join_table.post_callbacks)
             except FileNotFoundError as e:
