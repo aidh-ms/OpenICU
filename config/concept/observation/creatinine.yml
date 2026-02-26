@@ -11,9 +11,8 @@ mappings:
       dataset: mimic-iv
       version: "3.1"
       table: labevents
-      event: labevent
-      code: .*?(Creatinine)
-      # unit: mg/dL
+      event: result
+      code: (50912//Creatinine)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
