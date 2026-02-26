@@ -54,10 +54,11 @@ event_defaults:
     stay_id: col(stay_id)
 
 events:
-  - name: chartevent
+  - name: result
     columns:
       time: col(charttime)
       code:
+        - col(itemid)
         - col(label)
         - col(valueuom)
       numeric_value: col(valuenum)

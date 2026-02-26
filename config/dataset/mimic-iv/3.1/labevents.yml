@@ -69,30 +69,54 @@ event_defaults:
     stay_id: const("-1")
 
 events:
-  - name: labevent_id
+  - name: order
     columns:
       time: col(charttime)
-      numeric_value: col(labevent_id)
+      code:
+        - col(itemid)
+        - col(label)
+        - col(valueuom)
+
   - name: specimen_id
     columns:
       time: col(charttime)
       numeric_value: col(specimen_id)
+  - name: priority
+    columns:
+      time: col(charttime)
+      text_value: col(priority)
+    filters:
+      - drop_na(text_value)
   - name: order_provider_id
     columns:
       time: col(charttime)
       text_value: col(order_provider_id)
     filters:
       - drop_na(text_value)
-  - name: labevent
+  - name: comments
+    columns:
+      time: col(charttime)
+      text_value: col(comments)
+    filters:
+      - drop_na(text_value)
+
+  - name: result
     columns:
       time: col(charttime)
       code:
+        - col(itemid)
         - col(label)
         - col(valueuom)
       numeric_value: col(valuenum)
       text_value: col(value)
+
+  - name: flag
+    columns:
+      time: col(charttime)
+      text_value: col(flag)
     filters:
       - drop_na(text_value)
+
   - name: ref_range_lower
     columns:
       time: col(charttime)
@@ -105,21 +129,8 @@ events:
       numeric_value: col(ref_range_upper)
     filters:
       - drop_na(numeric_value)
-  - name: flag
+
+  - name: event_id
     columns:
       time: col(charttime)
-      text_value: col(flag)
-    filters:
-      - drop_na(text_value)
-  - name: priority
-    columns:
-      time: col(charttime)
-      text_value: col(priority)
-    filters:
-      - drop_na(text_value)
-  - name: comments
-    columns:
-      time: col(charttime)
-      text_value: col(comments)
-    filters:
-      - drop_na(text_value)
+      numeric_value: col(labevent_id)

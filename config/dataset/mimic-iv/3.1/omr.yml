@@ -21,7 +21,7 @@ columns:
     type: int64
 
 events:
-  - name: value
+  - name: result
     columns:
       subject_id: col(subject_id)
       time: col(chartdate)

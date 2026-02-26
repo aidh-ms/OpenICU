@@ -1,0 +1,193 @@
+name: emar_detail
+path: hosp/emar_detail.csv.gz
+version: "3.1"
+dataset: mimic-iv
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+
+  # db fields - times
+
+  # db fields - values
+  - name: administration_type
+    type: string
+  - name: barcode_type
+    type: string
+  - name: complete_dose_not_given
+    type: string
+  - name: continued_infusion_in_other_location
+    type: string
+  - name: dose_due
+    type: string
+  - name: dose_due_unit
+    type: string
+  - name: dose_given
+    type: string
+  - name: dose_given_unit
+    type: string
+  - name: emar_id
+    type: string
+  - name: emar_seq
+    type: int64
+  - name: infusion_complete
+    type: string
+  - name: infusion_rate
+    type: string
+  - name: infusion_rate_adjustment
+    type: string
+  - name: infusion_rate_adjustment_amount
+    type: string
+  - name: infusion_rate_unit
+    type: string
+  - name: new_iv_bag_hung
+    type: string
+  - name: non_formulary_visual_verification
+    type: string
+  - name: parent_field_ordinal
+    type: string
+  - name: pharmacy_id
+    type: int64
+  - name: prior_infusion_rate
+    type: string
+  - name: product_amount_given
+    type: string
+  - name: product_code
+    type: string
+  - name: product_description
+    type: string
+  - name: product_description_other
+    type: string
+  - name: product_unit
+    type: string
+  - name: reason_for_no_barcode
+    type: string
+  - name: restart_interval
+    type: string
+  - name: route
+    type: string
+  - name: side
+    type: string
+  - name: site
+    type: string
+  - name: will_remainder_of_dose_be_given
+    type: string
+
+join:
+  - name: emar
+    path: hosp/emar.csv.gz
+    columns:
+      # subject_id and extentions
+      - name: subject_id
+        type: int64
+      - name: hadm_id
+        type: int64
+
+      # db fields - times
+      - name: charttime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+
+      # db fields - values
+      - name: emar_id
+        type: string
+      - name: medication
+        type: string
+      - name: pharmacy_id
+        type: int64
+    both_on:
+      - emar_id
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+
+events:
+  - name: administration
+    columns:
+      time: col(charttime)
+      code:
+        - col(medication)
+        - col(administration_type)
+        - col(route)
+      text_value: col(parent_field_ordinal)
+
+  - name: dose_due
+    columns:
+      time: col(charttime)
+      code:
+        - col(dose_due_unit)
+      text_value: col(dose_due)
+    filters:
+      - drop_na(text_value)
+
+  - name: dose_given
+    columns:
+      time: col(charttime)
+      code:
+        - col(dose_given_unit)
+      text_value: col(dose_given)
+    filters:
+      - drop_na(text_value)
+
+  - name: product
+    columns:
+      time: col(charttime)
+      code:
+        - col(product_code)
+        - col(product_description)
+        - col(product_unit)
+      text_value: col(product_description_other)
+    filters:
+      - drop_na(text_value)
+
+  - name: infusion_rate
+    columns:
+      time: col(charttime)
+      code:
+        - col(infusion_rate_unit)
+      text_value: col(infusion_rate)
+    filters:
+      - drop_na(text_value)
+
+  - name: infusion_rate_adjustment
+    columns:
+      time: col(charttime)
+      code:
+        - col(infusion_rate_unit)
+        - col(infusion_rate_adjustment)
+      text_value: col(infusion_rate_adjustment_amount)
+    filters:
+      - drop_na(text_value)
+
+  - name: dose_completion
+    columns:
+      time: col(charttime)
+      text_value: col(complete_dose_not_given)
+    filters:
+      - drop_na(text_value)
+
+  - name: administration_site
+    columns:
+      time: col(charttime)
+      code:
+        - col(side)
+      text_value: col(site)
+    filters:
+      - drop_na(text_value)
+
+  - name: non_formulary_verification
+    columns:
+      time: col(charttime)
+      text_value: col(non_formulary_visual_verification)
+    filters:
+      - drop_na(text_value)
+
+  - name: event_id
+    columns:
+      time: col(charttime)
+      numeric_value: col(emar_seq)
