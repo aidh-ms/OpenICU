@@ -1,0 +1,56 @@
+name: emar
+path: data/nw_hosp/emar.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: scheduletime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: emar_id  # emar = subject_id + "-" + emar_seq
+    type: string
+  - name: emar_seq
+    type: int64
+  - name: enter_provider_id
+    type: string
+  - name: event_txt
+    type: string
+  - name: medication
+    type: string
+  - name: pharmacy_id
+    type: int64
+  - name: poe_id
+    type: string
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+
+events:
+  - name: diagnoses
+    columns:
+      time: col(charttime)
+      code:
+        - col(medication)
+      text_value: col(event_txt)
+  - name: scheduletime
+    columns:
+      time: col(scheduletime)

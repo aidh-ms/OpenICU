@@ -22,6 +22,15 @@ config_files:
       - openicu.config.dataset.mimic-iv.3.1.diagnoses_icd
       - openicu.config.dataset.mimic-iv.3.1.admissions
       - openicu.config.dataset.mimic-iv.3.1.labevents
+  - path: /workspaces/config/dataset/nwicu/0.1.0/
+    includes:
+      - openicu.config.dataset.nwicu.0.1.0.prescriptions
+      - openicu.config.dataset.nwicu.0.1.0.patients
+      - openicu.config.dataset.nwicu.0.1.0.icustays
+      - openicu.config.dataset.nwicu.0.1.0.procedureevents
+      - openicu.config.dataset.nwicu.0.1.0.chartevents
+      - openicu.config.dataset.nwicu.0.1.0.admissions
+      - openicu.config.dataset.nwicu.0.1.0.labevents
   - path: /workspaces/config/dataset/eicu/2.0/
     includes:
       - openicu.config.dataset.eicu.2.0.patient
@@ -36,3 +45,5 @@ config:
       path: /workspaces/example/data/physionet.org/files/mimiciv/3.1
     - name: eicu
       path: /workspaces/example/data/physionet.org/files/eicu-crd/2.0
+    - name: nwicu
+      path: /workspaces/example/data/physionet.org/files/nwicu-northwestern-icu/0.1.0

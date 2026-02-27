@@ -1,0 +1,61 @@
+name: diagnoses_icd
+path: data/nw_hosp/diagnoses_icd.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields - times
+  # db fields - values
+  - name: icd_code
+    type: string
+  - name: icd_version
+    type: int64
+  - name: seq_num
+    type: int64
+
+join:
+  - name: d_icd_diagnoses
+    path: data/nw_hosp/d_icd_diagnoses.csv.gz
+    columns:
+      # subject_id and extentions
+      # db fields - times
+      # db fields - values
+      - name: icd_code
+        type: string
+      - name: icd_version
+        type: int64
+      - name: long_title
+        type: string
+    both_on:
+      - icd_code
+      - icd_version
+  - name: admissions
+    path: data/nw_hosp/admissions.csv.gz
+    columns:
+      # subject_id and extentions
+      - name: hadm_id
+        type: int64
+      # db fields - times
+      - name: dischtime
+        type: datetime
+      # db fields - values
+    both_on:
+      - hadm_id
+
+events:
+  - name: diagnoses
+    columns:
+      subject_id: col(subject_id)
+      time: col(dischtime)
+      code:
+        - col(icd_code)
+        - col(icd_version)
+      numeric_value: col(seq_num)
+      extension:
+        hadm_id: col(hadm_id)
+        stay_id: const("-1")

@@ -1,0 +1,45 @@
+name: patients
+path: data/nw_hosp/patients.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: anchor_age
+    type: int64
+  - name: anchor_year
+    type: int64
+  - name: anchor_year_group
+    type: string
+  - name: dod
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+  # db fields - values
+  - name: gender
+    type: string
+
+post_callbacks:
+  - to_datetime(anchor_year, 1, 1, "00:00:00", anchor_age, dob)
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: const(-1)
+    stay_id: const("-1")
+
+events:
+  - name: dob
+    columns:
+      time: col(dob)
+  - name: dod
+    columns:
+      time: col(dod)
+  - name: gender
+    columns:
+      time: col(dob)
+      code:
+        - col(gender)

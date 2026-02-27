@@ -1,0 +1,82 @@
+name: prescriptions
+path: data/nw_hosp/prescriptions.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+  # subject_id and extentions
+  - name: hadm_id # should be identical field in pharmacy
+    type: int64
+  - name: subject_id  # should be identical field in pharmacy
+    type: int64
+  # db fields - times
+  - name: starttime # identical field in pharmacy
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: stoptime  # identical field in pharmacy
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: doses_per_24_hrs
+    type: float32
+  - name: dose_unit_rx
+    type: string
+  - name: dose_val_rx
+    type: string
+  - name: drug
+    type: string
+  - name: drug_type
+    type: string
+  - name: form_rx
+    type: string
+  - name: form_unit_disp
+    type: string
+  - name: form_val_disp
+    type: string
+  - name: formulary_drug_cd
+    type: string
+  - name: gsn # Generic Sequence Number
+    type: string
+  - name: ndc # National Drug Code
+    type: string
+  - name: order_provider_id
+    type: string
+  - name: pharmacy_id # unique id in pharmacy table
+    type: int64
+  - name: prod_strength
+    type: string
+  - name: poe_id  # orders
+    type: string
+  - name: poe_seq
+    type: int64
+  - name: route # identical field in pharmacy
+    type: string
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+
+events:
+  - name: medication_start
+    columns:
+      time: col(starttime)
+      code:
+        - const("MEDICATION_START")
+        - col(drug)
+        - col(drug_type)
+        - col(prod_strength)
+  - name: status
+    columns:
+      time: col(stoptime)
+      text_value: col(status)
+  - name: medication_stop
+    columns:
+      time: col(stoptime)
+      code:
+        - col(drug)
+        - col(drug_type)
+        - col(prod_strength)
