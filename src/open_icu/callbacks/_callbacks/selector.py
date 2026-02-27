@@ -26,7 +26,7 @@ class FirstNotNull(CallbackProtocol):
             output: Name of the output column to be created.
         """
         if len(fields) == 1 and isinstance(fields[0], list):
-            self.fields: Sequence[AstValue] = fields[0]
+            self.fields: Sequence[AstValue] = fields[0]  # type: ignore[invalid-assignment]
         else:
             self.fields = fields
 
