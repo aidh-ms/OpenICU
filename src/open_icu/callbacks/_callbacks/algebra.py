@@ -26,7 +26,7 @@ class Add(CallbackProtocol):
 class Sum(CallbackProtocol):
     def __init__(self, *summands: AstValue, output: Optional[str] = None) -> None:
         if len(summands) == 1 and isinstance(summands[0], list):
-            self.summands: Sequence[AstValue] = summands[0]
+            self.summands: Sequence[AstValue] = summands[0]  # type: ignore[invalid-assignment]
         else:
             self.summands = summands
         self.output = output
@@ -79,7 +79,7 @@ class Multiply(CallbackProtocol):
 class Product(CallbackProtocol):
     def __init__(self, *factors: AstValue, output: Optional[str] = None) -> None:
         if len(factors) == 1 and isinstance(factors[0], list):
-            self.factors: Sequence[AstValue] = factors[0]
+            self.factors: Sequence[AstValue] = factors[0]  # type: ignore[invalid-assignment]
         else:
             self.factors = factors
         self.output = output
