@@ -1,0 +1,144 @@
+name: procedureevents
+path: data/nw_icu/procedureevents.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+  # subject_id and extensions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: endtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: starttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      strict: false
+  # db fields - values
+  - name: continueinnextdept
+    type: int64
+  - name: isopenbag
+    type: int64
+  - name: itemid
+    type: int64
+  - name: location
+    type: string
+  - name: linkorderid
+    type: int64
+  - name: locationcategory
+    type: string
+  - name: ordercategoryname
+    type: string
+  - name: orderid
+    type: int64
+  - name: originalamount
+    type: float32
+  - name: originalrate
+    type: float32
+  - name: patientweight
+    type: float32
+  - name: statusdescription
+    type: string
+  - name: value
+    type: float32
+  - name: valueuom
+    type: string
+
+join:
+  - name: d_items
+    path: data/nw_icu/d_items.csv.gz
+    columns:
+      # subject_id and extensions
+      # db fields - times
+      # db fields - values
+      - name: itemid
+        type: int64
+      - name: label
+        type: string
+    both_on:
+      - itemid
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+
+events:
+  - name: event_start
+    columns:
+      time: col(starttime)
+      code:
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(value)
+  - name: event_end
+    columns:
+      time: col(endtime)
+      code:
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(value)
+  - name: location
+    columns:
+      time: col(endtime)
+      code:
+        - col(locationcategory)
+      text_value: col(location)
+    filters:
+      - drop_na(text_value)
+  - name: order
+    columns:
+      time: col(endtime)
+      code:
+        - col(ordercategoryname)
+      numeric_value: col(orderid)
+  - name: linkorder
+    columns:
+      time: col(endtime)
+      numeric_value: col(linkorderid)
+  - name: weight
+    columns:
+      time: col(starttime)
+      code:
+        - const("kg")
+      numeric_value: col(patientweight)
+  - name: isopenbag
+    columns:
+      time: col(starttime)
+      numeric_value: col(isopenbag)
+  - name: continueinnextdept
+    columns:
+      time: col(endtime)
+      code:
+        - col(continueinnextdept)
+  - name: statusdescription
+    columns:
+      time: col(endtime)
+      code:
+        - col(statusdescription)
+  - name: originalamount
+    columns:
+      time: col(starttime)
+      code:
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(originalamount)
+  - name: originalrate
+    columns:
+      time: col(starttime)
+      code:
+        - col(label)
+      numeric_value: col(originalrate)
+    filters:
+      - drop_na(numeric_value)

@@ -1,0 +1,70 @@
+name: chartevents
+path: data/nw_icu/chartevents.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: itemid
+    type: int64
+  - name: value
+    type: string
+  - name: valuenum
+    type: float32
+  - name: valueuom
+    type: string
+  - name: warning
+    type: int64
+
+join:
+  - name: d_items
+    path: data/nw_icu/d_items.csv.gz
+    columns:
+      # subject_id and extentions
+      # db fields - times
+      # db fields - values
+      - name: itemid
+        type: int64
+      - name: label
+        type: string
+    both_on:
+      - itemid
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+
+events:
+  - name: chartevent
+    columns:
+      time: col(charttime)
+      code:
+        - col(label)
+        - col(valueuom)
+      numeric_value: col(valuenum)
+      text_value: col(value)
+  - name: warning
+    columns:
+      time: col(storetime)
+      numeric_value: col(warning)
+    filters:
+      - drop_na(numeric_value)

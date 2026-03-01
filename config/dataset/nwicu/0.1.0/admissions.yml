@@ -1,0 +1,104 @@
+name: admissions
+path: data/nw_hosp/admissions.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: admittime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: deathtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: dischtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: edregtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: edouttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: admission_location
+    type: string
+  - name: admission_type
+    type: string
+  - name: admit_provider_id
+    type: string
+  - name: discharge_location
+    type: string
+  - name: hospital_expire_flag
+    type: int64
+  - name: insurance
+    type: string
+  - name: language
+    type: string
+  - name: marital_status
+    type: string
+  - name: race
+    type: string
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: const("-1")
+
+events:
+  - name: admission
+    columns:
+      time: col(admittime)
+      code:
+        - col(admission_location)
+        - col(admission_type)
+        - col(admit_provider_id)
+  - name: discharge
+    columns:
+      time: col(dischtime)
+      code:
+        - col(discharge_location)
+  - name: dod
+    columns:
+      time: col(deathtime)
+  - name: insurance
+    columns:
+      time: col(admittime)
+      code:
+        - col(insurance)
+  - name: language
+    columns:
+      time: col(admittime)
+      code:
+        - col(language)
+  - name: marital_status
+    columns:
+      time: col(admittime)
+      code:
+        - col(marital_status)
+  - name: race
+    columns:
+      time: col(admittime)
+      code:
+        - col(race)
+  - name: emergency_department_registration
+    columns:
+      time: col(edregtime)
+  - name: emergency_department_discharge
+    columns:
+      time: col(edouttime)
+  - name: hospital_expire_flag
+    columns:
+      time: col(dischtime)
+      numeric_value: col(hospital_expire_flag)
