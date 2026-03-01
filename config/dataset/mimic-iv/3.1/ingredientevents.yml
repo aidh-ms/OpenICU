@@ -71,6 +71,7 @@ events:
     columns:
       time: col(starttime)
       code:
+        - col(itemid)
         - col(label)
         - col(rateuom)
       numeric_value: col(rate)
@@ -80,6 +81,7 @@ events:
     columns:
       time: col(endtime)
       code:
+        - col(itemid)
         - col(label)
         - col(rateuom)
       numeric_value: col(rate)
@@ -89,6 +91,7 @@ events:
     columns:
       time: col(endtime)
       code:
+        - col(itemid)
         - col(label)
         - col(amountuom)
       numeric_value: col(amount)
@@ -109,6 +112,7 @@ events:
     columns:
       time: col(starttime)
       code:
+        - col(itemid)
         - col(label)
         - col(rateuom)
       numeric_value: col(originalrate)

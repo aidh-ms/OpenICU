@@ -1,6 +1,6 @@
-name: creatinine
+name: potassium
 version: 1.0.0
-unit: mg/dL
+unit: mE1/L
 
 extension_columns:
   dataset: col("dataset")
@@ -12,7 +12,7 @@ mappings:
       version: "3.1"
       table: labevents
       event: result
-      code: (50912//Creatinine)
+      code: (50971//Potassium)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

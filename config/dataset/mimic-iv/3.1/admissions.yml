@@ -57,6 +57,13 @@ event_defaults:
     stay_id: const("-1")
 
 events:
+  - name: emergency_department_registration
+    columns:
+      time: col(edregtime)
+  - name: emergency_department_discharge
+    columns:
+      time: col(edouttime)
+
   - name: admission
     columns:
       time: col(admittime)
@@ -64,14 +71,6 @@ events:
         - col(admission_location)
         - col(admission_type)
         - col(admit_provider_id)
-  - name: discharge
-    columns:
-      time: col(dischtime)
-      code:
-        - col(discharge_location)
-  - name: dod
-    columns:
-      time: col(deathtime)
   - name: insurance
     columns:
       time: col(admittime)
@@ -87,18 +86,21 @@ events:
       time: col(admittime)
       code:
         - col(marital_status)
-  - name: race
+  - name: ethnicity
     columns:
       time: col(admittime)
       code:
         - col(race)
-  - name: emergency_department_registration
+
+  - name: discharge
     columns:
-      time: col(edregtime)
-  - name: emergency_department_discharge
-    columns:
-      time: col(edouttime)
+      time: col(dischtime)
+      code:
+        - col(discharge_location)
   - name: hospital_expire_flag
     columns:
       time: col(dischtime)
       numeric_value: col(hospital_expire_flag)
+  - name: dod
+    columns:
+      time: col(deathtime)

@@ -73,64 +73,60 @@ event_defaults:
     stay_id: const("-1")
 
 events:
-  - name: microevent_id
-    columns:
-      time: col(charttime)
-      numeric_value: col(microevent_id)
-  - name: specimen_id
-    columns:
-      time: col(charttime)
-      numeric_value: col(micro_specimen_id)
-  - name: order_provider_id
-    columns:
-      time: col(charttime)
-      text_value: col(order_provider_id)
-    callbacks:
-      - drop_na(text_value)
   - name: spec
     columns:
       time: col(charttime)
       code:
         - col(spec_type_desc)
       numeric_value: col(spec_itemid)
+  - name: specimen_id
+    columns:
+      time: col(charttime)
+      numeric_value: col(micro_specimen_id)
+
   - name: test_item
     columns:
       time: col(charttime)
       code:
         - col(test_name)
       numeric_value: col(test_itemid)
+
   - name: organism
     columns:
       time: col(charttime)
       code:
         - col(org_name)
       numeric_value: col(org_itemid)
+
   - name: antibiotic
     columns:
       time: col(charttime)
       code:
         - col(ab_name)
       numeric_value: col(ab_itemid)
+    filters:
+      - drop_na(numeric_value)
+      - drop_na(text_value)
+
   - name: dilution
     columns:
       time: col(charttime)
       text_value: col(dilution_text)
       numeric_value: col(dilution_value)
       # dilution_comparison
-    filters:
-      - drop_na(numeric_value)
-      - drop_na(text_value)
+
   - name: interpretation
     columns:
       time: col(charttime)
       text_value: col(interpretation)
     filters:
       - drop_na(text_value)
-  - name: comments
+
+  - name: order_provider_id
     columns:
       time: col(charttime)
-      text_value: col(comments)
-    filters:
+      text_value: col(order_provider_id)
+    callbacks:
       - drop_na(text_value)
   - name: comments
     columns:
@@ -138,3 +134,7 @@ events:
       text_value: col(comments)
     filters:
       - drop_na(text_value)
+  - name: microevent_id
+    columns:
+      time: col(charttime)
+      numeric_value: col(microevent_id)
