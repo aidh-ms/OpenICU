@@ -3,41 +3,41 @@ version: 1.0.0
 
 config_files:
   - path: /workspaces/config/dataset/mimic-iv/3.1/
-    includes:
-      - openicu.config.dataset.mimic-iv.3.1.prescriptions
-      - openicu.config.dataset.mimic-iv.3.1.outputevents
-      - openicu.config.dataset.mimic-iv.3.1.drgcodes
-      - openicu.config.dataset.mimic-iv.3.1.services
-      - openicu.config.dataset.mimic-iv.3.1.emar
-      - openicu.config.dataset.mimic-iv.3.1.patients
-      - openicu.config.dataset.mimic-iv.3.1.omr
-      - openicu.config.dataset.mimic-iv.3.1.icustays
-      - openicu.config.dataset.mimic-iv.3.1.datetimeevent
-      - openicu.config.dataset.mimic-iv.3.1.hcpcsevents
-      - openicu.config.dataset.mimic-iv.3.1.microbiologyevents
-      - openicu.config.dataset.mimic-iv.3.1.procedureevents
-      - openicu.config.dataset.mimic-iv.3.1.chartevents
-      - openicu.config.dataset.mimic-iv.3.1.ingredientevents
-      - openicu.config.dataset.mimic-iv.3.1.inputevents
-      - openicu.config.dataset.mimic-iv.3.1.diagnoses_icd
-      - openicu.config.dataset.mimic-iv.3.1.admissions
-      - openicu.config.dataset.mimic-iv.3.1.labevents
+    # includes:
+    #   - openicu.config.dataset.mimic-iv.3.1.prescriptions
+    #   - openicu.config.dataset.mimic-iv.3.1.outputevents
+    #   - openicu.config.dataset.mimic-iv.3.1.drgcodes
+    #   - openicu.config.dataset.mimic-iv.3.1.services
+    #   - openicu.config.dataset.mimic-iv.3.1.emar
+    #   - openicu.config.dataset.mimic-iv.3.1.patients
+    #   - openicu.config.dataset.mimic-iv.3.1.omr
+    #   - openicu.config.dataset.mimic-iv.3.1.icustays
+    #   - openicu.config.dataset.mimic-iv.3.1.datetimeevent
+    #   - openicu.config.dataset.mimic-iv.3.1.hcpcsevents
+    #   - openicu.config.dataset.mimic-iv.3.1.microbiologyevents
+    #   - openicu.config.dataset.mimic-iv.3.1.procedureevents
+    #   - openicu.config.dataset.mimic-iv.3.1.chartevents
+    #   - openicu.config.dataset.mimic-iv.3.1.ingredientevents
+    #   - openicu.config.dataset.mimic-iv.3.1.inputevents
+    #   - openicu.config.dataset.mimic-iv.3.1.diagnoses_icd
+    #   - openicu.config.dataset.mimic-iv.3.1.admissions
+    #   - openicu.config.dataset.mimic-iv.3.1.labevents
   - path: /workspaces/config/dataset/nwicu/0.1.0/
-    includes:
-      - openicu.config.dataset.nwicu.0.1.0.prescriptions
-      - openicu.config.dataset.nwicu.0.1.0.patients
-      - openicu.config.dataset.nwicu.0.1.0.icustays
-      - openicu.config.dataset.nwicu.0.1.0.procedureevents
-      - openicu.config.dataset.nwicu.0.1.0.chartevents
-      - openicu.config.dataset.nwicu.0.1.0.admissions
-      - openicu.config.dataset.nwicu.0.1.0.labevents
+    # includes:
+    #   - openicu.config.dataset.nwicu.0.1.0.prescriptions
+    #   - openicu.config.dataset.nwicu.0.1.0.patients
+    #   - openicu.config.dataset.nwicu.0.1.0.icustays
+    #   - openicu.config.dataset.nwicu.0.1.0.procedureevents
+    #   - openicu.config.dataset.nwicu.0.1.0.chartevents
+    #   - openicu.config.dataset.nwicu.0.1.0.admissions
+    #   - openicu.config.dataset.nwicu.0.1.0.labevents
   - path: /workspaces/config/dataset/eicu/2.0/
-    includes:
-      - openicu.config.dataset.eicu.2.0.patient
-      - openicu.config.dataset.eicu.2.0.vitalperiodic
-      - openicu.config.dataset.eicu.2.0.infusiondrug
-      - openicu.config.dataset.eicu.2.0.medication
-      - openicu.config.dataset.eicu.2.0.lab
+    # includes:
+    #   - openicu.config.dataset.eicu.2.0.patient
+    #   - openicu.config.dataset.eicu.2.0.vitalperiodic
+    #   - openicu.config.dataset.eicu.2.0.infusiondrug
+    #   - openicu.config.dataset.eicu.2.0.medication
+    #   - openicu.config.dataset.eicu.2.0.lab
 
 config:
   data:
