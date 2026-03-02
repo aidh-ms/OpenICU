@@ -28,7 +28,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         identifier_tuple: Tuple of (class_name, version, name)
         uuid: UUID generated from the identifier
     """
-    __open_icu_config_type__: ClassVar[str] = "config"
+    __open_icu_config_type__: ClassVar[str] = "base"
 
     name: str = Field(..., description="Name of the configuration.")
     version: str = Field(..., description="Version of the configuration.")
@@ -94,6 +94,15 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         """
         id = ".".join(t).lower()
         return f"openicu.config.{id}"
+
+    @classmethod
+    def prefix(cls) -> str:
+        """Get the prefix of the identifier.
+
+        Returns:
+            The prefix string (e.g., "openicu.config")
+        """
+        return cls.build_identifier((cls.__open_icu_config_type__,))
 
     @classmethod
     def load(cls, file_path: Path) -> Self:
