@@ -121,6 +121,20 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         """Remove all entries from the registry."""
         self._registry.clear()
 
+    def _ensure_prefix(self, identifier: str) -> str:
+        """Ensure the identifier has the correct prefix.
+
+        Args:
+            identifier: The configuration identifier to check
+
+        Returns:
+            The identifier with the correct prefix
+        """
+        prefix = self._config_type.prefix()
+        if identifier.startswith(prefix):
+            return identifier
+        return f"{prefix}.{identifier}"
+
     def load(
         self,
         file_path: Path,
@@ -140,10 +154,13 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             includes: If specified, only load configurations with these identifiers
             excludes: If specified, skip configurations with these identifiers
         """
+        _includes = [self._ensure_prefix(id) for id in includes or []]
+        _excludes = [self._ensure_prefix(id) for id in excludes or []]
+
         for config in load_config(file_path, self._config_type):
             if (
-                (excludes is not None and config.identifier in excludes) or
-                (includes is not None and config.identifier not in includes)
+                (_excludes and config.identifier in _excludes) or
+                (_includes and config.identifier not in _includes)
             ):
                 logger.info("Skip loading configuration: %s", config.identifier)
                 continue
