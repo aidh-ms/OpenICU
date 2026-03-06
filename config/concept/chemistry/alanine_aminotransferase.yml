@@ -1,0 +1,18 @@
+name: alanine_aminotransferase
+version: 1.0.0
+unit: ['IU/L', 'U/l']
+
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
+
+mappings:
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: labevents
+      event: result
+      code: (50861//Alanine Aminotransferase (ALT))
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

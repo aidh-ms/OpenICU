@@ -1,0 +1,18 @@
+name: patient_weight
+version: 1.0.0
+unit: kg
+
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
+
+mappings:
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: chartevents
+      event: result
+      code: (226512//Admission Weight (Kg))
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

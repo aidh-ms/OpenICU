@@ -1,0 +1,27 @@
+name: arterial_oxygen_saturation
+version: 1.0.0
+unit: ['%', '% Sat.']
+
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
+
+mappings:
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: chartevents
+      event: result
+      code: (220227//Arterial O2 Saturation)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: labevents
+      event: result
+      code: (50817//Oxygen Saturation)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
