@@ -117,7 +117,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     code_expr = (code_prefix + "//" + parse_expr(event_lf, event.columns.code[0]).fill_null("")).alias("code")
                 elif len(event.columns.code) > 1:
                     code_expr = (code_prefix + "//" + pl.concat_str(
-                        [parse_expr(event_lf, col_expr) for col_expr in event.columns.code],
+                        [parse_expr(event_lf, col_expr) if col_expr is not None else pl.lit("NULL") for col_expr in event.columns.code],
                         separator="//",
                         ignore_nulls=True
                     )).alias("code")

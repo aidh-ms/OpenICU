@@ -1,0 +1,18 @@
+name: respiratory_rate
+version: 1.0.0
+unit: ['insp/min', '/min']
+
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
+
+mappings:
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: chartevents
+      event: result
+      code: (220210//Respiratory Rate|224688//Respiratory Rate (Set)|224689//Respiratory Rate (spontaneous)|224690//Respiratory Rate (Total))
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

@@ -35,11 +35,13 @@ events:
   - name: dob
     columns:
       time: col(dob)
-  - name: dod
-    columns:
-      time: col(dod)
+
   - name: gender
     columns:
       time: col(dob)
       code:
         - col(gender)
+
+  - name: dod
+    columns:
+      time: col(dod)

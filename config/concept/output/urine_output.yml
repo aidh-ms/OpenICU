@@ -1,0 +1,18 @@
+name: urine_output
+version: 1.0.0
+unit: mL
+
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
+
+mappings:
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: outputevents
+      event: result
+      code: (226557//R Ureteral Stent|226558//L Ureteral Stent|226559//Foley|226560//Void|226561//Condom Cath|226563//Suprapubic|226564//R Nephrostomy|226565//L Nephrostomy|226566//Urine and GU Irrigant Out|226567//Straight Cath|226584//Ileoconduit|227510//TF Residual)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

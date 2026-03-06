@@ -51,11 +51,11 @@ event_defaults:
     stay_id: col(stay_id)
 
 events:
-  - name: datetimeevent
+  - name: result
     columns:
       time: col(charttime)
       code:
-        - const("DATETIMEEVENT")
+        - col(itemid)
         - col(label)
         - col(valueuom)
       text_value: col(value)

@@ -53,6 +53,7 @@ events:
     columns:
       time: col(charttime)
       code:
+        - col(itemid)
         - col(label)
         - col(valueuom)
       numeric_value: col(value)

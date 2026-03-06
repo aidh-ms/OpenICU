@@ -1,0 +1,18 @@
+name: O2_partial_pressure
+version: 1.0.0
+unit: ['mmHg', 'mm Hg']
+
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
+
+mappings:
+  - pattern:
+      dataset: mimic-iv
+      version: "3.1"
+      table: labevents
+      event: result
+      code: (50821//pO2)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
