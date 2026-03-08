@@ -105,6 +105,24 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         return cls.build_identifier((cls.__open_icu_config_type__,))
 
     @classmethod
+    def ensure_prefix(cls, identifier: str) -> str:
+        """Ensure the identifier has the correct prefix.
+
+        If the identifier does not start with the expected prefix, it is
+        prepended to ensure consistency.
+
+        Args:
+            identifier: The identifier string to check
+
+        Returns:
+            The identifier string with the correct prefix
+        """
+        prefix = cls.prefix()
+        if not identifier.startswith(prefix):
+            return f"{prefix}.{identifier}"
+        return identifier
+
+    @classmethod
     def load(cls, file_path: Path) -> Self:
         """Load configuration from a YAML file.
 
