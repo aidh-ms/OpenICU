@@ -16,15 +16,15 @@ class ConceptConfig(BaseConfig):
         identifier_tuple: Tuple of (class_name, version, name)
         uuid: UUID generated from the identifier
         unit: Unit of measurement for the concept values
-        type: Type of concept: 'base' or 'derived'
+        type: Type of concept: 'base', 'dependent', or 'complex'
         extension_columns: Dictionary of extension columns to include in the concept table
         mappings: List of MappingConfig objects defining how to extract concept data
     """
     __open_icu_config_type__ = "concept"
 
     unit: str = Field(..., description="Unit of measurement for the concept values.")
-    type: Literal["base", "derived"] = Field(
-        "base", description="Type of concept: 'base' or 'derived'."
+    type: Literal["base", "dependent", "complex"] = Field(
+        "base", description="Type of concept: 'base', 'dependent', or 'complex'."
     )
 
     extension_columns: dict[str, str] = Field(
