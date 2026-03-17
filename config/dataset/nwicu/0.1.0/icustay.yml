@@ -1,0 +1,53 @@
+name: icustays
+path: data/nw_icu/icustays.csv.gz
+version: "0.1.0"
+dataset: nwicu
+
+columns:
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: intime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: outtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: first_careunit
+    type: string
+  - name: last_careunit
+    type: string
+  - name: los
+    type: float32
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+
+events:
+  - name: icu_admission
+    columns:
+      time: col(intime)
+      code:
+        - col(first_careunit)
+  - name: icu_discharge
+    columns:
+      time: col(outtime)
+      code:
+        - col(last_careunit)
+  - name: icu_length_of_stay
+    columns:
+      time: col(outtime)
+      code:
+        - const("d")
+      numeric_value: col(los)

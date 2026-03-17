@@ -41,7 +41,7 @@ class ExprInterpreter(ast.NodeVisitor):
         kwargs = dict(self.visit_Keyword(k) for k in node.keywords if k.arg is not None)
 
         try:
-            return cls(*args, **kwargs)  # type: ignore[invalid-return-type]
+            return cls(*args, **kwargs)
         except TypeError as e:
             raise TypeError(f"Bad arguments for {name}(*{args}, **{kwargs}): {e}") from e
 
