@@ -36,10 +36,9 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         """Return the number of registered items."""
         return len(self._registry)
 
-    def __contains__(self, identifiers: tuple[str, ...]) -> bool:
+    def __contains__(self, identifiers: tuple[str, ...] | str) -> bool:
         """Check if key exists using 'in' operator."""
-        identifier = self._config_type.build_identifier(identifiers)
-        return identifier in self._registry
+        return self.get_identifier(identifiers) in self._registry
 
     def __repr__(self) -> str:
         """Return string representation of the registry."""
@@ -55,6 +54,19 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         t = get_generic_type(self.__class__)
         return cast(type[T], t)
 
+    def get_identifier(self, identifiers: tuple[str, ...] | str) -> str:
+        """Get the full identifier string from components.
+
+        Args:
+            identifiers: Tuple of identifier components (e.g., (class_name, version, name)) or a single identifier string
+
+        Returns:
+            The full hierarchical identifier string
+        """
+        if isinstance(identifiers, str):
+            return self._config_type.ensure_prefix(identifiers)
+        return self._config_type.build_identifier(identifiers)
+
     def register(self, value: T, overwrite: bool = False) -> None:
         """Register a configuration object.
 
@@ -63,9 +75,10 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             overwrite: If True, replace existing configuration with same identifier
         """
         if overwrite or value.identifier not in self._registry:
+            logger.info("Loaded configuration: %s", value.identifier)
             self._registry[value.identifier] = value
 
-    def unregister(self, identifiers: tuple[str, ...]) -> bool:
+    def unregister(self, identifiers: tuple[str, ...] | str) -> bool:
         """Remove a configuration by identifier.
 
         Args:
@@ -74,23 +87,23 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         Returns:
             True if the configuration was removed, False if not found
         """
-        identifier = self._config_type.build_identifier(identifiers)
+        identifier = self.get_identifier(identifiers)
         if identifier in self._registry:
             del self._registry[identifier]
             return True
         return False
 
-    def get(self, identifiers: tuple[str, ...], default: T | None = None) -> T | None:
+    def get(self, identifiers: tuple[str, ...] | str, default: T | None = None) -> T | None:
         """Retrieve a configuration by its identifier components.
 
         Args:
-            identifiers: Tuple of identifier components (e.g., (class_name, version, name))
+            identifiers: Tuple of identifier components (e.g., (class_name, version, name)) or a single identifier string
             default: Default value if configuration not found
 
         Returns:
             The configuration object or default if not found
         """
-        identifier = self._config_type.build_identifier(identifiers)
+        identifier = self.get_identifier(identifiers)
         return self._registry.get(identifier, default)
 
     def keys(self) -> list[str]:
@@ -140,20 +153,9 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             includes: If specified, only load configurations with these identifiers
             excludes: If specified, skip configurations with these identifiers
         """
-        _includes = [self._config_type.ensure_prefix(id) for id in includes or []]
-        _excludes = [self._config_type.ensure_prefix(id) for id in excludes or []]
 
-        for config in load_config(file_path, self._config_type):
-            if (
-                (_excludes and config.identifier in _excludes) or
-                (_includes and config.identifier not in _includes)
-            ):
-                logger.info("Skip loading configuration: %s", config.identifier)
-                continue
-
+        for config in load_configs(file_path, self._config_type, includes=includes, excludes=excludes):
             self.register(config, overwrite=overwrite)
-            logger.info("Loaded configuration: %s", config.identifier)
-
 
     def save(self, path: Path) -> None:
         """Save all registered configurations to YAML files.
@@ -169,7 +171,13 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             config.save(path)
 
 
-def load_config[T: BaseConfig](path: Path, config_type: type[T]) -> list[T]:
+def load_configs[T: BaseConfig](
+    path: Path,
+    config_type: type[T],
+    includes: list[str] | None = None,
+    excludes: list[str] | None = None,
+    **kwargs
+) -> list[T]:
     """Load all configuration files of a specific type from a directory.
 
     Recursively searches for YAML files in the directory and attempts to
@@ -179,10 +187,16 @@ def load_config[T: BaseConfig](path: Path, config_type: type[T]) -> list[T]:
     Args:
         path: Directory path to search for configuration files
         config_type: The configuration class to instantiate
+        includes: If specified, only load configurations with these identifiers
+        excludes: If specified, skip configurations with these identifiers
+        **kwargs: Additional keyword arguments to pass to the configuration loader
 
     Returns:
         List of successfully loaded configuration objects
     """
+    _includes = [config_type.ensure_prefix(id) for id in includes or []]
+    _excludes = [config_type.ensure_prefix(id) for id in excludes or []]
+
     configs = []
     for file_path in path.rglob("*.*"):
         if (
@@ -192,9 +206,16 @@ def load_config[T: BaseConfig](path: Path, config_type: type[T]) -> list[T]:
             continue
 
         try:
-            config = config_type.load(file_path)
+            config = config_type.load(file_path, **kwargs)
         except ValidationError:
             logger.warning("failed to load config from %s", file_path)
+            continue
+
+        if (
+            (_excludes and config.identifier in _excludes) or
+            (_includes and config.identifier not in _includes)
+        ):
+            logger.info("Skip loading configuration: %s", config.identifier)
             continue
 
         configs.append(config)

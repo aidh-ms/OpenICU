@@ -11,6 +11,7 @@ from uuid import uuid4
 import polars as pl
 
 from open_icu.callbacks.interpreter import parse_expr
+from open_icu.config.registry import load_configs
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.concept.config.concept import ConceptConfig, MappingConfig
@@ -42,6 +43,32 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         config = ConceptStepConfig.load(config_path)
         return cls(project, config, concept_config_registry)
 
+    def setup_config(self) -> None:
+        """Load external configuration files into the registry.
+
+        Processes each ConfigFileConfig from the step configuration, loading
+        YAML files into the registry with specified filtering and overwrite
+        behavior. Saves the consolidated configuration to the project's
+        configs directory.
+        """
+        dataset_paths = [
+            dataset_config.path
+            for dataset_config in self._config.config.dataset_configs
+        ]
+
+        for config in self._config.config_files:
+            configs = load_configs(
+                config.path,
+                ConceptConfig,
+                includes=config.includes,
+                excludes=config.excludes,
+                dataset_paths=dataset_paths,
+            )
+            for config in configs:
+                self._registry.register(config, overwrite=self._config.overwrite)
+
+        self._registry.save(self._project.configs_path)
+
     def extract(self) -> None:
         extraction_dataset = self._project.datasets.get(self._config.config.extraction_step.lower())
         if not extraction_dataset:
@@ -56,13 +83,14 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         for concept in self._registry.values():
             logger.info("extracting concept: %s", concept.name)
-            for mapping in concept.mappings:
-                self.extract_mapping(
-                    concept,
-                    mapping,
-                    codes_df,
-                    extraction_dataset.data_path
-                )
+            for dataset_cf in concept.dataset_concepts:
+                for mapping in dataset_cf.mappings:
+                    self.extract_mapping(
+                        concept,
+                        mapping,
+                        codes_df,
+                        extraction_dataset.data_path
+                    )
 
     def extract_mapping(
         self,
