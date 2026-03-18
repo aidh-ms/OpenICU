@@ -1,0 +1,61 @@
+name: lab
+path: lab.csv.gz
+version: "2.0"
+dataset: eicu
+
+columns:
+  # subject_id and extentions
+  - name: patientunitstayid
+    type: int64
+  # db columns - times
+  - name: labresultoffset
+    type: int64
+  # db columns - values
+  - name: labname
+    type: str
+  - name: labmeasurenamesystem
+    type: str
+  - name: labresult
+    type: float32
+  - name: labresulttext
+    type: str
+
+post_callbacks:
+  - add_offset(admission_timestamp, labresultoffset, event_timestamp)
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    columns:
+      # subject_id and extentions
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      # db columns - times
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+      # db columns - values
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+
+event_defaults:
+  subject_id: col(patienthealthsystemstayid)
+  time: col(event_timestamp)
+  extension:
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+events:
+  - name: labevent
+    columns:
+      code:
+        - col(labname)
+        - col(labmeasurenamesystem)
+      numeric_value: col(labresult)
+      text_value: col(labresulttext)
