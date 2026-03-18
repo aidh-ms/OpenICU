@@ -123,11 +123,12 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         return identifier
 
     @classmethod
-    def load(cls, file_path: Path) -> Self:
+    def load(cls, file_path: Path, **kwargs) -> Self:
         """Load configuration from a YAML file.
 
         Args:
             file_path: Path to the YAML configuration file
+            **kwargs: Additional keyword arguments for configuration initialization
 
         Returns:
             Configuration instance populated from the YAML file
@@ -138,6 +139,10 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         """
         with open(file_path, "r") as f:
             data = yaml.safe_load(f)
+
+        for k, v in kwargs.items():
+            if k not in data:
+                data[k] = v
 
         return cls(**data)
 
@@ -165,3 +170,23 @@ class BaseDatasetConfig(BaseConfig):
     attributes and methods in the future.
     """
     dataset: str = Field(..., description="Name of the dataset associated with this dataset configuration.")
+
+    @classmethod
+    def load(cls, file_path: Path, **kwargs) -> Self:
+        """Load configuration from a YAML file.
+
+        Args:
+            file_path: Path to the YAML configuration file
+            **kwargs: Additional keyword arguments for configuration initialization
+
+        Returns:
+            Configuration instance populated from the YAML file
+
+        Raises:
+            FileNotFoundError: If file_path does not exist
+            yaml.YAMLError: If YAML parsing fails
+        """
+        *_, dataset, version, _, _ = file_path.parts
+        name = file_path.stem
+
+        return super().load(file_path, dataset=dataset, name=name, version=version)
