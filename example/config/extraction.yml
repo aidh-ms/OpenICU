@@ -43,7 +43,7 @@ config:
   data:
     - name: mimic-iv
       path: /workspaces/example/data/physionet.org/files/mimiciv/3.1
-    - name: eicu
+    - name: eicu-crd
       path: /workspaces/example/data/physionet.org/files/eicu-crd/2.0
     - name: nwicu
       path: /workspaces/example/data/physionet.org/files/nwicu-northwestern-icu/0.1.0
