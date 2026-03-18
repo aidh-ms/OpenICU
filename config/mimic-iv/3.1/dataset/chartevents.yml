@@ -1,7 +1,4 @@
-name: chartevents
 path: icu/chartevents.csv.gz
-version: "3.1"
-dataset: mimic-iv
 
 columns:
 
