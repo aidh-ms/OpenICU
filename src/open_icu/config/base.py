@@ -156,3 +156,12 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
 
         with open(path, "w") as f:
             yaml.safe_dump(self.model_dump(mode="json", exclude_computed_fields=True), f)
+
+
+class BaseDatasetConfig(BaseConfig):
+    """Base configuration class for dataset configurations.
+
+    Inherits from BaseConfig and can be extended with dataset-specific
+    attributes and methods in the future.
+    """
+    dataset: str = Field(..., description="Name of the dataset associated with this dataset configuration.")
