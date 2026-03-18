@@ -1,7 +1,4 @@
-name: patient
 path: patient.csv.gz
-version: "2.0"
-dataset: eicu
 
 columns:
   # subject_id and extension
