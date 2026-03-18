@@ -12,7 +12,7 @@ from open_icu.steps.concept.config.mapping import MappingConfig
 class DatasetConceptConfig(BaseDatasetConfig):
     """Configuration for a dataset-specific concept.
 
-    Inherits from ConceptConfig and adds dataset-specific attributes if needed.
+    Inherits from BaseDatasetConfig and adds dataset-specific attributes if needed.
     """
     __open_icu_config_type__ = "concept"
 
@@ -38,7 +38,7 @@ class ConceptConfig(BaseConfig):
         unit: Unit of measurement for the concept values
         type: Type of concept: 'base', 'dependent', or 'complex'
         extension_columns: Dictionary of extension columns to include in the concept table
-        mappings: List of MappingConfig objects defining how to extract concept data
+        dataset_concepts: List of DatasetConceptConfig objects defining how to extract concept data per dataset
     """
     __open_icu_config_type__ = "concept"
 

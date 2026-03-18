@@ -57,15 +57,15 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         ]
 
         for config in self._config.config_files:
-            configs = load_configs(
+            concepts = load_configs(
                 config.path,
                 ConceptConfig,
                 includes=config.includes,
                 excludes=config.excludes,
                 dataset_paths=dataset_paths,
             )
-            for config in configs:
-                self._registry.register(config, overwrite=self._config.overwrite)
+            for concept in concepts:
+                self._registry.register(concept, overwrite=config.overwrite)
 
         self._registry.save(self._project.configs_path)
 

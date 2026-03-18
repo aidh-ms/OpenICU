@@ -13,7 +13,7 @@ from open_icu.steps.base.config import BaseStepConfig
 class DatasetConfig(BaseModel):
     """Configuration for a source dataset.
 
-    Specifies the name and file path for a source ICU dataset.
+    Specifies the name and file path for to the concept definition of a dataset.
 
     Attributes:
         name: Name identifier for the dataset
