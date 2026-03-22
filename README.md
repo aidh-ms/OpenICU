@@ -15,8 +15,8 @@ This is a project to unify and extract data from different ICU data sources.
 
 1. **Clone the repository:**
     ```sh
-    git clone https://github.com/Paul-B98/python-project-template.git
-    cd python-project-template
+    git clone https://github.com/aidh-ms/OpenICU.git
+    cd OpenICU
     ```
 
 2. **Open the project in Visual Studio Code:**

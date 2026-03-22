@@ -105,11 +105,30 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         return cls.build_identifier((cls.__open_icu_config_type__,))
 
     @classmethod
-    def load(cls, file_path: Path) -> Self:
+    def ensure_prefix(cls, identifier: str) -> str:
+        """Ensure the identifier has the correct prefix.
+
+        If the identifier does not start with the expected prefix, it is
+        prepended to ensure consistency.
+
+        Args:
+            identifier: The identifier string to check
+
+        Returns:
+            The identifier string with the correct prefix
+        """
+        prefix = cls.prefix()
+        if not identifier.startswith(prefix):
+            return f"{prefix}.{identifier}"
+        return identifier
+
+    @classmethod
+    def load(cls, file_path: Path, **kwargs) -> Self:
         """Load configuration from a YAML file.
 
         Args:
             file_path: Path to the YAML configuration file
+            **kwargs: Additional keyword arguments for configuration initialization
 
         Returns:
             Configuration instance populated from the YAML file
@@ -120,6 +139,10 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         """
         with open(file_path, "r") as f:
             data = yaml.safe_load(f)
+
+        for k, v in kwargs.items():
+            if k not in data:
+                data[k] = v
 
         return cls(**data)
 
@@ -138,3 +161,32 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
 
         with open(path, "w") as f:
             yaml.safe_dump(self.model_dump(mode="json", exclude_computed_fields=True), f)
+
+
+class BaseDatasetConfig(BaseConfig):
+    """Base configuration class for dataset configurations.
+
+    Inherits from BaseConfig and can be extended with dataset-specific
+    attributes and methods in the future.
+    """
+    dataset: str = Field(..., description="Name of the dataset associated with this dataset configuration.")
+
+    @classmethod
+    def load(cls, file_path: Path, **kwargs) -> Self:
+        """Load configuration from a YAML file.
+
+        Args:
+            file_path: Path to the YAML configuration file
+            **kwargs: Additional keyword arguments for configuration initialization
+
+        Returns:
+            Configuration instance populated from the YAML file
+
+        Raises:
+            FileNotFoundError: If file_path does not exist
+            yaml.YAMLError: If YAML parsing fails
+        """
+        *_, dataset, version, _, _ = file_path.parts
+        name = file_path.stem
+
+        return super().load(file_path, dataset=dataset, name=name, version=version)
