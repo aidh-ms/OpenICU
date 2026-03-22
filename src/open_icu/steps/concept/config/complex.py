@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
-from pydantic import Field, computed_field
+from pydantic import ConfigDict, Field, computed_field
 
 from open_icu.config.base import BaseDatasetConfig
 from open_icu.utils.importer import import_callable
@@ -23,6 +23,7 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
 
     Inherits from BaseDatasetConfig and adds attributes specific to complex concepts.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     __open_icu_config_type__ = "concept"
 
     type: Literal["complex"] = Field(
