@@ -72,28 +72,26 @@ class ConceptConfig(BaseConfig):
         name = data.get("name")
         paths = dataset_paths or []
         for path in paths:
-            file_path = path / f"{name}.yml"
-            if not file_path.exists():
+            sub_file_path = path / f"{name}.yml"
+            if not sub_file_path.exists():
                 continue
 
             adapter = TypeAdapter(DatasetConceptConfigUnion)
             try:
-                with open(file_path, "r") as f:
-                    data = yaml.safe_load(f)
+                with open(sub_file_path, "r") as f:
+                    sub_data = yaml.safe_load(f)
 
-                *_, dataset, version, _, _ = file_path.parts
-                name = file_path.stem
-
-                data.update({
+                *_, dataset, version, _, _ = sub_file_path.parts
+                sub_data.update({
                     "dataset": dataset,
                     "version": version,
-                    "name": name,
+                    "name": sub_file_path.stem,
                 })
 
-                dataset_concept = adapter.validate_python(data)
+                dataset_concept = adapter.validate_python(sub_data)
                 data.setdefault("dataset_concepts", []).append(dataset_concept)
             except ValidationError:
-                logger.warning("failed to load dataset concept config for %s from %s", name, path)
+                logger.warning("failed to load dataset concept config for %s from %s", name, sub_file_path)
 
         for k, v in kwargs.items():
             if k not in data:
