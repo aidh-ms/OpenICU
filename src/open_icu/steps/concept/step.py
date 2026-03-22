@@ -5,6 +5,7 @@ of data from source CSV files, applies transformations via callbacks, performs
 joins, and outputs MEDS-compliant Parquet files.
 """
 import gc
+from functools import cached_property
 from pathlib import Path
 from uuid import uuid4
 
@@ -14,7 +15,13 @@ from open_icu.callbacks.interpreter import parse_expr
 from open_icu.config.registry import load_configs
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
-from open_icu.steps.concept.config.concept import ConceptConfig, MappingConfig
+from open_icu.steps.concept.config.concept import (
+    ComplexDatasetConceptConfig,
+    ConceptConfig,
+    DerivedDatasetConceptConfig,
+    SimpleDatasetConceptConfig,
+)
+from open_icu.steps.concept.config.simple import MappingConfig
 from open_icu.steps.concept.config.step import ConceptStepConfig
 from open_icu.steps.concept.registry import concept_config_registry
 from open_icu.storage.project import OpenICUProject
@@ -70,39 +77,63 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         self._registry.save(self._project.configs_path)
 
     def extract(self) -> None:
+        datasets = {
+            dataset_config.name
+            for dataset_config in self._config.config.dataset_configs
+        }
+
+        for dataset in datasets:
+            for concept in self._registry.values():
+                dataset_concept = concept.get_dataset_concept(dataset)
+                if dataset_concept is None:
+                    logger.warning(
+                        "skipping concept %s for dataset %s: no dataset-specific config found",
+                        concept.name,
+                        dataset
+                    )
+                    continue
+
+                if isinstance(dataset_concept, SimpleDatasetConceptConfig):
+                    for mapping in dataset_concept.mappings:
+                        self.extract_mapping(
+                            concept,
+                            mapping,
+                        )
+
+                if isinstance(dataset_concept, DerivedDatasetConceptConfig):
+                    pass
+                if isinstance(dataset_concept, ComplexDatasetConceptConfig):
+                    dataset_concept.fn(self._project)
+
+    @property
+    def extraction_dataset(self):
         extraction_dataset = self._project.datasets.get(self._config.config.extraction_step.lower())
         if not extraction_dataset:
             logger.warning("skipping concept step: extraction dataset not found")
             return
+        return self._project.datasets.get(self._config.config.extraction_step.lower())
 
+    @cached_property
+    def codes_df(self) -> pl.DataFrame:
+        extraction_dataset = self.extraction_dataset
+        if not extraction_dataset:
+            logger.warning("skipping concept step: extraction dataset not found")
+            return pl.DataFrame()
         codes_path = extraction_dataset.metadata_path / "codes.parquet"
         if not codes_path.exists():
             logger.warning("skipping concept step: extraction codes.parquet not found")
-            return
-        codes_df = pl.read_parquet(extraction_dataset.metadata_path / "codes.parquet")
-
-        for concept in self._registry.values():
-            logger.info("extracting concept: %s", concept.name)
-            for dataset_cf in concept.dataset_concepts:
-                for mapping in dataset_cf.mappings:
-                    self.extract_mapping(
-                        concept,
-                        mapping,
-                        codes_df,
-                        extraction_dataset.data_path
-                    )
+            return pl.DataFrame()
+        return pl.read_parquet(codes_path)
 
     def extract_mapping(
         self,
         concept: ConceptConfig,
         mapping: MappingConfig,
-        codes_df: pl.DataFrame,
-        dataset_path: Path,
     ) -> None:
-        mapping_codes = codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
+        mapping_codes = self.codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
 
         for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
-            data_path = dataset_path / dataset / version / table / f"{event}.parquet"
+            data_path = self.extraction_dataset.data_path / dataset / version / table / f"{event}.parquet"
             if not data_path.exists():
                 logger.warning(
                     "skipping mapping for concept %s: file not found (%s)",
