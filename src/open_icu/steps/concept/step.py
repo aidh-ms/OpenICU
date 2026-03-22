@@ -189,4 +189,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 gc.collect()
 
         files = list(output_data_path.glob("*.parquet"))
-        pl.scan_parquet(files).sink_parquet(output_data_path / f"{dataset_concept.name}.parquet")
+        pl.scan_parquet(files).sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
+
+        for file in files:
+            file.unlink()
