@@ -1,4 +1,8 @@
-from pydantic import BaseModel, Field, computed_field
+from typing import Literal
+
+from pydantic import BaseModel, Field, computed_field, model_validator
+
+from open_icu.config.base import BaseDatasetConfig
 
 
 class MappingColumnConfig(BaseModel):
@@ -63,3 +67,23 @@ class MappingConfig(BaseModel):
     filters: list[str] = Field(
         default_factory=list, description="The list of filter configurations for the mapping."
     )
+
+
+class SimpleDatasetConceptConfig(BaseDatasetConfig):
+    """Configuration for a dataset-specific concept.
+
+    Inherits from BaseDatasetConfig and adds dataset-specific attributes if needed.
+    """
+    __open_icu_config_type__ = "concept"
+
+    mappings: list[MappingConfig] = Field(default_factory=list, description="List of concept mappings.")
+    type: Literal["simple"] = Field(
+        "simple", description="Type of concept: 'base', 'derived', or 'complex'."
+    )
+
+    @model_validator(mode="after")
+    def inject_dataset_into_mappings(self) -> "SimpleDatasetConceptConfig":
+        for mapping in self.mappings:
+            mapping.pattern.dataset = self.dataset
+            mapping.pattern.version = self.version
+        return self
