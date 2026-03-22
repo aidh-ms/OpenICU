@@ -21,7 +21,6 @@ from open_icu.steps.concept.config.concept import (
     DerivedDatasetConceptConfig,
     SimpleDatasetConceptConfig,
 )
-from open_icu.steps.concept.config.simple import MappingConfig
 from open_icu.steps.concept.config.step import ConceptStepConfig
 from open_icu.steps.concept.registry import concept_config_registry
 from open_icu.storage.project import OpenICUProject
@@ -94,14 +93,14 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     continue
 
                 if isinstance(dataset_concept, SimpleDatasetConceptConfig):
-                    for mapping in dataset_concept.mappings:
-                        self.extract_mapping(
-                            concept,
-                            mapping,
-                        )
+                    self.extract_simple_concept(
+                        concept,
+                        dataset_concept,
+                    )
 
                 if isinstance(dataset_concept, DerivedDatasetConceptConfig):
                     pass
+
                 if isinstance(dataset_concept, ComplexDatasetConceptConfig):
                     dataset_concept.fn(self._project)
 
@@ -125,65 +124,69 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             return pl.DataFrame()
         return pl.read_parquet(codes_path)
 
-    def extract_mapping(
+    def extract_simple_concept(
         self,
         concept: ConceptConfig,
-        mapping: MappingConfig,
+        dataset_concept: SimpleDatasetConceptConfig,
     ) -> None:
-        mapping_codes = self.codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
+        assert self._workspace_dir is not None
+        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path.mkdir(parents=True, exist_ok=True)
 
-        for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
-            data_path = self.extraction_dataset.data_path / dataset / version / table / f"{event}.parquet"
-            if not data_path.exists():
-                logger.warning(
-                    "skipping mapping for concept %s: file not found (%s)",
-                    concept.name,
-                    data_path
+        for mapping in dataset_concept.mappings:
+            mapping_codes = self.codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
+
+            for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
+                data_path = self.extraction_dataset.data_path / dataset / version / table / f"{event}.parquet"
+                if not data_path.exists():
+                    logger.warning(
+                        "skipping mapping for concept %s: file not found (%s)",
+                        concept.name,
+                        data_path
+                    )
+                    continue
+
+                lf = pl.scan_parquet(data_path).filter(pl.col("code").is_in(mapping_codes))
+
+                # extension columns
+                lf = lf.with_columns(pl.lit(dataset).alias("dataset"))
+                lf = lf.with_columns(pl.lit(version).alias("version"))
+                lf = lf.with_columns(pl.lit(table).alias("table"))
+                lf = lf.with_columns(pl.lit(event).alias("event"))
+                for col_name, col_expr in concept.extension_columns.items():
+                    lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
+
+                # value columns
+                if mapping.columns.text_value is None:
+                    lf = lf.with_columns(pl.lit(None).alias("text_value"))
+                else:
+                    lf = lf.with_columns(parse_expr(lf, mapping.columns.text_value).alias("text_value"))
+
+                if mapping.columns.numeric_value is None:
+                    lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
+                else:
+                    lf = lf.with_columns(parse_expr(lf, mapping.columns.numeric_value).alias("numeric_value"))
+
+                # code column
+                lf = lf.with_columns(pl.lit(concept.code).alias("code"))
+
+                for expr in mapping.filters:
+                    lf = lf.filter(parse_expr(lf, expr))
+                lf = lf.select([
+                    pl.col("subject_id").cast(pl.Int64),
+                    pl.col("time").cast(pl.Datetime(time_unit="us")),
+                    pl.col("code").cast(pl.String),
+                    pl.col("numeric_value").cast(pl.Float32),
+                    pl.col("text_value").cast(pl.String),
+                ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
+
+                output_file = output_data_path / f"{str(uuid4())}.parquet"
+                lf.sink_parquet(
+                    output_file,
                 )
-                continue
 
-            lf = pl.scan_parquet(data_path).filter(pl.col("code").is_in(mapping_codes))
+                del lf
+                gc.collect()
 
-            # extension columns
-            lf = lf.with_columns(pl.lit(dataset).alias("dataset"))
-            lf = lf.with_columns(pl.lit(version).alias("version"))
-            lf = lf.with_columns(pl.lit(table).alias("table"))
-            lf = lf.with_columns(pl.lit(event).alias("event"))
-            for col_name, col_expr in concept.extension_columns.items():
-                lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
-
-            # value columns
-            if mapping.columns.text_value is None:
-                lf = lf.with_columns(pl.lit(None).alias("text_value"))
-            else:
-                lf = lf.with_columns(parse_expr(lf, mapping.columns.text_value).alias("text_value"))
-
-            if mapping.columns.numeric_value is None:
-                lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
-            else:
-                lf = lf.with_columns(parse_expr(lf, mapping.columns.numeric_value).alias("numeric_value"))
-
-            # code column
-            lf = lf.with_columns(pl.lit(concept.code).alias("code"))
-
-            for expr in mapping.filters:
-                lf = lf.filter(parse_expr(lf, expr))
-            lf = lf.select([
-                pl.col("subject_id").cast(pl.Int64),
-                pl.col("time").cast(pl.Datetime(time_unit="us")),
-                pl.col("code").cast(pl.String),
-                pl.col("numeric_value").cast(pl.Float32),
-                pl.col("text_value").cast(pl.String),
-            ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
-
-            assert self._workspace_dir is not None
-            output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
-            output_data_path.mkdir(parents=True, exist_ok=True)
-
-            output_file = output_data_path / f"{str(uuid4())}.parquet"
-            lf.sink_parquet(
-                output_file,
-            )
-
-            del lf
-            gc.collect()
+        files = list(output_data_path.glob("*.parquet"))
+        pl.scan_parquet(files).sink_parquet(output_data_path / f"{dataset_concept.name}.parquet")

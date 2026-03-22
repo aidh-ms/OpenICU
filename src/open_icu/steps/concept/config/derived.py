@@ -1,8 +1,17 @@
 from typing import Literal
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from open_icu.config.base import BaseDatasetConfig
+
+
+class BaseTable(BaseModel):
+    pass
+
+
+
+
+
 
 
 class DerivedDatasetConceptConfig(BaseDatasetConfig):
