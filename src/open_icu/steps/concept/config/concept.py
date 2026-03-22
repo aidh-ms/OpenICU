@@ -72,7 +72,8 @@ class ConceptConfig(BaseConfig):
         name = data.get("name")
         paths = dataset_paths or []
         for path in paths:
-            if not (path / f"{name}.yml").exists():
+            file_path = path / f"{name}.yml"
+            if not file_path.exists():
                 continue
 
             adapter = TypeAdapter(DatasetConceptConfigUnion)
