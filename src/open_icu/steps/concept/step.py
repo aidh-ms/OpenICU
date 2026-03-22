@@ -99,7 +99,10 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     )
 
                 if isinstance(dataset_concept, DerivedDatasetConceptConfig):
-                    pass
+                    self.extract_derived_concept(
+                        concept,
+                        dataset_concept,
+                    )
 
                 if isinstance(dataset_concept, ComplexDatasetConceptConfig):
                     dataset_concept.fn(self._project)
@@ -193,3 +196,10 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         for file in files:
             file.unlink()
+
+    def extract_derived_concept(
+        self,
+        concept: ConceptConfig,
+        dataset_concept: DerivedDatasetConceptConfig,
+    ) -> None:
+        pass

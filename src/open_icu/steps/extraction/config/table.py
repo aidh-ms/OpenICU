@@ -20,6 +20,7 @@ class TableType(StrEnum):
     """Supported table file formats."""
 
     CSV = auto()
+    CSVGZ = auto()
 
 
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
@@ -40,7 +41,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     path: str = Field(..., description="The file path to the table data.")
-    type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
+    type: TableType = Field(TableType.CSVGZ, description="The type of the table (e.g. csv, json).")
     columns: list[ColumnConfig] = Field(
         default_factory=list,
         description="The list of column configurations for the table."
