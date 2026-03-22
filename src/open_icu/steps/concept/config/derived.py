@@ -88,3 +88,19 @@ class DerivedDatasetConceptConfig(BaseDatasetConfig):
     filters: list[str] = Field(
         default_factory=list, description="The list of filter configurations for the derived concept."
     )
+
+    @computed_field
+    @property
+    def dependencies(self) -> set[str]:
+        """Get the set of concept dependencies for this derived concept.
+
+        Returns:
+            A set of concept identifiers that this derived concept depends on.
+        """
+        from open_icu.steps.concept.config.concept import ConceptConfig  # Avoid circular import
+
+        deps = {
+            ConceptConfig.ensure_prefix(concept)
+            for concept in self.table.concept
+        } | {ConceptConfig.ensure_prefix(self.table.concept)}
+        return deps

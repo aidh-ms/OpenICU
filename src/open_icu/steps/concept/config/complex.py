@@ -31,6 +31,7 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
     )
     concept_transformer: str = Field(..., description="The name of the concept transformer function to apply to this concept (python dotted path).")
     kwargs: dict = Field(default_factory=dict, description="Additional keyword arguments to pass to the concept transformer function.")
+    concepts: list[str] = Field(default_factory=list, description="The list of concept identifiers that this complex concept depends on.")
 
     @computed_field
     @property
@@ -46,3 +47,19 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
             self,
             **self.kwargs
         )
+
+    @computed_field
+    @property
+    def dependencies(self) -> set[str]:
+        """Get the set of concept dependencies for this derived concept.
+
+        Returns:
+            A set of concept identifiers that this derived concept depends on.
+        """
+        from open_icu.steps.concept.config.concept import ConceptConfig  # Avoid circular import
+
+        deps = {
+            ConceptConfig.ensure_prefix(concept)
+            for concept in self.concepts
+        }
+        return deps

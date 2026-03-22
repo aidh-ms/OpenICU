@@ -6,6 +6,7 @@ joins, and outputs MEDS-compliant Parquet files.
 """
 import gc
 from functools import cached_property
+from graphlib import TopologicalSorter
 from pathlib import Path
 from uuid import uuid4
 
@@ -83,6 +84,8 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         }
 
         for dataset in datasets:
+            depend_concepts = dict()
+
             for concept in self._registry.values():
                 dataset_concept = concept.get_dataset_concept(dataset)
                 if dataset_concept is None:
@@ -98,6 +101,13 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept,
                         dataset_concept,
                     )
+
+                if isinstance(dataset_concept, (DerivedDatasetConceptConfig, ComplexDatasetConceptConfig)):
+                    depend_concepts[concept.identifier] = dataset_concept.dependencies
+
+            for concept_id in TopologicalSorter(depend_concepts).static_order():
+                concept = self._registry.get(concept_id)
+                assert concept is not None
 
                 if isinstance(dataset_concept, DerivedDatasetConceptConfig):
                     self.extract_derived_concept(
