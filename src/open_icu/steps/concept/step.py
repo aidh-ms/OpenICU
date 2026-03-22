@@ -21,6 +21,7 @@ from open_icu.steps.concept.config.concept import (
     DerivedDatasetConceptConfig,
     SimpleDatasetConceptConfig,
 )
+from open_icu.steps.concept.config.derived import BaseConceptTable
 from open_icu.steps.concept.config.step import ConceptStepConfig
 from open_icu.steps.concept.registry import concept_config_registry
 from open_icu.storage.project import OpenICUProject
@@ -197,9 +198,92 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         for file in files:
             file.unlink()
 
+    def get_path_for_concept_table(self, table: BaseConceptTable, dataset: str) -> Path:
+        concept_tuple = ConceptConfig.ensure_prefix(table.concept).split(("."))
+        assert self._workspace_dir is not None
+        output_data_path = Path(self._workspace_dir.path, *concept_tuple[1:])
+        return output_data_path / f"{dataset}.parquet"
+
     def extract_derived_concept(
         self,
         concept: ConceptConfig,
         dataset_concept: DerivedDatasetConceptConfig,
     ) -> None:
-        pass
+        def _read_table(file_path: Path, table: BaseConceptTable) -> pl.LazyFrame:
+            if not file_path.exists():
+                raise FileNotFoundError(f"file not found ({file_path})")
+            lf = pl.scan_parquet(
+                file_path,
+                low_memory=True,
+            ).select(table.columns)
+
+            for expr in table.pre_callbacks:
+                lf = lf.with_columns(parse_expr(lf, expr))
+
+            for expr in table.callbacks:
+                lf = lf.with_columns(parse_expr(lf, expr))
+
+            return lf
+
+        try:
+            lf = _read_table(
+                self.get_path_for_concept_table(dataset_concept.table, dataset_concept.dataset),
+                dataset_concept.table
+            )
+            post_callbacks = [*dataset_concept.table.post_callbacks]
+
+            for join_table in dataset_concept.join:
+                lf = lf.join(
+                    _read_table(
+                        self.get_path_for_concept_table(join_table, dataset_concept.dataset),
+                        join_table
+                    ),
+                    how=join_table.how,  # type: ignore[invalid-argument-type]
+                    **join_table.join_params,  # type: ignore[invalid-argument-type]
+                )
+                post_callbacks.extend(join_table.post_callbacks)
+        except FileNotFoundError as e:
+            logger.warning("skipping table %s: %s", dataset_concept.table.concept, e)
+            return
+
+        for expr in post_callbacks:
+            lf = lf.with_columns(parse_expr(lf, expr))
+
+        columns = dataset_concept.event.model_dump()
+        extension = concept.extension_columns.copy()
+        extension.update(columns.pop("extension"))
+        mapping = {
+            col_expr: col_name
+            for col_name, col_expr in columns.items()
+            if col_expr is not None and not isinstance(col_expr, list)
+        } | {
+            col_expr: col_name
+            for col_name, col_expr in extension.items()
+            if col_expr is not None
+        }
+
+        for col_expr, col_name in mapping.items():
+            lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
+
+        # code column
+        lf = lf.with_columns(pl.lit(concept.code).alias("code"))
+
+        for expr in dataset_concept.filters:
+            lf = lf.filter(parse_expr(lf, expr))
+
+        # Reorder columns
+        lf = lf.select([
+            pl.col("subject_id").cast(pl.Int64),
+            pl.col("time").cast(pl.Datetime(time_unit="us")),
+            pl.col("code").cast(pl.String),
+            pl.col("numeric_value").cast(pl.Float32),
+            pl.col("text_value").cast(pl.String),
+        ] + [pl.col(col).cast(pl.String) for col in extension.keys()])
+
+        assert self._workspace_dir is not None
+        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path.mkdir(parents=True, exist_ok=True)
+        lf.sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
+
+        del lf
+        gc.collect()
