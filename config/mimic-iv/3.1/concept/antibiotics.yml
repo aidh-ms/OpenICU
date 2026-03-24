@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: inputevents
+      event: medication
+      code: .*?(Vancomycin|Acyclovir|Ambisome|Amikacin|Ampicillin|Ampicillin/Sulbactam (Unasyn)|Atovaquone|Azithromycin|Aztreonam|Caspofungin|Cefazolin|Cefepime|Ceftazidime|Ceftriaxone|Chloroquine|Ciprofloxacin|Clindamycin|Colistin|Daptomycin|Doxycycline|Erythromycin|Ethambutol|Fluconazole|Foscarnet|Gancyclovir|Gentamicin|Imipenem/Cilastatin|Isoniazid|Levofloxacin|Linezolid|Mefloquine|Meropenem|Metronidazole|Micafungin|Moxifloxacin|Nafcillin|Oxacillin|Penicillin G potassium|Piperacillin|Piperacillin/Tazobactam (Zosyn)|Pyrazinamide|Quinine|Ribavirin|Rifampin|Bactrim (SMX/TMP)|Dalfopristin/Quinupristin (Synercid)|Tobramycin|Valgancyclovir|Voriconazole|Keflex|Tamiflu)
+    columns:
+      numeric_value: const(1)
+      text_value: const("true")
