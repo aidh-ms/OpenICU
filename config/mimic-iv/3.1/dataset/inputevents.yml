@@ -50,6 +50,12 @@ event_defaults:
     stay_id: col(stay_id)
 
 events:
+  - name: medication
+    columns:
+      time: col(endtime)
+      code:
+        - col(label)
+      text_value: col(label)
   - name: dosage
     columns:
       time: col(endtime)

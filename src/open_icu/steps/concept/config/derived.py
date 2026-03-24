@@ -83,7 +83,7 @@ class DerivedDatasetConceptConfig(BaseDatasetConfig):
         default_factory=list, description="The list of join configurations for the derived concept."
     )
     event: MEDSConceptTable = Field(
-        default_factory=..., description="The configuration for the MEDS event concept table to be derived (if applicable)."
+        ..., description="The configuration for the MEDS event concept table to be derived (if applicable)."
     )
     filters: list[str] = Field(
         default_factory=list, description="The list of filter configurations for the derived concept."

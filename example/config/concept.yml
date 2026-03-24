@@ -1,5 +1,6 @@
 name: Concept
 version: 1.0.0
+overwrite: true
 
 config_files:
   - path: /workspaces/config/concept

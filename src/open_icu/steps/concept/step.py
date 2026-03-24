@@ -145,10 +145,12 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
     ) -> None:
         assert self._workspace_dir is not None
         output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
-        output_data_path.mkdir(parents=True, exist_ok=True)
+        output_dataset_path = output_data_path / dataset_concept.dataset
+        output_dataset_path.mkdir(parents=True, exist_ok=True)
 
         for mapping in dataset_concept.mappings:
             mapping_codes = self.codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
+            print(mapping.regex, mapping_codes)
 
             for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
                 data_path = self.extraction_dataset.data_path / dataset / version / table / f"{event}.parquet"
@@ -194,7 +196,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     pl.col("text_value").cast(pl.String),
                 ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
 
-                output_file = output_data_path / f"{str(uuid4())}.parquet"
+                output_file = output_dataset_path / f"{str(uuid4())}.parquet"
                 lf.sink_parquet(
                     output_file,
                 )
@@ -202,11 +204,14 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 del lf
                 gc.collect()
 
-        files = list(output_data_path.glob("*.parquet"))
-        pl.scan_parquet(files).sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
+        files = list(output_dataset_path.glob("*.parquet"))
+        if files:
+            pl.scan_parquet(files).sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
 
         for file in files:
             file.unlink()
+
+        output_dataset_path.rmdir()
 
     def get_path_for_concept_table(self, table: BaseConceptTable, dataset: str) -> Path:
         concept_tuple = ConceptConfig.ensure_prefix(table.concept).split(("."))
