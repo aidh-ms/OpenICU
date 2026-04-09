@@ -198,6 +198,8 @@ def load_configs[T: BaseConfig](
     _excludes = [config_type.ensure_prefix(id) for id in excludes or []]
 
     configs = []
+    if not path.exists():
+        logger.warning("Path does not exists: %s", path)
     for file_path in path.rglob("*.*"):
         if (
             not file_path.is_file()

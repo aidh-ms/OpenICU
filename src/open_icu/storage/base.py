@@ -7,6 +7,10 @@ throughout OpenICU for managing directories with optional cleanup.
 from pathlib import Path
 from shutil import rmtree
 
+from open_icu.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 class FileStorage:
     """Base class for file system storage management.
