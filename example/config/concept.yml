@@ -3,7 +3,7 @@ version: 1.0.0
 overwrite: true
 
 config_files:
-  - path: /workspaces/config/concept
+  - path: /workspaces/config/02_concept
     # includes:
     #   - antibiotics.1.0.0
 
