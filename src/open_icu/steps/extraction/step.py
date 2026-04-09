@@ -61,7 +61,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         for table in self._registry.values():
             path = paths.get(table.dataset)
             if path is None:
-                logger.warning("skipping table %s: dataset path not found (%s)", table.name, path)
+                logger.warning("Skipping table %s: dataset path not found (%s)", table.__pydantic_parent_namespace__)
                 continue
 
             try:
@@ -70,6 +70,11 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 post_callbacks = [*table.post_callbacks]
                 for join_table in table.join:
                     # Use broadcast join with small right table
+                    logger.debug(
+                        "Joining table %s with %s",
+                        table.name,
+                        join_table.path,
+                    )
                     join_lf = self._read_table(join_table, path)
                     lf = lf.join(
                         join_lf,
@@ -79,14 +84,20 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     )
                     post_callbacks.extend(join_table.post_callbacks)
             except FileNotFoundError as e:
-                logger.warning("skipping table %s: %s", table.name, e)
+                logger.warning("Skipping table %s: %s", table.name, e)
                 continue
 
-            logger.info("processing table %s", table.name)
+            logger.info("Processing table %s", table.name)
             for expr in post_callbacks:
                 lf = lf.with_columns(parse_expr(lf, expr))
 
+
             for event in table.events:
+                logger.debug(
+                    "Processing event %s for table %s",
+                    event.name,
+                    table.name,
+                )
                 event_identifier: tuple[str, ...] = table.identifier_tuple[1:] + (event.name,)
                 event_lf = lf
 
@@ -150,6 +161,12 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
                 # Write to parquet with streaming
                 output_file = output_data_path / f"{event.name}.parquet"
+                logger.info(
+                    "Writing event %s for table %s to %s",
+                    event.name,
+                    table.name,
+                    output_file,
+                )
                 event_lf.sink_parquet(
                     output_file,
                 )

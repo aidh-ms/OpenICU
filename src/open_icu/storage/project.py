@@ -7,10 +7,12 @@ and configuration files.
 
 from pathlib import Path
 
+from open_icu.logging import get_logger
 from open_icu.storage.base import FileStorage
 from open_icu.storage.meds import MEDSDataset
 from open_icu.storage.workspace import WorkspaceDir
 
+logger = get_logger(__name__)
 
 class OpenICUProject(FileStorage):
     """OpenICU project directory manager.
@@ -47,6 +49,10 @@ class OpenICUProject(FileStorage):
         super().__init__(path, overwrite)
         # Create the project directory if it doesn't exist
         if not self._path.exists():
+            logger.info(
+                "Creating project subdirectories at %s (datasets, workspace, configs)",
+                self._path,
+            )
             self.datasets_path.mkdir(parents=True, exist_ok=True)
             self.workspace_path.mkdir(parents=True, exist_ok=True)
             self.configs_path.mkdir(parents=True, exist_ok=True)
@@ -130,6 +136,11 @@ class OpenICUProject(FileStorage):
         dir_path = self.workspace_path / name
 
         workspace_dir = WorkspaceDir(dir_path, overwrite=overwrite)
+        logger.debug(
+            "Registered workspace '%s' at %s",
+            name,
+            dir_path,
+        )
         self._workspace[name] = workspace_dir
         return workspace_dir
 
@@ -146,5 +157,10 @@ class OpenICUProject(FileStorage):
         dataset_path = self.datasets_path / name
 
         dataset = MEDSDataset(dataset_path, overwrite=overwrite)
+        logger.debug(
+            "Registered dataset '%s' at %s",
+            name,
+            dataset_path,
+        )
         self._datasets[name] = dataset
         return dataset

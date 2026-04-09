@@ -65,6 +65,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         ]
 
         for config in self._config.config_files:
+            logger.debug(
+                "Loading concepts from %s (overwrite=%s)",
+                config.path,
+                config.overwrite,
+            )
             concepts = load_configs(
                 config.path,
                 ConceptConfig,
@@ -73,7 +78,17 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 dataset_paths=dataset_paths,
             )
             for concept in concepts:
+                logger.debug(
+                    "Registering concept '%s' (overwrite=%s)",
+                    concept.name,
+                    config.overwrite,
+                )
                 self._registry.register(concept, overwrite=config.overwrite)
+
+        logger.info(
+            "Saving merged configuration to %s",
+            self._project.configs_path,
+        )
 
         self._registry.save(self._project.configs_path)
 
@@ -84,6 +99,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         }
 
         for dataset in datasets:
+            logger.info("Processing concepts for dataset %s", dataset)
             depend_concepts = dict()
 
             for concept in self._registry.values():
@@ -97,25 +113,50 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     continue
 
                 if isinstance(dataset_concept, SimpleDatasetConceptConfig):
+                    logger.debug(
+                        "Extracting simple concept %s for dataset %s",
+                        concept.identifier,
+                        dataset,
+                    )
                     self.extract_simple_concept(
                         concept,
                         dataset_concept,
                     )
 
                 if isinstance(dataset_concept, (DerivedDatasetConceptConfig, ComplexDatasetConceptConfig)):
+                    logger.debug(
+                        "Registering dependent concept %s for dataset %s",
+                        concept.identifier,
+                        dataset,
+                    )
                     depend_concepts[concept.identifier] = dataset_concept.dependencies
 
             for concept_id in TopologicalSorter(depend_concepts).static_order():
+                logger.debug(
+                    "Processing dependent concept %s for dataset %s",
+                    concept_id,
+                    dataset,
+                )
                 concept = self._registry.get(concept_id)
                 assert concept is not None
 
                 if isinstance(dataset_concept, DerivedDatasetConceptConfig):
+                    logger.debug(
+                        "Extracting derived concept %s for dataset %s",
+                        concept.identifier,
+                        dataset,
+                    )
                     self.extract_derived_concept(
                         concept,
                         dataset_concept,
                     )
 
                 if isinstance(dataset_concept, ComplexDatasetConceptConfig):
+                    logger.debug(
+                        "Running complex concept %s for dataset %s",
+                        concept.identifier,
+                        dataset,
+                    )
                     dataset_concept.fn(self._project)
 
     @property
@@ -143,6 +184,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         concept: ConceptConfig,
         dataset_concept: SimpleDatasetConceptConfig,
     ) -> None:
+        logger.debug(
+            "Extracting simple concept %s for dataset %s",
+            concept.identifier,
+            dataset_concept.dataset,
+        )
         assert self._workspace_dir is not None
         output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
         output_dataset_path = output_data_path / dataset_concept.dataset
@@ -161,6 +207,14 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     )
                     continue
 
+                logger.debug(
+                    "Loading source event %s/%s/%s/%s for concept %s",
+                    dataset,
+                    version,
+                    table,
+                    event,
+                    concept.identifier,
+                )
                 lf = pl.scan_parquet(data_path).filter(pl.col("code").is_in(mapping_codes))
 
                 # extension columns
@@ -196,6 +250,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
 
                 output_file = output_dataset_path / f"{str(uuid4())}.parquet"
+                logger.debug(
+                    "Writing temporary concept file for %s to %s",
+                    concept.identifier,
+                    output_file,
+                )
                 lf.sink_parquet(
                     output_file,
                 )
@@ -205,8 +264,18 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         files = list(output_dataset_path.glob("*.parquet"))
         if files:
+            logger.info(
+                "Writing merged concept file for %s to %s",
+                concept.identifier,
+                output_data_path / f"{dataset_concept.dataset}.parquet",
+            )
             pl.scan_parquet(files).sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
 
+        logger.debug(
+            "Cleaning up temporary concept files for %s in %s",
+            concept.identifier,
+            output_dataset_path,
+        )
         for file in files:
             file.unlink()
 
@@ -223,9 +292,19 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         concept: ConceptConfig,
         dataset_concept: DerivedDatasetConceptConfig,
     ) -> None:
+        logger.debug(
+            "Extracting derived concept %s for dataset %s",
+            concept.identifier,
+            dataset_concept.dataset,
+        )
         def _read_table(file_path: Path, table: BaseConceptTable) -> pl.LazyFrame:
             if not file_path.exists():
                 raise FileNotFoundError(f"file not found ({file_path})")
+            logger.debug(
+                "Reading concept table %s from %s",
+                table.concept,
+                file_path,
+            )
             lf = pl.scan_parquet(
                 file_path,
                 low_memory=True,
@@ -247,6 +326,12 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             post_callbacks = [*dataset_concept.table.post_callbacks]
 
             for join_table in dataset_concept.join:
+                logger.debug(
+                    "Joining concept table %s with %s (how=%s)",
+                    dataset_concept.table.concept,
+                    join_table.concept,
+                    join_table.how,
+                )
                 lf = lf.join(
                     _read_table(
                         self.get_path_for_concept_table(join_table, dataset_concept.dataset),
@@ -297,6 +382,13 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         assert self._workspace_dir is not None
         output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
         output_data_path.mkdir(parents=True, exist_ok=True)
+
+        logger.info(
+            "Writing derived concept %s to %s",
+            concept.identifier,
+            output_data_path / f"{dataset_concept.dataset}.parquet",
+        )
+
         lf.sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
 
         del lf

@@ -154,7 +154,17 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             excludes: If specified, skip configurations with these identifiers
         """
 
+        logger.debug(
+            "Loading configs from %s (overwrite=%s)",
+            file_path,
+            overwrite,
+        )
         for config in load_configs(file_path, self._config_type, includes=includes, excludes=excludes):
+            logger.debug(
+                "Registering config '%s' (overwrite=%s)",
+                config.identifier,
+                overwrite,
+            )
             self.register(config, overwrite=overwrite)
 
     def save(self, path: Path) -> None:
@@ -166,8 +176,10 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
         Args:
             path: Base directory path for saving configurations
         """
+        logger.info("Saving configurations to %s", path)
         path.mkdir(parents=True, exist_ok=True)
         for config in self._registry.values():
+            logger.debug("Saving configuration %s", config.identifier)
             config.save(path)
 
 
@@ -209,6 +221,7 @@ def load_configs[T: BaseConfig](
 
         try:
             config = config_type.load(file_path, **kwargs)
+            logger.debug("Loaded configuration %s from %s", config.identifier, file_path)
         except ValidationError:
             logger.warning("failed to load config from %s", file_path)
             continue
@@ -217,7 +230,7 @@ def load_configs[T: BaseConfig](
             (_excludes and config.identifier in _excludes) or
             (_includes and config.identifier not in _includes)
         ):
-            logger.info("Skip loading configuration: %s", config.identifier)
+            logger.debug("Skip loading configuration: %s", config.identifier)
             continue
 
         configs.append(config)

@@ -35,9 +35,17 @@ class FileStorage:
         """
         self._path = path
 
+        logger.debug(
+            "Initializing storage at %s with overwrite=%s",
+            path,
+            overwrite,
+        )
+
         # Remove existing project directory if overwrite is True
         if overwrite:
+            logger.info("Overwriting existing directory at %s", self._path)
             self.cleanup()
+
         self._path.mkdir(parents=True, exist_ok=True)
 
     def cleanup(self) -> None:
@@ -46,6 +54,7 @@ class FileStorage:
         Uses shutil.rmtree to recursively delete the directory if it exists.
         """
         if self._path.exists():
+            logger.info("Removing directory at %s", self._path)
             rmtree(self._path)
 
     @property
