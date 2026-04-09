@@ -11,10 +11,12 @@ from pathlib import Path
 
 from open_icu.config.base import BaseConfig
 from open_icu.config.registry import BaseConfigRegistry
+from open_icu.logging import get_logger
 from open_icu.steps.base.config import BaseStepConfig
 from open_icu.storage.project import OpenICUProject
 from open_icu.storage.workspace import WorkspaceDir
 
+logger = get_logger(__name__)
 
 class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMeta):
     """Abstract base class for configurable data processing steps.
@@ -98,14 +100,36 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
             and (self._project.datasets_path / self._step_name).exists()
         )
 
+        logger.debug(
+            "Step '%s': overwrite=%s, workspace_exists=%s, dataset_exists=%s, skip=%s",
+            self._step_name,
+            self._config.overwrite,
+            (self._project.workspace_path / self._step_name).exists(),
+            (self._project.datasets_path / self._step_name).exists(),
+            skip,
+        )
+
+        logger.info("Running step '%s'", self._step_name)
+        logger.debug("Step '%s': setting up config", self._step_name)
         self.setup_config()
+        logger.debug("Step '%s': setting up project", self._step_name)
         self.setup_project()
         if not skip:
+            logger.debug("Step '%s': starting extraction", self._step_name)
             self.extract()
+            logger.debug("Step '%s': running hooks", self._step_name)
             self.hooks()
+            logger.debug("Step '%s': collecting results", self._step_name)
             self.collect()
+        else:
+            logger.info(
+                "Skipping step '%s' because overwrite=False and both workspace and dataset already exist",
+                self._step_name,
+            )
+
 
         assert isinstance(self._workspace_dir, WorkspaceDir)
+        logger.debug("Step '%s': finished successfully", self._step_name)
         return self._workspace_dir
 
     def setup_config(self) -> None:
@@ -117,6 +141,11 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         configs directory.
         """
         for config in self._config.config_files:
+            logger.debug(
+                "Loading config file %s (overwrite=%s)",
+                config.path,
+                config.overwrite,
+            )
             self._registry.load(
                 config.path,
                 overwrite=config.overwrite,
@@ -124,6 +153,10 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
                 excludes=config.excludes
             )
 
+        logger.info(
+            "Saving merged configuration to %s",
+            self._project.configs_path,
+        )
         self._registry.save(self._project.configs_path)
 
     def setup_project(self) -> None:
@@ -137,9 +170,21 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
             overwrite=self._config.overwrite,
         )
 
+        logger.debug(
+            "Registered workspace for step '%s' at %s",
+            self._step_name,
+            self._workspace_dir.path,
+        )
+
         self._dataset = self._project.add_dataset(
             name=self._step_name,
             overwrite=self._config.overwrite,
+        )
+
+        logger.debug(
+            "Registered dataset for step '%s' at %s",
+            self._step_name,
+            self._dataset.path,
         )
 
     def hooks(self) -> None:
@@ -159,14 +204,31 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         to complete the MEDS-compliant output.
         """
         if self._workspace_dir is None or self._dataset is None:
+            logger.debug(
+                "Skipping collect step '%s': workspace or dataset not initialized",
+                self._step_name,
+            )
             return
+
+        logger.info(
+            "Collecting results for step '%s' into dataset at %s",
+            self._step_name,
+            self._dataset.data_path,
+        )
 
         for file_path in self._workspace_dir.content:
             relative_path = file_path.relative_to(self._workspace_dir._path)
             dest_path = self._dataset.data_path / relative_path
             dest_path.parent.mkdir(parents=True, exist_ok=True)
 
+            logger.debug("Copying %s -> %s", file_path, dest_path)
+
             shutil.copy(file_path, dest_path)
 
         self._dataset.write_metadata(self._config.dataset.metadata)
         self._dataset.write_codes()
+
+        logger.info(
+            "Finished collecting results for step '%s'",
+            self._step_name,
+        )
