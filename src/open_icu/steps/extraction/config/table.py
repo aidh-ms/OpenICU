@@ -11,7 +11,7 @@ from typing import Any
 from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from open_icu.config.base import BaseConfig
+from open_icu.config.base import BaseDatasetConfig
 from open_icu.steps.extraction.config.column import ColumnConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
 
@@ -20,6 +20,7 @@ class TableType(StrEnum):
     """Supported table file formats."""
 
     CSV = auto()
+    CSVGZ = auto()
 
 
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
@@ -40,7 +41,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     path: str = Field(..., description="The file path to the table data.")
-    type: TableType = Field(TableType.CSV, description="The type of the table (e.g. csv, json).")
+    type: TableType = Field(TableType.CSVGZ, description="The type of the table (e.g. csv, json).")
     columns: list[ColumnConfig] = Field(
         default_factory=list,
         description="The list of column configurations for the table."
@@ -65,7 +66,7 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
         return dtype_map
 
 
-class JsonTableConfig(BaseTableConfig):
+class JoinTableConfig(BaseTableConfig):
     """Configuration for a table to join with the main table.
 
     Extends BaseTableConfig with join specification parameters.
@@ -108,7 +109,7 @@ class JsonTableConfig(BaseTableConfig):
         return params
 
 
-class TableConfig(BaseConfig, BaseTableConfig):
+class TableConfig(BaseDatasetConfig, BaseTableConfig):
     """Complete configuration for extracting MEDS events from a table.
 
     Combines BaseConfig (for versioning/identification) with BaseTableConfig
@@ -127,8 +128,7 @@ class TableConfig(BaseConfig, BaseTableConfig):
     """
     __open_icu_config_type__: str = "dataset"
 
-    dataset: str = Field(..., description="The dataset this table belongs to.")
-    join: list[JsonTableConfig] = Field(
+    join: list[JoinTableConfig] = Field(
         default_factory=list,
         description="List of join configurations for joining tables.",
     )
