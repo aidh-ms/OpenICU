@@ -48,7 +48,7 @@ class ConceptConfig(BaseConfig):
     @property
     def code(self) -> str:
         """Return the code column name based on concept type."""
-        if if self.unit is None:
+        if self.unit is None:
             return self.name
         return f"{self.name}//{self.unit}"
 
