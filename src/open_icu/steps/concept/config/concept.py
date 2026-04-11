@@ -48,7 +48,9 @@ class ConceptConfig(BaseConfig):
     @property
     def code(self) -> str:
         """Return the code column name based on concept type."""
-        return "{self.name}" + ("//{self.unit}" if self.unit is not None else "")
+        if if self.unit is None:
+            return self.name
+        return f"{self.name}//{self.unit}"
 
     @classmethod
     def load(cls, file_path: Path, dataset_paths: list[Path] | None = None, **kwargs) -> Self:
