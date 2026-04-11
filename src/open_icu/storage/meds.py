@@ -13,8 +13,10 @@ import polars as pl
 from meds._version import __version__ as meds_version
 from meds.schema import DatasetMetadataSchema
 
+from open_icu.logging import get_logger
 from open_icu.storage.base import FileStorage
 
+logger = get_logger(__name__)
 
 class MEDSDataset(FileStorage):
     """MEDS format dataset storage manager.
@@ -85,6 +87,11 @@ class MEDSDataset(FileStorage):
         metadata.update(_metadata)
         DatasetMetadataSchema.validate(metadata)
 
+        logger.info(
+            "Writing dataset metadata to %s",
+            self.metadata_path / "dataset.json",
+        )
+
         with open(self.metadata_path / "dataset.json", "w") as f:
             json.dump(metadata, f, indent=4)
 
@@ -96,6 +103,8 @@ class MEDSDataset(FileStorage):
         parent_codes columns (set to null). This creates the MEDS-required
         code vocabulary file.
         """
+        logger.debug("Extracting code vocabulary from parquet files in %s", self.data_path)
+
         dfs = []
         for file_path in self.data_path.rglob("*.parquet"):
             _df = pl.scan_parquet(file_path).select(pl.col("code")).unique().collect(engine="streaming")
@@ -113,5 +122,10 @@ class MEDSDataset(FileStorage):
                 pl.lit(None).alias("description").cast(pl.String),
                 pl.lit(None).alias("parent_codes").cast(pl.String)
             ])
+
+        logger.info(
+            "Writing code vocabulary to %s",
+            self.metadata_path / "codes.parquet",
+        )
 
         codes_df.write_parquet(self.metadata_path / "codes.parquet")
