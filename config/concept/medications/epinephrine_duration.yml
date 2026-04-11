@@ -1,0 +1,6 @@
+name: epinephrine_duration
+version: 1.0.0
+unit: None
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

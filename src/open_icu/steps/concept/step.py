@@ -150,7 +150,6 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         for mapping in dataset_concept.mappings:
             mapping_codes = self.codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
-            print(mapping.regex, mapping_codes)
 
             for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
                 data_path = self.extraction_dataset.data_path / dataset / version / table / f"{event}.parquet"

@@ -76,6 +76,7 @@ events:
     columns:
       time: col(starttime)
       code:
+        - col(itemid)
         - col(label)
         - col(valueuom)
       numeric_value: col(value)
@@ -83,6 +84,7 @@ events:
     columns:
       time: col(endtime)
       code:
+        - col(itemid)
         - col(label)
         - col(valueuom)
       numeric_value: col(value)

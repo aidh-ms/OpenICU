@@ -1,0 +1,6 @@
+name: arterial_oxygen_saturation
+version: 1.0.0
+unit: "%"
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
