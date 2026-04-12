@@ -337,8 +337,8 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         self.get_path_for_concept_table(join_table, dataset_concept.dataset),
                         join_table
                     ),
-                    how=join_table.how,  # type: ignore[invalid-argument-type]
-                    **join_table.join_params,  # type: ignore[invalid-argument-type]
+                    how=join_table.how,  # ty: ignore[invalid-argument-type]
+                    **join_table.join_params,  # ty: ignore[invalid-argument-type]
                 )
                 post_callbacks.extend(join_table.post_callbacks)
         except FileNotFoundError as e:
