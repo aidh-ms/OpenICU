@@ -1,6 +1,0 @@
-name: sodium
-version: 1.0.0
-unit: mEq/L
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

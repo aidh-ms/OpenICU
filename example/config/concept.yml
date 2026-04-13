@@ -3,7 +3,7 @@ version: 1.0.0
 overwrite: true
 
 config_files:
-  - path: /workspaces/config/02_concept
+  - path: /workspaces/config/concept
     # includes:
     #   - antibiotics.1.0.0
 
@@ -11,8 +11,8 @@ config:
   extraction_step: Extraction
   dataset_configs:
     - name: mimic-iv
-      path: /workspaces/config/mimic-iv/3.1/concept/
+      path: /workspaces/config/dataset/mimic-iv/3.1/concept/
     - name: eicu-crd
-      path: /workspaces/config/eicu-crd/2.0/concept/
+      path: /workspaces/config/dataset/eicu-crd/2.0/concept/
     - name: nwicu
-      path: /workspaces/config/nwicu/0.1.0/concept/
+      path: /workspaces/config/dataset/nwicu/0.1.0/concept/

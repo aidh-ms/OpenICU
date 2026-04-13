@@ -1,6 +1,0 @@
-name: mean_corpuscular_volume
-version: 1.0.0
-unit: fL
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

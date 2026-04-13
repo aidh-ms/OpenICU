@@ -2,7 +2,7 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /workspaces/config/mimic-iv/3.1/dataset/
+  - path: /workspaces/config/dataset/mimic-iv/3.1/dataset/
     # includes:
     #   - openicu.config.dataset.mimic-iv.3.1.prescriptions
     #   - openicu.config.dataset.mimic-iv.3.1.outputevents
@@ -22,7 +22,7 @@ config_files:
     #   - openicu.config.dataset.mimic-iv.3.1.diagnoses_icd
     #   - openicu.config.dataset.mimic-iv.3.1.admissions
     #   - openicu.config.dataset.mimic-iv.3.1.labevents
-  - path: /workspaces/config/nwicu/0.1.0/dataset/
+  - path: /workspaces/config/dataset/nwicu/0.1.0/dataset/
     # includes:
     #   - openicu.config.dataset.nwicu.0.1.0.prescriptions
     #   - openicu.config.dataset.nwicu.0.1.0.patients
@@ -31,7 +31,7 @@ config_files:
     #   - openicu.config.dataset.nwicu.0.1.0.chartevents
     #   - openicu.config.dataset.nwicu.0.1.0.admissions
     #   - openicu.config.dataset.nwicu.0.1.0.labevents
-  - path: /workspaces/config/eicu-crd/2.0/dataset/
+  - path: /workspaces/config/dataset/eicu-crd/2.0/dataset/
     # includes:
     #   - openicu.config.dataset.eicu.2.0.patient
     #   - openicu.config.dataset.eicu.2.0.vitalperiodic

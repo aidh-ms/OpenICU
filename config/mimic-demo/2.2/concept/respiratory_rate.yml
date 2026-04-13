@@ -1,9 +1,0 @@
-type: simple
-mappings:
-  - pattern:
-      table: chartevents
-      event: result
-      code: (224688//Respiratory Rate (Set)|224690//Respiratory Rate (Total)|220210//Respiratory Rate|224689//Respiratory Rate (spontaneous))
-    columns:
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
