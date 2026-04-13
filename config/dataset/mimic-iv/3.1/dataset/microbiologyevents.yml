@@ -44,8 +44,6 @@ columns:
     type: int64
   - name: order_provider_id
     type: string
-  - name: order_provider_id
-    type: string
   - name: org_itemid
     type: int64
   - name: org_name
