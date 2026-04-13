@@ -56,7 +56,7 @@ docs = [
     "mkdocs-material>=9.6.14",
     "mkdocs-section-index>=0.3.10",
     "mkdocstrings-python>=1.16.12",
-    "pymdown-extensions>=10.15",
+    "pymdown-extensions>=10.21.2",
 ]
 
 [tool.pytest.ini_options]
