@@ -24,20 +24,20 @@ join:
     path: hosp/admissions.csv.gz
     columns:
       # subject_id and extensions
-      - name: subject_id
+      - name: hadm_id
         type: int64
       # db fields - times
-      - name: admittime
+      - name: dischtime
         type: datetime
         params:
           format: "%Y-%m-%d %H:%M:%S"
       # db fields - values
     both_on:
-      - subject_id
+      - hadm_id
 
 event_defaults:
   subject_id: col(subject_id)
-  time: col(admittime)
+  time: col(dischtime)
   code_prefix:
     - col(drg_type)
     - col(drg_code)
