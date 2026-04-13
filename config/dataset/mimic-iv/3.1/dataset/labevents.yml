@@ -126,8 +126,3 @@ events:
       numeric_value: col(ref_range_upper)
     filters:
       - drop_na(numeric_value)
-
-  - name: event_id
-    columns:
-      time: col(charttime)
-      numeric_value: col(labevent_id)
