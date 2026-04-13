@@ -1,8 +1,8 @@
-"""Sharding step implementation for converting ICU data to MEDS format.
+"""Sharding step implementation for building subject-oriented shards from concept data.
 
-This module implements the ShardingStep class that orchestrates the extraction
-of data from source CSV files, applies transformations via callbacks, performs
-joins, and outputs MEDS-compliant Parquet files.
+This module implements the ShardingStep class, which loads reusable sharding
+preset configurations, registers them in the sharding registry, and prepares
+the configuration required to build subject-oriented shard outputs.
 """
 from pathlib import Path
 
@@ -16,48 +16,58 @@ from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
 
+
 class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
-    """ TODO: Documentation
-    """
+    """Sharding step for creating subject-oriented shard outputs from concept data."""
+
     @classmethod
     def load(cls, project: OpenICUProject, config_path: Path) -> "ShardingStep":
         """Load a sharding step from a configuration file.
 
         Args:
-            project: The OpenICU project to operate within
-            config_path: Path to the sharding configuration YAML file
+            project: The OpenICU project to operate within.
+            config_path: Path to the sharding step configuration YAML file.
 
         Returns:
-            An initialized ShardingStep instance
+            An initialized ShardingStep instance.
         """
         config = ShardingStepConfig.load(config_path)
         return cls(project, config, sharding_config_registry)
 
     def setup_config(self) -> None:
-        """Load external configuration files into the registry.
+        """Load external sharding preset configurations into the registry.
 
-        Processes each ConfigFileConfig from the step configuration, loading
-        YAML files into the registry with specified filtering and overwrite
-        behavior. Saves the consolidated configuration to the project's
-        configs directory.
+        Processes each configured config file source, loads matching sharding
+        preset configuration files, registers them in the sharding registry,
+        and saves the merged registry state to the project's config directory.
         """
-        dataset_paths = [
-            dataset_config.path
-            for dataset_config in self._config.config.dataset_configs
-        ]
-
         for config in self._config.config_files:
+            logger.debug(
+                "Loading shardings from %s (overwrite=%s)",
+                config.path,
+                config.overwrite,
+            )
             shardings = load_configs(
                 config.path,
                 ShardingConfig,
                 includes=config.includes,
                 excludes=config.excludes,
-                dataset_paths=dataset_paths,
             )
             for sharding in shardings:
+                logger.debug(
+                    "Registering sharding '%s' (overwrite=%s)",
+                    sharding.name,
+                    config.overwrite,
+                )
                 self._registry.register(sharding, overwrite=config.overwrite)
+
+        logger.info(
+            "Saving merged configuration to %s",
+            self._project.configs_path,
+        )
 
         self._registry.save(self._project.configs_path)
 
     def extract(self) -> None:
+        """Build subject-oriented shards from the configured concept data."""
         pass

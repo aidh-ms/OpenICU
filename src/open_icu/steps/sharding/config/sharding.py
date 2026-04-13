@@ -1,30 +1,20 @@
 from pydantic import Field
 
 from open_icu.config.base import BaseConfig
+from open_icu.steps.sharding.config.selection import SelectionConfig
 
 
 class ShardingConfig(BaseConfig):
-    """Configuration for a sharding table.
-
-    Attributes:
-        TODO:
-        ...
-    """
+    """Configuration for a reusable sharding preset."""
 
     __open_icu_config_type__ = "sharding"
 
-    concepts: list[str] = Field()       # all-include, include, exclude
+    description: str | None = Field(
+        default=None,
+        description="Optional description of the sharding preset.",
+    )
 
-    # # Nächste
-
-    # subject_ids: list[str] = Field()    # all-includes, include, exclude
-
-    # # ERstmal ignorieren
-    # time_spacing: str = Field()         # TODO: naming
-    # presplit: bool = Field()            # true, false (split before sharding)
-    # grouping_size: int = Field()        # patients per parquet
-
-    # """ """
-
-
-# multithread auf parquet ein thread paar subjects
+    selection: SelectionConfig = Field(
+        default_factory=SelectionConfig,
+        description="Selection rules defined by this sharding preset.",
+    )
