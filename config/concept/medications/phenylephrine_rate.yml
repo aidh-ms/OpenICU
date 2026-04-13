@@ -1,0 +1,6 @@
+name: phenylephrine_rate
+version: 1.0.0
+unit: mcg/kg/min
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

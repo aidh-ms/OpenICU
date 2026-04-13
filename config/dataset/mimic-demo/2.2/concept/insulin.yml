@@ -1,0 +1,16 @@
+type: simple
+mappings:
+  - pattern:
+      table: inputevents_cv
+      event: result
+      code: ()
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+  - pattern:
+      table: inputevents_mv
+      event: result
+      code: (223260//Insulin - Glargine|223258//Insulin - Regular)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

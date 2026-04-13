@@ -1,0 +1,6 @@
+name: alkaline_phosphatase
+version: 1.0.0
+unit: IU/L
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")
