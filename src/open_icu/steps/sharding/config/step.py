@@ -32,6 +32,11 @@ class CustomConfig(BaseModel):
         description="References to sharding preset configurations to apply.",
     )
 
+    datasets: SelectionConfig = Field(
+        default_factory=SelectionConfig,
+        description="Additional dataset selection rules applied on top of presets.",
+    )
+
     concepts: SelectionConfig = Field(
         default_factory=SelectionConfig,
         description="Additional concept selection rules applied on top of presets.",
