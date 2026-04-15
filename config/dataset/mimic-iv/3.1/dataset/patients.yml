@@ -32,6 +32,8 @@ events:
   - name: dob
     columns:
       time: col(dob)
+      code:
+        - const(MEDS_BIRTH)
 
   - name: gender
     columns:
@@ -42,3 +44,5 @@ events:
   - name: dod
     columns:
       time: col(dod)
+      code:
+        - const(MEDS_DEATH)
