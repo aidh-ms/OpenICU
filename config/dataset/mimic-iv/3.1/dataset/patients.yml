@@ -43,3 +43,5 @@ events:
       time: col(dod)
       code:
         - const(MEDS_DEATH)
+    filters:
+      - drop_na(time)
