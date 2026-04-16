@@ -56,9 +56,14 @@ events:
   - name: emergency_department_registration
     columns:
       time: col(edregtime)
+    filters:
+      - drop_na(time)
   - name: emergency_department_discharge
     columns:
       time: col(edouttime)
+    filters:
+      - drop_na(time)
+
 
   - name: admission
     columns:
@@ -100,3 +105,5 @@ events:
   - name: dod
     columns:
       time: col(deathtime)
+    filters:
+      - drop_na(time)
