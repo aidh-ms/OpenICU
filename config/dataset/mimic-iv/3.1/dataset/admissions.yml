@@ -105,5 +105,7 @@ events:
   - name: dod
     columns:
       time: col(deathtime)
+      code:
+        - const(MEDS_DEATH)
     filters:
       - drop_na(time)
