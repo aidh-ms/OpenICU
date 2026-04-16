@@ -71,7 +71,8 @@ events:
       code:
         - col(admission_location)
         - col(admission_type)
-        - col(admit_provider_id)
+    extension:
+      admit_provider_id: col(admit_provider_id)
   - name: insurance
     columns:
       time: col(admittime)
