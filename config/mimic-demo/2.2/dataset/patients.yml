@@ -21,12 +21,10 @@ columns:
 
 post_callbacks:
   - to_datetime(anchor_year, 1, 1, "00:00:00", anchor_age, dob)
+  - set_time(dod, 23, 59, 59, dod_24)
 
 event_defaults:
   subject_id: col(subject_id)
-  extension:
-    hadm_id: const(-1)
-
 
 events:
   - name: dob
@@ -41,4 +39,6 @@ events:
 
   - name: dod
     columns:
-      time: col(dod)
+      time: col(dod_24)
+    filters:
+      - drop_na(time)
