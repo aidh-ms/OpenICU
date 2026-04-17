@@ -45,7 +45,7 @@ dev = [
     "jupyterlab>=4.4.3",
     "pytest>=9.0.3",
     "pytest-cov>=6.2.1",
-    "ruff>=0.11.13",
+    "ruff>=0.15.11",
     "ty>=0.0.31",
 ]
 docs = [
