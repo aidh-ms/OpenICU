@@ -62,7 +62,7 @@ columns:
     type: int64
 
 post_callbacks:
-  - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+  - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "years", admission_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, discharge_timestamp)
 
 event_defaults:

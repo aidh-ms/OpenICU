@@ -1,7 +1,6 @@
 from typing import Optional
 
 import polars as pl
-from click import Option
 from polars import LazyFrame
 
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_expr
@@ -16,15 +15,17 @@ class ToDatetime(CallbackProtocol):
         month: AstValue,
         day: AstValue,
         time: AstValue,
-        offset: AstValue,
+        offset: Optional[AstValue] = None,
+        offset_unit: str = "minutes",
         output: Optional[str] = None,
     ) -> None:
-        self.year: AstValue = year
-        self.month: AstValue = month
-        self.day: AstValue = day
-        self.time: AstValue = time
-        self.offset: AstValue = offset
-        self.output: Option[str] = output
+        self.year = year
+        self.month = month
+        self.day = day
+        self.time = time
+        self.offset = offset
+        self.offset_unit = offset_unit
+        self.output = output
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         datetime_expr = (
@@ -36,8 +37,25 @@ class ToDatetime(CallbackProtocol):
             + pl.lit(" ")
             + to_expr(lf, self.time).cast(pl.Utf8)
         ).str.to_datetime()
-        offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
-        expr = datetime_expr + offset_expr
+
+        expr = datetime_expr
+
+        if self.offset is not None:
+            offset_expr = to_expr(lf, self.offset).abs()
+
+            if self.offset_unit == "minutes":
+                expr = expr - pl.duration(minutes=offset_expr)
+            elif self.offset_unit == "hours":
+                expr = expr - pl.duration(hours=offset_expr)
+            elif self.offset_unit == "days":
+                expr = expr - pl.duration(days=offset_expr)
+            elif self.offset_unit == "years":
+                expr = expr.dt.offset_by(pl.lit("-") + offset_expr.cast(pl.String) + pl.lit("y"))
+            elif self.offset_unit == "months":
+                expr = expr.dt.offset_by(pl.lit("-") + offset_expr.cast(pl.String) + pl.lit("mo"))
+            else:
+                raise ValueError(f"Unsupported offset_unit: {self.offset_unit}")
+
         if self.output is None:
             return expr
         return expr.alias(self.output)

@@ -20,7 +20,7 @@ columns:
     type: string
 
 post_callbacks:
-  - to_datetime(anchor_year, 1, 1, "00:00:00", anchor_age, dob)
+  - to_datetime(anchor_year, 1, 1, "00:00:00", anchor_age, "years", dob)
   - set_time(dod, 23, 59, 59, dod_24)
 
 event_defaults:
