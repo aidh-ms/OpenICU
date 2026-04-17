@@ -102,12 +102,20 @@ class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
 
         concept_root = self._project.workspace_path / self._config.config.concept_step.lower()
 
-        cnpt_paths: list[str] = []
-        for code in pl.read_parquet(
-            "/workspaces/OpenICU.example/output/project/datasets/concept/metadata/codes.parquet"
-        )["code"]:
+        cnpt_paths: list[Path] = []
+
+
+        codes_metadata_path = self._project.datasets_path / "output/project/datasets/concept/metadata/codes.parquet"
+        ordered_codes = pl.read_parquet(codes_metadata_path)["code"]
+
+        for code in ordered_codes:
             for ds_name in self._config.config.datasets.include:
-                cnpt_paths.append(concept_root / code.split("//")[0] / "1.0.0" / (str(ds_name) + ".parquet"))
+                path = concept_root / code.split("//")[0] / "1.0.0" / f"{ds_name}.parquet"
+
+                if path.exists():
+                    cnpt_paths.append(path)
+                else:
+                    logger.debug("Skipping missing concept file: %s", path)
 
         if len(cnpt_paths) == 0:
             logger.warning(
