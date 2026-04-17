@@ -67,7 +67,7 @@ event_defaults:
   subject_id: col(subject_id)
   extension:
     hadm_id: col(hadm_id)
-    stay_id: const("-1")
+    stay_id: const(None)
 
 events:
   - name: spec

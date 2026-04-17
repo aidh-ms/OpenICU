@@ -28,4 +28,4 @@ events:
       numeric_value: col(seq_num)
       extension:
         hadm_id: const(-1)
-        stay_id: const("-1")
+        stay_id: const(None)
