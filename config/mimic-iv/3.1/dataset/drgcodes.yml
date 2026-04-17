@@ -43,7 +43,7 @@ event_defaults:
     - col(drg_code)
   extension:
     hadm_id: col(hadm_id)
-    stay_id: const(None)
+
 
 events:
   - name: drg_code

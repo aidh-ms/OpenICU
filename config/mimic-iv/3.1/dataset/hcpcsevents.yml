@@ -30,4 +30,3 @@ events:
       text_value: col(short_description)
       extension:
           hadm_id: col(hadm_id)
-          stay_id: const(None)
