@@ -33,35 +33,35 @@ config_files:
     #   - openicu.config.dataset.nwicu.0.1.0.labevents
   - path: /workspaces/config/dataset/eicu-crd/2.0/dataset/
     # includes:
-    #     - p'enicu.config.dataset.eicu.2.0.treatment
-    #     - penicu.config.dataset.eicu.2.0.diagnosis
-    #     - penicu.config.dataset.eicu.2.0.medication
-    #     - penicu.config.dataset.eicu.2.0.intakeoutput
-    #     - penicu.config.dataset.eicu.2.0.lab
-    #     - penicu.config.dataset.eicu.2.0.respiratorycare
-    #     - penicu.config.dataset.eicu.2.0.patient
-    #     - penicu.config.dataset.eicu.2.0.careplangoal
-    #     - penicu.config.dataset.eicu.2.0.vitalaperiodic
-    #     - penicu.config.dataset.eicu.2.0.careplaninfectiousdisease
-    #     - penicu.config.dataset.eicu.2.0.respiratorycharting
-    #     - penicu.config.dataset.eicu.2.0.careplangeneral
-    #     - penicu.config.dataset.eicu.2.0.nursecharting
-    #     - penicu.config.dataset.eicu.2.0.nurseassessment
-    #     - penicu.config.dataset.eicu.2.0.nursecare
-    #     - penicu.config.dataset.eicu.2.0.infusiondrug
-    #     - penicu.config.dataset.eicu.2.0.apachepatientresult
-    #     - penicu.config.dataset.eicu.2.0.vitalperiodic
-    #     - penicu.config.dataset.eicu.2.0.note
-    #     - penicu.config.dataset.eicu.2.0.customlab
-    #     - penicu.config.dataset.eicu.2.0.pasthistory
-    #     - penicu.config.dataset.eicu.2.0.admissiondrug
-    #     - penicu.config.dataset.eicu.2.0.careplaneol
-    #     - penicu.config.dataset.eicu.2.0.allergy
-    #     - penicu.config.dataset.eicu.2.0.apacheapsvar
-    #     - penicu.config.dataset.eicu.2.0.admissiondx
-    #     - penicu.config.dataset.eicu.2.0.apachepredvar
-    #     - penicu.config.dataset.eicu.2.0.physicalexam
-    #     - penicu.config.dataset.eicu.2.0.microlab'
+    #     - openicu.config.dataset.eicu-crd.2.0.treatment
+    #     - openicu.config.dataset.eicu-crd.2.0.diagnosis
+    #     - openicu.config.dataset.eicu-crd.2.0.medication
+    #     - openicu.config.dataset.eicu-crd.2.0.intakeoutput
+    #     - openicu.config.dataset.eicu-crd.2.0.lab
+    #     - openicu.config.dataset.eicu-crd.2.0.respiratorycare
+    #     - openicu.config.dataset.eicu-crd.2.0.patient
+    #     - openicu.config.dataset.eicu-crd.2.0.careplangoal
+    #     - openicu.config.dataset.eicu-crd.2.0.vitalaperiodic
+    #     - openicu.config.dataset.eicu-crd.2.0.careplaninfectiousdisease
+    #     - openicu.config.dataset.eicu-crd.2.0.respiratorycharting
+    #     - openicu.config.dataset.eicu-crd.2.0.careplangeneral
+    #     - openicu.config.dataset.eicu-crd.2.0.nursecharting
+    #     - openicu.config.dataset.eicu-crd.2.0.nurseassessment
+    #     - openicu.config.dataset.eicu-crd.2.0.nursecare
+    #     - openicu.config.dataset.eicu-crd.2.0.infusiondrug
+    #     - openicu.config.dataset.eicu-crd.2.0.apachepatientresult
+    #     - openicu.config.dataset.eicu-crd.2.0.vitalperiodic
+    #     - openicu.config.dataset.eicu-crd.2.0.note
+    #     - openicu.config.dataset.eicu-crd.2.0.customlab
+    #     - openicu.config.dataset.eicu-crd.2.0.pasthistory
+    #     - openicu.config.dataset.eicu-crd.2.0.admissiondrug
+    #     - openicu.config.dataset.eicu-crd.2.0.careplaneol
+    #     - openicu.config.dataset.eicu-crd.2.0.allergy
+    #     - openicu.config.dataset.eicu-crd.2.0.apacheapsvar
+    #     - openicu.config.dataset.eicu-crd.2.0.admissiondx
+    #     - openicu.config.dataset.eicu-crd.2.0.apachepredvar
+    #     - openicu.config.dataset.eicu-crd.2.0.physicalexam
+    #     - openicu.config.dataset.eicu-crd.2.0.microlab
 
 config:
   data:
