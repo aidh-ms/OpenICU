@@ -23,6 +23,8 @@ columns:
 
 post_callbacks:
   - add_offset(admission_timestamp, respcarestatusoffset, event_timestamp)
+  - add_offset(admission_timestamp, ventstartoffset, ventstart_timestamp)
+  - add_offset(admission_timestamp, ventendoffset, ventend_timestamp)
 
 join:
   - name: patient
@@ -73,7 +75,7 @@ events:
       - drop_na(numeric_value)
   - name: ventstart
     columns:
-      time: col(admission_timestamp)
+      time: col(ventstart_timestamp)
       code:
         - const("ventstart_offset_min")
       numeric_value: col(ventstartoffset)
@@ -81,7 +83,7 @@ events:
       - drop_na(numeric_value)
   - name: ventend
     columns:
-      time: col(admission_timestamp)
+      time: col(ventend_timestamp)
       code:
         - const("ventend_offset_min")
       numeric_value: col(ventendoffset)
