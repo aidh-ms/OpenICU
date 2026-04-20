@@ -41,18 +41,18 @@ class ToDatetime(CallbackProtocol):
         expr = datetime_expr
 
         if self.offset is not None:
-            offset_expr = to_expr(lf, self.offset).abs()
+            offset_expr = to_expr(lf, self.offset)
 
             if self.offset_unit == "minutes":
-                expr = expr - pl.duration(minutes=offset_expr)
+                expr = expr + pl.duration(minutes=offset_expr)
             elif self.offset_unit == "hours":
-                expr = expr - pl.duration(hours=offset_expr)
+                expr = expr + pl.duration(hours=offset_expr)
             elif self.offset_unit == "days":
-                expr = expr - pl.duration(days=offset_expr)
+                expr = expr + pl.duration(days=offset_expr)
             elif self.offset_unit == "years":
-                expr = expr.dt.offset_by(pl.lit("-") + offset_expr.cast(pl.String) + pl.lit("y"))
+                expr = expr.dt.offset_by(offset_expr.cast(pl.String) + pl.lit("y"))
             elif self.offset_unit == "months":
-                expr = expr.dt.offset_by(pl.lit("-") + offset_expr.cast(pl.String) + pl.lit("mo"))
+                expr = expr.dt.offset_by(offset_expr.cast(pl.String) + pl.lit("mo"))
             else:
                 raise ValueError(f"Unsupported offset_unit: {self.offset_unit}")
 

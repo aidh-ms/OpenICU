@@ -60,6 +60,14 @@ class ExprInterpreter(ast.NodeVisitor):
 
         raise NotImplementedError(node.op)
 
+    def visit_UnaryOp(self, node) -> AstValue:
+        operand = self.visit(node.operand)
+        if isinstance(node.op, ast.USub):
+            return Multiply(operand, -1)
+        if isinstance(node.op, ast.UAdd):
+            return operand
+        raise NotImplementedError(node.op)
+
     def visit_Compare(self, node) -> AstValue:
         left = self.visit(node.left)
         right = self.visit(node.comparators[0])
