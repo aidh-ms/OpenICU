@@ -54,6 +54,6 @@ events:
       code:
         - col(icd_code)
         - col(icd_version)
-      numeric_value: col(seq_num)
       extension:
         hadm_id: col(hadm_id)
+        seq_num: col(seq_num)
