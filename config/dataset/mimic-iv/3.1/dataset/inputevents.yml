@@ -48,31 +48,42 @@ event_defaults:
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
+    caregiver_id: col(caregiver_id)
+    orderid: col(orderid)
+    linkorderid: col(linkorderid)
 
 events:
-  - name: medication
-    columns:
-      time: col(endtime)
-      code:
-        - col(label)
-      text_value: col(label)
-  - name: dosage
-    columns:
-      time: col(endtime)
-      code:
-        - col(itemid)
-        - col(label)
-        - col(amountuom)
-      numeric_value: col(amount)
-    filters:
-      - drop_na(numeric_value)
-  - name: rate
+  - name: INFUSION_START
     columns:
       time: col(starttime)
       code:
         - col(itemid)
         - col(label)
-        - col(rateuom)
-      numeric_value: col(rate)
-    filters:
-      - drop_na(numeric_value)
+    extension:
+      - col(originalamount)
+      - col(amountuom)
+      - col(originalrate)
+      - col(rateuom)
+      - col(totalamount)
+      - col(totalamountuom)
+
+  - name: INFUSION_END
+    columns:
+      time: col(endtime)
+      code:
+        - col(itemid)
+        - col(label)
+      text_value: col(statusdescription)
+    extension:
+      - col(rate)
+      - col(rateuom)
+      - col(amount)
+      - col(amountuom)
+
+  - name: SUBJECT_WEIGHT_AT_INFUSION
+    columns:
+      time: col(starttime)
+      code:
+        - const(kg)
+      numeric_value:
+        - col(patientweight)
