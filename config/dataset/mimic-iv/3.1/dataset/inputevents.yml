@@ -1,33 +1,67 @@
 path: icu/inputevents.csv.gz
 
 columns:
-  # subject_id and extentions
+  # subject_id and other ids
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: subject_id
+  - name: caregiver_id
+    type: int64
+  - name: orderid
+    type: int64
+  - name: linkorderid
     type: int64
   # db fields - times
-  - name: endtime
-    type: datetime
-    params:
-      format: "%Y-%m-%d %H:%M:%S"
   - name: starttime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+  - name: endtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
+  - name: itemid
+    type: int64
   - name: amount
     type: float32
   - name: amountuom
     type: string
-  - name: itemid
-    type: int64
   - name: rate
     type: float32
   - name: rateuom
     type: string
+  - name: ordercategoryname
+    type: string
+  - name: secondordercategoryname
+    type: string
+  - name: ordercomponenttypedescription
+    type: string
+  - name: ordercategorydescription
+    type: string
+  - name: patientweight
+    type: float32
+  - name: totalamount
+    type: float32
+  - name: totalamountuom
+    type: string
+  - name: isopenbag
+    type: boolean
+  - name: continueinnextdept
+    type: boolean
+  - name: statusdescription
+    type: string
+  - name: originalamount
+    type: float32
+  - name: originalrate
+    type: float32
 
 join:
   - name: d_items
@@ -60,12 +94,17 @@ events:
         - col(itemid)
         - col(label)
     extension:
+      - col(ordercategoryname)
+      - col(secondordercategoryname)
+      - col(ordercomponenttypedescription)
+      - col(ordercategorydescription)
       - col(originalamount)
       - col(amountuom)
       - col(originalrate)
       - col(rateuom)
       - col(totalamount)
       - col(totalamountuom)
+      - col(isopenbag)
 
   - name: INFUSION_END
     columns:
@@ -79,6 +118,7 @@ events:
       - col(rateuom)
       - col(amount)
       - col(amountuom)
+      - col(continueinnextdept)
 
   - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
