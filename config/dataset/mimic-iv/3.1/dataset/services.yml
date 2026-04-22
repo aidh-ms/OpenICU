@@ -24,11 +24,7 @@ event_defaults:
     hadm_id: col(hadm_id)
 
 events:
-  - name: prev_service
-    columns:
-      code:
-        - col(prev_service)
-  - name: curr_service
+  - name: service
     columns:
       code:
         - col(curr_service)
