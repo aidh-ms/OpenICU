@@ -52,8 +52,9 @@ events:
       subject_id: col(subject_id)
       time: col(dischtime)
       code:
-        - col(icd_code)
         - col(icd_version)
+        - col(icd_code)
+        - col(long_title)
       extension:
         hadm_id: col(hadm_id)
         seq_num: col(seq_num)
