@@ -94,17 +94,17 @@ events:
         - col(itemid)
         - col(label)
     extension:
-      - col(ordercategoryname)
-      - col(secondordercategoryname)
-      - col(ordercomponenttypedescription)
-      - col(ordercategorydescription)
-      - col(originalamount)
-      - col(amountuom)
-      - col(originalrate)
-      - col(rateuom)
-      - col(totalamount)
-      - col(totalamountuom)
-      - col(isopenbag)
+      ordercategoryname: col(ordercategoryname)
+      secondordercategoryname: col(secondordercategoryname)
+      ordercomponenttypedescription: col(ordercomponenttypedescription)
+      ordercategorydescription: col(ordercategorydescription)
+      originalamount: col(originalamount)
+      amountuom: col(amountuom)
+      originalrate: col(originalrate)
+      rateuom: col(rateuom)
+      totalamount: col(totalamount)
+      totalamountuom: col(totalamountuom)
+      isopenbag: col(isopenbag)
 
   - name: INFUSION_END
     columns:
@@ -114,16 +114,15 @@ events:
         - col(label)
       text_value: col(statusdescription)
     extension:
-      - col(rate)
-      - col(rateuom)
-      - col(amount)
-      - col(amountuom)
-      - col(continueinnextdept)
+      rate: col(rate)
+      rateuom: col(rateuom)
+      amount: col(amount)
+      amountuom: col(amountuom)
+      continueinnextdept: col(continueinnextdept)
 
   - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
       time: col(starttime)
       code:
-        - const(kg)
-      numeric_value:
-        - col(patientweight)
+        - const("kg")
+      numeric_value: col(patientweight)
