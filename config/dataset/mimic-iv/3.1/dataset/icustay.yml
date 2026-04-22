@@ -35,16 +35,12 @@ events:
   - name: icu_admission
     columns:
       time: col(intime)
-      code:
-        - col(first_careunit)
   - name: icu_discharge
     columns:
       time: col(outtime)
-      code:
-        - col(last_careunit)
   - name: icu_length_of_stay
     columns:
       time: col(outtime)
       code:
-        - const("d")
+        - const("days")
       numeric_value: col(los)
