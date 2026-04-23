@@ -3,37 +3,68 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from open_icu.steps.base.config import BaseStepConfig
+from open_icu.steps.sharding.config.selection import SelectionConfig
 
 
-class DatasetConfig(BaseModel):
-    """Configuration for a source dataset.
+class PresetRefConfig(BaseModel):
+    """Reference to a predefined sharding preset."""
 
-    Specifies the name and file path for to the sharding definition of a dataset.
+    name: str = Field(
+        ...,
+        description="Name of the sharding preset.",
+    )
 
-    Attributes:
-        name: Name identifier for the dataset
-        path: Filesystem path to the dataset directory
-    """
-    name: str = Field(..., description="Name of the dataset.")
-    path: Path = Field(..., description="Path to the dataset.")
+    path: Path | None = Field(
+        default=None,
+        description="Optional path to the preset definition. If omitted, a default path is used.",
+    )
 
 
 class CustomConfig(BaseModel):
-    """Custom configuration specific to the sharding step.
+    """Custom configuration specific to the sharding step."""
 
-    Attributes:
-        concept_step: Name of the concept step
-    """
-
-    concept_step: str = Field(description="Name of the concept step.")
-    dataset_configs: list[DatasetConfig] = Field(
-        default_factory=list, description="List of dataset-specific sharding configuration paths."
+    concept_step: str = Field(
+        description="Name of the preceding concept step."
     )
 
-class ShardingStepConfig(BaseStepConfig[CustomConfig]):
-    """Complete configuration for the sharding step.
+    presets: list[PresetRefConfig] = Field(
+        default_factory=list,
+        description="References to sharding preset configurations to apply.",
+    )
 
-    Combines base step configuration with sharding-specific settings.
-    """
+    datasets: SelectionConfig = Field(
+        default_factory=SelectionConfig,
+        description="Additional dataset selection rules applied on top of presets.",
+    )
+
+    concepts: SelectionConfig = Field(
+        default_factory=SelectionConfig,
+        description="Additional concept selection rules applied on top of presets.",
+    )
+
+    subjects: SelectionConfig = Field(
+        default_factory=SelectionConfig,
+        description="Subject selection rules.",
+    )
+
+    time_resolution: str | None = Field(
+        default=None,
+        description="Optional temporal resolution used for sharding output.",
+    )
+
+    presplit: bool = Field(
+        default=False,
+        description="Whether to split subjects before sharding.",
+    )
+
+    subjects_per_shard: int = Field(
+        default=1000,
+        gt=0,
+        description="Number of subjects written per shard/file.",
+    )
+
+
+class ShardingStepConfig(BaseStepConfig[CustomConfig]):
+    """Complete configuration for the sharding step."""
 
     pass
