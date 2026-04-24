@@ -28,12 +28,12 @@ columns:
     params:
       strict: false
   # db fields - values
-  - name: continueinnextdept
-    type: int64
-  - name: isopenbag
-    type: int64
   - name: itemid
     type: int64
+  - name: value
+    type: float32
+  - name: valueuom
+    type: string
   - name: location
     type: string
   - name: locationcategory
@@ -44,12 +44,17 @@ columns:
     type: string
   - name: patientweight
     type: float32
+  - name: isopenbag
+    type: int64
+  - name: continueinnextdept
+    type: int64
   - name: statusdescription
     type: string
-  - name: value
+  - name: originalamount
     type: float32
-  - name: valueuom
-    type: string
+  - name: originalrate
+    type: float32
+
 
 join:
   - name: d_items

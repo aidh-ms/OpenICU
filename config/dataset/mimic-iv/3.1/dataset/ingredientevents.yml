@@ -15,11 +15,11 @@ columns:
   - name: linkorderid
     type: int64
     # db fields - times
-  - name: endtime
+  - name: starttime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
-  - name: starttime
+  - name: endtime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
@@ -28,22 +28,22 @@ columns:
     params:
       format: "%Y-%m-%d %H:%M:%S"
     # db fields - values
+  - name: itemid
+    type: int64
   - name: amount
     type: float32
   - name: amountuom
     type: string
-  - name: itemid
-    type: int64
-  - name: originalamount
-    type: float32
-  - name: originalrate
-    type: float32
   - name: rate
     type: float32
   - name: rateuom
     type: string
   - name: statusdescription
     type: string
+  - name: originalamount
+    type: float32
+  - name: originalrate
+    type: float32
 
 join:
   - name: d_items
@@ -93,3 +93,4 @@ events:
       rateuom: col(rateuom)
       amount: col(amount)
       amountuom: col(amountuom)
+  # TODO: consider bolus administration, which do not have a rate and have endtime: starttime + 1 minute

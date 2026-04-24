@@ -26,22 +26,19 @@ event_defaults:
   subject_id: col(subject_id)
 
 events:
-  - name: dob
+  - name: MEDS_BIRTH
     columns:
       time: col(dob)
-      code:
-        - const(MEDS_BIRTH)
 
-  - name: gender
+  - name: GENDER
     columns:
       time: col(dob)
       code:
         - col(gender)
 
-  - name: dod
+  - name: MEDS_DEATH
     columns:
       time: col(dod)
-      code:
-        - const(MEDS_DEATH)
     filters:
       - drop_na(time)
+  # TODO: move to end of day or deduplicate with in-hospital death
