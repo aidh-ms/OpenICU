@@ -1,6 +1,0 @@
-name: red_blood_cell_count
-version: 1.0.0
-unit: m/uL
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")
