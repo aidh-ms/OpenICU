@@ -1,0 +1,6 @@
+name: Richmond_agitation_sedation_scale
+version: 1.0.0
+unit: None
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

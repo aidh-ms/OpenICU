@@ -1,0 +1,44 @@
+path: hosp/patients.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: anchor_age
+    type: int64
+  - name: anchor_year
+    type: int64
+  - name: anchor_year_group
+    type: string
+  - name: dod
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+  # db fields - values
+  - name: gender
+    type: string
+
+post_callbacks:
+  - to_datetime(anchor_year, 1, 1, "00:00:00", -anchor_age, "years", output=dob)
+  - set_time(dod, 23, 59, 59, output=dod_24)
+
+event_defaults:
+  subject_id: col(subject_id)
+
+events:
+  - name: dob
+    columns:
+      time: col(dob)
+
+  - name: gender
+    columns:
+      time: col(dob)
+      code:
+        - col(gender)
+
+  - name: dod
+    columns:
+      time: col(dod_24)
+    filters:
+      - drop_na(time)
