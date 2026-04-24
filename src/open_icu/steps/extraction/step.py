@@ -61,7 +61,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         for table in self._registry.values():
             path = paths.get(table.dataset)
             if path is None:
-                logger.warning("Skipping table %s: dataset path not found (%s)", table.__pydantic_parent_namespace__)
+                logger.warning("Skipping table %s: dataset path not found (%s)", table.__pydantic_parent_namespace__, table.dataset)
                 continue
 
             try:

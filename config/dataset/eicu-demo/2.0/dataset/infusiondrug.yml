@@ -1,4 +1,4 @@
-path: infusionDrug.csv.gz
+path: infusiondrug.csv.gz
 
 columns:
   # subject_id and extentions
