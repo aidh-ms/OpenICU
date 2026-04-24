@@ -1,6 +1,0 @@
-name: patient_height
-version: 1.0.0
-unit: cm
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

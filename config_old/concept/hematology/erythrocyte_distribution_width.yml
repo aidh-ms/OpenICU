@@ -1,6 +1,0 @@
-name: erythrocyte_distribution_width
-version: 1.0.0
-unit: "%"
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

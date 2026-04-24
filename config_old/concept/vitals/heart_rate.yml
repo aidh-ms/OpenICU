@@ -1,6 +1,0 @@
-name: heart_rate
-version: 1.0.0
-unit: bpm
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

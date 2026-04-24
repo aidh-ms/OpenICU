@@ -1,6 +1,0 @@
-name: C-reactive_protein
-version: 1.0.0
-unit: mg/L
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

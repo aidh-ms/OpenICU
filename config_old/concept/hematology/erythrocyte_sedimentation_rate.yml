@@ -1,6 +1,0 @@
-name: erythrocyte_sedimentation_rate
-version: 1.0.0
-unit: mm/hr
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")
