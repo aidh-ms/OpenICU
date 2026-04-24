@@ -1,6 +1,0 @@
-name: respiratory_rate
-version: 1.0.0
-unit: insp/min
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")
