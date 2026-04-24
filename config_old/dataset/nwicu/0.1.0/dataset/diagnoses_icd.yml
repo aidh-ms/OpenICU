@@ -1,4 +1,4 @@
-path: hosp/diagnoses_icd.csv.gz
+path: data/nw_hosp/diagnoses_icd.csv.gz
 
 columns:
   # subject_id and extentions
@@ -17,7 +17,7 @@ columns:
 
 join:
   - name: d_icd_diagnoses
-    path: hosp/d_icd_diagnoses.csv.gz
+    path: data/nw_hosp/d_icd_diagnoses.csv.gz
     columns:
       # subject_id and extentions
       # db fields - times
@@ -32,7 +32,7 @@ join:
       - icd_code
       - icd_version
   - name: admissions
-    path: hosp/admissions.csv.gz
+    path: data/nw_hosp/admissions.csv.gz
     columns:
       # subject_id and extentions
       - name: hadm_id
@@ -55,3 +55,4 @@ events:
       numeric_value: col(seq_num)
       extension:
         hadm_id: col(hadm_id)
+        stay_id: const("-1")

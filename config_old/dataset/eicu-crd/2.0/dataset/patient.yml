@@ -62,12 +62,13 @@ columns:
     type: int64
 
 post_callbacks:
-  - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
-  - add_offset(admission_timestamp, unitdischargeoffset, output=discharge_timestamp)
+  - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+  - add_offset(admission_timestamp, unitdischargeoffset, discharge_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   extension:
+    hadm_id: const(-1)
     stay_id: col(patientunitstayid)
 
 events:
