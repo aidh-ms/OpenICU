@@ -1,12 +1,12 @@
-path: icu/icustays.csv.gz
+path: hosp/transfers.csv.gz
 
 columns:
   # subject_id and extentions
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
-  - name: stay_id
-    type: int64
-  - name: subject_id
+  - name: transfer_id
     type: int64
   # db fields - times
   - name: intime
@@ -18,29 +18,21 @@ columns:
     params:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
-  - name: first_careunit
+  - name: eventtype
     type: string
-  - name: last_careunit
+  - name: careunit
     type: string
-  - name: los
-    type: float32
 
 event_defaults:
   subject_id: col(subject_id)
   extension:
     hadm_id: col(hadm_id)
-    stay_id: col(stay_id)
+    transfer_id: col(transfer_id)
 
 events:
-  - name: icu_admission
+  - name: TRANSFER_TO
+    time: col(intime)
     columns:
-      time: col(intime)
-  - name: icu_discharge
-    columns:
-      time: col(outtime)
-  - name: icu_length_of_stay
-    columns:
-      time: col(outtime)
       code:
-        - const("days")
-      numeric_value: col(los)
+        - col(eventtype)
+        - col(careunit)

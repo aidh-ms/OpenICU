@@ -2,9 +2,9 @@ path: hosp/hcpcsevents.csv.gz
 
 columns:
   # subject_id and extentions
-  - name: hadm_id
-    type: int64
   - name: subject_id
+    type: int64
+  - name: hadm_id
     type: int64
   # db fields - times
   - name: chartdate
@@ -19,15 +19,50 @@ columns:
   - name: short_description
     type: string
 
+join:
+  - name: d_hcpcs
+    path: hosp/d_hcpcs.csv.gz
+    columns:
+      # subject_id and extentions
+      # db fields - times
+      # db fields - values
+      - name: code
+        type: string
+      - name: category
+        type: int64
+      - name: long_description
+        type: string
+    left_on:
+      - hcpcs_cd
+    right_on:
+      - code
+  - name: admissions
+    path: hosp/admissions.csv.gz
+    columns:
+      # subject_id and extentions
+      - name: hadm_id
+        type: int64
+      # db fields - times
+      - name: dischtime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+      # db fields - values
+    both_on:
+      - hadm_id
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+
 events:
   - name: hcpcsevent
     columns:
-      subject_id: col(subject_id)
-      time: col(chartdate)
+      time: col(dischtime)
       code:
         - col(hcpcs_cd)
-      numeric_value: col(seq_num)
-      text_value: col(short_description)
+        - col(long_description)
       extension:
-          hadm_id: col(hadm_id)
-          stay_id: const("-1")
+          seq_num: col(seq_num)
+          chartdate: col(chartdate)
