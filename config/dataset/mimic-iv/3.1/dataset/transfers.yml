@@ -35,6 +35,7 @@ events:
       time: col(intime)
       code:
         - col(eventtype)
+        # TODO: careunit is null if eventtype == "discharge". remove col(careunit) for those cases.
         - col(careunit)
       extension:
         available_time: col(intime)
