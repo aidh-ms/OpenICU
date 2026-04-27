@@ -2,18 +2,24 @@ path: icu/ingredientevents.csv.gz
 
 columns:
   # subject_id and extensions
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: subject_id
+  - name: caregiver_id
+    type: int64
+  - name: orderid
+    type: int64
+  - name: linkorderid
     type: int64
     # db fields - times
-  - name: endtime
+  - name: starttime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
-  - name: starttime
+  - name: endtime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
@@ -22,26 +28,22 @@ columns:
     params:
       format: "%Y-%m-%d %H:%M:%S"
     # db fields - values
+  - name: itemid
+    type: int64
   - name: amount
     type: float32
   - name: amountuom
     type: string
-  - name: itemid
-    type: int64
-  - name: linkorderid
-    type: int64
-  - name: orderid
-    type: int64
-  - name: originalamount
-    type: int64
-  - name: originalrate
-    type: float32
   - name: rate
     type: float32
   - name: rateuom
     type: string
   - name: statusdescription
     type: string
+  - name: originalamount
+    type: float32
+  - name: originalrate
+    type: float32
 
 join:
   - name: d_items
@@ -62,56 +64,33 @@ event_defaults:
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
+    caregiver_id: col(caregiver_id)
+    orderid: col(orderid)
+    linkorderid: col(linkorderid)
 
 events:
-  - name: rate_start
+  - name: INGREDIENT_START
     columns:
       time: col(starttime)
       code:
         - col(itemid)
         - col(label)
-        - col(rateuom)
-      numeric_value: col(rate)
-    filters:
-      - drop_na(numeric_value)
-  - name: rate_end
+    extension:
+      originalamount: col(originalamount)
+      amountuom: col(amountuom)
+      originalrate: col(originalrate)
+      rateuom: col(rateuom)
+
+  - name: INGREDIENT_END
     columns:
       time: col(endtime)
       code:
         - col(itemid)
         - col(label)
-        - col(rateuom)
-      numeric_value: col(rate)
-    filters:
-      - drop_na(numeric_value)
-  - name: dosage
-    columns:
-      time: col(endtime)
-      code:
-        - col(itemid)
-        - col(label)
-        - col(amountuom)
-      numeric_value: col(amount)
-  - name: order
-    columns:
-      time: col(endtime)
-      numeric_value: col(orderid)
-  - name: linkorder
-    columns:
-      time: col(endtime)
-      numeric_value: col(linkorderid)
-  - name: statusdescription
-    columns:
-      time: col(endtime)
-      code:
-        - col(statusdescription)
-  - name: originalrate
-    columns:
-      time: col(starttime)
-      code:
-        - col(itemid)
-        - col(label)
-        - col(rateuom)
-      numeric_value: col(originalrate)
-    filters:
-      - drop_na(numeric_value)
+      text_value: col(statusdescription)
+    extension:
+      rate: col(rate)
+      rateuom: col(rateuom)
+      amount: col(amount)
+      amountuom: col(amountuom)
+  # TODO: consider bolus administration, which do not have a rate and have endtime: starttime + 1 minute

@@ -7,25 +7,25 @@ columns:
   # db fields - times
   - name: chartdate
     type: datetime
-    # params:
-    #   format: "%Y-%m-%d %H:%M:%S"
+    params:
+      format: "%Y-%m-%d"
   # db fields - values
+  - name: seq_num
+    type: int64
   - name: result_name
     type: string
   - name: result_value
     type: string
-  - name: seq_num
-    type: int64
+
+event_defaults:
+  subject_id: col(subject_id)
 
 events:
-  - name: result
+  - name: MISC
     columns:
-      subject_id: col(subject_id)
       time: col(chartdate)
       code:
         - col(result_name)
       text_value: col(result_value)
-      numeric_value: col(seq_num)
-      extension:
-        hadm_id: const(-1)
-        stay_id: const("-1")
+    extension:
+      seq_num: col(seq_num)
