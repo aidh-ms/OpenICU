@@ -1,4 +1,4 @@
-path: hosp/hcpcsevents.csv.gz
+path: hosp/procedures_icd.csv.gz
 
 columns:
   # subject_id and extentions
@@ -12,30 +12,30 @@ columns:
     params:
       format: "%Y-%m-%d"
   # db fields - values
-  - name: hcpcs_cd
-    type: string
   - name: seq_num
     type: int64
-  - name: short_description
+  - name: icd_code
     type: string
+  - name: icd_version
+    type: int64
+
 
 join:
-  - name: d_hcpcs
-    path: hosp/d_hcpcs.csv.gz
+  - name: d_icd_procedures
+    path: hosp/d_icd_procedures.csv.gz
     columns:
       # subject_id and extentions
       # db fields - times
       # db fields - values
-      - name: code
+      - name: icd_code
         type: string
-      - name: category
+      - name: icd_version
         type: int64
-      - name: long_description
+      - name: long_title
         type: string
-    left_on:
-      - hcpcs_cd
-    right_on:
-      - code
+    both_on:
+      - icd_code
+      - icd_version
   - name: admissions
     path: hosp/admissions.csv.gz
     columns:
@@ -57,13 +57,15 @@ event_defaults:
     hadm_id: col(hadm_id)
 
 events:
-  - name: HCPCS
+  - name: PROCEDURE
     columns:
-      # TODO: move chartdate to end of day with callback
+      # TODO: move to end of the day with callback
       time: col(chartdate)
       code:
-        - col(hcpcs_cd)
-        - col(long_description)
+        - const("ICD")
+        - col(icd_version)
+        - col(icd_code)
+        - col(long_title)
       extension:
         available_time: col(dischtime)
         seq_num: col(seq_num)

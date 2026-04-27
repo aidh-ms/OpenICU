@@ -1,33 +1,67 @@
 path: icu/inputevents.csv.gz
 
 columns:
-  # subject_id and extentions
+  # subject_id and other ids
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: subject_id
+  - name: caregiver_id
+    type: int64
+  - name: orderid
+    type: int64
+  - name: linkorderid
     type: int64
   # db fields - times
-  - name: endtime
-    type: datetime
-    params:
-      format: "%Y-%m-%d %H:%M:%S"
   - name: starttime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+  - name: endtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
+  - name: itemid
+    type: int64
   - name: amount
     type: float32
   - name: amountuom
     type: string
-  - name: itemid
-    type: int64
   - name: rate
     type: float32
   - name: rateuom
     type: string
+  - name: ordercategoryname
+    type: string
+  - name: secondaryordercategoryname
+    type: string
+  - name: ordercomponenttypedescription
+    type: string
+  - name: ordercategorydescription
+    type: string
+  - name: patientweight
+    type: float32
+  - name: totalamount
+    type: float32
+  - name: totalamountuom
+    type: string
+  - name: isopenbag
+    type: boolean
+  - name: continueinnextdept
+    type: boolean
+  - name: statusdescription
+    type: string
+  - name: originalamount
+    type: float32
+  - name: originalrate
+    type: float32
 
 join:
   - name: d_items
@@ -48,31 +82,54 @@ event_defaults:
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
+    caregiver_id: col(caregiver_id)
+    orderid: col(orderid)
+    linkorderid: col(linkorderid)
 
 events:
-  - name: medication
+  - name: INFUSION_START
     columns:
-      time: col(endtime)
+      time: col(starttime)
+      # TODO: implement a max callback.
       code:
+        - col(itemid)
         - col(label)
-      text_value: col(label)
-  - name: dosage
+      extension:
+        available_time: max(col(storetime), col(starttime))
+        ordercategoryname: col(ordercategoryname)
+        secondaryordercategoryname: col(secondaryordercategoryname)
+        ordercomponenttypedescription: col(ordercomponenttypedescription)
+        ordercategorydescription: col(ordercategorydescription)
+        originalamount: col(originalamount)
+        amountuom: col(amountuom)
+        originalrate: col(originalrate)
+        rateuom: col(rateuom)
+        totalamount: col(totalamount)
+        totalamountuom: col(totalamountuom)
+        isopenbag: col(isopenbag)
+
+  - name: INFUSION_END
     columns:
       time: col(endtime)
       code:
         - col(itemid)
         - col(label)
-        - col(amountuom)
-      numeric_value: col(amount)
-    filters:
-      - drop_na(numeric_value)
-  - name: rate
+      text_value: col(statusdescription)
+      extension:
+        available_time: max(col(storetime), col(endtime))
+        rate: col(rate)
+        rateuom: col(rateuom)
+        amount: col(amount)
+        amountuom: col(amountuom)
+        continueinnextdept: col(continueinnextdept)
+
+  - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
       time: col(starttime)
       code:
-        - col(itemid)
-        - col(label)
-        - col(rateuom)
-      numeric_value: col(rate)
+        - const(kg)
+      numeric_value: col(patientweight)
+      extension:
+        available_time: col(storetime)
     filters:
-      - drop_na(numeric_value)
+      - first_distinct(subject_id, time)

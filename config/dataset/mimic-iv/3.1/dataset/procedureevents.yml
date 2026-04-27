@@ -2,18 +2,24 @@ path: icu/procedureevents.csv.gz
 
 columns:
   # subject_id and extensions
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: subject_id
+  - name: caregiver_id
+    type: int64
+  - name: orderid
+    type: int64
+  - name: linkorderid
     type: int64
   # db fields - times
-  - name: endtime
+  - name: starttime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
-  - name: starttime
+  - name: endtime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
@@ -22,34 +28,33 @@ columns:
     params:
       strict: false
   # db fields - values
-  - name: continueinnextdept
-    type: int64
-  - name: isopenbag
-    type: int64
   - name: itemid
     type: int64
-  - name: location
-    type: string
-  - name: linkorderid
-    type: int64
-  - name: locationcategory
-    type: string
-  - name: ordercategoryname
-    type: string
-  - name: orderid
-    type: int64
-  - name: originalamount
-    type: float32
-  - name: originalrate
-    type: float32
-  - name: patientweight
-    type: float32
-  - name: statusdescription
-    type: string
   - name: value
     type: float32
   - name: valueuom
     type: string
+  - name: location
+    type: string
+  - name: locationcategory
+    type: string
+  - name: ordercategoryname
+    type: string
+  - name: ordercategorydescription
+    type: string
+  - name: patientweight
+    type: float32
+  - name: isopenbag
+    type: boolean
+  - name: continueinnextdept
+    type: boolean
+  - name: statusdescription
+    type: string
+  - name: originalamount
+    type: float32
+  - name: originalrate
+    type: float32
+
 
 join:
   - name: d_items
@@ -70,74 +75,45 @@ event_defaults:
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
+    caregiver_id: col(caregiver_id)
+    orderid: col(orderid)
+    linkorderid: col(linkorderid)
 
 events:
-  - name: event_start
+  - name: PROCEDURE_START
     columns:
       time: col(starttime)
+      # TODO: implement the max callback
       code:
         - col(itemid)
         - col(label)
-        - col(valueuom)
-      numeric_value: col(value)
-  - name: event_end
+      extension:
+        available_time: max(col(storetime), col(starttime))
+        location: col(location)
+        locationcategory: col(locationcategory)
+        ordercategoryname: col(ordercategoryname)
+        ordercategorydescription: col(ordercategorydescription)
+        isopenbag: col(isopenbag)
+
+  - name: PROCEDURE_END
     columns:
       time: col(endtime)
       code:
         - col(itemid)
         - col(label)
-        - col(valueuom)
-      numeric_value: col(value)
-  - name: location
-    columns:
-      time: col(endtime)
-      code:
-        - col(locationcategory)
-      text_value: col(location)
-    filters:
-      - drop_na(text_value)
-  - name: order
-    columns:
-      time: col(endtime)
-      code:
-        - col(ordercategoryname)
-      numeric_value: col(orderid)
-  - name: linkorder
-    columns:
-      time: col(endtime)
-      numeric_value: col(linkorderid)
-  - name: weight
+      text_value: col(statusdescription)
+      extension:
+        available_time: max(col(storetime), col(endtime))
+        value: col(value)
+        valueuom: col(valueuom)
+        continueinnextdept: col(continueinnextdept)
+    # TODO: add a filter for valueuom != "None"
+
+  - name: SUBJECT_WEIGHT_AT_PROCEDURE
     columns:
       time: col(starttime)
       code:
-        - const("kg")
+        - const(kg)
       numeric_value: col(patientweight)
-  - name: isopenbag
-    columns:
-      time: col(starttime)
-      numeric_value: col(isopenbag)
-  - name: continueinnextdept
-    columns:
-      time: col(endtime)
-      code:
-        - col(continueinnextdept)
-  - name: statusdescription
-    columns:
-      time: col(endtime)
-      code:
-        - col(statusdescription)
-  - name: originalamount
-    columns:
-      time: col(starttime)
-      code:
-        - col(label)
-        - col(valueuom)
-      numeric_value: col(originalamount)
-  - name: originalrate
-    columns:
-      time: col(starttime)
-      code:
-        - col(label)
-      numeric_value: col(originalrate)
-    filters:
-      - drop_na(numeric_value)
+      extension:
+        available_time: col(storetime)

@@ -52,108 +52,46 @@ columns:
     type: string
 
 join:
-  - name: pharmacy
-    path: hosp/pharmacy.csv.gz
+  - name: poe
+    path: hosp/poe.csv.gz
     columns:
-      # subject_id and extentions
+      - name: poe_id
+        type: string
+      - name: poe_seq
+        type: int64
       # db fields - times
-      # - name: entertime
-      #   type: datetime
-      #   params:
-      #     format: "%H:%M:%S"
-      # - name: expirationdate
-      #   type: datetime
-      #   params:
-      #     format: "%Y-%m-%d"
-      # - name: verifiedtime
-      #   type: datetime
-      #   params:
-      #     format: "%H:%M:%S"
-      # db fields - values
-      - name: basal_rate
-        type: float32
-      - name: disp_sched
-        type: string
-      - name: dispensation
-        type: string
-      - name: duration
-        type: float32
-      - name: duration_interval
-        type: string
-      - name: expiration_value
-        type: int64
-      - name: expiration_unit
-        type: string
-      - name: fill_quantity
-        type: string
-      - name: frequency
-        type: string
-      - name: infusion_type
-        type: string
-      - name: lockout_interval
-        type: string
-      - name: medication
-        type: string
-      - name: one_hr_max
-        type: string
-      - name: pharmacy_id
-        type: int64
-      - name: proc_type
-        type: string
-      - name: sliding_scale
-        type: string
-      - name: status
-        type: string
+      - name: ordertime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
     both_on:
-      - pharmacy_id
+      - poe_id
+      - poe_seq
 
 event_defaults:
   subject_id: col(subject_id)
   extension:
     hadm_id: col(hadm_id)
-    stay_id: const("-1")
+    poe_id: col(poe_id)
+    poe_seq: col(poe_seq)
+    pharmacy_id: col(pharmacy_id)
+    order_provider_id: col(order_provider_id)
 
 events:
-  - name: medication_start
+  - name: MEDICATION_ORDER
     columns:
-      time: col(starttime)
+      time: first_not_null(col(ordertime), col(starttime))
       code:
-        - const("MEDICATION_START")
-        - col(medication)
-        - col(infusion_type)
         - col(drug)
-        - col(drug_type)
-        - col(prod_strength)
-  - name: status
-    columns:
-      time: col(stoptime)
-      text_value: col(status)
-  # - name: verifiedtime
-  #   columns:
-  #     time: verifiedtime
-  #     code:
-  #       - const("VERIFIEDTIME")
-  - name: frequency
-    columns:
-      time: col(starttime)
-      code:
-        - col(frequency)
-  - name: sliding_scale
-    columns:
-      time: col(starttime)
-      code:
-        - col(sliding_scale)
-  - name: lockout_interval
-    columns:
-      time: col(starttime)
-      code:
-        - col(lockout_interval)
-  - name: medication_stop
-    columns:
-      time: col(stoptime)
-      code:
-        - col(medication)
-        - col(infusion_type)
-        - col(drug)
-        - col(drug_type)
-        - col(prod_strength)
+      text_value: col(prod_strength)
+      extension:
+        available_time: col(ordertime)
+        prescribed_start: col(starttime)
+        prescribed_end: col(stoptime)
+        ndc: col(ndc)
+        drug_type: col(drug_type)
+        form: col(form_rx)
+        dose: col(dose_val_rx)
+        dose_uom: col(dose_unit_rx)
+        route: col(route)
+        # NOTE: some columns are omitted for now. Maybe revisited later if they are required downstream
