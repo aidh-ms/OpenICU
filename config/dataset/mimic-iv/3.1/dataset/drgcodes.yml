@@ -46,6 +46,7 @@ events:
     columns:
       time: col(dischtime)
       code:
+        - col(drg_type)
         - col(drg_code)
         - col(description)
       extension:

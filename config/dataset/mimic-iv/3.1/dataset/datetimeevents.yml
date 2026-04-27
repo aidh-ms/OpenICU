@@ -19,11 +19,13 @@ columns:
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+  - name: value
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: itemid
     type: int64
-  - name: value
-    type: string
   - name: valueuom
     type: string
   - name: warning

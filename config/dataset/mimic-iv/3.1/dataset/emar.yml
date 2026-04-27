@@ -50,8 +50,8 @@ events:
     columns:
       time: col(charttime)
       code:
-        - col(event_txt)
         - col(medication)
+      text_value: col(event_txt)
       extension:
         available_time: col(storetime)
         scheduletime: col(scheduletime)

@@ -40,7 +40,7 @@ columns:
     type: string
   - name: ordercategoryname
     type: string
-  - name: secondordercategoryname
+  - name: secondaryordercategoryname
     type: string
   - name: ordercomponenttypedescription
     type: string
@@ -97,7 +97,7 @@ events:
       extension:
         available_time: max(col(storetime), col(starttime))
         ordercategoryname: col(ordercategoryname)
-        secondordercategoryname: col(secondordercategoryname)
+        secondaryordercategoryname: col(secondaryordercategoryname)
         ordercomponenttypedescription: col(ordercomponenttypedescription)
         ordercategorydescription: col(ordercategorydescription)
         originalamount: col(originalamount)
@@ -131,6 +131,5 @@ events:
       numeric_value: col(patientweight)
       extension:
         available_time: col(storetime)
-    filter:
-      - deduplicate()
-      # TODO: implement a filter that deduplicates multiple patient weights at the same timestamp.
+    filters:
+      - first_distinct(subject_id, time)

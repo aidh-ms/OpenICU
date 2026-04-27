@@ -99,11 +99,11 @@ events:
       code:
         - col(org_itemid)
         - col(org_name)
-      numeric_value: col(quantity)
-      text_value: col(comment)
+      text_value: col(quantity)
       extension:
         available_time: first_not_null(col(storetime), col(storedate))
         isolate_num: col(isolate_num)
+        comments: col(comments)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_SUSCEPTIBILITY
@@ -112,11 +112,11 @@ events:
       code:
         - col(ab_itemid)
         - col(ab_name)
+      numeric_value: col(dilution_value)
       text_value: col(interpretation)
       extension:
         available_time: first_not_null(col(storetime), col(storedate))
         dilution_text: col(dilution_text)
         dilution_comparison: col(dilution_comparison)
-        dilution_value: col(dilution_value)
     filters:
       - drop_na(text_value)

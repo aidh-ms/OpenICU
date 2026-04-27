@@ -45,9 +45,9 @@ columns:
   - name: patientweight
     type: float32
   - name: isopenbag
-    type: int64
+    type: boolean
   - name: continueinnextdept
-    type: int64
+    type: boolean
   - name: statusdescription
     type: string
   - name: originalamount
