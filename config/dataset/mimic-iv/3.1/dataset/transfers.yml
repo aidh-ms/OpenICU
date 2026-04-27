@@ -31,8 +31,8 @@ event_defaults:
 
 events:
   - name: TRANSFER_TO
-    time: col(intime)
     columns:
+      time: col(intime)
       code:
         - col(eventtype)
         - col(careunit)

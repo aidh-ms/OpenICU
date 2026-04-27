@@ -24,8 +24,8 @@ event_defaults:
 
 events:
   - name: SERVICE
-    time: col(transfertime)
     columns:
+      time: col(transfertime)
       code:
         - col(curr_service)
       extension:
