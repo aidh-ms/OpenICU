@@ -2,10 +2,16 @@ path: hosp/microbiologyevents.csv.gz
 
 columns:
   # subject_id and extensions
-  - name: hadm_id
+  - name: microevent_id
     type: int64
   - name: subject_id
     type: int64
+  - name: hadm_id
+    type: int64
+  - name: micro_specimen_id
+    type: int64
+  - name: order_provider_id
+    type: string
   # db fields - times
   - name: chartdate
     type: datetime
@@ -24,113 +30,91 @@ columns:
     params:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
-  - name: ab_itemid
+  - name: spec_itemid
     type: int64
-  - name: ab_name
+  - name: spec_type_desc
     type: string
-  - name: comments
-    type: string
-  - name: dilution_comparison
-    type: string
-  - name: dilution_text
-    type: string
-  - name: dilution_value
-    type: float32
-  - name: interpretation
-    type: string
-  - name: micro_specimen_id
+  - name: test_seq
     type: int64
-  - name: microevent_id
+  - name: test_itemid
     type: int64
-  - name: order_provider_id
+  - name: test_name
     type: string
   - name: org_itemid
     type: int64
   - name: org_name
     type: string
-  - name: spec_itemid
-    type: int64
-  - name: spec_type_desc
-    type: string
-  - name: test_itemid
-    type: int64
-  - name: test_name
-    type: string
-  - name: test_seq
+  - name: isolate_num
     type: int64
   - name: quantity
+    type: string
+  - name: ab_itemid
+    type: int64
+  - name: ab_name
+    type: string
+  - name: dilution_text
+    type: string
+  - name: dilution_comparison
+    type: string
+  - name: dilution_value
+    type: float32
+  - name: interpretation
+    type: string
+  - name: comments
     type: string
 
 event_defaults:
   subject_id: col(subject_id)
   extension:
     hadm_id: col(hadm_id)
+    microevent_id: col(microevent_id)
+    micro_specimen_id: col(micro_specimen_id)
+    order_provider_id: col(order_provider_id)
 
 events:
-  - name: spec
+  - name: MICROBIOLOGY_SPECIMEN
     columns:
-      time: col(charttime)
+      # TODO: move chartdate to end of day
+      time: first_not_null(col(charttime), col(chartdate))
+      available_time: first_not_null(col(charttime), col(chartdate))
       code:
+        - col(spec_itemid)
         - col(spec_type_desc)
-      numeric_value: col(spec_itemid)
-  - name: specimen_id
-    columns:
-      time: col(charttime)
-      numeric_value: col(micro_specimen_id)
+    # TODO: deduplicate via a callback
 
-  - name: test_item
+  - name: MICROBIOLOGY_TEST
     columns:
-      time: col(charttime)
+      time: first_not_null(col(charttime), col(chartdate))
+      available_time: first_not_null(col(charttime), col(chartdate))
       code:
+        - col(test_itemid)
         - col(test_name)
-      numeric_value: col(test_itemid)
+    # TODO: deduplicate via a callback
 
-  - name: organism
+  - name: MICROBIOLOGY_ORGANISM
     columns:
-      time: col(charttime)
+      time: first_not_null(col(charttime), col(chartdate))
+      available_time: first_not_null(col(storetime), col(storedate))
       code:
+        - col(org_itemid)
         - col(org_name)
-      numeric_value: col(org_itemid)
+      numeric_value: col(quantity)
+      text_value: col(comment)
+    extension:
+      isolate_num: col(isolate_num)
+    # TODO: deduplicate via a callback
 
-  - name: antibiotic
+  - name: MICROBIOLOGY_SUSCEPTIBILITY
     columns:
-      time: col(charttime)
+      time: first_not_null(col(charttime), col(chartdate))
+      available_time: first_not_null(col(storetime), col(storedate))
       code:
+        - col(ab_itemid)
         - col(ab_name)
-      numeric_value: col(ab_itemid)
-    filters:
-      - drop_na(numeric_value)
-      - drop_na(text_value)
-
-  - name: dilution
-    columns:
-      time: col(charttime)
-      text_value: col(dilution_text)
-      numeric_value: col(dilution_value)
-      # dilution_comparison
-
-  - name: interpretation
-    columns:
-      time: col(charttime)
       text_value: col(interpretation)
     filters:
       - drop_na(text_value)
-
-  - name: order_provider_id
-    columns:
-      time: col(charttime)
-      text_value: col(order_provider_id)
-    filters:
-      - drop_na(text_value)
-
-  - name: comments
-    columns:
-      time: col(charttime)
-      text_value: col(comments)
-    filters:
-      - drop_na(text_value)
-
-  - name: microevent_id
-    columns:
-      time: col(charttime)
-      numeric_value: col(microevent_id)
+    extension:
+      dilution_text: col(dilution_text)
+      dilution_comparison: col(dilution_comparison)
+      dilution_value: col(dilution_value)
