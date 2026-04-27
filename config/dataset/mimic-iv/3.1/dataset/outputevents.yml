@@ -52,6 +52,7 @@ events:
   - name: FLUID_OUTPUT
     columns:
       time: col(charttime)
+      available_time: col(storetime)
       code:
         - col(itemid)
         - col(label)

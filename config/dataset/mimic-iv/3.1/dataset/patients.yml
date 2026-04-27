@@ -29,16 +29,19 @@ events:
   - name: MEDS_BIRTH
     columns:
       time: col(dob)
+      available_time: col(dob)
 
   - name: GENDER
     columns:
       time: col(dob)
+      available_time: col(dob)
       code:
         - col(gender)
 
   - name: MEDS_DEATH
     columns:
       time: col(dod)
+      available_time: col(dod)
     filters:
       - drop_na(time)
   # TODO: move to end of day or deduplicate with in-hospital death

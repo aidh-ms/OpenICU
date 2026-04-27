@@ -56,6 +56,7 @@ events:
   - name: DIAGNOSIS
     columns:
       time: col(dischtime)
+      available_time: col(dischtime)
       code:
         - const("ICD")
         - col(icd_version)

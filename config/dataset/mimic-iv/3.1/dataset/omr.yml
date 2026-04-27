@@ -23,7 +23,9 @@ event_defaults:
 events:
   - name: MISC
     columns:
+      # TODO: move chartdate to end of day with callback
       time: col(chartdate)
+      available_time: col(chartdate)
       code:
         - col(result_name)
       text_value: col(result_value)

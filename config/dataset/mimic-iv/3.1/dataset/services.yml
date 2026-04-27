@@ -25,6 +25,7 @@ event_defaults:
 events:
   - name: SERVICE
     time: col(transfertime)
+    available_time: col(transfertime)
     columns:
       code:
         - col(curr_service)

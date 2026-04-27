@@ -59,7 +59,9 @@ event_defaults:
 events:
   - name: PROCEDURE
     columns:
-      time: col(dischtime)
+      # TODO: move to end of the day with callback
+      time: col(chartdate)
+      available_time: col(dischtime)
       code:
         - const("ICD")
         - col(icd_version)

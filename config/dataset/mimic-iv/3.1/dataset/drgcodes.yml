@@ -44,6 +44,7 @@ event_defaults:
 events:
   - name: DRG
     time: col(dischtime)
+    available_time: col(dischtime)
     code:
       - col(drg_code)
       - col(description)
