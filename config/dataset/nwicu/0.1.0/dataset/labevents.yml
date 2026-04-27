@@ -63,7 +63,7 @@ event_defaults:
   subject_id: col(subject_id)
   extension:
     hadm_id: col(hadm_id)
-    stay_id: const("-1")
+
 
 events:
   - name: labevent_id

@@ -15,7 +15,8 @@ class ToDatetime(CallbackProtocol):
         month: AstValue,
         day: AstValue,
         time: AstValue,
-        offset: AstValue,
+        offset: Optional[AstValue] = None,
+        offset_unit: str = "minutes",
         output: Optional[str] = None,
     ) -> None:
         self.year = year
@@ -23,6 +24,7 @@ class ToDatetime(CallbackProtocol):
         self.day = day
         self.time = time
         self.offset = offset
+        self.offset_unit = offset_unit
         self.output = output
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
@@ -35,8 +37,25 @@ class ToDatetime(CallbackProtocol):
             + pl.lit(" ")
             + to_expr(lf, self.time).cast(pl.Utf8)
         ).str.to_datetime()
-        offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
-        expr = datetime_expr + offset_expr
+
+        expr = datetime_expr
+
+        if self.offset is not None:
+            offset_expr = to_expr(lf, self.offset)
+
+            if self.offset_unit == "minutes":
+                expr = expr + pl.duration(minutes=offset_expr)
+            elif self.offset_unit == "hours":
+                expr = expr + pl.duration(hours=offset_expr)
+            elif self.offset_unit == "days":
+                expr = expr + pl.duration(days=offset_expr)
+            elif self.offset_unit == "years":
+                expr = expr.dt.offset_by(offset_expr.cast(pl.String) + pl.lit("y"))
+            elif self.offset_unit == "months":
+                expr = expr.dt.offset_by(offset_expr.cast(pl.String) + pl.lit("mo"))
+            else:
+                raise ValueError(f"Unsupported offset_unit: {self.offset_unit}")
+
         if self.output is None:
             return expr
         return expr.alias(self.output)
@@ -52,6 +71,39 @@ class AddOffset(CallbackProtocol):
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
         expr = to_expr(lf, self.datetime) + offset_expr
+
+        if self.output is None:
+            return expr
+        return expr.alias(self.output)
+
+
+@register_callback_cls
+class SetTime(CallbackProtocol):
+    def __init__(
+        self,
+        datetime: AstValue,
+        hours: AstValue,
+        minutes: AstValue,
+        seconds: AstValue,
+        output: Optional[str] = None,
+    ) -> None:
+        self.datetime: AstValue = datetime
+        self.hours: AstValue = hours
+        self.minutes: AstValue = minutes
+        self.seconds: AstValue = seconds
+        self.output: Optional[str] = output
+
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        dt_expr = to_expr(lf, self.datetime)
+
+        expr = pl.datetime(
+            year=dt_expr.dt.year(),
+            month=dt_expr.dt.month(),
+            day=dt_expr.dt.day(),
+            hour=to_expr(lf, self.hours),
+            minute=to_expr(lf, self.minutes),
+            second=to_expr(lf, self.seconds),
+        )
 
         if self.output is None:
             return expr
