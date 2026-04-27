@@ -27,17 +27,17 @@ event_defaults:
   subject_id: col(subject_id)
 
 events:
-  - name: dob
+  - name: MEDS_BIRTH
     columns:
       time: col(dob)
 
-  - name: gender
+  - name: GENDER
     columns:
       time: col(dob)
       code:
         - col(gender)
 
-  - name: dod
+  - name: MEDS_DEATH
     columns:
       time: col(dod_24)
     filters:

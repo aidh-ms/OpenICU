@@ -1,4 +1,4 @@
-path: hosp/diagnoses_icd.csv.gz
+path: hosp/procedures_icd.csv.gz
 
 columns:
   # subject_id and extentions
@@ -7,6 +7,10 @@ columns:
   - name: hadm_id
     type: int64
   # db fields - times
+  - name: chartdate
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
   # db fields - values
   - name: seq_num
     type: int64
@@ -53,7 +57,7 @@ event_defaults:
     hadm_id: col(hadm_id)
 
 events:
-  - name: DIAGNOSIS
+  - name: PROCEDURE
     columns:
       time: col(dischtime)
       code:
@@ -63,3 +67,4 @@ events:
         - col(long_title)
       extension:
         seq_num: col(seq_num)
+        chartdate: col(chartdate)

@@ -2,20 +2,22 @@ path: hosp/admissions.csv.gz
 
 columns:
   # subject_id and extentions
-  - name: hadm_id
-    type: int64
   - name: subject_id
     type: int64
+  - name: hadm_id
+    type: int64
+  - name: admit_provider_id
+    type: string
   # db fields - times
   - name: admittime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
-  - name: deathtime
+  - name: dischtime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
-  - name: dischtime
+  - name: deathtime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
@@ -28,16 +30,12 @@ columns:
     params:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
-  - name: admission_location
-    type: string
   - name: admission_type
     type: string
-  - name: admit_provider_id
+  - name: admission_location
     type: string
   - name: discharge_location
     type: string
-  - name: hospital_expire_flag
-    type: int64
   - name: insurance
     type: string
   - name: language
@@ -46,58 +44,67 @@ columns:
     type: string
   - name: race
     type: string
+  - name: hospital_expire_flag
+    type: int64
 
 event_defaults:
   subject_id: col(subject_id)
   extension:
     hadm_id: col(hadm_id)
-
+    admit_provider_id: col(admit_provider_id)
 
 events:
-  - name: emergency_department_registration
+  - name: ED_REGISTRATION
     columns:
       time: col(edregtime)
-  - name: emergency_department_discharge
+    filters:
+      - drop_na(time)
+  - name: ED_OUT
     columns:
       time: col(edouttime)
+    filters:
+      - drop_na(time)
 
-  - name: admission
+
+  - name: HOSPITAL_ADMISSION
     columns:
       time: col(admittime)
       code:
-        - col(admission_location)
         - col(admission_type)
-        - col(admit_provider_id)
-  - name: insurance
+        - col(admission_location)
+
+  - name: INSURANCE
     columns:
       time: col(admittime)
       code:
         - col(insurance)
-  - name: language
+
+  - name: LANGUAGE
     columns:
       time: col(admittime)
       code:
         - col(language)
-  - name: marital_status
+
+  - name: MARITAL_STATUS
     columns:
       time: col(admittime)
       code:
         - col(marital_status)
-  - name: ethnicity
+
+  - name: ETHNICITY
     columns:
       time: col(admittime)
       code:
         - col(race)
 
-  - name: discharge
+  - name: HOSPITAL_DISCHARGE
     columns:
       time: col(dischtime)
       code:
         - col(discharge_location)
-  - name: hospital_expire_flag
-    columns:
-      time: col(dischtime)
-      numeric_value: col(hospital_expire_flag)
-  - name: dod
+
+  - name: MEDS_DEATH
     columns:
       time: col(deathtime)
+    filters:
+      - drop_na(time)

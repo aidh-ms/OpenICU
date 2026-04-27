@@ -40,7 +40,6 @@ event_defaults:
   extension:
     hadm_id: col(hadm_id)
 
-
 events:
   - name: diagnoses
     columns:
