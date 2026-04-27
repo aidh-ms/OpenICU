@@ -80,7 +80,7 @@ event_defaults:
 events:
   - name: MEDICATION_ORDER
     columns:
-      time: col(ordertime)
+      time: first_not_null(col(ordertime), col(starttime))
       code:
         - col(drug)
       text_value: col(prod_strength)
