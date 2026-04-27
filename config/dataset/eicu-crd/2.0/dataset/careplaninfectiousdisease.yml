@@ -1,0 +1,64 @@
+path: carePlanInfectiousDisease.csv.gz
+
+columns:
+  # subject_id and extensions
+  - name: patientunitstayid
+    type: int64
+  # db fields - times
+  - name: cplinfectdiseaseoffset
+    type: int64
+  # db fields - values
+  - name: infectdiseasesite
+    type: string
+  - name: infectdiseaseassessment
+    type: string
+  - name: responsetotherapy
+    type: string
+  - name: treatment
+    type: string
+
+post_callbacks:
+  - add_offset(admission_timestamp, cplinfectdiseaseoffset, event_timestamp)
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    columns:
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+
+event_defaults:
+  subject_id: col(patienthealthsystemstayid)
+  time: col(event_timestamp)
+  extension:
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+
+events:
+  - name: infectiousdisease
+    columns:
+      code:
+        - col(infectdiseasesite)
+        - col(infectdiseaseassessment)
+      text_value: col(treatment)
+    filters:
+      - drop_na(infectdiseasesite)
+  - name: responsetotherapy
+    columns:
+      code:
+        - col(infectdiseasesite)
+      text_value: col(responsetotherapy)
+    filters:
+      - drop_na(responsetotherapy)

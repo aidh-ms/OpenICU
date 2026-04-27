@@ -1,0 +1,111 @@
+path: vitalAperiodic.csv.gz
+
+columns:
+  # subject_id and extensions
+  - name: patientunitstayid
+    type: int64
+  # db fields - times
+  - name: observationoffset
+    type: int64
+  # db fields - values
+  - name: noninvasivesystolic
+    type: float64
+  - name: noninvasivediastolic
+    type: float64
+  - name: noninvasivemean
+    type: float64
+  - name: paop
+    type: float64
+  - name: cardiacoutput
+    type: float64
+  - name: cardiacinput
+    type: float64
+  - name: svr
+    type: float64
+  - name: svri
+    type: float64
+  - name: pvr
+    type: float64
+  - name: pvri
+    type: float64
+
+post_callbacks:
+  - add_offset(admission_timestamp, observationoffset, event_timestamp)
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    columns:
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+
+event_defaults:
+  subject_id: col(patienthealthsystemstayid)
+  time: col(event_timestamp)
+  extension:
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+
+events:
+  - name: noninvasivesystolic
+    columns:
+      numeric_value: col(noninvasivesystolic)
+    filters:
+      - drop_na(numeric_value)
+  - name: noninvasivediastolic
+    columns:
+      numeric_value: col(noninvasivediastolic)
+    filters:
+      - drop_na(numeric_value)
+  - name: noninvasivemean
+    columns:
+      numeric_value: col(noninvasivemean)
+    filters:
+      - drop_na(numeric_value)
+  - name: paop
+    columns:
+      numeric_value: col(paop)
+    filters:
+      - drop_na(numeric_value)
+  - name: cardiacoutput
+    columns:
+      numeric_value: col(cardiacoutput)
+    filters:
+      - drop_na(numeric_value)
+  - name: cardiacinput
+    columns:
+      numeric_value: col(cardiacinput)
+    filters:
+      - drop_na(numeric_value)
+  - name: svr
+    columns:
+      numeric_value: col(svr)
+    filters:
+      - drop_na(numeric_value)
+  - name: svri
+    columns:
+      numeric_value: col(svri)
+    filters:
+      - drop_na(numeric_value)
+  - name: pvr
+    columns:
+      numeric_value: col(pvr)
+    filters:
+      - drop_na(numeric_value)
+  - name: pvri
+    columns:
+      numeric_value: col(pvri)
+    filters:
+      - drop_na(numeric_value)

@@ -1,0 +1,119 @@
+path: apachePatientResult.csv.gz
+
+columns:
+  # subject_id and extensions
+  - name: patientunitstayid
+    type: int64
+  # db fields - values
+  - name: apacheversion
+    type: string
+  - name: acutephysiologyscore
+    type: int64
+  - name: apachescore
+    type: int64
+  - name: predictedicumortality
+    type: float64
+  - name: actualicumortality
+    type: string
+  - name: predictediculos
+    type: float64
+  - name: actualiculos
+    type: float64
+  - name: predictedhospitalmortality
+    type: float64
+  - name: actualhospitalmortality
+    type: string
+  - name: predictedhospitallos
+    type: float64
+  - name: actualhospitallos
+    type: float64
+  - name: actualventdays
+    type: float64
+  - name: predventdays
+    type: float64
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    columns:
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+
+event_defaults:
+  subject_id: col(patienthealthsystemstayid)
+  time: col(admission_timestamp)
+  extension:
+    hadm_id: const(-1)
+    stay_id: col(patientunitstayid)
+
+events:
+  - name: apachescore
+    columns:
+      code:
+        - col(apacheversion)
+      numeric_value: col(apachescore)
+  - name: acutephysiologyscore
+    columns:
+      code:
+        - col(apacheversion)
+      numeric_value: col(acutephysiologyscore)
+  - name: predictedicumortality
+    columns:
+      code:
+        - col(apacheversion)
+      numeric_value: col(predictedicumortality)
+  - name: actualicumortality
+    columns:
+      code:
+        - col(apacheversion)
+      text_value: col(actualicumortality)
+  - name: predictedhospitalmortality
+    columns:
+      code:
+        - col(apacheversion)
+      numeric_value: col(predictedhospitalmortality)
+  - name: actualhospitalmortality
+    columns:
+      code:
+        - col(apacheversion)
+      text_value: col(actualhospitalmortality)
+  - name: predictediculos
+    columns:
+      code:
+        - col(apacheversion)
+      numeric_value: col(predictediculos)
+  - name: actualiculos
+    columns:
+      numeric_value: col(actualiculos)
+  - name: predictedhospitallos
+    columns:
+      code:
+        - col(apacheversion)
+      numeric_value: col(predictedhospitallos)
+  - name: actualhospitallos
+    columns:
+      numeric_value: col(actualhospitallos)
+  - name: actualventdays
+    columns:
+      numeric_value: col(actualventdays)
+    filters:
+      - drop_na(numeric_value)
+  - name: predventdays
+    columns:
+      code:
+        - col(apacheversion)
+      numeric_value: col(predventdays)
+    filters:
+      - drop_na(numeric_value)
