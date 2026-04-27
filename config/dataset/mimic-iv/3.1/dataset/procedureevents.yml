@@ -45,9 +45,9 @@ columns:
   - name: patientweight
     type: float32
   - name: isopenbag
-    type: int64
+    type: boolean
   - name: continueinnextdept
-    type: int64
+    type: boolean
   - name: statusdescription
     type: string
   - name: originalamount
@@ -83,15 +83,17 @@ events:
   - name: PROCEDURE_START
     columns:
       time: col(starttime)
+      # TODO: implement the max callback
       code:
         - col(itemid)
         - col(label)
-    extension:
-      location: col(location)
-      locationcategory: col(locationcategory)
-      ordercategoryname: col(ordercategoryname)
-      ordercategorydescription: col(ordercategorydescription)
-      isopenbag: col(isopenbag)
+      extension:
+        available_time: max(col(storetime), col(starttime))
+        location: col(location)
+        locationcategory: col(locationcategory)
+        ordercategoryname: col(ordercategoryname)
+        ordercategorydescription: col(ordercategorydescription)
+        isopenbag: col(isopenbag)
 
   - name: PROCEDURE_END
     columns:
@@ -100,15 +102,18 @@ events:
         - col(itemid)
         - col(label)
       text_value: col(statusdescription)
-    extension:
-      value: col(value)
-      valueuom: col(valueuom)
-      continueinnextdept: col(continueinnextdept)
+      extension:
+        available_time: max(col(storetime), col(endtime))
+        value: col(value)
+        valueuom: col(valueuom)
+        continueinnextdept: col(continueinnextdept)
     # TODO: add a filter for valueuom != "None"
 
   - name: SUBJECT_WEIGHT_AT_PROCEDURE
     columns:
       time: col(starttime)
       code:
-        - const("kg")
+        - const(kg)
       numeric_value: col(patientweight)
+      extension:
+        available_time: col(storetime)

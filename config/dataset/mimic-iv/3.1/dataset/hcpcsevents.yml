@@ -57,12 +57,13 @@ event_defaults:
     hadm_id: col(hadm_id)
 
 events:
-  - name: hcpcsevent
+  - name: HCPCS
     columns:
-      time: col(dischtime)
+      # TODO: move chartdate to end of day with callback
+      time: col(chartdate)
       code:
         - col(hcpcs_cd)
         - col(long_description)
       extension:
-          seq_num: col(seq_num)
-          chartdate: col(chartdate)
+        available_time: col(dischtime)
+        seq_num: col(seq_num)
