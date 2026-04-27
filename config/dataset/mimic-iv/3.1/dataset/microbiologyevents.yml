@@ -100,8 +100,8 @@ events:
         - col(org_name)
       numeric_value: col(quantity)
       text_value: col(comment)
-    extension:
-      isolate_num: col(isolate_num)
+      extension:
+        isolate_num: col(isolate_num)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_SUSCEPTIBILITY
@@ -112,9 +112,9 @@ events:
         - col(ab_itemid)
         - col(ab_name)
       text_value: col(interpretation)
+      extension:
+        dilution_text: col(dilution_text)
+        dilution_comparison: col(dilution_comparison)
+        dilution_value: col(dilution_value)
     filters:
       - drop_na(text_value)
-    extension:
-      dilution_text: col(dilution_text)
-      dilution_comparison: col(dilution_comparison)
-      dilution_value: col(dilution_value)

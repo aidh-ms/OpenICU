@@ -29,5 +29,5 @@ events:
       code:
         - col(result_name)
       text_value: col(result_value)
-    extension:
-      seq_num: col(seq_num)
+      extension:
+        seq_num: col(seq_num)

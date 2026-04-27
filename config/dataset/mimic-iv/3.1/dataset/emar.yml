@@ -53,5 +53,5 @@ events:
       code:
         - col(event_txt)
         - col(medication)
-    extension:
-      scheduletime: col(scheduletime)
+      extension:
+        scheduletime: col(scheduletime)

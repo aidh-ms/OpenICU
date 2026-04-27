@@ -85,13 +85,13 @@ events:
       code:
         - col(drug)
       text_value: col(prod_strength)
-    extension:
-      prescribed_start: col(starttime)
-      prescribed_end: col(stoptime)
-      ndc: col(ndc)
-      drug_type: col(drug_type)
-      form: col(form_rx)
-      dose: col(dose_val_rx)
-      dose_uom: col(dose_unit_rx)
-      route: col(route)
-      # NOTE: some columns are omitted for now. Maybe revisited later if they are required downstream
+      extension:
+        prescribed_start: col(starttime)
+        prescribed_end: col(stoptime)
+        ndc: col(ndc)
+        drug_type: col(drug_type)
+        form: col(form_rx)
+        dose: col(dose_val_rx)
+        dose_uom: col(dose_unit_rx)
+        route: col(route)
+        # NOTE: some columns are omitted for now. Maybe revisited later if they are required downstream

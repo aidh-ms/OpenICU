@@ -88,12 +88,12 @@ events:
       code:
         - col(itemid)
         - col(label)
-    extension:
-      location: col(location)
-      locationcategory: col(locationcategory)
-      ordercategoryname: col(ordercategoryname)
-      ordercategorydescription: col(ordercategorydescription)
-      isopenbag: col(isopenbag)
+      extension:
+        location: col(location)
+        locationcategory: col(locationcategory)
+        ordercategoryname: col(ordercategoryname)
+        ordercategorydescription: col(ordercategorydescription)
+        isopenbag: col(isopenbag)
 
   - name: PROCEDURE_END
     columns:
@@ -103,10 +103,10 @@ events:
         - col(itemid)
         - col(label)
       text_value: col(statusdescription)
-    extension:
-      value: col(value)
-      valueuom: col(valueuom)
-      continueinnextdept: col(continueinnextdept)
+      extension:
+        value: col(value)
+        valueuom: col(valueuom)
+        continueinnextdept: col(continueinnextdept)
     # TODO: add a filter for valueuom != "None"
 
   - name: SUBJECT_WEIGHT_AT_PROCEDURE
