@@ -45,10 +45,10 @@ events:
   - name: DRG
     columns:
       time: col(dischtime)
-      available_time: col(dischtime)
       code:
         - col(drg_code)
         - col(description)
       extension:
+        available_time: col(dischtime)
         drg_severity: col(drg_severity)
         drg_mortality: col(drg_mortality)

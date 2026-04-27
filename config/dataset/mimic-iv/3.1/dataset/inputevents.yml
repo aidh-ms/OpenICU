@@ -90,12 +90,12 @@ events:
   - name: INFUSION_START
     columns:
       time: col(starttime)
-      available_time: max(col(storetime), col(starttime))
       # TODO: implement a max callback.
       code:
         - col(itemid)
         - col(label)
       extension:
+        available_time: max(col(storetime), col(starttime))
         ordercategoryname: col(ordercategoryname)
         secondordercategoryname: col(secondordercategoryname)
         ordercomponenttypedescription: col(ordercomponenttypedescription)
@@ -111,12 +111,12 @@ events:
   - name: INFUSION_END
     columns:
       time: col(endtime)
-      available_time: max(col(storetime), col(endtime))
       code:
         - col(itemid)
         - col(label)
       text_value: col(statusdescription)
       extension:
+        available_time: max(col(storetime), col(endtime))
         rate: col(rate)
         rateuom: col(rateuom)
         amount: col(amount)
@@ -126,10 +126,11 @@ events:
   - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
       time: col(starttime)
-      available_time: col(storetime)
       code:
         - const(kg)
       numeric_value: col(patientweight)
+      extension:
+        available_time: col(storetime)
     filter:
       - deduplicate()
       # TODO: implement a filter that deduplicates multiple patient weights at the same timestamp.

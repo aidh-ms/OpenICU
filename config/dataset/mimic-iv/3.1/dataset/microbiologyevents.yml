@@ -76,43 +76,45 @@ events:
     columns:
       # TODO: move chartdate to end of day
       time: first_not_null(col(charttime), col(chartdate))
-      available_time: first_not_null(col(charttime), col(chartdate))
       code:
         - col(spec_itemid)
         - col(spec_type_desc)
+      extension:
+        available_time: first_not_null(col(charttime), col(chartdate))
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_TEST
     columns:
       time: first_not_null(col(charttime), col(chartdate))
-      available_time: first_not_null(col(charttime), col(chartdate))
       code:
         - col(test_itemid)
         - col(test_name)
+      extension:
+        available_time: first_not_null(col(charttime), col(chartdate))
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_ORGANISM
     columns:
       time: first_not_null(col(charttime), col(chartdate))
-      available_time: first_not_null(col(storetime), col(storedate))
       code:
         - col(org_itemid)
         - col(org_name)
       numeric_value: col(quantity)
       text_value: col(comment)
       extension:
+        available_time: first_not_null(col(storetime), col(storedate))
         isolate_num: col(isolate_num)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_SUSCEPTIBILITY
     columns:
       time: first_not_null(col(charttime), col(chartdate))
-      available_time: first_not_null(col(storetime), col(storedate))
       code:
         - col(ab_itemid)
         - col(ab_name)
       text_value: col(interpretation)
       extension:
+        available_time: first_not_null(col(storetime), col(storedate))
         dilution_text: col(dilution_text)
         dilution_comparison: col(dilution_comparison)
         dilution_value: col(dilution_value)

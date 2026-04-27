@@ -81,11 +81,11 @@ events:
   - name: MEDICATION_ORDER
     columns:
       time: col(ordertime)
-      available_time: col(ordertime)
       code:
         - col(drug)
       text_value: col(prod_strength)
       extension:
+        available_time: col(ordertime)
         prescribed_start: col(starttime)
         prescribed_end: col(stoptime)
         ndc: col(ndc)

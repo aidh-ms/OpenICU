@@ -61,9 +61,9 @@ events:
     columns:
       # TODO: move chartdate to end of day with callback
       time: col(chartdate)
-      available_time: col(dischtime)
       code:
         - col(hcpcs_cd)
         - col(long_description)
       extension:
-          seq_num: col(seq_num)
+        available_time: col(dischtime)
+        seq_num: col(seq_num)

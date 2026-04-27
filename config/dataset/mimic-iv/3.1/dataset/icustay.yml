@@ -35,15 +35,18 @@ events:
   - name: icu_admission
     columns:
       time: col(intime)
-      available_time: col(intime)
+      extension:
+        available_time: col(intime)
   - name: icu_discharge
     columns:
       time: col(outtime)
-      available_time: col(outtime)
+      extension:
+        available_time: col(outtime)
   - name: icu_length_of_stay
     columns:
       time: col(outtime)
-      available_time: col(outtime)
       code:
         - const(days)
       numeric_value: col(los)
+      extension:
+        available_time: col(outtime)

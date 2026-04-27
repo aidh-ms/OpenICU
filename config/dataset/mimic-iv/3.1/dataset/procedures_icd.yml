@@ -61,12 +61,12 @@ events:
     columns:
       # TODO: move to end of the day with callback
       time: col(chartdate)
-      available_time: col(dischtime)
       code:
         - const("ICD")
         - col(icd_version)
         - col(icd_code)
         - col(long_title)
       extension:
+        available_time: col(dischtime)
         seq_num: col(seq_num)
         chartdate: col(chartdate)

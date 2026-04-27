@@ -54,11 +54,11 @@ events:
   - name: TIMESTAMP_OF
     columns:
       time: col(charttime)
-      available_time: col(storetime)
       code:
         - col(itemid)
         - col(label)
       extension:
+        available_time: col(storetime)
         datetime_value: col(value)
         datetime_uom: col(valueuom)
         warning: col(warning)

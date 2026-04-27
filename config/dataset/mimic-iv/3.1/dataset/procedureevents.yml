@@ -84,11 +84,11 @@ events:
     columns:
       time: col(starttime)
       # TODO: implement the max callback
-      available_time: max(col(storetime), col(starttime))
       code:
         - col(itemid)
         - col(label)
       extension:
+        available_time: max(col(storetime), col(starttime))
         location: col(location)
         locationcategory: col(locationcategory)
         ordercategoryname: col(ordercategoryname)
@@ -98,12 +98,12 @@ events:
   - name: PROCEDURE_END
     columns:
       time: col(endtime)
-      available_time: max(col(storetime), col(endtime))
       code:
         - col(itemid)
         - col(label)
       text_value: col(statusdescription)
       extension:
+        available_time: max(col(storetime), col(endtime))
         value: col(value)
         valueuom: col(valueuom)
         continueinnextdept: col(continueinnextdept)
@@ -112,7 +112,8 @@ events:
   - name: SUBJECT_WEIGHT_AT_PROCEDURE
     columns:
       time: col(starttime)
-      available_time: col(storetime)
       code:
         - const(kg)
       numeric_value: col(patientweight)
+      extension:
+        available_time: col(storetime)

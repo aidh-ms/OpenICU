@@ -49,9 +49,9 @@ events:
   - name: MEDICATION_ADMINISTRATION
     columns:
       time: col(charttime)
-      available_time: col(storetime)
       code:
         - col(event_txt)
         - col(medication)
       extension:
+        available_time: col(storetime)
         scheduletime: col(scheduletime)
