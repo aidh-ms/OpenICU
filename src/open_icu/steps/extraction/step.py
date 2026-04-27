@@ -61,7 +61,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         for table in self._registry.values():
             path = paths.get(table.dataset)
             if path is None:
-                logger.warning("Skipping table %s: dataset path not found (%s)", table.__pydantic_parent_namespace__)
+                logger.warning("Skipping table %s: dataset path not found (%s)", table.__pydantic_parent_namespace__, table.dataset)
                 continue
 
             try:
@@ -152,7 +152,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     pl.col("code").cast(pl.String),
                     pl.col("numeric_value").cast(pl.Float32),
                     pl.col("text_value").cast(pl.String),
-                ] + [pl.col(col).cast(pl.String) for col in event.columns.extension.keys()])
+                ] + [pl.col(col) for col in event.columns.extension.keys()])
 
                 # Ensure output directory exists
                 assert self._workspace_dir is not None

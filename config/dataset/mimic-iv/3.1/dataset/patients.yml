@@ -20,7 +20,8 @@ columns:
     type: string
 
 post_callbacks:
-  - to_datetime(anchor_year, 1, 1, "00:00:00", anchor_age, dob)
+  - to_datetime(anchor_year, 1, 1, "00:00:00", -anchor_age, "years", output=dob)
+  - set_time(dod, 23, 59, 59, output=dod_24)
 
 event_defaults:
   subject_id: col(subject_id)
@@ -38,7 +39,6 @@ events:
 
   - name: MEDS_DEATH
     columns:
-      time: col(dod)
+      time: col(dod_24)
     filters:
       - drop_na(time)
-  # TODO: move to end of day or deduplicate with in-hospital death

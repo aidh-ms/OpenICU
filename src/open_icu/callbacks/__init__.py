@@ -1,6 +1,5 @@
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Modulo, Multiply, Pow, Product, Root, Subtract, Sum
 from open_icu.callbacks._callbacks.filter import DropNa
-from open_icu.callbacks._callbacks.selector import FirstNotNull
 from open_icu.callbacks._callbacks.shortcuts import Col, Const
 from open_icu.callbacks._callbacks.time import AddOffset, ToDatetime
 from open_icu.callbacks.proto import CallbackProtocol
@@ -14,6 +13,7 @@ __all__ = [
     "DropNa",
     "ToDatetime",
     "AddOffset",
+    "SetTime"
     "FirstNotNull",
     "Add",
     "Sum",
