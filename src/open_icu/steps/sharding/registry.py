@@ -19,4 +19,4 @@ class ShardingConfigRegistry(BaseConfigRegistry[ShardingConfig]):
     pass
 
 sharding_config_registry = ShardingConfigRegistry()
-"""Global singleton instance of the concept configuration registry."""
+"""Global singleton instance of the sharding configuration registry."""
