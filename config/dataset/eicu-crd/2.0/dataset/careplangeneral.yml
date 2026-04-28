@@ -33,7 +33,7 @@ join:
     both_on:
       - patientunitstayid
     callbacks:
-      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
