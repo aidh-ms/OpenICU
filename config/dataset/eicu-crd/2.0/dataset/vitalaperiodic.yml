@@ -4,6 +4,8 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: vitalaperiodicid
+    type: int64
   # db fields - times
   - name: observationoffset
     type: int64
@@ -56,24 +58,26 @@ event_defaults:
   time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    vitalaperiodic_id: col(vitalaperiodicid)
 
 events:
-  - name: NON_INVASIVE_SYSTOLIC_BP
+  # TODO: can we preface all of these with VITAL//
+  - name: NON_INVASIVE_SYSTOLIC_BLOOD_PRESSURE
     columns:
       numeric_value: col(noninvasivesystolic)
     filters:
       - drop_na(numeric_value)
-  - name: NON_INVASIVE_DIASTOLIC_BP
+  - name: NON_INVASIVE_DIASTOLIC_BLOOD_PRESSURE
     columns:
       numeric_value: col(noninvasivediastolic)
     filters:
       - drop_na(numeric_value)
-  - name: NON_INVASIVE_MEAN_BP
+  - name: NON_INVASIVE_MEAN_BLOOD_PRESSURE
     columns:
       numeric_value: col(noninvasivemean)
     filters:
       - drop_na(numeric_value)
-  - name: PAOP
+  - name: PULMONARY_ARTERY_OCCLUSION_PRESSURE
     columns:
       numeric_value: col(paop)
     filters:
@@ -88,22 +92,22 @@ events:
       numeric_value: col(cardiacinput)
     filters:
       - drop_na(numeric_value)
-  - name: SVR
+  - name: SYSTEMIC_VASCULAR_RESISTANCE
     columns:
       numeric_value: col(svr)
     filters:
       - drop_na(numeric_value)
-  - name: SVRI
+  - name: SYSTEMIC_VASCULAR_RESISTANCE_INDEX
     columns:
       numeric_value: col(svri)
     filters:
       - drop_na(numeric_value)
-  - name: PVR
+  - name: PULMONARY_VASCULAR_RESISTANCE
     columns:
       numeric_value: col(pvr)
     filters:
       - drop_na(numeric_value)
-  - name: PVRI
+  - name: PULMONARY_VASCULAR_RESISTANCE_INDEX
     columns:
       numeric_value: col(pvri)
     filters:
