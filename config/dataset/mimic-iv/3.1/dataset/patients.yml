@@ -30,15 +30,21 @@ events:
   - name: MEDS_BIRTH
     columns:
       time: col(dob)
+      extension:
+        available_time: col(dob)
 
   - name: GENDER
     columns:
       time: col(dob)
       code:
         - col(gender)
+      extension:
+        available_time: col(dob)
 
   - name: MEDS_DEATH
     columns:
       time: col(dod_24)
+      extension:
+        available_time: col(dod_24)
     filters:
       - drop_na(time)

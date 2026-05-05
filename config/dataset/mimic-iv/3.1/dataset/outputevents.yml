@@ -57,3 +57,5 @@ events:
         - col(label)
         - col(valueuom)
       numeric_value: col(value)
+      extension:
+        available_time: col(storetime)

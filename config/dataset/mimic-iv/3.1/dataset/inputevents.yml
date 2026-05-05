@@ -40,7 +40,7 @@ columns:
     type: string
   - name: ordercategoryname
     type: string
-  - name: secondordercategoryname
+  - name: secondaryordercategoryname
     type: string
   - name: ordercomponenttypedescription
     type: string
@@ -90,21 +90,23 @@ events:
   - name: INFUSION_START
     columns:
       time: col(starttime)
+      # TODO: implement a max callback.
       code:
         - col(itemid)
         - col(label)
-    extension:
-      ordercategoryname: col(ordercategoryname)
-      secondordercategoryname: col(secondordercategoryname)
-      ordercomponenttypedescription: col(ordercomponenttypedescription)
-      ordercategorydescription: col(ordercategorydescription)
-      originalamount: col(originalamount)
-      amountuom: col(amountuom)
-      originalrate: col(originalrate)
-      rateuom: col(rateuom)
-      totalamount: col(totalamount)
-      totalamountuom: col(totalamountuom)
-      isopenbag: col(isopenbag)
+      extension:
+        available_time: max(col(storetime), col(starttime))
+        ordercategoryname: col(ordercategoryname)
+        secondaryordercategoryname: col(secondaryordercategoryname)
+        ordercomponenttypedescription: col(ordercomponenttypedescription)
+        ordercategorydescription: col(ordercategorydescription)
+        originalamount: col(originalamount)
+        amountuom: col(amountuom)
+        originalrate: col(originalrate)
+        rateuom: col(rateuom)
+        totalamount: col(totalamount)
+        totalamountuom: col(totalamountuom)
+        isopenbag: col(isopenbag)
 
   - name: INFUSION_END
     columns:
@@ -113,16 +115,21 @@ events:
         - col(itemid)
         - col(label)
       text_value: col(statusdescription)
-    extension:
-      rate: col(rate)
-      rateuom: col(rateuom)
-      amount: col(amount)
-      amountuom: col(amountuom)
-      continueinnextdept: col(continueinnextdept)
+      extension:
+        available_time: max(col(storetime), col(endtime))
+        rate: col(rate)
+        rateuom: col(rateuom)
+        amount: col(amount)
+        amountuom: col(amountuom)
+        continueinnextdept: col(continueinnextdept)
 
   - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
       time: col(starttime)
       code:
-        - const("kg")
+        - const(kg)
       numeric_value: col(patientweight)
+      extension:
+        available_time: col(storetime)
+    filters:
+      - first_distinct(subject_id, time)
