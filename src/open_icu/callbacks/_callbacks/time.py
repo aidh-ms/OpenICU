@@ -86,6 +86,8 @@ class AddOffset(CallbackProtocol):
             expr = expr + pl.duration(hours=offset_expr)
         elif self.offset_unit == "days":
             expr = expr + pl.duration(days=offset_expr)
+        else:
+            raise ValueError(f"Unsupported offset_unit: {self.offset_unit}")
 
         if self.output is None:
             return expr
