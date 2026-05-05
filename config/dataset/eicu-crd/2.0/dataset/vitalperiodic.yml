@@ -70,7 +70,6 @@ join:
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
-  # TODO: this is not actually the subject_id
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
@@ -78,54 +77,118 @@ event_defaults:
     vitalperiodicid: col(vitalperiodicid)
 
 events:
+  # TODO: can we preface all of these with VITAL//
   - name: HEART_RATE
     columns:
       code:
         - const(BPM)
       numeric_value: col(heartrate)
-  # TODO: add unit to all other events here
+    filters:
+      # TODO: filter on original name or on `numeric_value`?
+      - drop_na(heartrate)
   - name: TEMPERATURE
     columns:
+      code:
+        - const(C)
       numeric_value: col(temperature)
-  - name: SAO2
+    filters:
+      - drop_na(temperature)
+  - name: O2_SATURATION_PUlSE_OXIMETRY
     columns:
+      code:
+        - const(%)
       numeric_value: col(sao2)
+    filters:
+      - drop_na(sao2)
   - name: RESPIRATORY_RATE
     columns:
+      code:
+        - const(bpm)
       numeric_value: col(respiration)
-  - name: CVP
+    filters:
+      - drop_na(respiration)
+  - name: CENTRAL_VENOUS_PRESSURE
     columns:
+      code:
+      # TODO: some patients have cvp > 200, which may be mmH20 rather than mmHg.
+        - const(mmHg)
       numeric_value: col(cvp)
+    filters:
+      - drop_na(cvp)
   - name: ETCO2
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(etco2)
-  - name: SYSTOLIC_BP
+    filters:
+      - drop_na(etco2)
+  - name: SYSTOLIC_BLOOD_PRESSURE
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(systemicsystolic)
-  - name: DIASTOLIC_BP
+    filters:
+      - drop_na(systemicsystolic)
+  - name: DIASTOLIC_BLOOD_PRESSURE
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(systemicdiastolic)
-  - name: MEAN_BP
+    filters:
+      - drop_na(systemicdiastolic)
+  - name: MEAN_INVASIVE_BLOOD_PRESSURE
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(systemicmean)
-  - name: PA_SYSTOLIC_BP
+    filters:
+      - drop_na(systemicmean)
+  - name: PULMONARY_ARTERY_SYSTOLIC_BLOOD_PRESSURE
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(pasystolic)
-  - name: PA_DIASTOLIC_BP
+    filters:
+      - drop_na(pasystolic)
+  - name: PULMONARY_ARTERY_DIASTOLIC_BLOOD_PRESSURE
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(padiastolic)
-  - name: PA_MEAN_BP
+    filters:
+      - drop_na(padiastolic)
+  - name: PULMONARY_ARTERY_MEAN_BLOOD_PRESSURE
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(pamean)
-  - name: ST1
+    filters:
+      - drop_na(pamean)
+  - name: ST_SEGMENT_DEVIATION_LEAD_1
     columns:
+      code:
+        - const(mV)
       numeric_value: col(st1)
-  - name: ST2
+    filters:
+      - drop_na(st1)
+  - name: ST_SEGMENT_DEVIATION_LEAD_2
     columns:
+      code:
+        - const(mV)
       numeric_value: col(st2)
-  - name: ST3
+    filters:
+      - drop_na(st2)
+  - name: ST_SEGMENT_DEVIATION_LEAD_3
     columns:
+      code:
+        - const(mV)
       numeric_value: col(st3)
-  - name: ICP
+    filters:
+      - drop_na(st3)
+  - name: INTRACRANIAL_PRESSURE
     columns:
+      code:
+        - const(mmHg)
       numeric_value: col(icp)
+    filters:
+      - drop_na(icp)
