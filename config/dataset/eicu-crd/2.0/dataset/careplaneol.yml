@@ -42,6 +42,6 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: eol_discussion
+  - name: EOL_DISCUSSION
     columns:
       text_value: col(activeupondischarge)

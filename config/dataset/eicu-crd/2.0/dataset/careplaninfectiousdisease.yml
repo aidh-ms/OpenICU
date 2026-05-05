@@ -46,7 +46,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: infectiousdisease
+  - name: INFECTIOUS_DISEASE
     columns:
       code:
         - col(infectdiseasesite)
@@ -54,7 +54,7 @@ events:
       text_value: col(treatment)
     filters:
       - drop_na(infectdiseasesite)
-  - name: responsetotherapy
+  - name: RESPONSE_TO_THERAPY
     columns:
       code:
         - col(infectdiseasesite)

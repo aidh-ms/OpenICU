@@ -79,89 +79,89 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: gcs_verbal
+  - name: APACHE_PRED_GCS_VERBAL
     columns:
       code:
         - const("GCS")
       numeric_value: col(verbal)
     filters:
       - drop_na(numeric_value)
-  - name: gcs_motor
+  - name: APACHE_PRED_GCS_MOTOR
     columns:
       code:
         - const("GCS")
       numeric_value: col(motor)
     filters:
       - drop_na(numeric_value)
-  - name: gcs_eyes
+  - name: APACHE_PRED_GCS_EYES
     columns:
       code:
         - const("GCS")
       numeric_value: col(eyes)
     filters:
       - drop_na(numeric_value)
-  - name: admitdiagnosis
+  - name: APACHE_ADMIT_DIAGNOSIS
     columns:
       text_value: col(admitdiagnosis)
     filters:
       - drop_na(text_value)
-  - name: diedinhospital
+  - name: APACHE_DIED_IN_HOSPITAL
     columns:
       numeric_value: col(diedinhospital)
-  - name: dischargelocation
+  - name: APACHE_DISCHARGE_LOCATION
     columns:
       text_value: col(dischargelocation)
     filters:
       - drop_na(text_value)
-  - name: readmit
+  - name: APACHE_READMIT
     columns:
       numeric_value: col(readmit)
-  - name: electivesurgery
+  - name: APACHE_ELECTIVE_SURGERY
     columns:
       numeric_value: col(electivesurgery)
-  - name: thrombolytics
+  - name: APACHE_THROMBOLYTICS
     columns:
       numeric_value: col(thrombolytics)
-  - name: diabetes
+  - name: APACHE_DIABETES
     columns:
       numeric_value: col(diabetes)
-  - name: aids
+  - name: APACHE_AIDS
     columns:
       numeric_value: col(aids)
-  - name: hepaticfailure
+  - name: APACHE_HEPATIC_FAILURE
     columns:
       numeric_value: col(hepaticfailure)
-  - name: lymphoma
+  - name: APACHE_LYMPHOMA
     columns:
       numeric_value: col(lymphoma)
-  - name: metastaticcancer
+  - name: APACHE_METASTATIC_CANCER
     columns:
       numeric_value: col(metastaticcancer)
-  - name: leukemia
+  - name: APACHE_LEUKEMIA
     columns:
       numeric_value: col(leukemia)
-  - name: immunosuppression
+  - name: APACHE_IMMUNOSUPPRESSION
     columns:
       numeric_value: col(immunosuppression)
-  - name: cirrhosis
+  - name: APACHE_CIRRHOSIS
     columns:
       numeric_value: col(cirrhosis)
-  - name: pao2
+  - name: APACHE_PRED_PAO2
     columns:
       numeric_value: col(pao2)
     filters:
       - drop_na(numeric_value)
-  - name: fio2
+  - name: APACHE_PRED_FIO2
     columns:
       numeric_value: col(fio2)
     filters:
       - drop_na(numeric_value)
-  - name: creatinine
+  - name: APACHE_PRED_CREATININE
     columns:
       numeric_value: col(creatinine)
     filters:
       - drop_na(numeric_value)
-  - name: ejectfx
+  - name: APACHE_EJECTION_FRACTION
     columns:
       numeric_value: col(ejectfx)
     filters:

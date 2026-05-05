@@ -4,6 +4,8 @@ columns:
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
+  - name: vitalperiodicid
+    type: int64
   # db fields - times
   - name: observationoffset
     type: int64
@@ -40,8 +42,6 @@ columns:
     type: int64
   - name: temperature
     type: float64 # decimal(x,y)
-  - name: vitalperiodicid
-    type: int64
 
 
 post_callbacks:
@@ -70,63 +70,62 @@ join:
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
+  # TODO: this is not actually the subject_id
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    vitalperiodicid: col(vitalperiodicid)
 
 events:
-  - name: heartrate
+  - name: HEART_RATE
     columns:
       code:
-        - const("BPM")
+        - const(BPM)
       numeric_value: col(heartrate)
-  - name: vitalperiodicid
-    columns:
-      code:
-      numeric_value: col(observationoffset)
-  - name: temperature
+  # TODO: add unit to all other events here
+  - name: TEMPERATURE
     columns:
       numeric_value: col(temperature)
-  - name: sao2
+  - name: SAO2
     columns:
       numeric_value: col(sao2)
-  - name: respiration
+  - name: RESPIRATORY_RATE
     columns:
       numeric_value: col(respiration)
-  - name: cvp
+  - name: CVP
     columns:
       numeric_value: col(cvp)
-  - name: etco2
+  - name: ETCO2
     columns:
       numeric_value: col(etco2)
-  - name: systemicsystolic
+  - name: SYSTOLIC_BP
     columns:
       numeric_value: col(systemicsystolic)
-  - name: systemicdiastolic
+  - name: DIASTOLIC_BP
     columns:
       numeric_value: col(systemicdiastolic)
-  - name: systemicmean
+  - name: MEAN_BP
     columns:
       numeric_value: col(systemicmean)
-  - name: pasystolic
+  - name: PA_SYSTOLIC_BP
     columns:
       numeric_value: col(pasystolic)
-  - name: padiastolic
+  - name: PA_DIASTOLIC_BP
     columns:
       numeric_value: col(padiastolic)
-  - name: pamean
+  - name: PA_MEAN_BP
     columns:
       numeric_value: col(pamean)
-  - name: st1
+  - name: ST1
     columns:
       numeric_value: col(st1)
-  - name: st2
+  - name: ST2
     columns:
       numeric_value: col(st2)
-  - name: st3
+  - name: ST3
     columns:
       numeric_value: col(st3)
-  - name: icp
+  - name: ICP
     columns:
       numeric_value: col(icp)

@@ -42,7 +42,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: careplanitem
+  - name: CAREPLAN_GENERAL
     columns:
       code:
         - col(cplgroup)

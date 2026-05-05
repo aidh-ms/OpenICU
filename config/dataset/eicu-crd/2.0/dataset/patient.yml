@@ -71,48 +71,48 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: gender
+  - name: GENDER
     columns:
       # TODO: suggest and maybe change time birthdate
       time: col(admission_timestamp)
       code: # codes is null, when using gender and gender is empty string
         - col(gender)
-  - name: icu_admission
+  - name: ICU_ADMISSION
     columns:
       time: col(admission_timestamp)
       code:
         - col(unittype)
-  - name: age
+  - name: AGE
     columns:
       time: col(admission_timestamp)
       code:
-        - const("y")
+        - const(years)
       text_value: col(age)
-  - name: ethnicity
+  - name: ETHNICITY
     columns:
       time: col(admission_timestamp)
       code:
         - col(ethnicity)
-  - name: admissionheight
+  - name: SUBJECT_HEIGHT_AT_ICU_ADMIT
     columns:
       time: col(admission_timestamp)
       code:
-        - const("cm")
+        - const(cm)
       numeric_value: col(admissionheight)
-  - name: admissionweight
+  - name: SUBJECT_WEIGHT_AT_ICU_ADMIT
     columns:
       time: col(admission_timestamp)
       code:
-        - const("kg")
+        - const(kg)
       numeric_value: col(admissionweight)
-  - name: icu_discharge
+  - name: ICU_DISCHARGE
     columns:
       time: col(discharge_timestamp)
       code:
-        - const(unittype)
-  - name: dischargeweight
+        - col(unittype)
+  - name: SUBJECT_WEIGHT_AT_ICU_DISCHARGE
     columns:
       time: col(discharge_timestamp)
       code:
-        - const("kg")
+        - const(kg)
       numeric_value: col(dischargeweight)

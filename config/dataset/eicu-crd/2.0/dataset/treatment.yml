@@ -40,7 +40,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: treatment
+  - name: TREATMENT
     columns:
       text_value: col(treatmentstring)
     filters:

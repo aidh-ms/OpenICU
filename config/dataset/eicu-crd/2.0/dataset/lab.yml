@@ -48,7 +48,7 @@ event_defaults:
   extension:
     stay_id: col(patientunitstayid)
 events:
-  - name: labevent
+  - name: LAB
     columns:
       code:
         - col(labname)

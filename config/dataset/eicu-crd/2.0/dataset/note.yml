@@ -46,7 +46,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: note
+  - name: NOTE
     columns:
       code:
         - col(notetype)

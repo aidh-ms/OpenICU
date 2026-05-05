@@ -58,52 +58,52 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: noninvasivesystolic
+  - name: NON_INVASIVE_SYSTOLIC_BP
     columns:
       numeric_value: col(noninvasivesystolic)
     filters:
       - drop_na(numeric_value)
-  - name: noninvasivediastolic
+  - name: NON_INVASIVE_DIASTOLIC_BP
     columns:
       numeric_value: col(noninvasivediastolic)
     filters:
       - drop_na(numeric_value)
-  - name: noninvasivemean
+  - name: NON_INVASIVE_MEAN_BP
     columns:
       numeric_value: col(noninvasivemean)
     filters:
       - drop_na(numeric_value)
-  - name: paop
+  - name: PAOP
     columns:
       numeric_value: col(paop)
     filters:
       - drop_na(numeric_value)
-  - name: cardiacoutput
+  - name: CARDIAC_OUTPUT
     columns:
       numeric_value: col(cardiacoutput)
     filters:
       - drop_na(numeric_value)
-  - name: cardiacinput
+  - name: CARDIAC_INPUT
     columns:
       numeric_value: col(cardiacinput)
     filters:
       - drop_na(numeric_value)
-  - name: svr
+  - name: SVR
     columns:
       numeric_value: col(svr)
     filters:
       - drop_na(numeric_value)
-  - name: svri
+  - name: SVRI
     columns:
       numeric_value: col(svri)
     filters:
       - drop_na(numeric_value)
-  - name: pvr
+  - name: PVR
     columns:
       numeric_value: col(pvr)
     filters:
       - drop_na(numeric_value)
-  - name: pvri
+  - name: PVRI
     columns:
       numeric_value: col(pvri)
     filters:

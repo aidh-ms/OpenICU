@@ -44,7 +44,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: nursecare
+  - name: NURSE_CARE
     columns:
       code:
         - col(celllabel)

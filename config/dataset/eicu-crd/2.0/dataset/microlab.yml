@@ -46,7 +46,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: culture
+  - name: MICROBIOLOGY_ORGANISM
     columns:
       code:
         - col(culturesite)
@@ -54,7 +54,7 @@ events:
       text_value: col(sensitivitylevel)
     filters:
       - drop_na(culturesite)
-  - name: sensitivity
+  - name: MICROBIOLOGY_SUSCEPTIBILITY
     columns:
       code:
         - col(culturesite)

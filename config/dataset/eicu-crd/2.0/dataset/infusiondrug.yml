@@ -51,7 +51,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: patientweight
+  - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
       time: col(admission_timestamp)
       code:
@@ -59,7 +59,7 @@ events:
       text_value: col(patientweight)
     filters:
       - drop_na(text_value)
-  - name: drugamount
+  - name: INFUSION_AMOUNT
     columns:
       time: col(event_timestamp)
       code:
@@ -67,7 +67,7 @@ events:
       numeric_value: col(drugamount)
     filters:
       - drop_na(numeric_value)
-  - name: drugrate
+  - name: INFUSION_DRUG_RATE
     columns:
       time: col(event_timestamp)
       text_value: col(drugrate)
@@ -75,7 +75,7 @@ events:
         - col(drugname)
     filters:
       - drop_na(text_value)
-  - name: infusionrate
+  - name: INFUSION_RATE
     columns:
       time: col(event_timestamp)
       text_value: col(infusionrate)
@@ -83,7 +83,7 @@ events:
         - col(drugname)
     filters:
       - drop_na(text_value)
-  - name: volumeoffluid
+  - name: INFUSION_VOLUME
     columns:
       time: col(event_timestamp)
       text_value: col(volumeoffluid)

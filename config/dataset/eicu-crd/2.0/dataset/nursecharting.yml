@@ -46,7 +46,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: nursingchartevent
+  - name: NURSE_CHART
     columns:
       code:
         - col(nursingchartcelltypecat)

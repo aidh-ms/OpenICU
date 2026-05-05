@@ -52,27 +52,27 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: intaketotal
+  - name: INTAKE_TOTAL
     columns:
       code:
         - const("mL")
       numeric_value: col(intaketotal)
-  - name: outputtotal
+  - name: OUTPUT_TOTAL
     columns:
       code:
         - const("mL")
       numeric_value: col(outputtotal)
-  - name: dialysistotal
+  - name: DIALYSIS_TOTAL
     columns:
       code:
         - const("mL")
       numeric_value: col(dialysistotal)
-  - name: nettotal
+  - name: NET_TOTAL
     columns:
       code:
         - const("mL")
       numeric_value: col(nettotal)
-  - name: cellevent
+  - name: INTAKE_OUTPUT_CELL
     columns:
       code:
         - col(celllabel)

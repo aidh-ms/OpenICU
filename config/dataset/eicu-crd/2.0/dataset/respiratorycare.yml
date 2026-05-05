@@ -52,27 +52,27 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: airwaytype
+  - name: AIRWAY_TYPE
     columns:
       text_value: col(airwaytype)
     filters:
       - drop_na(text_value)
-  - name: airwaysize
+  - name: AIRWAY_SIZE
     columns:
       text_value: col(airwaysize)
     filters:
       - drop_na(text_value)
-  - name: airwayposition
+  - name: AIRWAY_POSITION
     columns:
       text_value: col(airwayposition)
     filters:
       - drop_na(text_value)
-  - name: cuffpressure
+  - name: CUFF_PRESSURE
     columns:
       numeric_value: col(cuffpressure)
     filters:
       - drop_na(numeric_value)
-  - name: ventstart
+  - name: VENT_START
     columns:
       time: col(ventstart_timestamp)
       code:
@@ -80,7 +80,7 @@ events:
       numeric_value: col(ventstartoffset)
     filters:
       - drop_na(numeric_value)
-  - name: ventend
+  - name: VENT_END
     columns:
       time: col(ventend_timestamp)
       code:

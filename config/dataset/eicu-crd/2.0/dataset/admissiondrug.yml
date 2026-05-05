@@ -46,7 +46,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: admissiondrug
+  - name: ADMISSION_MEDICATION
     columns:
       code:
         - col(drugname)

@@ -58,58 +58,58 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: apachescore
+  - name: APACHE_SCORE
     columns:
       code:
         - col(apacheversion)
       numeric_value: col(apachescore)
-  - name: acutephysiologyscore
+  - name: APACHE_APS_SCORE
     columns:
       code:
         - col(apacheversion)
       numeric_value: col(acutephysiologyscore)
-  - name: predictedicumortality
+  - name: APACHE_PREDICTED_ICU_MORTALITY
     columns:
       code:
         - col(apacheversion)
       numeric_value: col(predictedicumortality)
-  - name: actualicumortality
+  - name: APACHE_ACTUAL_ICU_MORTALITY
     columns:
       code:
         - col(apacheversion)
       text_value: col(actualicumortality)
-  - name: predictedhospitalmortality
+  - name: APACHE_PREDICTED_HOSPITAL_MORTALITY
     columns:
       code:
         - col(apacheversion)
       numeric_value: col(predictedhospitalmortality)
-  - name: actualhospitalmortality
+  - name: APACHE_ACTUAL_HOSPITAL_MORTALITY
     columns:
       code:
         - col(apacheversion)
       text_value: col(actualhospitalmortality)
-  - name: predictediculos
+  - name: APACHE_PREDICTED_ICU_LOS
     columns:
       code:
         - col(apacheversion)
       numeric_value: col(predictediculos)
-  - name: actualiculos
+  - name: APACHE_ACTUAL_ICU_LOS
     columns:
       numeric_value: col(actualiculos)
-  - name: predictedhospitallos
+  - name: APACHE_PREDICTED_HOSPITAL_LOS
     columns:
       code:
         - col(apacheversion)
       numeric_value: col(predictedhospitallos)
-  - name: actualhospitallos
+  - name: APACHE_ACTUAL_HOSPITAL_LOS
     columns:
       numeric_value: col(actualhospitallos)
-  - name: actualventdays
+  - name: APACHE_ACTUAL_VENT_DAYS
     columns:
       numeric_value: col(actualventdays)
     filters:
       - drop_na(numeric_value)
-  - name: predventdays
+  - name: APACHE_PREDICTED_VENT_DAYS
     columns:
       code:
         - col(apacheversion)

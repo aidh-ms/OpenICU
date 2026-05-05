@@ -80,119 +80,119 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: intubated
+  - name: APACHE_APS_INTUBATED
     columns:
       numeric_value: col(intubated)
-  - name: vent
+  - name: APACHE_APS_VENT
     columns:
       numeric_value: col(vent)
-  - name: dialysis
+  - name: APACHE_APS_DIALYSIS
     columns:
       numeric_value: col(dialysis)
-  - name: gcs_eyes
+  - name: APACHE_APS_GCS_EYES
     columns:
       code:
         - const("GCS")
       numeric_value: col(eyes)
     filters:
       - drop_na(numeric_value)
-  - name: gcs_motor
+  - name: APACHE_APS_GCS_MOTOR
     columns:
       code:
         - const("GCS")
       numeric_value: col(motor)
     filters:
       - drop_na(numeric_value)
-  - name: gcs_verbal
+  - name: APACHE_APS_GCS_VERBAL
     columns:
       code:
         - const("GCS")
       numeric_value: col(verbal)
     filters:
       - drop_na(numeric_value)
-  - name: urine
+  - name: APACHE_APS_URINE
     columns:
       code:
         - const("mL")
       numeric_value: col(urine)
     filters:
       - drop_na(numeric_value)
-  - name: wbc
+  - name: APACHE_APS_WBC
     columns:
       numeric_value: col(wbc)
     filters:
       - drop_na(numeric_value)
-  - name: temperature
+  - name: APACHE_APS_TEMPERATURE
     columns:
       numeric_value: col(temperature)
     filters:
       - drop_na(numeric_value)
-  - name: respiratoryrate
+  - name: APACHE_APS_RESPIRATORY_RATE
     columns:
       numeric_value: col(respiratoryrate)
     filters:
       - drop_na(numeric_value)
-  - name: sodium
+  - name: APACHE_APS_SODIUM
     columns:
       numeric_value: col(sodium)
     filters:
       - drop_na(numeric_value)
-  - name: heartrate
+  - name: APACHE_APS_HEART_RATE
     columns:
       numeric_value: col(heartrate)
     filters:
       - drop_na(numeric_value)
-  - name: meanbp
+  - name: APACHE_APS_MEAN_BP
     columns:
       numeric_value: col(meanbp)
     filters:
       - drop_na(numeric_value)
-  - name: ph
+  - name: APACHE_APS_PH
     columns:
       numeric_value: col(ph)
     filters:
       - drop_na(numeric_value)
-  - name: hematocrit
+  - name: APACHE_APS_HEMATOCRIT
     columns:
       numeric_value: col(hematocrit)
     filters:
       - drop_na(numeric_value)
-  - name: creatinine
+  - name: APACHE_APS_CREATININE
     columns:
       numeric_value: col(creatinine)
     filters:
       - drop_na(numeric_value)
-  - name: albumin
+  - name: APACHE_APS_ALBUMIN
     columns:
       numeric_value: col(albumin)
     filters:
       - drop_na(numeric_value)
-  - name: pao2
+  - name: APACHE_APS_PAO2
     columns:
       numeric_value: col(pao2)
     filters:
       - drop_na(numeric_value)
-  - name: pco2
+  - name: APACHE_APS_PCO2
     columns:
       numeric_value: col(pco2)
     filters:
       - drop_na(numeric_value)
-  - name: bun
+  - name: APACHE_APS_BUN
     columns:
       numeric_value: col(bun)
     filters:
       - drop_na(numeric_value)
-  - name: glucose
+  - name: APACHE_APS_GLUCOSE
     columns:
       numeric_value: col(glucose)
     filters:
       - drop_na(numeric_value)
-  - name: bilirubin
+  - name: APACHE_APS_BILIRUBIN
     columns:
       numeric_value: col(bilirubin)
     filters:
       - drop_na(numeric_value)
-  - name: fio2
+  - name: APACHE_APS_FIO2
     columns:
       numeric_value: col(fio2)
     filters:

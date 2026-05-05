@@ -44,14 +44,14 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: allergy
+  - name: ALLERGY
     columns:
       code:
         - col(allergytype)
       text_value: col(allergyname)
     filters:
       - drop_na(allergyname)
-  - name: drugallergy
+  - name: DRUG_ALLERGY
     columns:
       code:
         - col(allergytype)

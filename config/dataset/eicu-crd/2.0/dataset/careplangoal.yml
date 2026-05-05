@@ -44,7 +44,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: careplangoal
+  - name: CAREPLAN_GOAL
     columns:
       code:
         - col(cplgoalcategory)
