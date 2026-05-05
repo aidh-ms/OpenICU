@@ -6,7 +6,7 @@ callback transformations, join specifications, and event extraction rules.
 
 from abc import ABCMeta
 from enum import StrEnum, auto
-from typing import Any
+from typing import Any, ClassVar
 
 from polars.datatypes import DataTypeClass
 from pydantic import BaseModel, ConfigDict, Field, computed_field
@@ -126,7 +126,7 @@ class TableConfig(BaseDatasetConfig, BaseTableConfig):
         join: List of tables to join before event extraction
         events: List of MEDS events to extract from this table
     """
-    __open_icu_config_type__: str = "dataset"
+    __open_icu_config_type__: ClassVar[str] = "dataset"
 
     join: list[JoinTableConfig] = Field(
         default_factory=list,
