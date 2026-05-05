@@ -13,7 +13,7 @@ columns:
   - name: etco2 # etCo2
     type: int64
   - name: heartrate
-    type: float64 # decimal(x,y)
+    type: float32 # decimal(x,y)
   - name: padiastolic
     type: int64
   - name: pamean
@@ -39,7 +39,7 @@ columns:
   - name: systemicsystolic
     type: int64
   - name: temperature
-    type: float64 # decimal(x,y)
+    type: float32 # decimal(x,y)
   - name: vitalperiodicid
     type: int64
 

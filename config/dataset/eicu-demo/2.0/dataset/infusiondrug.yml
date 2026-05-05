@@ -9,7 +9,7 @@ columns:
     type: int64
   # db fields - values
   - name: drugamount
-    type: float64 # decimal(x,y)
+    type: float32 # decimal(x,y)
   - name: drugname
     type: string
   - name: drugrate
