@@ -9,25 +9,25 @@ columns:
     type: int64
   # db fields - values
   - name: noninvasivesystolic
-    type: float64
+    type: float32
   - name: noninvasivediastolic
-    type: float64
+    type: float32
   - name: noninvasivemean
-    type: float64
+    type: float32
   - name: paop
-    type: float64
+    type: float32
   - name: cardiacoutput
-    type: float64
+    type: float32
   - name: cardiacinput
-    type: float64
+    type: float32
   - name: svr
-    type: float64
+    type: float32
   - name: svri
-    type: float64
+    type: float32
   - name: pvr
-    type: float64
+    type: float32
   - name: pvri
-    type: float64
+    type: float32
 
 post_callbacks:
   - add_offset(admission_timestamp, observationoffset, event_timestamp)
@@ -49,13 +49,13 @@ join:
     both_on:
       - patientunitstayid
     callbacks:
-      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
-    hadm_id: const(-1)
+    hadm_id: const(None)
     stay_id: col(patientunitstayid)
 
 events:

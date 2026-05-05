@@ -9,17 +9,17 @@ columns:
     type: int64
   # db fields - values
   - name: intaketotal
-    type: float64
+    type: float32
   - name: outputtotal
-    type: float64
+    type: float32
   - name: dialysistotal
-    type: float64
+    type: float32
   - name: nettotal
-    type: float64
+    type: float32
   - name: celllabel
     type: string
   - name: cellvaluenumeric
-    type: float64
+    type: float32
   - name: cellvaluetext
     type: string
 
@@ -43,13 +43,13 @@ join:
     both_on:
       - patientunitstayid
     callbacks:
-      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
-    hadm_id: const(-1)
+    hadm_id: const(None)
     stay_id: col(patientunitstayid)
 
 events:
