@@ -110,17 +110,19 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 # Rename columns
                 columns = event.columns.model_dump()
                 extension = columns.pop("extension")
-                mapping = {
-                    col_expr: col_name
-                    for col_name, col_expr in columns.items()
-                    if col_expr is not None and not isinstance(col_expr, list)
-                } | {
-                    col_expr: col_name
-                    for col_name, col_expr in extension.items()
-                    if col_expr is not None
-                }
-                for col_expr, col_name in mapping.items():
-                    event_lf = event_lf.with_columns(parse_expr(event_lf, col_expr).alias(col_name))
+                for col_name, col_expr in columns.items():
+                    if col_name == "extension":
+                        continue
+                    if col_expr is not None and not isinstance(col_expr, list):
+                        event_lf = event_lf.with_columns(
+                            parse_expr(event_lf, col_expr).alias(col_name)
+                        )
+
+                for col_name, col_expr in extension.items():
+                    if col_expr is not None:
+                        event_lf = event_lf.with_columns(
+                            parse_expr(event_lf, col_expr).alias(col_name)
+                        )
 
                 # Create code column by concatenating code columns
                 code_prefix = pl.lit("//".join(event_identifier))
