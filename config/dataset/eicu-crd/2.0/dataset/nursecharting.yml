@@ -4,6 +4,8 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: nursingchartid
+    type: int64
   # db fields - times
   - name: nursingchartoffset
     type: int64
@@ -44,6 +46,7 @@ event_defaults:
   time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    nursingchart_id: col(nursingchartid)
 
 events:
   - name: NURSE_CHART
