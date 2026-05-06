@@ -67,13 +67,13 @@ class AddOffset(CallbackProtocol):
         self,
         datetime: AstValue,
         offset: AstValue,
-        output: Optional[str] = None,
         offset_unit: str = "minutes",
+        output: Optional[str] = None,
     ) -> None:
         self.datetime = datetime
         self.offset = offset
-        self.output = output
         self.offset_unit = offset_unit
+        self.output = output
 
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
