@@ -42,6 +42,4 @@ event_defaults:
 events:
   - name: TREATMENT
     columns:
-      text_value: col(treatmentstring)
-    filters:
-      - drop_na(treatmentstring)
+      code: col(treatmentstring)
