@@ -64,6 +64,7 @@ columns:
 post_callbacks:
   - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, output=discharge_timestamp)
+  - add_offset(admission_timestamp, age * 365.25, offset_unit="days", output=birth_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
@@ -82,12 +83,14 @@ events:
       time: col(admission_timestamp)
       code:
         - col(unittype)
-  - name: AGE
+      extension:
+        - available_time: col(admission_timestamp)
+
+  - name: MEDS_BIRTH
     columns:
-      time: col(admission_timestamp)
-      code:
-        - const(years)
-      text_value: col(age)
+      time: col(birth_timestamp)
+    # TODO: deduplicate via a callback
+
   - name: ETHNICITY
     columns:
       time: col(admission_timestamp)
