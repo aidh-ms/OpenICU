@@ -5,16 +5,26 @@ columns:
   - name: patientunitstayid
     type: int64
   # db columns - times
+  - name: drugorderoffset
+    type: int64
   - name: drugstartoffset
+    type: int64
+  - name: drugstopoffset
     type: int64
   # db columns - values
   - name: drugname
     type: str
   - name: dosage
     type: str
+  - name: routeAdmin
+    type: str
+  - name: frequency
+    type: str
 
 post_callbacks:
-  - add_offset(admission_timestamp, drugstartoffset, output=event_timestamp)
+  - add_offset(admission_timestamp, drugorderoffset, output=order_timestamp)
+  - add_offset(admission_timestamp, drugstartoffset, output=start_timestamp)
+  - add_offset(admission_timestamp, drugstopoffset, output=stop_timestamp)
 
 join:
   - name: patient
@@ -40,13 +50,21 @@ join:
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
-  time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
 
 events:
   - name: MEDICATION_ORDER
     columns:
+      time: col(order_timestamp)
       code:
         - col(drugname)
-      text_value: col(dosage)
+      extension:
+        prescribed_start: col(start_timestamp)
+        prescribed_end: col(stop_timestamp)
+        dose: col(dosage)
+        frequency: col(frequency)
+        route: col(routeAdmin)
+    filters:
+      # NOTE: drugname is not available for all rows. These are dropped for now (might need to be revisited)
+      - drop_na(drugname)
