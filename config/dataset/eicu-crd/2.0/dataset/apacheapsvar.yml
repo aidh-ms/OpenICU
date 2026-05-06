@@ -20,39 +20,39 @@ columns:
     type: int64
   # lab/vital values
   - name: urine
-    type: float64
+    type: float32
   - name: wbc
-    type: float64
+    type: float32
   - name: temperature
-    type: float64
+    type: float32
   - name: respiratoryrate
-    type: float64
+    type: float32
   - name: sodium
-    type: int64
+    type: float32
   - name: heartrate
     type: int64
   - name: meanbp
-    type: int64
+    type: float
   - name: ph
-    type: float64
+    type: float32
   - name: hematocrit
-    type: float64
+    type: float32
   - name: creatinine
-    type: float64
+    type: float32
   - name: albumin
-    type: float64
+    type: float32
   - name: pao2
-    type: float64
+    type: float32
   - name: pco2
-    type: float64
+    type: float32
   - name: bun
-    type: int64
+    type: float32
   - name: glucose
-    type: int64
+    type: float32
   - name: bilirubin
-    type: float64
+    type: float32
   - name: fio2
-    type: float64
+    type: float32
 
 join:
   - name: patient
@@ -71,13 +71,13 @@ join:
     both_on:
       - patientunitstayid
     callbacks:
-      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(admission_timestamp)
   extension:
-    hadm_id: const(-1)
+    hadm_id: const(None)
     stay_id: col(patientunitstayid)
 
 events:
