@@ -4,6 +4,8 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: respcareid
+    type: int64
   # db fields - times
   - name: respcarestatusoffset
     type: int64
@@ -22,7 +24,7 @@ columns:
     type: float64
 
 post_callbacks:
-  - add_offset(admission_timestamp, respcarestatusoffset, event_timestamp)
+  - add_offset(admission_timestamp, respcarestatusoffset, enter_timestamp)
   - add_offset(admission_timestamp, ventstartoffset, ventstart_timestamp)
   - add_offset(admission_timestamp, ventendoffset, ventend_timestamp)
 
@@ -47,44 +49,26 @@ join:
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
-  time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    respcare_id: col(respcareid)
 
 events:
-  - name: AIRWAY_TYPE
-    columns:
-      text_value: col(airwaytype)
-    filters:
-      - drop_na(text_value)
-  - name: AIRWAY_SIZE
-    columns:
-      text_value: col(airwaysize)
-    filters:
-      - drop_na(text_value)
-  - name: AIRWAY_POSITION
-    columns:
-      text_value: col(airwayposition)
-    filters:
-      - drop_na(text_value)
-  - name: CUFF_PRESSURE
-    columns:
-      numeric_value: col(cuffpressure)
-    filters:
-      - drop_na(numeric_value)
-  - name: VENT_START
+  - name: VENTILATION_START
     columns:
       time: col(ventstart_timestamp)
       code:
-        - const("ventstart_offset_min")
-      numeric_value: col(ventstartoffset)
-    filters:
-      - drop_na(numeric_value)
-  - name: VENT_END
+        - col(airwaytype)
+      extension:
+        available_time: col(enter_timestamp)
+        airwaysize: col(airwaysize)
+        airwayposition: col(airwayposition)
+        cuffpressure: col(cuffpressure)
+
+  - name: VENTILATION_END
     columns:
       time: col(ventend_timestamp)
       code:
-        - const("ventend_offset_min")
-      numeric_value: col(ventendoffset)
-    filters:
-      - drop_na(numeric_value)
+        - col(airwaytype)
+    # TODO: drop ventendoffset == 0
+    # TODO: this currently does not consider cases where ventend_timestamp < enter_timestamp
