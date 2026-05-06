@@ -78,16 +78,20 @@ class AddOffset(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         offset_expr = to_expr(lf, self.offset)
-        expr = to_expr(lf, self.datetime)
 
-        if self.offset_unit == "minutes":
-            expr = expr + pl.duration(minutes=offset_expr)
-        elif self.offset_unit == "hours":
-            expr = expr + pl.duration(hours=offset_expr)
-        elif self.offset_unit == "days":
-            expr = expr + pl.duration(days=offset_expr)
-        else:
+        if self.offset_unit not in [
+            "weeks",
+            "days",
+            "hours",
+            "minutes",
+            "seconds",
+            "milliseconds",
+            "microseconds",
+            "nanoseconds",
+        ]:
             raise ValueError(f"Unsupported offset_unit: {self.offset_unit}")
+
+        expr = to_expr(lf, self.datetime) + pl.duration(**{self.offset_unit: offset_expr})  # ty: ignore[invalid-argument-type]
 
         if self.output is None:
             return expr
