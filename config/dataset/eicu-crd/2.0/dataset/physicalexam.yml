@@ -49,5 +49,3 @@ events:
       code:
         - col(physicalexampath)
       text_value: col(physicalexamtext)
-    filters:
-      - drop_na(physicalexampath)
