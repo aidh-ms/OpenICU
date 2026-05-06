@@ -49,7 +49,8 @@ events:
       code:
       # TODO: icd9code may contain both ICD-9 and ICD-10 codes. We should separate them into two columns.
         - col(icd9code)
-        - col(diagnosispriority)
       text_value: col(diagnosisstring)
+      extension:
+        diagnosispriority: col(diagnosispriority)
     filters:
       - drop_na(diagnosisstring)
