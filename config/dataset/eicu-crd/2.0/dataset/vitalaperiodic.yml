@@ -30,7 +30,7 @@ columns:
     type: float32
 
 post_callbacks:
-  - add_offset(admission_timestamp, observationoffset, event_timestamp)
+  - add_offset(admission_timestamp, observationoffset, output=event_timestamp)
 
 join:
   - name: patient

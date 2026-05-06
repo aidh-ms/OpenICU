@@ -14,7 +14,7 @@ columns:
     type: string
 
 post_callbacks:
-  - add_offset(admission_timestamp, cplitemoffset, event_timestamp)
+  - add_offset(admission_timestamp, cplitemoffset, output=event_timestamp)
 
 join:
   - name: patient
