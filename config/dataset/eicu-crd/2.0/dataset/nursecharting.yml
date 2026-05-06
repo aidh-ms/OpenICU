@@ -55,6 +55,8 @@ events:
         - col(nursingchartcelltypecat)
         - col(nursingchartcelltypevallabel)
         - col(nursingchartcelltypevalname)
+      # TODO: ensure that numeric_value parses to number or null otherwise
+      numeric_value: col(nursingchartvalue)
       text_value: col(nursingchartvalue)
     filters:
       - drop_na(nursingchartvalue)
