@@ -44,10 +44,7 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: ADMISSION_DIAGNOSIS
+  - name: DIAGNOSIS
     columns:
       code:
-        - col(admitdxname)
-      text_value: col(admitdxtext)
-    filters:
-      - drop_na(admitdxname)
+        - col(admitdxpath)

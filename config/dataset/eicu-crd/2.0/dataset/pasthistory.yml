@@ -44,10 +44,8 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: PAST_HISTORY
+  - name: HISTORY
     columns:
       code:
         - col(pasthistorypath)
-      text_value: col(pasthistoryvaluetext)
-    filters:
-      - drop_na(pasthistorypath)
+      text_value: col(pasthistoryvalue)
