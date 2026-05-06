@@ -17,7 +17,7 @@ columns:
   - name: infusionrate
     type: string
   - name: patientweight
-    type: string
+    type: float64
   - name: volumeoffluid
     type: string
 post_callbacks:
@@ -53,41 +53,20 @@ event_defaults:
 events:
   - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
-      time: col(admission_timestamp)
-      code:
-        - const("kg")
-      text_value: col(patientweight)
-    filters:
-      - drop_na(text_value)
-  - name: INFUSION_AMOUNT
-    columns:
       time: col(event_timestamp)
       code:
-        - col(drugname)
-      numeric_value: col(drugamount)
+        - const(kg)
+      numeric_value: col(patientweight)
     filters:
       - drop_na(numeric_value)
-  - name: INFUSION_DRUG_RATE
+
+  - name: INFUSION
     columns:
       time: col(event_timestamp)
-      text_value: col(drugrate)
       code:
         - col(drugname)
-    filters:
-      - drop_na(text_value)
-  - name: INFUSION_RATE
-    columns:
-      time: col(event_timestamp)
-      text_value: col(infusionrate)
-      code:
-        - col(drugname)
-    filters:
-      - drop_na(text_value)
-  - name: INFUSION_VOLUME
-    columns:
-      time: col(event_timestamp)
-      text_value: col(volumeoffluid)
-      code:
-        - col(drugname)
-    filters:
-      - drop_na(text_value)
+    extension:
+      drugrate: col(drugrate)
+      infusionrate: col(infusionrate)
+      drugamount: col(drugamount)
+      volume: col(volumeoffluid)
