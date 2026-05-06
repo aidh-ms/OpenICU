@@ -48,6 +48,7 @@ events:
     columns:
       code:
         - col(labothername)
+      numeric_value: col(labotherresult)
       text_value: col(labothervaluetext)
     filters:
       - drop_na(labothername)
