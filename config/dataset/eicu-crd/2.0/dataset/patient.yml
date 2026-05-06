@@ -96,26 +96,41 @@ events:
       time: col(admission_timestamp)
       code:
         - col(ethnicity)
-  - name: SUBJECT_HEIGHT_AT_ICU_ADMIT
+      extension:
+        - available_time: col(admission_timestamp)
+
+  - name: SUBJECT_HEIGHT
     columns:
       time: col(admission_timestamp)
       code:
         - const(cm)
       numeric_value: col(admissionheight)
-  - name: SUBJECT_WEIGHT_AT_ICU_ADMIT
+      extension:
+        - available_time: col(admission_timestamp)
+
+  - name: SUBJECT_WEIGHT
     columns:
       time: col(admission_timestamp)
       code:
         - const(kg)
       numeric_value: col(admissionweight)
+      extension:
+        - available_time: col(admission_timestamp)
+
   - name: ICU_DISCHARGE
     columns:
       time: col(discharge_timestamp)
       code:
         - col(unittype)
-  - name: SUBJECT_WEIGHT_AT_ICU_DISCHARGE
+      extension:
+        - available_time: col(discharge_timestamp)
+
+  # TODO: Can OpenICU deal with two events with the same name?
+  - name: SUBJECT_WEIGHT
     columns:
       time: col(discharge_timestamp)
       code:
         - const(kg)
       numeric_value: col(dischargeweight)
+      extension:
+        - available_time: col(discharge_timestamp)

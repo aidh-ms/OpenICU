@@ -75,6 +75,7 @@ event_defaults:
   extension:
     stay_id: col(patientunitstayid)
     vitalperiodicid: col(vitalperiodicid)
+    available_time: col(event_timestamp)
 
 events:
   # TODO: can we preface all of these with VITAL//
