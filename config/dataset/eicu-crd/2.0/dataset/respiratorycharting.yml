@@ -4,8 +4,12 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: respchartid
+    type: int64
   # db fields - times
   - name: respchartoffset
+    type: int64
+  - name: respchartentryoffset
     type: int64
   # db fields - values
   - name: respcharttypecat
@@ -17,6 +21,7 @@ columns:
 
 post_callbacks:
   - add_offset(admission_timestamp, respchartoffset, event_timestamp)
+  - add_offset(admission_timestamp, respchartentryoffset, enter_timestamp)
 
 join:
   - name: patient
@@ -42,6 +47,7 @@ event_defaults:
   time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    respchart_id: col(respchartid)
 
 events:
   - name: RESPIRATORY_CHART
@@ -49,6 +55,8 @@ events:
       code:
         - col(respcharttypecat)
         - col(respchartvaluelabel)
+      # TODO: make sure this casts as a number, setting to null if it doesn't
+      numeric_value: col(respchartvalue)
       text_value: col(respchartvalue)
-    filters:
-      - drop_na(respchartvalue)
+      extension:
+        available_time: col(enter_timestamp)
