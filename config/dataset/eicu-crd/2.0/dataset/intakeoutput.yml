@@ -4,6 +4,8 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: intakeoutputid
+    type: int64
   # db fields - times
   - name: intakeoutputoffset
     type: int64
@@ -25,6 +27,7 @@ columns:
 
 post_callbacks:
   - add_offset(admission_timestamp, intakeoutputoffset, event_timestamp)
+  - add_offset(admission_timestamp, intakeoutputentryoffset, entry_timestamp)
 
 join:
   - name: patient
@@ -50,33 +53,13 @@ event_defaults:
   time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    intakeoutput_id: col(intakeoutputid)
+    available_time: col(entry_timestamp)
 
 events:
-  - name: INTAKE_TOTAL
+  - name: INTAKE_OUTPUT
     columns:
       code:
-        - const("mL")
-      numeric_value: col(intaketotal)
-  - name: OUTPUT_TOTAL
-    columns:
-      code:
-        - const("mL")
-      numeric_value: col(outputtotal)
-  - name: DIALYSIS_TOTAL
-    columns:
-      code:
-        - const("mL")
-      numeric_value: col(dialysistotal)
-  - name: NET_TOTAL
-    columns:
-      code:
-        - const("mL")
-      numeric_value: col(nettotal)
-  - name: INTAKE_OUTPUT_CELL
-    columns:
-      code:
-        - col(celllabel)
+        - col(cellpath)
       numeric_value: col(cellvaluenumeric)
       text_value: col(cellvaluetext)
-    filters:
-      - drop_na(celllabel)
