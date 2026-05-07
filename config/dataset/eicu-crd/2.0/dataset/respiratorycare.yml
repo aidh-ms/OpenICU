@@ -24,9 +24,9 @@ columns:
     type: float32
 
 post_callbacks:
-  - add_offset(admission_timestamp, respcarestatusoffset, enter_timestamp)
-  - add_offset(admission_timestamp, ventstartoffset, ventstart_timestamp)
-  - add_offset(admission_timestamp, ventendoffset, ventend_timestamp)
+  - add_offset(admission_timestamp, respcarestatusoffset, output=entered_timestamp)
+  - add_offset(admission_timestamp, ventstartoffset, output=ventstart_timestamp)
+  - add_offset(admission_timestamp, ventendoffset, output=ventend_timestamp)
 
 join:
   - name: patient
@@ -60,7 +60,7 @@ events:
       code:
         - col(airwaytype)
       extension:
-        available_time: col(enter_timestamp)
+        available_time: col(entered_timestamp)
         airwaysize: col(airwaysize)
         airwayposition: col(airwayposition)
         cuffpressure: col(cuffpressure)

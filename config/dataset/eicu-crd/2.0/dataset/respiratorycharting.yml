@@ -20,8 +20,8 @@ columns:
     type: string
 
 post_callbacks:
-  - add_offset(admission_timestamp, respchartoffset, event_timestamp)
-  - add_offset(admission_timestamp, respchartentryoffset, enter_timestamp)
+  - add_offset(admission_timestamp, respchartoffset, output=event_timestamp)
+  - add_offset(admission_timestamp, respchartentryoffset, output=entered_timestamp)
 
 join:
   - name: patient

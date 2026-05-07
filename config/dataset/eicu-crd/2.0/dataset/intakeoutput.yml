@@ -30,8 +30,8 @@ columns:
     type: string
 
 post_callbacks:
-  - add_offset(admission_timestamp, intakeoutputoffset, event_timestamp)
-  - add_offset(admission_timestamp, intakeoutputentryoffset, entry_timestamp)
+  - add_offset(admission_timestamp, intakeoutputoffset, output=event_timestamp)
+  - add_offset(admission_timestamp, intakeoutputentryoffset, output=entered_timestamp)
 
 join:
   - name: patient
@@ -58,7 +58,7 @@ event_defaults:
   extension:
     stay_id: col(patientunitstayid)
     intakeoutput_id: col(intakeoutputid)
-    available_time: col(entry_timestamp)
+    available_time: col(entered_timestamp)
 
 events:
   - name: INTAKE_OUTPUT
