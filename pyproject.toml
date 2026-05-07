@@ -42,11 +42,11 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "jupyterlab>=4.4.3",
+    "jupyterlab>=4.5.7",
     "pytest>=9.0.3",
     "pytest-cov>=6.2.1",
-    "ruff>=0.15.11",
-    "ty>=0.0.32",
+    "ruff>=0.15.12",
+    "ty>=0.0.34",
 ]
 docs = [
     "mkdocs>=1.6.1",

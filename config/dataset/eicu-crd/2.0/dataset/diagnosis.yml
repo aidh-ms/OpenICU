@@ -16,7 +16,7 @@ columns:
     type: string
 
 post_callbacks:
-  - add_offset(admission_timestamp, diagnosisoffset, event_timestamp)
+  - add_offset(admission_timestamp, diagnosisoffset, output=event_timestamp)
 
 join:
   - name: patient
@@ -35,6 +35,7 @@ join:
     both_on:
       - patientunitstayid
     callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:

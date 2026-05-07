@@ -13,11 +13,11 @@ columns:
     type: int64
   # db fields - values
   - name: intaketotal
-    type: float64
+    type: float32
   - name: outputtotal
-    type: float64
+    type: float32
   - name: dialysistotal
-    type: float64
+    type: float32
   - name: nettotal
     type: float64
   - name: cellpath
@@ -25,7 +25,7 @@ columns:
   - name: celllabel
     type: string
   - name: cellvaluenumeric
-    type: float64
+    type: float32
   - name: cellvaluetext
     type: string
 

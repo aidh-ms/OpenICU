@@ -23,15 +23,15 @@ columns:
     type: string
   # db fields - values
   - name: admissionheight
-    type: float64 # decimal(x,y) # decimal(10,2)
+    type: float32 # decimal(x,y) # decimal(10,2)
   - name: admissionweight
-    type: float64 # decimal(x,y)
+    type: float32 # decimal(x,y)
   - name: age
     type: string
   - name: apacheadmissiondx
     type: string
   - name: dischargeweight
-    type: float64 # decimal(x,y)
+    type: float32 # decimal(x,y)
   - name: ethnicity
     type: string
   - name: gender

@@ -11,28 +11,28 @@ columns:
     type: int64
   # db fields - values
   - name: noninvasivesystolic
-    type: float64
+    type: float32
   - name: noninvasivediastolic
-    type: float64
+    type: float32
   - name: noninvasivemean
-    type: float64
+    type: float32
   - name: paop
-    type: float64
+    type: float32
   - name: cardiacoutput
-    type: float64
+    type: float32
   - name: cardiacinput
-    type: float64
+    type: float32
   - name: svr
-    type: float64
+    type: float32
   - name: svri
-    type: float64
+    type: float32
   - name: pvr
-    type: float64
+    type: float32
   - name: pvri
-    type: float64
+    type: float32
 
 post_callbacks:
-  - add_offset(admission_timestamp, observationoffset, event_timestamp)
+  - add_offset(admission_timestamp, observationoffset, output=event_timestamp)
 
 join:
   - name: patient

@@ -21,7 +21,7 @@ columns:
   - name: airwayposition
     type: string
   - name: cuffpressure
-    type: float64
+    type: float32
 
 post_callbacks:
   - add_offset(admission_timestamp, respcarestatusoffset, enter_timestamp)
