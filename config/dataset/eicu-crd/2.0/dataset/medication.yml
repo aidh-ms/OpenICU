@@ -16,7 +16,7 @@ columns:
     type: str
   - name: dosage
     type: str
-  - name: routeAdmin
+  - name: routeadmin
     type: str
   - name: frequency
     type: str
@@ -64,7 +64,7 @@ events:
         prescribed_end: col(stop_timestamp)
         dose: col(dosage)
         frequency: col(frequency)
-        route: col(routeAdmin)
+        route: col(routeadmin)
     filters:
       # NOTE: drugname is not available for all rows. These are dropped for now (might need to be revisited)
       - drop_na(drugname)

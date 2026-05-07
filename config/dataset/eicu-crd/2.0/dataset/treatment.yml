@@ -42,4 +42,5 @@ event_defaults:
 events:
   - name: TREATMENT
     columns:
-      code: col(treatmentstring)
+      code:
+        - col(treatmentstring)

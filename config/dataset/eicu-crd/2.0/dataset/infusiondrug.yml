@@ -65,8 +65,8 @@ events:
       time: col(event_timestamp)
       code:
         - col(drugname)
-    extension:
-      drugrate: col(drugrate)
-      infusionrate: col(infusionrate)
-      drugamount: col(drugamount)
-      volume: col(volumeoffluid)
+      extension:
+        drugrate: col(drugrate)
+        infusionrate: col(infusionrate)
+        drugamount: col(drugamount)
+        volume: col(volumeoffluid)

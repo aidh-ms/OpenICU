@@ -9,6 +9,8 @@ columns:
   # db fields - times
   - name: intakeoutputoffset
     type: int64
+  - name: intakeoutputentryoffset
+    type: int64
   # db fields - values
   - name: intaketotal
     type: float64
@@ -18,6 +20,8 @@ columns:
     type: float64
   - name: nettotal
     type: float64
+  - name: cellpath
+    type: string
   - name: celllabel
     type: string
   - name: cellvaluenumeric

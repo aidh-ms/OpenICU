@@ -94,7 +94,7 @@ events:
       numeric_value: col(temperature)
     filters:
       - drop_na(temperature)
-  - name: O2_SATURATION_PUlSE_OXIMETRY
+  - name: O2_SATURATION_PULSE_OXIMETRY
     columns:
       code:
         - const(%)
