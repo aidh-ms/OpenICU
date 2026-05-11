@@ -45,9 +45,9 @@ columns:
   - name: patientweight
     type: float32
   - name: isopenbag
-    type: boolean
+    type: int8
   - name: continueinnextdept
-    type: boolean
+    type: int8
   - name: statusdescription
     type: string
   - name: originalamount
@@ -88,7 +88,7 @@ events:
         - col(itemid)
         - col(label)
       extension:
-        available_time: max(col(storetime), col(starttime))
+        available_time: max(storetime, starttime, output=available_time)
         location: col(location)
         locationcategory: col(locationcategory)
         ordercategoryname: col(ordercategoryname)
@@ -103,7 +103,7 @@ events:
         - col(label)
       text_value: col(statusdescription)
       extension:
-        available_time: max(col(storetime), col(endtime))
+        available_time: max(storetime, endtime, output=available_time)
         value: col(value)
         valueuom: col(valueuom)
         continueinnextdept: col(continueinnextdept)

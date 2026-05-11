@@ -53,9 +53,9 @@ columns:
   - name: totalamountuom
     type: string
   - name: isopenbag
-    type: boolean
+    type: int8
   - name: continueinnextdept
-    type: boolean
+    type: int8
   - name: statusdescription
     type: string
   - name: originalamount
@@ -95,7 +95,7 @@ events:
         - col(itemid)
         - col(label)
       extension:
-        available_time: max(col(storetime), col(starttime))
+        available_time: max(storetime, starttime, output=acailable_time)
         ordercategoryname: col(ordercategoryname)
         secondaryordercategoryname: col(secondaryordercategoryname)
         ordercomponenttypedescription: col(ordercomponenttypedescription)
@@ -116,7 +116,7 @@ events:
         - col(label)
       text_value: col(statusdescription)
       extension:
-        available_time: max(col(storetime), col(endtime))
+        available_time: max(storetime, endtime, output=available_time)
         rate: col(rate)
         rateuom: col(rateuom)
         amount: col(amount)
