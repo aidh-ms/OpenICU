@@ -16,7 +16,7 @@ columns:
     type: string
 
 post_callbacks:
-  - add_offset(admission_timestamp, admitdxenteredoffset, output=event_timestamp)
+  - add_offset(admission_timestamp, admitdxenteredoffset, output=entered_timestamp)
 
 join:
   - name: patient
@@ -39,16 +39,13 @@ join:
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
-  time: col(event_timestamp)
+  time: col(admission_timestamp)
   extension:
-    hadm_id: const(None)
     stay_id: col(patientunitstayid)
+    available_time: col(entered_timestamp)
 
 events:
-  - name: admissiondx
+  - name: DIAGNOSIS
     columns:
       code:
-        - col(admitdxname)
-      text_value: col(admitdxtext)
-    filters:
-      - drop_na(admitdxname)
+        - col(admitdxpath)

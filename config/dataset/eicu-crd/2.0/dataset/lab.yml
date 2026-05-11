@@ -4,6 +4,8 @@ columns:
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
+  - name: labid
+    type: int64
   # db columns - times
   - name: labresultoffset
     type: int64
@@ -47,8 +49,10 @@ event_defaults:
   time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    lab_id: col(labid)
+
 events:
-  - name: labevent
+  - name: LAB
     columns:
       code:
         - col(labname)

@@ -4,6 +4,8 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: nursingchartid
+    type: int64
   # db fields - times
   - name: nursingchartoffset
     type: int64
@@ -43,16 +45,18 @@ event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
-    hadm_id: const(None)
     stay_id: col(patientunitstayid)
+    nursingchart_id: col(nursingchartid)
 
 events:
-  - name: nursingchartevent
+  - name: NURSE_CHART
     columns:
       code:
         - col(nursingchartcelltypecat)
         - col(nursingchartcelltypevallabel)
         - col(nursingchartcelltypevalname)
+      # TODO: ensure that numeric_value parses to number or null otherwise
+      numeric_value: col(nursingchartvalue)
       text_value: col(nursingchartvalue)
     filters:
       - drop_na(nursingchartvalue)

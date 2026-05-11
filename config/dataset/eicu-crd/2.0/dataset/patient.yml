@@ -64,6 +64,7 @@ columns:
 post_callbacks:
   - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, output=discharge_timestamp)
+  - add_offset(admission_timestamp, age * 365.25, offset_unit="days", output=birth_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
@@ -71,48 +72,64 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: gender
+  - name: GENDER
     columns:
-      # TODO: suggest and maybe change time birthdate
-      time: col(admission_timestamp)
+      time: col(birth_timestamp)
       code: # codes is null, when using gender and gender is empty string
         - col(gender)
-  - name: icu_admission
+  - name: ICU_ADMISSION
     columns:
       time: col(admission_timestamp)
       code:
         - col(unittype)
-  - name: age
+      extension:
+        available_time: col(admission_timestamp)
+
+  - name: MEDS_BIRTH
     columns:
-      time: col(admission_timestamp)
-      code:
-        - const("y")
-      text_value: col(age)
-  - name: ethnicity
+      time: col(birth_timestamp)
+    # TODO: deduplicate via a callback
+
+  - name: ETHNICITY
     columns:
       time: col(admission_timestamp)
       code:
         - col(ethnicity)
-  - name: admissionheight
+      extension:
+        available_time: col(admission_timestamp)
+
+  - name: SUBJECT_HEIGHT
     columns:
       time: col(admission_timestamp)
       code:
-        - const("cm")
+        - const(cm)
       numeric_value: col(admissionheight)
-  - name: admissionweight
+      extension:
+        available_time: col(admission_timestamp)
+
+  - name: SUBJECT_WEIGHT
     columns:
       time: col(admission_timestamp)
       code:
-        - const("kg")
+        - const(kg)
       numeric_value: col(admissionweight)
-  - name: icu_discharge
+      extension:
+        available_time: col(admission_timestamp)
+
+  - name: ICU_DISCHARGE
     columns:
       time: col(discharge_timestamp)
       code:
-        - const(unittype)
-  - name: dischargeweight
+        - col(unittype)
+      extension:
+        available_time: col(discharge_timestamp)
+
+  # TODO: Can OpenICU deal with two events with the same name?
+  - name: SUBJECT_WEIGHT
     columns:
       time: col(discharge_timestamp)
       code:
-        - const("kg")
+        - const(kg)
       numeric_value: col(dischargeweight)
+      extension:
+        available_time: col(discharge_timestamp)

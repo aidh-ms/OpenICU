@@ -36,20 +36,22 @@ join:
       - patientunitstayid
     callbacks:
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
-    hadm_id: const(None)
     stay_id: col(patientunitstayid)
 
 events:
-  - name: diagnosis
+  - name: DIAGNOSIS
     columns:
       code:
+      # TODO: icd9code may contain both ICD-9 and ICD-10 codes. We should separate them into two columns.
         - col(icd9code)
-        - col(diagnosispriority)
       text_value: col(diagnosisstring)
+      extension:
+        diagnosispriority: col(diagnosispriority)
     filters:
       - drop_na(diagnosisstring)
