@@ -63,14 +63,35 @@ class ToDatetime(CallbackProtocol):
 
 @register_callback_cls
 class AddOffset(CallbackProtocol):
-    def __init__(self, datetime: AstValue, offset: AstValue, output: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        datetime: AstValue,
+        offset: AstValue,
+        offset_unit: str = "minutes",
+        output: Optional[str] = None,
+    ) -> None:
         self.datetime = datetime
         self.offset = offset
+        self.offset_unit = offset_unit
         self.output = output
 
+
     def __call__(self, lf: LazyFrame) -> CallbackResult:
-        offset_expr = pl.duration(minutes=to_expr(lf, self.offset).abs())
-        expr = to_expr(lf, self.datetime) + offset_expr
+        offset_expr = to_expr(lf, self.offset)
+
+        if self.offset_unit not in [
+            "weeks",
+            "days",
+            "hours",
+            "minutes",
+            "seconds",
+            "milliseconds",
+            "microseconds",
+            "nanoseconds",
+        ]:
+            raise ValueError(f"Unsupported offset_unit: {self.offset_unit}")
+
+        expr = to_expr(lf, self.datetime) + pl.duration(**{self.offset_unit: offset_expr})  # ty: ignore[invalid-argument-type]
 
         if self.output is None:
             return expr

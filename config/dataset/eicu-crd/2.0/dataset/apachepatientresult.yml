@@ -12,25 +12,25 @@ columns:
   - name: apachescore
     type: int64
   - name: predictedicumortality
-    type: float64
+    type: float32
   - name: actualicumortality
     type: string
   - name: predictediculos
-    type: float64
+    type: float32
   - name: actualiculos
-    type: float64
+    type: float32
   - name: predictedhospitalmortality
-    type: float64
+    type: float32
   - name: actualhospitalmortality
     type: string
   - name: predictedhospitallos
-    type: float64
+    type: float32
   - name: actualhospitallos
-    type: float64
+    type: float32
   - name: actualventdays
-    type: float64
+    type: float32
   - name: predventdays
-    type: float64
+    type: float32
 
 join:
   - name: patient
@@ -49,13 +49,13 @@ join:
     both_on:
       - patientunitstayid
     callbacks:
-      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, admission_timestamp)
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(admission_timestamp)
   extension:
-    hadm_id: const(-1)
+    hadm_id: const(None)
     stay_id: col(patientunitstayid)
 
 events:
