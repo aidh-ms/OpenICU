@@ -99,7 +99,7 @@ events:
   - name: O2_SATURATION_PULSE_OXIMETRY
     columns:
       code:
-        - const(%)
+        - const("%")
       numeric_value: col(sao2)
     filters:
       - drop_na(sao2)

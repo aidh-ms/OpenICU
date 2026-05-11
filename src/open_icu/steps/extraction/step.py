@@ -152,7 +152,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     pl.col("subject_id").cast(pl.Int64),
                     pl.col("time").cast(pl.Datetime(time_unit="us")),
                     pl.col("code").cast(pl.String),
-                    pl.col("numeric_value").cast(pl.Float32),
+                    pl.col("numeric_value").cast(pl.Float32, strict=False),
                     pl.col("text_value").cast(pl.String),
                 ] + [pl.col(col) for col in event.columns.extension.keys()])
 
