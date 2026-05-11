@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 
 import polars as pl
 from polars import LazyFrame
