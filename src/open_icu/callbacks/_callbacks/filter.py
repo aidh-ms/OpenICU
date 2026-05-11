@@ -1,5 +1,5 @@
 
-from typing import Any, Optional, Sequence
+from typing import Sequence
 
 import polars as pl
 from polars import LazyFrame
