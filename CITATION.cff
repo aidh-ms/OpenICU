@@ -6,6 +6,15 @@ authors:
   given-names: "Paul"
   affiliation: Universität Münster
   orcid: "https://orcid.org/0009-0002-8163-0989"
+- family-names: "Laser"
+  given-names: "Tobias"
+  affiliation: "Medical University of Innsbruck"
+  orcid: "https://orcid.org/0009-0004-1096-0360"
+- family-names: "Rockenschaub"
+  given-names: "Patrick"
+  affiliation: Medical University of Innsbruck
+  email: patrick.rockenschaub@i-med.ac.at
+  orcid: "https://orcid.org/0000-0002-6499-7933"
 - given-names: Christian
   family-names: Porschen
   email: c_pors01@uni-muenster.de

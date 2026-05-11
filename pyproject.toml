@@ -4,10 +4,14 @@ description = "This is a project to unify and analyse data from different ICU da
 version = "0.0.1"
 license = "MIT"
 authors = [
-    { name = "Paul-B98", email = "115164840+Paul-B98@users.noreply.github.com" }
+    { name = "Paul-B98", email = "115164840+Paul-B98@users.noreply.github.com" },
+    { name = "TobiasVeronaLaser"},
+    { name = "prockenschaub"}
 ]
 maintainers = [
     { name = "Paul-B98", email = "115164840+Paul-B98@users.noreply.github.com" }
+    { name = "TobiasVeronaLaser"},
+    { name = "prockenschaub"}
 ]
 readme = "README.md"
 keywords = ["Data", "ICU", "Healthcare"]
