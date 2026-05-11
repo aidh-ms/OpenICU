@@ -15,7 +15,7 @@ __all__ = [
     "FirstDistinct",
     "ToDatetime",
     "AddOffset",
-    "SetTime"
+    "SetTime",
     "FirstNotNull",
     "Max",
     "Add",
