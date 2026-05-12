@@ -38,7 +38,7 @@ join:
 
 post_callbacks:
   - add_offset(admission_timestamp, diagnosisoffset, output=event_timestamp)
-  
+
 post_transformations:
   - split_explode(icd9code)
 
@@ -52,7 +52,7 @@ events:
   - name: DIAGNOSIS
     columns:
       code:
-      # TODO: icd9code may contain both ICD-9 and ICD-10 codes. We should separate them into two columns.
+      # TODO: icd9code may contain both ICD-9 and ICD-10 codes. We should separate them into two columns. Tobi: CURRENTLY SEPERATED INTO ROWS
         - col(icd9code)
       text_value: col(diagnosisstring)
       extension:

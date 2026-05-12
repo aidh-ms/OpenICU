@@ -87,8 +87,8 @@ events:
         - const(BPM)
       numeric_value: col(heartrate)
     filters:
-      # TODO: filter on original name or on `numeric_value`?
-      - drop_na(heartrate)
+      # TODO: filter on original name or on `numeric_value`? on numeric_value
+      - drop_na(numeric_value)
   - name: TEMPERATURE
     columns:
       code:
@@ -113,7 +113,7 @@ events:
   - name: CENTRAL_VENOUS_PRESSURE
     columns:
       code:
-      # TODO: some patients have cvp > 200, which may be mmH20 rather than mmHg.
+      # TODO: some patients have cvp > 200, which may be mmH20 rather than mmHg. TODO: split into code with other unit
         - const(mmHg)
       numeric_value: col(cvp)
     filters:
