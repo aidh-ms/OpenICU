@@ -64,7 +64,8 @@ columns:
 post_callbacks:
   - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, output=discharge_timestamp)
-  - add_offset(admission_timestamp, age * 365.25, offset_unit="days", output=birth_timestamp)
+  - add_offset(admission_timestamp, cast(replace(age == "> 89", "90", age), "int16") * 365.25, offset_unit="days", output=birth_timestamp)
+  - replace((gender == "") or (gender == None), "Unknown", gender, output=gender_1)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
@@ -75,8 +76,8 @@ events:
   - name: GENDER
     columns:
       time: col(birth_timestamp)
-      code: # codes is null, when using gender and gender is empty string
-        - col(gender)
+      code: 
+        - col(gender_1)
   - name: ICU_ADMISSION
     columns:
       time: col(admission_timestamp)
@@ -88,7 +89,9 @@ events:
   - name: MEDS_BIRTH
     columns:
       time: col(birth_timestamp)
-    # TODO: deduplicate via a callback
+    filters:
+      - drop_na(time)
+      - first_distinct(subject_id, time)
 
   - name: ETHNICITY
     columns:
@@ -124,7 +127,6 @@ events:
       extension:
         available_time: col(discharge_timestamp)
 
-  # TODO: Can OpenICU deal with two events with the same name?
   - name: SUBJECT_WEIGHT
     columns:
       time: col(discharge_timestamp)

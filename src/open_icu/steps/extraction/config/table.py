@@ -55,7 +55,9 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     post_callbacks: list[str] = Field(
         default_factory=list, description="The list of post-processing callback configurations for the table."
     )
-
+    post_transformations: list[str] = Field(
+        default_factory=list, description="The list of post-processing transformation configurations for the event."
+    )
     @computed_field
     @property
     def dtypes(self) -> dict[str, DataTypeClass]:

@@ -107,3 +107,6 @@ class EventConfig(BaseModel):
     filters: list[str] = Field(
         default_factory=list, description="The list of filter configurations for the event."
     )
+    transformations: list[str] = Field(
+        default_factory=list, description="The list of transformation configurations for the event."
+    )

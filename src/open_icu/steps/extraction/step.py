@@ -9,6 +9,7 @@ import gc
 from pathlib import Path
 
 import polars as pl
+from polars import LazyFrame
 
 from open_icu.callbacks.interpreter import parse_expr
 from open_icu.logging import get_logger
@@ -68,6 +69,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 lf = self._read_table(table, path)
 
                 post_callbacks = [*table.post_callbacks]
+                post_transformations = [*table.post_transformations]
                 for join_table in table.join:
                     # Use broadcast join with small right table
                     logger.debug(
@@ -83,6 +85,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                         **join_table.join_params  # ty: ignore[invalid-argument-type]
                     )
                     post_callbacks.extend(join_table.post_callbacks)
+                    post_transformations.extend(join_table.post_transformations)
             except FileNotFoundError as e:
                 logger.warning("Skipping table %s: %s", table.name, e)
                 continue
@@ -90,7 +93,15 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             logger.info("Processing table %s", table.name)
             for expr in post_callbacks:
                 lf = lf.with_columns(parse_expr(lf, expr))
-
+            
+            for expr in post_transformations:
+                result = parse_expr(lf, expr)
+                if not isinstance(result, LazyFrame):
+                    raise TypeError(
+                        f"Frame callback {expr!r} must return a LazyFrame, "
+                        f"got {type(result).__name__}"
+                    )
+                lf = result
 
             for event in table.events:
                 logger.debug(
@@ -147,6 +158,16 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 for expr in event.filters:
                     event_lf = event_lf.filter(parse_expr(event_lf, expr))
 
+                for expr in event.transformations:
+                    result = parse_expr(event_lf, expr)
+                    if not isinstance(result, LazyFrame):
+                        raise TypeError(
+                            f"Frame callback {expr!r} must return a LazyFrame, "
+                            f"got {type(result).__name__}"
+                        )
+                    event_lf = result
+                    
+
                 # Reorder columns
                 event_lf = event_lf.select([
                     pl.col("subject_id").cast(pl.Int64),
@@ -169,10 +190,24 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     table.name,
                     output_file,
                 )
-                event_lf.sink_parquet(
-                    output_file,
-                )
-                del event_lf
+                if output_file.exists():
+                    logger.info("Existing output found for event %s, appending to it", event.name)
+
+                    existing_lf = pl.scan_parquet(output_file)
+
+                    event_lf = pl.concat(
+                        [existing_lf, event_lf],
+                        how="vertical",
+                    )
+                    tmp_output_file = output_data_path / f"{event.name}.tmp.parquet"
+
+                    event_lf.sink_parquet(tmp_output_file)
+                    tmp_output_file.replace(output_file)
+                else: 
+                    event_lf.sink_parquet(
+                        output_file,
+                    )
+                    del event_lf
 
             del lf
             gc.collect()

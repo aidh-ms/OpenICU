@@ -8,7 +8,7 @@ from open_icu.callbacks.registry import register_callback_cls
 
 
 @register_callback_cls
-class ReplaceIfTrue(CallbackProtocol):
+class Replace(CallbackProtocol):
     def __init__(
         self,
         condition: AstValue,

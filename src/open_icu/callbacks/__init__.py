@@ -23,6 +23,9 @@ from open_icu.callbacks._callbacks.logical import And, Not, Or
 from open_icu.callbacks._callbacks.shortcuts import Col, Const
 from open_icu.callbacks._callbacks.time import AddOffset, SetTime, ToDatetime
 from open_icu.callbacks._callbacks.selector import FirstNotNull, Max
+from open_icu.callbacks._callbacks.conditional import Replace
+from open_icu.callbacks._callbacks.type import Cast
+from open_icu.callbacks._callbacks.reshape import SplitExplode
 from open_icu.callbacks.proto import CallbackProtocol
 from open_icu.callbacks.registry import register_callback_cls, registry
 
@@ -63,4 +66,10 @@ __all__ = [
 
     "Col",
     "Const",
+
+    "Replace",
+
+    "Cast",
+
+    "SplitExplode",
 ]

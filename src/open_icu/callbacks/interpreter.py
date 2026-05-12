@@ -68,6 +68,24 @@ class ExprInterpreter(ast.NodeVisitor):
             return Or(left, right)
 
         raise NotImplementedError(type(node.op))
+    
+    def visit_BoolOp(self, node) -> AstValue:
+        if not node.values:
+            raise ValueError("Empty boolean operation is not supported")
+
+        values = [self.visit(v) for v in node.values]
+
+        if isinstance(node.op, ast.And):
+            expr = values[0]
+            for value in values[1:]:
+                expr = And(expr, value)
+            return expr
+
+        if isinstance(node.op, ast.Or):
+            expr = values[0]
+            for value in values[1:]:
+                expr = Or(expr, value)
+            return expr
 
     def visit_UnaryOp(self, node) -> AstValue:
         operand = self.visit(node.operand)
@@ -105,8 +123,6 @@ class ExprInterpreter(ast.NodeVisitor):
             return NotEqual(left, right)
 
         raise NotImplementedError(type(op))
-
-        raise NotImplementedError(node.ops[0])
 
     def _get_name(self, node) -> str:
         if isinstance(node, ast.Name):
