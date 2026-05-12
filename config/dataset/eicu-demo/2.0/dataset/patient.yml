@@ -75,7 +75,7 @@ events:
     columns:
       # TODO: suggest and maybe change time birthdate
       time: col(admission_timestamp)
-      code: # codes is null, when using gender and gender is empty string
+      code:
         - col(gender)
   - name: icu_admission
     columns:
