@@ -11,7 +11,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-05-06T15:24:42.86982729Z"
+exclude-newer = "2026-05-06T15:42:06.870291438Z"
 exclude-newer-span = "P7D"
 
 [[package]]
@@ -1140,7 +1140,7 @@ requires-dist = [
     { name = "pyarrow", specifier = ">=24.0.0" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "types-pyyaml", specifier = "<=6.0.12.20260408" },
+    { name = "types-pyyaml", specifier = ">=6.0.12" },
 ]
 
 [package.metadata.requires-dev]
