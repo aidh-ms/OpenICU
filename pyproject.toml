@@ -30,7 +30,7 @@ dependencies = [
     "pyarrow>=24.0.0",
     "pydantic>=2.13.4",
     "pyyaml>=6.0.2",
-    "types-pyyaml>=6.0.12.20260508",
+    "types-pyyaml>=6.0.12",
 ]
 
 [project.urls]
@@ -54,14 +54,10 @@ dev = [
 ]
 docs = [
     "mkdocs>=1.6.1",
-    "mkdocs-gen-files>=0.5.0",
-    "mkdocs-literate-nav>=0.6.2",
-    "mkdocs-macros-plugin>=1.5.0",
-    "mkdocs-material>=9.6.14",
-    "mkdocs-section-index>=0.3.12",
-    "mkdocstrings-python>=2.0.3",
-    "pymdown-extensions>=10.21.2",
 ]
+
+[tool.uv]
+exclude-newer = "P7D"
 
 [tool.pytest.ini_options]
 python_files = ["test_*.py", "*_test.py"]
