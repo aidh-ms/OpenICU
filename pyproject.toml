@@ -9,7 +9,7 @@ authors = [
     { name = "prockenschaub"}
 ]
 maintainers = [
-    { name = "Paul-B98", email = "115164840+Paul-B98@users.noreply.github.com" }
+    { name = "Paul-B98", email = "115164840+Paul-B98@users.noreply.github.com" },
     { name = "TobiasVeronaLaser"},
     { name = "prockenschaub"}
 ]
