@@ -2,12 +2,13 @@ from typing import Optional
 
 import polars as pl
 from polars import LazyFrame
+from polars._typing import PolarsDataType
 
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_expr
 from open_icu.callbacks.registry import register_callback_cls
 
 
-_DTYPE_MAP: dict[str, pl.DataType] = {
+_DTYPE_MAP: dict[str, PolarsDataType] = {
     "int8": pl.Int8,
     "int16": pl.Int16,
     "int32": pl.Int32,
