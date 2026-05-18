@@ -6,7 +6,7 @@ from polars import Expr, LazyFrame
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
 from open_icu.callbacks._callbacks.logical import And, Or, Not
 from open_icu.callbacks._callbacks.comparison import GreaterThan, LessThan, GreaterEqual, LessEqual, Equal, NotEqual
-from open_icu.callbacks.proto import AstValue, CallbackProtocol
+from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
 from open_icu.callbacks.registry import registry
 
 
