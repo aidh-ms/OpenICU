@@ -5,7 +5,7 @@ from polars import LazyFrame
 
 AstAtom = Union[int, float, bool, str, None]
 AstValue = Union[AstAtom, pl.Expr, "CallbackProtocol", list["AstValue"], tuple["AstValue"]]
-CallbackResult = Union[pl.Expr, pl.LazyFrame] 
+CallbackResult = pl.Expr
 
 
 @runtime_checkable
