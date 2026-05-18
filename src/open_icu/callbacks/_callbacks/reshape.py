@@ -3,7 +3,6 @@ from polars import LazyFrame
 
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_col_name
 from open_icu.callbacks.registry import register_callback_cls
-from typing import Union
 
 
 @register_callback_cls
@@ -19,7 +18,7 @@ class SplitExplode(CallbackProtocol):
         self.separator = separator
         self.strip = strip
 
-    def __call__(self, lf: LazyFrame) -> Union[CallbackResult, LazyFrame]:
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
         lf = (
             lf.with_columns(
                 pl.col(self.column)
