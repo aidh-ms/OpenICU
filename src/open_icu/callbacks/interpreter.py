@@ -1,7 +1,7 @@
 import ast
 from typing import Tuple
 
-from polars import Expr, LazyFrame
+from polars import LazyFrame
 
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
 from open_icu.callbacks._callbacks.logical import And, Or, Not
