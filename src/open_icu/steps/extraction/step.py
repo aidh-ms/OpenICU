@@ -67,9 +67,26 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
             try:
                 lf = self._read_table(table, path)
+                for expr in table.filters:
+                    print("tobi2", expr)
+                    print(len(lf.filter(pl.col("ventendoffset") == 0).collect()))
+                    result = parse_expr(lf, expr)
+
+                    if not isinstance(result, pl.Expr):
+                        raise TypeError(
+                            f"Filter callback {expr!r} must return a Polars Expr, "
+                            f"got {type(result).__name__}"
+                        )
+                    print(len(lf.filter(pl.col("ventendoffset") == 0).collect()))
+                    lf = lf.filter(result)
+                    print(len(lf.filter(pl.col("ventendoffset") == 0).collect()))
+                    print("tobi2", expr)
+
+
 
                 post_callbacks = [*table.post_callbacks]
                 post_transformations = [*table.post_transformations]
+                post_filters = [*table.post_filters]
                 for join_table in table.join:
                     # Use broadcast join with small right table
                     logger.debug(
@@ -86,6 +103,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     )
                     post_callbacks.extend(join_table.post_callbacks)
                     post_transformations.extend(join_table.post_transformations)
+                    post_filters.extend(join_table.post_filters)
             except FileNotFoundError as e:
                 logger.warning("Skipping table %s: %s", table.name, e)
                 continue
@@ -102,6 +120,18 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                         f"got {type(result).__name__}"
                     )
                 lf = result
+
+            for expr in post_filters:
+                print("tobi", expr)
+                result = parse_expr(lf, expr)
+
+                if not isinstance(result, pl.Expr):
+                    raise TypeError(
+                        f"Filter callback {expr!r} must return a Polars Expr, "
+                        f"got {type(result).__name__}"
+                    )
+
+                lf = lf.filter(result)
 
             for event in table.events:
                 logger.debug(
@@ -176,6 +206,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     pl.col("numeric_value").cast(pl.Float32, strict=False),
                     pl.col("text_value").cast(pl.String),
                 ] + [pl.col(col) for col in event.columns.extension.keys()])
+
+                for expr in event.post_filters:
+                    event_lf = event_lf.filter(parse_expr(event_lf, expr))
 
                 # Ensure output directory exists
                 assert self._workspace_dir is not None

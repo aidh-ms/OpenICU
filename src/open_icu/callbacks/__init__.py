@@ -18,7 +18,7 @@ from open_icu.callbacks._callbacks.comparison import (
     LessThan,
     NotEqual,
 )
-from open_icu.callbacks._callbacks.filter import DropNa, FirstDistinct
+from open_icu.callbacks._callbacks.filter import DropNa, FirstDistinct, DropIf
 from open_icu.callbacks._callbacks.logical import And, Not, Or
 from open_icu.callbacks._callbacks.shortcuts import Col, Const
 from open_icu.callbacks._callbacks.time import AddOffset, SetTime, ToDatetime
@@ -36,6 +36,7 @@ __all__ = [
 
     "DropNa",
     "FirstDistinct",
+    "DropIf",
     "ToDatetime",
     "AddOffset",
     "SetTime",

@@ -52,7 +52,6 @@ events:
   - name: DIAGNOSIS
     columns:
       code:
-      # TODO: icd9code may contain both ICD-9 and ICD-10 codes. We should separate them into two columns. Tobi: CURRENTLY SEPERATED INTO ROWS
         - col(icd9code)
       text_value: col(diagnosisstring)
       extension:

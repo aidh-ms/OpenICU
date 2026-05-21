@@ -6,9 +6,11 @@ columns:
     type: int64
   - name: vitalaperiodicid
     type: int64
+
   # db fields - times
   - name: observationoffset
     type: int64
+
   # db fields - values
   - name: noninvasivesystolic
     type: float32
@@ -31,31 +33,41 @@ columns:
   - name: pvri
     type: float32
 
-post_callbacks:
-  - add_offset(admission_timestamp, observationoffset, output=event_timestamp)
-
 join:
   - name: patient
     path: patient.csv.gz
+
     columns:
+      # subject_id and join keys
       - name: patienthealthsystemstayid
         type: int64
       - name: patientunitstayid
         type: int64
+
+      # db fields - times
       - name: hospitaladmitoffset
         type: int64
       - name: hospitaladmittime24
         type: string
       - name: hospitaldischargeyear
         type: int64
+
     both_on:
       - patientunitstayid
+
     callbacks:
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
+
+    post_join_callbacks:
+      - add_offset(admission_timestamp, observationoffset, output=event_timestamp)
 
 event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
+
+  code_prefix:
+    - const(VITAL)
+
   extension:
     stay_id: col(patientunitstayid)
     vitalaperiodic_id: col(vitalaperiodicid)
@@ -68,46 +80,55 @@ events:
       numeric_value: col(noninvasivesystolic)
     filters:
       - drop_na(numeric_value)
+
   - name: NON_INVASIVE_DIASTOLIC_BLOOD_PRESSURE
     columns:
       numeric_value: col(noninvasivediastolic)
     filters:
       - drop_na(numeric_value)
+
   - name: NON_INVASIVE_MEAN_BLOOD_PRESSURE
     columns:
       numeric_value: col(noninvasivemean)
     filters:
       - drop_na(numeric_value)
+
   - name: PULMONARY_ARTERY_OCCLUSION_PRESSURE
     columns:
       numeric_value: col(paop)
     filters:
       - drop_na(numeric_value)
+
   - name: CARDIAC_OUTPUT
     columns:
       numeric_value: col(cardiacoutput)
     filters:
       - drop_na(numeric_value)
+
   - name: CARDIAC_INPUT
     columns:
       numeric_value: col(cardiacinput)
     filters:
       - drop_na(numeric_value)
+
   - name: SYSTEMIC_VASCULAR_RESISTANCE
     columns:
       numeric_value: col(svr)
     filters:
       - drop_na(numeric_value)
+
   - name: SYSTEMIC_VASCULAR_RESISTANCE_INDEX
     columns:
       numeric_value: col(svri)
     filters:
       - drop_na(numeric_value)
+
   - name: PULMONARY_VASCULAR_RESISTANCE
     columns:
       numeric_value: col(pvr)
     filters:
       - drop_na(numeric_value)
+
   - name: PULMONARY_VASCULAR_RESISTANCE_INDEX
     columns:
       numeric_value: col(pvri)

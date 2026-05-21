@@ -18,7 +18,8 @@ columns:
     type: int64
   - name: short_description
     type: string
-
+post_callbacks:
+  - set_time(chartdate, 23, 59, 59, output=chartdate_24)
 join:
   - name: d_hcpcs
     path: hosp/d_hcpcs.csv.gz
@@ -60,7 +61,7 @@ events:
   - name: HCPCS
     columns:
       # TODO: move chartdate to end of day with callback
-      time: col(chartdate)
+      time: col(chartdate_24)
       code:
         - col(hcpcs_cd)
         - col(long_description)

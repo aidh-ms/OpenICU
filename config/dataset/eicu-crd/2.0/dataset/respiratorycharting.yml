@@ -55,7 +55,6 @@ events:
       code:
         - col(respcharttypecat)
         - col(respchartvaluelabel)
-      # TODO: make sure this casts as a number, setting to null if it doesn't
       numeric_value: col(respchartvalue)
       text_value: col(respchartvalue)
       extension:

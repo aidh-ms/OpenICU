@@ -234,7 +234,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 if mapping.columns.numeric_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
                 else:
-                    lf = lf.with_columns(parse_expr(lf, mapping.columns.numeric_value).alias("numeric_value"))
+                    expr = parse_expr(lf, mapping.columns.numeric_value)
+
+                    lf = lf.with_columns(
+                        expr.cast(pl.Float64, strict=False).alias("numeric_value")
+                    )
 
                 # code column
                 lf = lf.with_columns(pl.lit(concept.code).alias("code"))

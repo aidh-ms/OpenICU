@@ -4,7 +4,7 @@ from typing import Sequence
 import polars as pl
 from polars import LazyFrame
 
-from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_col_name
+from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_col_name, to_expr
 from open_icu.callbacks.registry import register_callback_cls
 
 
@@ -35,3 +35,21 @@ class FirstDistinct(CallbackProtocol):
         """
         cols = [to_col_name(f) for f in self.fields]
         return pl.struct(cols).is_first_distinct()
+    
+@register_callback_cls
+class DropIf(CallbackProtocol):
+    """
+    Drops rows where the given boolean condition is True.
+
+    Example:
+
+    Meaning:
+        keep rows where is_invalid is False
+    """
+
+    def __init__(self, condition: AstValue) -> None:
+        self.condition = condition
+
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        condition_expr = to_expr(lf, self.condition)
+        return condition_expr.not_()
