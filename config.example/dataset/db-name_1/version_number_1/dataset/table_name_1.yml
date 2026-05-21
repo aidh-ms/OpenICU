@@ -138,7 +138,7 @@ event_defaults:
   # and before the event name.
   #
   # Final code structure:
-  # db_name // table_name // code_prefix // event.name // columns.code // code_suffix
+  # db_name // table_name // code_prefix // columns.code // code_suffix
   code_prefix:
     - const(PSEUDO_ICU)
 

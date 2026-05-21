@@ -108,7 +108,7 @@ class MEDSEventFieldDefaultConfig(BaseModel):
         merge code_prefix or code_suffix into columns.code, because the final
         code is built later as:
 
-            db_name // table_name // code_prefix // event.name // columns.code // code_suffix
+            db_name // table_name // code_prefix // columns.code // code_suffix
 
         Args:
             event_column_config: Event-specific column configuration dictionary

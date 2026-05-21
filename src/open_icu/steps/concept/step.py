@@ -1,9 +1,10 @@
 """Concept step implementation for converting ICU data to MEDS format.
 
 This module implements the ConceptStep class that orchestrates the extraction
-of data from source CSV files, applies transformations via callbacks, performs
-joins, and outputs MEDS-compliant Parquet files.
+of concept events from extracted MEDS event files, applies mappings based on
+code patterns, and outputs MEDS-compliant Parquet files.
 """
+
 import gc
 from functools import cached_property
 from graphlib import TopologicalSorter
@@ -37,6 +38,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
     mappings based on code patterns, and writes MEDS-compliant Parquet files
     to the workspace directory.
     """
+
     @classmethod
     def load(cls, project: OpenICUProject, config_path: Path) -> "ConceptStep":
         """Load a concept step from a configuration file.
@@ -108,7 +110,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     logger.warning(
                         "skipping concept %s for dataset %s: no dataset-specific config found",
                         concept.name,
-                        dataset
+                        dataset,
                     )
                     continue
 
@@ -139,6 +141,15 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 )
                 concept = self._registry.get(concept_id)
                 assert concept is not None
+
+                dataset_concept = concept.get_dataset_concept(dataset)
+                if dataset_concept is None:
+                    logger.warning(
+                        "skipping concept %s for dataset %s: no dataset-specific config found",
+                        concept.name,
+                        dataset,
+                    )
+                    continue
 
                 if isinstance(dataset_concept, DerivedDatasetConceptConfig):
                     logger.debug(
@@ -195,33 +206,76 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         output_dataset_path.mkdir(parents=True, exist_ok=True)
 
         for mapping in dataset_concept.mappings:
-            mapping_codes = self.codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
+            dataset = mapping.pattern.dataset
+            version = mapping.pattern.version
+            table = mapping.pattern.table
+            event = mapping.pattern.event
 
-            for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
-                data_path = self.extraction_dataset.data_path / dataset / version / table / f"{event}.parquet"
+            if dataset is None:
+                logger.warning(
+                    "skipping mapping for concept %s: dataset is not configured",
+                    concept.name,
+                )
+                continue
+
+            if version is None:
+                logger.warning(
+                    "skipping mapping for concept %s: version is not configured",
+                    concept.name,
+                )
+                continue
+
+            if table is None:
+                logger.warning(
+                    "skipping mapping for concept %s: table is not configured",
+                    concept.name,
+                )
+                continue
+
+            table_path = self.extraction_dataset.data_path / dataset / version / table
+
+            if event is None:
+                data_paths = sorted(table_path.glob("*.parquet"))
+            else:
+                data_paths = [table_path / f"{event}.parquet"]
+
+            if not data_paths:
+                logger.warning(
+                    "skipping mapping for concept %s: no event files found in %s",
+                    concept.name,
+                    table_path,
+                )
+                continue
+
+            for data_path in data_paths:
                 if not data_path.exists():
                     logger.warning(
                         "skipping mapping for concept %s: file not found (%s)",
                         concept.name,
-                        data_path
+                        data_path,
                     )
                     continue
+
+                event_name = data_path.stem
 
                 logger.debug(
                     "Loading source event %s/%s/%s/%s for concept %s",
                     dataset,
                     version,
                     table,
-                    event,
+                    event_name,
                     concept.identifier,
                 )
-                lf = pl.scan_parquet(data_path).filter(pl.col("code").is_in(mapping_codes))
+
+                lf = pl.scan_parquet(data_path).filter(
+                    pl.col("code").str.contains(mapping.regex)
+                )
 
                 # extension columns
                 lf = lf.with_columns(pl.lit(dataset).alias("dataset"))
                 lf = lf.with_columns(pl.lit(version).alias("version"))
                 lf = lf.with_columns(pl.lit(table).alias("table"))
-                lf = lf.with_columns(pl.lit(event).alias("event"))
+                lf = lf.with_columns(pl.lit(event_name).alias("event"))
                 for col_name, col_expr in concept.extension_columns.items():
                     lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
 
@@ -229,7 +283,9 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 if mapping.columns.text_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("text_value"))
                 else:
-                    lf = lf.with_columns(parse_expr(lf, mapping.columns.text_value).alias("text_value"))
+                    lf = lf.with_columns(
+                        parse_expr(lf, mapping.columns.text_value).alias("text_value")
+                    )
 
                 if mapping.columns.numeric_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
@@ -245,6 +301,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
                 for expr in mapping.filters:
                     lf = lf.filter(parse_expr(lf, expr))
+
                 lf = lf.select([
                     pl.col("subject_id").cast(pl.Int64),
                     pl.col("time").cast(pl.Datetime(time_unit="us")),
@@ -301,6 +358,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             concept.identifier,
             dataset_concept.dataset,
         )
+
         def _read_table(file_path: Path, table: BaseConceptTable) -> pl.LazyFrame:
             if not file_path.exists():
                 raise FileNotFoundError(f"file not found ({file_path})")
@@ -325,7 +383,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         try:
             lf = _read_table(
                 self.get_path_for_concept_table(dataset_concept.table, dataset_concept.dataset),
-                dataset_concept.table
+                dataset_concept.table,
             )
             post_callbacks = [*dataset_concept.table.post_callbacks]
 
@@ -339,7 +397,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 lf = lf.join(
                     _read_table(
                         self.get_path_for_concept_table(join_table, dataset_concept.dataset),
-                        join_table
+                        join_table,
                     ),
                     how=join_table.how,  # ty: ignore[invalid-argument-type]
                     **join_table.join_params,  # ty: ignore[invalid-argument-type]

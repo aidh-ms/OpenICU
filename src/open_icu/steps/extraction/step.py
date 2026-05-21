@@ -178,7 +178,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 # Create code column.
                 #
                 # Final code structure:
-                # db_name // table_name // code_prefix // event.name // columns.code // code_suffix
+                # db_name // table_name // code_prefix // columns.code // code_suffix
                 #
                 # db_name and table_name are automatic. code_prefix, columns.code,
                 # and code_suffix are configured. columns.code contains optional
@@ -326,12 +326,12 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
         The final code is built as:
 
-            db_name // table_name // code_prefix // event.name // columns.code // code_suffix
+            db_name // table_name // code_prefix // columns.code // code_suffix
 
         The db_name and table_name parts are automatic. The configured code
-        prefix is inserted after db/table and before the event name. Additional
-        user-defined code parts, such as units or methods, are provided through
-        columns.code. The configured code suffix is appended last.
+        prefix is inserted after db/table. Additional user-defined code parts,
+        such as event names, units, routes, specimens, or methods, are provided
+        through columns.code. The configured code suffix is appended last.
         """
         code_parts: list[pl.Expr] = [
             pl.lit(table.dataset),
@@ -346,8 +346,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             )
             for expr in event.code_prefix
         )
-
-        code_parts.append(pl.lit(event.name))
 
         code_parts.extend(
             self._parse_expr(

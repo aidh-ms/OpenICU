@@ -65,9 +65,6 @@ event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
 
-  code_prefix:
-    - const(VITAL)
-
   extension:
     stay_id: col(patientunitstayid)
     vitalaperiodic_id: col(vitalaperiodicid)
