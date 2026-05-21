@@ -24,7 +24,7 @@ columns:
     type: float32
 
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, respcarestatusoffset, output=entered_timestamp)
   - add_offset(admission_timestamp, ventstartoffset, output=ventstart_timestamp)
   - add_offset(admission_timestamp, ventendoffset, output=ventend_timestamp)
@@ -74,6 +74,6 @@ events:
         - col(airwaytype)
       extension:
         ventendoffset: col(ventendoffset)
-    post_filters:
+    filters:
       - drop_if(ventendoffset == 0)
     # TODO: this currently does not consider cases where ventend_timestamp < enter_timestamp

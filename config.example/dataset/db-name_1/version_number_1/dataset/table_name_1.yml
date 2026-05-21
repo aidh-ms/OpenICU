@@ -94,7 +94,7 @@ join:
     filters:
       - drop_na(subject_id)
 
-    # Join-specific post_join_callbacks
+    # Join-specific post_join_callbacks:
     # Runs immediately after this join.
     # Now columns from the main table and this join table are available.
     post_join_callbacks:
@@ -105,14 +105,14 @@ join:
     post_join_filters:
       - drop_na(event_time)
 
-# Table-level post_join_callbacks
+# Table-level post_join_callbacks:
 # Runs after all join tables have been joined.
 # Use this for columns that may depend on multiple joined tables.
 post_join_callbacks:
   - first_not_null(event_time, admission_timestamp, output=best_event_time)
 
 # Table-level post_join_filters
-# Runs after table post_join_callbacks.
+# Runs after table post_join_callbacks:.
 # Use this to validate the fully enriched table before event extraction.
 post_join_filters:
   - drop_na(best_event_time)

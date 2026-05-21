@@ -36,7 +36,7 @@ join:
       - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
 
 
-post_callbacks:
+transformations:
   - add_offset(admission_timestamp, diagnosisoffset, output=event_timestamp)
 
 post_transformations:

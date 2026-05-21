@@ -21,7 +21,7 @@ columns:
   - name: frequency
     type: str
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, drugorderoffset, output=order_timestamp)
   - add_offset(admission_timestamp, drugstartoffset, output=start_timestamp)
   - add_offset(admission_timestamp, drugstopoffset, output=stop_timestamp)

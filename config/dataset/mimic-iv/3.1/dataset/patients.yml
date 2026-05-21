@@ -19,7 +19,7 @@ columns:
   - name: gender
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - to_datetime(anchor_year, 1, 1, "00:00:00", -anchor_age, "years", output=dob)
   - set_time(dod, 23, 59, 59, output=dod_24)
 

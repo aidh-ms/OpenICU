@@ -1,7 +1,7 @@
 """Field configuration models for table columns.
 
 This module defines configurations for table column definitions including
-type specifications and constant value columns.
+type specifications and optional type conversion parameters.
 """
 
 from typing import Any
@@ -21,13 +21,14 @@ class ColumnConfig(BaseModel):
         params: Additional parameters for type conversion
         dtype: Computed Polars data type
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str = Field(..., description="The name of the column.")
     type: str = Field(..., description="The type of the column.")
     params: dict[str, Any] = Field(
         default_factory=dict,
-        description="Additional parameters for the column."
+        description="Additional parameters for type conversion.",
     )
 
     @computed_field

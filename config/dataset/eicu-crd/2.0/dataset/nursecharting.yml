@@ -19,7 +19,7 @@ columns:
   - name: nursingchartvalue
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, nursingchartoffset, output=event_timestamp)
 
 join:

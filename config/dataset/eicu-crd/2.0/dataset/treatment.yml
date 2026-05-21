@@ -11,7 +11,7 @@ columns:
   - name: treatmentstring
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, treatmentoffset, output=event_timestamp)
 
 join:

@@ -29,7 +29,7 @@ columns:
   - name: cellvaluetext
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, intakeoutputoffset, output=event_timestamp)
   - add_offset(admission_timestamp, intakeoutputentryoffset, output=entered_timestamp)
 

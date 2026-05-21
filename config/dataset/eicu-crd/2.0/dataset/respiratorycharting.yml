@@ -19,7 +19,7 @@ columns:
   - name: respchartvalue
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, respchartoffset, output=event_timestamp)
   - add_offset(admission_timestamp, respchartentryoffset, output=entered_timestamp)
 

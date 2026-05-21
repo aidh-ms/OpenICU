@@ -44,7 +44,7 @@ columns:
     type: int64
 
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, observationoffset, output=event_timestamp)
 
 join:

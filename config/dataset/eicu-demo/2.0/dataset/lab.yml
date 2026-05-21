@@ -17,7 +17,7 @@ columns:
   - name: labresulttext
     type: str
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, labresultoffset, output=event_timestamp)
 
 join:

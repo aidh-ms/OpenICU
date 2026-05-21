@@ -13,7 +13,7 @@ columns:
   - name: dosage
     type: str
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, drugstartoffset, output=event_timestamp)
 
 join:
