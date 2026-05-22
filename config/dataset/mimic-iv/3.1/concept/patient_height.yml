@@ -2,7 +2,7 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: (226707//Height)
     columns:
       numeric_value: col(numeric_value)

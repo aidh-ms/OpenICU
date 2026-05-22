@@ -2,14 +2,14 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: (223762//Temperature Celsius)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: (223761//Temperature Fahrenheit|224027//Skin Temperature)
     columns:
       numeric_value: col(numeric_value)

@@ -2,7 +2,7 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: (228096//Richmond-RAS Scale)
     columns:
       numeric_value: col(numeric_value)

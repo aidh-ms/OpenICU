@@ -2,7 +2,7 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: (220210//Respiratory Rate|224688//Respiratory Rate (Set)|224689//Respiratory Rate (spontaneous)|224690//Respiratory Rate (Total))
     columns:
       numeric_value: col(numeric_value)
