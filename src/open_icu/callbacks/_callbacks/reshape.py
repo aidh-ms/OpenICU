@@ -1,3 +1,5 @@
+from typing import Any
+
 import polars as pl
 from polars import LazyFrame
 
@@ -18,7 +20,7 @@ class SplitExplode(CallbackProtocol):
         self.separator = separator
         self.strip = strip
 
-    def __call__(self, lf: LazyFrame) -> CallbackResult:
+    def __call__(self, lf: LazyFrame) -> Any:
         lf = (
             lf.with_columns(
                 pl.col(self.column)
