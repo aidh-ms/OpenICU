@@ -3,7 +3,7 @@ from typing import Any
 import polars as pl
 from polars import LazyFrame
 
-from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult, to_col_name
+from open_icu.callbacks.proto import AstValue, CallbackProtocol, to_col_name
 from open_icu.callbacks.registry import register_callback_cls
 
 
