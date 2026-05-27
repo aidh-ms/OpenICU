@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: services
+      event: SERVICE
+      code: curr_service
+    columns:
+      numeric_value: col(curr_service)
+      text_value: col(curr_service)

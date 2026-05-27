@@ -1,0 +1,6 @@
+name: patient_weight
+version: 1.0.0
+unit: kg
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

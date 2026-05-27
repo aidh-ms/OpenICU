@@ -1,0 +1,24 @@
+type: simple
+mappings:
+  - pattern:
+      table: microbiologyevents
+      event: MICROBIOLOGY_SPECIMEN
+      code: org_itemid
+    columns: &id001
+      numeric_value: col(org_itemid)
+      text_value: col(org_itemid)
+  - pattern:
+      table: microbiologyevents
+      event: MICROBIOLOGY_TEST
+      code: org_itemid
+    columns: *id001
+  - pattern:
+      table: microbiologyevents
+      event: MICROBIOLOGY_ORGANISM
+      code: org_itemid
+    columns: *id001
+  - pattern:
+      table: microbiologyevents
+      event: MICROBIOLOGY_SUSCEPTIBILITY
+      code: org_itemid
+    columns: *id001

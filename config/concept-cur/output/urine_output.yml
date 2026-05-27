@@ -1,0 +1,6 @@
+name: urine_output
+version: 1.0.0
+unit: mL
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

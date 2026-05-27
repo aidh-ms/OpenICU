@@ -1,0 +1,6 @@
+name: white_blood_cell_count
+version: 1.0.0
+unit: K/uL
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

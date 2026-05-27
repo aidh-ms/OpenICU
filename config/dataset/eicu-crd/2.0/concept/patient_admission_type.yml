@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: admissiondx
+      event: DIAGNOSIS
+      code: admitdxpath
+    columns:
+      numeric_value: col(admitdxpath)
+      text_value: col(admitdxpath)

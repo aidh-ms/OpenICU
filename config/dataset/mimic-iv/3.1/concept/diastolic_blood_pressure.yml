@@ -3,7 +3,7 @@ mappings:
   - pattern:
       table: chartevents
       event: CHART
-      code: (220051//Arterial Blood Pressure diastolic|220180//Non Invasive Blood Pressure diastolic)
+      code: (8368(//.*)?|8441(//.*)?|8555(//.*)?|220051(//.*)?|220180(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

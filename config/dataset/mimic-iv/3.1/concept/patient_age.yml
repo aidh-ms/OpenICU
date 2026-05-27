@@ -1,0 +1,19 @@
+type: simple
+mappings:
+  - pattern:
+      table: patients
+      event: MEDS_BIRTH
+      code: dob
+    columns: &id001
+      numeric_value: col(dob)
+      text_value: col(dob)
+  - pattern:
+      table: patients
+      event: GENDER
+      code: dob
+    columns: *id001
+  - pattern:
+      table: patients
+      event: MEDS_DEATH
+      code: dob
+    columns: *id001

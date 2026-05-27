@@ -1,0 +1,6 @@
+name: fraction_of_inspired_oxygen
+version: 1.0.0
+unit: "%"
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

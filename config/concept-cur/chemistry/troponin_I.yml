@@ -1,0 +1,6 @@
+name: troponin_I
+version: 1.0.0
+unit: ng/mL
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

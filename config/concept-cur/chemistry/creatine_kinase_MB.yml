@@ -1,0 +1,6 @@
+name: creatine_kinase_MB
+version: 1.0.0
+unit: ng/mL
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

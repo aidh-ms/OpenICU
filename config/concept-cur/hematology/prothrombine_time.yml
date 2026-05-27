@@ -1,0 +1,6 @@
+name: prothrombine_time
+version: 1.0.0
+unit: sec
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

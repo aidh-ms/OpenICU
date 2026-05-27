@@ -3,7 +3,7 @@ mappings:
   - pattern:
       table: outputevents
       event: FLUID_OUTPUT
-      code: (226557//R Ureteral Stent|226558//L Ureteral Stent|226559//Foley|226560//Void|226561//Condom Cath|226563//Suprapubic|226564//R Nephrostomy|226565//L Nephrostomy|226566//Urine and GU Irrigant Out|226567//Straight Cath|226584//Ileoconduit|227510//TF Residual)
+      code: (40055(//.*)?|40056(//.*)?|40057(//.*)?|40065(//.*)?|40069(//.*)?|40085(//.*)?|40086(//.*)?|40094(//.*)?|40096(//.*)?|40405(//.*)?|40428(//.*)?|40473(//.*)?|40715(//.*)?|43175(//.*)?|226557(//.*)?|226558(//.*)?|226559(//.*)?|226560(//.*)?|226561(//.*)?|226563(//.*)?|226564(//.*)?|226565(//.*)?|226566(//.*)?|226567(//.*)?|226584(//.*)?|227510(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

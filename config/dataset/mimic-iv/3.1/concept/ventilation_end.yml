@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: chartevents
+      event: CHART
+      code: (467(//.*)?|469(//.*)?|226732(//.*)?)
+    columns:
+      numeric_value: const(1)
+      text_value: const("true")
