@@ -5,8 +5,8 @@ mappings:
       event: HEART_RATE
       code: respiration
     columns: &id001
-      numeric_value: col(respiration)
-      text_value: col(respiration)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: vitalperiodic
       event: TEMPERATURE

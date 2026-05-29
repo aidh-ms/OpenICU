@@ -3,14 +3,14 @@ mappings:
   - pattern:
       table: infusiondrug
       event: INFUSION
-      code: .*?(bactrim|cipro|flagyl|metronidazole|zithromax|zosyn|(((amika|cleo|ofloxa)|(azithro|clinda|tobra|vanco)my)c|(ampi|oxa|peni|pipera)cill|cefazol|levaqu|rifamp)in)
+      code: (bactrim|cipro|flagyl|metronidazole|zithromax|zosyn|(((amika|cleo|ofloxa)|(azithro|clinda|tobra|vanco)my)c|(ampi|oxa|peni|pipera)cill|cefazol|levaqu|rifamp)in)
     columns:
-      numeric_value: const(1)
-      text_value: const("true")
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: medication
       event: MEDICATION_ORDER
-      code: .*?(cipro|flagyl|maxipime|metronidazole|tazobactam|zosyn|cef(azolin|epime)|(((azithro|clinda|vanco)my|ofloxa|vanco)c|levaqu|piperacill|roceph)in)
+      code: (cipro|flagyl|maxipime|metronidazole|tazobactam|zosyn|cef(azolin|epime)|(((azithro|clinda|vanco)my|ofloxa|vanco)c|levaqu|piperacill|roceph)in)
     columns:
-      numeric_value: const(1)
-      text_value: const("true")
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

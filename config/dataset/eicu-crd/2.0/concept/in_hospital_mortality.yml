@@ -5,8 +5,8 @@ mappings:
       event: GENDER
       code: hospitaldischargestatus
     columns: &id001
-      numeric_value: col(hospitaldischargestatus)
-      text_value: col(hospitaldischargestatus)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: patient
       event: ICU_ADMISSION

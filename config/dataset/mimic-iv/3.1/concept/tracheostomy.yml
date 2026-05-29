@@ -3,7 +3,7 @@ mappings:
   - pattern:
       table: chartevents
       event: CHART
-      code: (1\.0\ ET/Trach(//.*)?|No\ Response\-ETT(//.*)?)
+      code: (No\ Response\-ETT(//.*)?)
     columns:
-      numeric_value: const(1)
-      text_value: const("true")
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

@@ -5,8 +5,8 @@ mappings:
       event: MICROBIOLOGY_SPECIMEN
       code: org_itemid
     columns: &id001
-      numeric_value: col(org_itemid)
-      text_value: col(org_itemid)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: microbiologyevents
       event: MICROBIOLOGY_TEST

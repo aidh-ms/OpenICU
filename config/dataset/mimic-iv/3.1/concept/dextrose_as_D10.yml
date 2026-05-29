@@ -12,15 +12,3 @@ mappings:
       event: INFUSION_END
       code: (220950(//.*)?|228140(//.*)?|220952(//.*)?)
     columns: *id001
-  - pattern:
-      table: inputevents
-      event: INFUSION_START
-      code: (30016(//.*)?|30017(//.*)?)
-    columns: &id002
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
-  - pattern:
-      table: inputevents
-      event: INFUSION_END
-      code: (30016(//.*)?|30017(//.*)?)
-    columns: *id002

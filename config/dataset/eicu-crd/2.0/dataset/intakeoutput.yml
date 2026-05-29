@@ -1,0 +1,69 @@
+path: intakeOutput.csv.gz
+
+columns:
+  # subject_id and extensions
+  - name: patientunitstayid
+    type: int64
+  - name: intakeoutputid
+    type: int64
+  # db fields - times
+  - name: intakeoutputoffset
+    type: int64
+  - name: intakeoutputentryoffset
+    type: int64
+  # db fields - values
+  - name: intaketotal
+    type: float32
+  - name: outputtotal
+    type: float32
+  - name: dialysistotal
+    type: float32
+  - name: nettotal
+    type: float64
+  - name: cellpath
+    type: string
+  - name: celllabel
+    type: string
+  - name: cellvaluenumeric
+    type: float32
+  - name: cellvaluetext
+    type: string
+
+post_join_callbacks:
+  - add_offset(admission_timestamp, intakeoutputoffset, output=event_timestamp)
+  - add_offset(admission_timestamp, intakeoutputentryoffset, output=entered_timestamp)
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    columns:
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
+
+event_defaults:
+  subject_id: col(patienthealthsystemstayid)
+  time: col(event_timestamp)
+  extension:
+    stay_id: col(patientunitstayid)
+    intakeoutput_id: col(intakeoutputid)
+    available_time: col(entered_timestamp)
+
+events:
+  - name: INTAKE_OUTPUT
+    columns:
+      code:
+        - col(cellpath)
+      numeric_value: col(cellvaluenumeric)
+      text_value: col(cellvaluetext)

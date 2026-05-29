@@ -1,0 +1,52 @@
+path: icu/icustays.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: subject_id
+    type: int64
+  # db fields - times
+  - name: intime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: outtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: first_careunit
+    type: string
+  - name: last_careunit
+    type: string
+  - name: los
+    type: float32
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+    stay_id: col(stay_id)
+
+events:
+  - name: icu_admission
+    columns:
+      time: col(intime)
+      extension:
+        available_time: col(intime)
+  - name: icu_discharge
+    columns:
+      time: col(outtime)
+      extension:
+        available_time: col(outtime)
+  - name: icu_length_of_stay
+    columns:
+      time: col(outtime)
+      code:
+        - const(days)
+      numeric_value: col(los)
+      extension:
+        available_time: col(outtime)

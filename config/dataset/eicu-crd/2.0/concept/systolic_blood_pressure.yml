@@ -5,8 +5,8 @@ mappings:
       event: HEART_RATE
       code: systemicsystolic
     columns: &id001
-      numeric_value: col(systemicsystolic)
-      text_value: col(systemicsystolic)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: vitalperiodic
       event: TEMPERATURE

@@ -1,0 +1,72 @@
+path: infusionDrug.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: patientunitstayid
+    type: int64
+  # db fields - times
+  - name: infusionoffset
+    type: int64
+  # db fields - values
+  - name: drugamount
+    type: float32 # decimal(x,y)
+  - name: drugname
+    type: string
+  - name: drugrate
+    type: string
+  - name: infusionrate
+    type: string
+  - name: patientweight
+    type: float64
+  - name: volumeoffluid
+    type: string
+post_join_callbacks:
+  - add_offset(admission_timestamp, infusionoffset, output=event_timestamp)
+
+join:
+  - name: patient
+    path: patient.csv.gz
+    columns:
+      # subject_id and extentions
+      - name: patienthealthsystemstayid
+        type: int64
+      - name: patientunitstayid
+        type: int64
+      # db fields - times
+      - name: hospitaladmitoffset
+        type: int64
+      - name: hospitaladmittime24
+        type: string
+      - name: hospitaldischargeyear
+        type: int64
+      # db fields - values
+    both_on:
+      - patientunitstayid
+    callbacks:
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
+
+event_defaults:
+  subject_id: col(patienthealthsystemstayid)
+  extension:
+    stay_id: col(patientunitstayid)
+
+events:
+  - name: SUBJECT_WEIGHT_AT_INFUSION
+    columns:
+      time: col(event_timestamp)
+      code:
+        - const(kg)
+      numeric_value: col(patientweight)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: INFUSION
+    columns:
+      time: col(event_timestamp)
+      code:
+        - col(drugname)
+      extension:
+        drugrate: col(drugrate)
+        infusionrate: col(infusionrate)
+        drugamount: col(drugamount)
+        volume: col(volumeoffluid)

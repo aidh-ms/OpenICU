@@ -3,36 +3,12 @@ mappings:
   - pattern:
       table: inputevents
       event: INFUSION_START
-      code: (30127(//.*)?)
+      code: (221749(//.*)?)
     columns: &id001
       numeric_value: col(numeric_value)
       text_value: col(text_value)
   - pattern:
       table: inputevents
       event: INFUSION_END
-      code: (30127(//.*)?)
+      code: (221749(//.*)?)
     columns: *id001
-  - pattern:
-      table: inputevents
-      event: INFUSION_START
-      code: (30128(//.*)?)
-    columns: &id002
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
-  - pattern:
-      table: inputevents
-      event: INFUSION_END
-      code: (30128(//.*)?)
-    columns: *id002
-  - pattern:
-      table: inputevents
-      event: INFUSION_START
-      code: (221749(//.*)?)
-    columns: &id003
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
-  - pattern:
-      table: inputevents
-      event: INFUSION_END
-      code: (221749(//.*)?)
-    columns: *id003

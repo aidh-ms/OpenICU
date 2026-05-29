@@ -5,8 +5,8 @@ mappings:
       event: HEART_RATE
       code: temperature
     columns: &id001
-      numeric_value: col(temperature)
-      text_value: col(temperature)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: vitalperiodic
       event: TEMPERATURE

@@ -1,4 +1,4 @@
-type: simple
+Stype: simple
 mappings:
   - pattern:
       table: labevents

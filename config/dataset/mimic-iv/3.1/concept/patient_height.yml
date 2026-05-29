@@ -3,7 +3,7 @@ mappings:
   - pattern:
       table: chartevents
       event: CHART
-      code: (920(//.*)?|1394(//.*)?|3485(//.*)?|4187(//.*)?|4188(//.*)?|3486(//.*)?|226707(//.*)?)
+      code: (226707(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

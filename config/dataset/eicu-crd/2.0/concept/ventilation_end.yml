@@ -5,8 +5,8 @@ mappings:
       event: VENTILATION_START
       code: ventendoffset
     columns: &id001
-      numeric_value: col(ventendoffset)
-      text_value: col(ventendoffset)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: respiratorycare
       event: VENTILATION_END
@@ -17,8 +17,8 @@ mappings:
       event: VENTILATION_START
       code: priorventendoffset
     columns: &id002
-      numeric_value: col(priorventendoffset)
-      text_value: col(priorventendoffset)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: respiratorycare
       event: VENTILATION_END
@@ -29,5 +29,5 @@ mappings:
       event: RESPIRATORY_CHART
       code: (off(//.*)?|Off(//.*)?|Suspended(//.*)?)
     columns:
-      numeric_value: const(1)
-      text_value: const("true")
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

@@ -5,8 +5,8 @@ mappings:
       event: HEART_RATE
       code: systemicmean
     columns: &id001
-      numeric_value: col(systemicmean)
-      text_value: col(systemicmean)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: vitalperiodic
       event: TEMPERATURE
@@ -92,8 +92,8 @@ mappings:
       event: NON_INVASIVE_SYSTOLIC_BLOOD_PRESSURE
       code: noninvasivemean
     columns: &id002
-      numeric_value: col(noninvasivemean)
-      text_value: col(noninvasivemean)
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
   - pattern:
       table: vitalaperiodic
       event: NON_INVASIVE_DIASTOLIC_BLOOD_PRESSURE
