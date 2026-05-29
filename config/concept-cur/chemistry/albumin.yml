@@ -1,6 +1,0 @@
-name: albumin
-version: 1.0.0
-unit: g/dL
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")
