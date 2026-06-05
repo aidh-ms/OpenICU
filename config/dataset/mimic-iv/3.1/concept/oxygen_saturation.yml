@@ -2,21 +2,21 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: (220277//O2 saturation pulseoxymetry|226253//SpO2 Desat Limit)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
   - pattern:
       table: labevents
-      event: result
+      event: LAB
       code: (50817//Oxygen Saturation)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: None
     columns:
       numeric_value: col(numeric_value)

@@ -4,6 +4,8 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: nursingchartid
+    type: int64
   # db fields - times
   - name: nursingchartoffset
     type: int64
@@ -17,7 +19,7 @@ columns:
   - name: nursingchartvalue
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, nursingchartoffset, output=event_timestamp)
 
 join:
@@ -43,16 +45,17 @@ event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
-    hadm_id: const(None)
     stay_id: col(patientunitstayid)
+    nursingchart_id: col(nursingchartid)
 
 events:
-  - name: nursingchartevent
+  - name: NURSE_CHART
     columns:
       code:
         - col(nursingchartcelltypecat)
         - col(nursingchartcelltypevallabel)
         - col(nursingchartcelltypevalname)
+      numeric_value: col(nursingchartvalue)
       text_value: col(nursingchartvalue)
     filters:
       - drop_na(nursingchartvalue)

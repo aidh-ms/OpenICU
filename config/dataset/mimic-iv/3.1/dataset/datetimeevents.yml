@@ -19,11 +19,13 @@ columns:
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+  - name: value
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: itemid
     type: int64
-  - name: value
-    type: string
   - name: valueuom
     type: string
   - name: warning
@@ -57,7 +59,8 @@ events:
       code:
         - col(itemid)
         - col(label)
-    extension:
-      datetime_value: col(value)
-      datetime_uom: col(valueuom)
-      warning: col(warning)
+      extension:
+        available_time: col(storetime)
+        datetime_value: col(value)
+        datetime_uom: col(valueuom)
+        warning: col(warning)

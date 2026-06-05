@@ -63,5 +63,6 @@ events:
         - col(valueuom)
       numeric_value: col(valuenum)
       text_value: col(value)
-    extension:
-      warning: col(warning)
+      extension:
+        available_time: col(storetime)
+        warning: col(warning)

@@ -17,10 +17,10 @@ columns:
   - name: infusionrate
     type: string
   - name: patientweight
-    type: string
+    type: float64
   - name: volumeoffluid
     type: string
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, infusionoffset, output=event_timestamp)
 
 join:
@@ -51,43 +51,22 @@ event_defaults:
     stay_id: col(patientunitstayid)
 
 events:
-  - name: patientweight
-    columns:
-      time: col(admission_timestamp)
-      code:
-        - const("kg")
-      text_value: col(patientweight)
-    filters:
-      - drop_na(text_value)
-  - name: drugamount
+  - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:
       time: col(event_timestamp)
       code:
-        - col(drugname)
-      numeric_value: col(drugamount)
+        - const(kg)
+      numeric_value: col(patientweight)
     filters:
       - drop_na(numeric_value)
-  - name: drugrate
+
+  - name: INFUSION
     columns:
       time: col(event_timestamp)
-      text_value: col(drugrate)
       code:
         - col(drugname)
-    filters:
-      - drop_na(text_value)
-  - name: infusionrate
-    columns:
-      time: col(event_timestamp)
-      text_value: col(infusionrate)
-      code:
-        - col(drugname)
-    filters:
-      - drop_na(text_value)
-  - name: volumeoffluid
-    columns:
-      time: col(event_timestamp)
-      text_value: col(volumeoffluid)
-      code:
-        - col(drugname)
-    filters:
-      - drop_na(text_value)
+      extension:
+        drugrate: col(drugrate)
+        infusionrate: col(infusionrate)
+        drugamount: col(drugamount)
+        volume: col(volumeoffluid)

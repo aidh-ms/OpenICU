@@ -17,8 +17,9 @@ class DatasetConfig(BaseModel):
     Specifies the name and file path for a source ICU dataset.
 
     Attributes:
-        name: Name identifier for the dataset
-        path: Filesystem path to the dataset directory
+        name: Name identifier for the dataset. Must match the dataset name used
+            by table configurations.
+        path: Filesystem path to the dataset directory.
     """
     name: str = Field(..., description="Name of the dataset.")
     path: Path = Field(..., description="Path to the dataset.")

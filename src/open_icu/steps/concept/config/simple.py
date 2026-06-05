@@ -57,9 +57,7 @@ class MappingConfig(BaseModel):
         return "//".join(
             (
                 self.pattern.dataset or "(.+?)",
-                self.pattern.version or "(.+?)",
                 self.pattern.table or "(.+?)",
-                self.pattern.event or "(.+?)",
                 self.pattern.code or "(.+?)",
             )
         )

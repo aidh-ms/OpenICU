@@ -57,9 +57,10 @@ events:
     columns:
       time: col(dischtime)
       code:
-        - const("ICD")
+        - const(ICD)
         - col(icd_version)
         - col(icd_code)
         - col(long_title)
       extension:
+        available_time: col(dischtime)
         seq_num: col(seq_num)

@@ -2,7 +2,15 @@ type: simple
 mappings:
   - pattern:
       table: inputevents
-      event: result
+      event: INFUSION_START
+      code: (221906//Norepinephrine)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+
+  - pattern:
+      table: inputevents
+      event: INFUSION_END
       code: (221906//Norepinephrine)
     columns:
       numeric_value: col(numeric_value)

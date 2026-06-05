@@ -1,10 +1,12 @@
 import ast
 from typing import Tuple
 
-from polars import Expr, LazyFrame
+from polars import LazyFrame
 
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
-from open_icu.callbacks.proto import AstValue, CallbackProtocol
+from open_icu.callbacks._callbacks.logical import And, Or, Not
+from open_icu.callbacks._callbacks.comparison import GreaterThan, LessThan, GreaterEqual, LessEqual, Equal, NotEqual
+from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
 from open_icu.callbacks.registry import registry
 
 
@@ -18,6 +20,9 @@ class ExprInterpreter(ast.NodeVisitor):
 
     def visit_List(self, node) -> AstValue:
         return [self.visit(e) for e in node.elts]
+    
+    def visit_Tuple(self, node) -> AstValue:
+        return tuple(self.visit(e) for e in node.elts)
 
     def visit_Name(self, node) -> AstValue:
         # DSL: bare names are column references
@@ -57,33 +62,78 @@ class ExprInterpreter(ast.NodeVisitor):
             return Subtract(left, right)
         if isinstance(node.op, ast.Div):
             return Divide(left, right)
+        if isinstance(node.op, ast.BitAnd):
+            return And(left, right)
+        if isinstance(node.op, ast.BitOr):
+            return Or(left, right)
 
-        raise NotImplementedError(node.op)
+        raise NotImplementedError(type(node.op))
+    
+    def visit_BoolOp(self, node) -> AstValue:
+        if not node.values:
+            raise ValueError("Empty boolean operation is not supported")
+
+        values = [self.visit(v) for v in node.values]
+
+        if isinstance(node.op, ast.And):
+            expr = values[0]
+            for value in values[1:]:
+                expr = And(expr, value)
+            return expr
+
+        if isinstance(node.op, ast.Or):
+            expr = values[0]
+            for value in values[1:]:
+                expr = Or(expr, value)
+            return expr
 
     def visit_UnaryOp(self, node) -> AstValue:
         operand = self.visit(node.operand)
+
         if isinstance(node.op, ast.USub):
             return Multiply(operand, -1)
         if isinstance(node.op, ast.UAdd):
             return operand
-        raise NotImplementedError(node.op)
+        if isinstance(node.op, ast.Not):
+            return Not(operand)
+        if isinstance(node.op, ast.Invert):
+            return Not(operand)
+
+        raise NotImplementedError(type(node.op).__name__)
 
     def visit_Compare(self, node) -> AstValue:
+        if len(node.ops) != 1 or len(node.comparators) != 1:
+            raise NotImplementedError("Chained comparisons are not supported")
+
         left = self.visit(node.left)
         right = self.visit(node.comparators[0])
+        op = node.ops[0]
 
-        if isinstance(node.ops[0], ast.Gt):
-            return left > right  # Callback has to be implemented and called'
+        if isinstance(op, ast.Gt):
+            return GreaterThan(left, right)
+        if isinstance(op, ast.Lt):
+            return LessThan(left, right)
+        if isinstance(op, ast.GtE):
+            return GreaterEqual(left, right)
+        if isinstance(op, ast.LtE):
+            return LessEqual(left, right)
+        if isinstance(op, ast.Eq):
+            return Equal(left, right)
+        if isinstance(op, ast.NotEq):
+            return NotEqual(left, right)
 
-        raise NotImplementedError(node.ops[0])
+        raise NotImplementedError(type(op))
 
     def _get_name(self, node) -> str:
         if isinstance(node, ast.Name):
             return node.id
         raise ValueError("Only simple calls allowed")
+    
+    def generic_visit(self, node):
+        raise ValueError(f"Unsupported syntax: {ast.dump(node)}")
 
 
-def parse_expr(lf : LazyFrame, expr: str) -> Expr:
+def parse_expr(lf : LazyFrame, expr: str) -> CallbackResult:
     interpreter = ExprInterpreter()
     callback = interpreter.eval(expr)
 

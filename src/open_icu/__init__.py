@@ -39,6 +39,8 @@ with OpenICUProject(project_path) as project:
 
 Author:
 - Paul Brauckmann
+- Tobias Laser
+- Patrick Rockenschaub
 - Christian Porschen
 
 License:

@@ -61,7 +61,7 @@ columns:
   - name: wardid
     type: int64
 
-post_callbacks:
+post_join_callbacks:
   - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, output=discharge_timestamp)
 
@@ -75,7 +75,7 @@ events:
     columns:
       # TODO: suggest and maybe change time birthdate
       time: col(admission_timestamp)
-      code: # codes is null, when using gender and gender is empty string
+      code:
         - col(gender)
   - name: icu_admission
     columns:

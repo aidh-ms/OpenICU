@@ -77,9 +77,10 @@ events:
         - col(valueuom)
       numeric_value: col(valuenum)
       text_value: col(value)
-    extension:
-      ref_range_lower: col(ref_range_lower)
-      ref_range_upper: col(ref_range_upper)
-      flag: col(flag)
-      priority: col(priority)
-      comments: col(comments)
+      extension:
+        available_time: col(storetime)
+        ref_range_lower: col(ref_range_lower)
+        ref_range_upper: col(ref_range_upper)
+        flag: col(flag)
+        priority: col(priority)
+        comments: col(comments)

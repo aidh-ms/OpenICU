@@ -49,7 +49,9 @@ columns:
 
 event_defaults:
   subject_id: col(subject_id)
+  time: col(admittime)
   extension:
+    available_time: col(admittime)
     hadm_id: col(hadm_id)
     admit_provider_id: col(admit_provider_id)
 
@@ -57,43 +59,42 @@ events:
   - name: ED_REGISTRATION
     columns:
       time: col(edregtime)
+      extension:
+        available_time: col(edregtime)
     filters:
       - drop_na(time)
   - name: ED_OUT
     columns:
       time: col(edouttime)
+      extension:
+        available_time: col(edouttime)
     filters:
       - drop_na(time)
 
 
   - name: HOSPITAL_ADMISSION
     columns:
-      time: col(admittime)
       code:
         - col(admission_type)
         - col(admission_location)
 
   - name: INSURANCE
     columns:
-      time: col(admittime)
       code:
         - col(insurance)
 
   - name: LANGUAGE
     columns:
-      time: col(admittime)
       code:
         - col(language)
 
   - name: MARITAL_STATUS
     columns:
-      time: col(admittime)
       code:
         - col(marital_status)
 
   - name: ETHNICITY
     columns:
-      time: col(admittime)
       code:
         - col(race)
 
@@ -102,9 +103,13 @@ events:
       time: col(dischtime)
       code:
         - col(discharge_location)
+      extension:
+        available_time: col(dischtime)
 
   - name: MEDS_DEATH
     columns:
       time: col(deathtime)
+      extension:
+        available_time: col(deathtime)
     filters:
       - drop_na(time)

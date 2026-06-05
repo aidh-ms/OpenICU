@@ -21,11 +21,13 @@ event_defaults:
   subject_id: col(subject_id)
 
 events:
-  - name: MISC
+  - name: OMR
     columns:
+      # TODO: move chartdate to end of day with callback
       time: col(chartdate)
       code:
         - col(result_name)
       text_value: col(result_value)
-    extension:
-      seq_num: col(seq_num)
+      extension:
+        available_time: col(chartdate)
+        seq_num: col(seq_num)

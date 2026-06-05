@@ -16,6 +16,15 @@ from open_icu.steps.extraction.config.column import ColumnConfig
 from open_icu.steps.extraction.config.event import EventConfig, MEDSEventFieldDefaultConfig
 
 
+def _get_or_default(data: dict[str, Any], key: str, default: Any) -> Any:
+    """Return a configured value if present, otherwise return the default.
+
+    This intentionally checks key existence instead of truthiness so that empty
+    lists can explicitly override defaults.
+    """
+    return data[key] if key in data else default
+
+
 class TableType(StrEnum):
     """Supported table file formats."""
 
@@ -26,34 +35,61 @@ class TableType(StrEnum):
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
     """Abstract base configuration for table extraction.
 
-    Defines columns, data types, and callback transformations for reading
-    and processing a source table.
+    Defines columns, data types, callback transformations, filters, and frame
+    transformations for reading and processing a source table.
 
     Attributes:
         path: File path to the table data relative to dataset root
         type: Table file format (currently only CSV supported)
         columns: List of column configurations
         pre_callbacks: Callbacks to apply before column processing
+        pre_filters: Filters to apply before column processing
         callbacks: Callbacks to apply after column processing
-        post_callbacks: Callbacks to apply after all transformations
+        filters: Filters to apply after callbacks
+        post_join_callbacks: Callbacks to apply after joins
+        post_join_filters: Filters to apply after post-join callbacks
+        transformations: Frame transformations to apply after post-join filters
         dtypes: Computed dictionary mapping column names to Polars types
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     path: str = Field(..., description="The file path to the table data.")
-    type: TableType = Field(TableType.CSVGZ, description="The type of the table (e.g. csv, json).")
+    type: TableType = Field(
+        TableType.CSVGZ,
+        description="The type of the table (e.g. csv, json).",
+    )
     columns: list[ColumnConfig] = Field(
         default_factory=list,
-        description="The list of column configurations for the table."
+        description="The list of column configurations for the table.",
     )
     pre_callbacks: list[str] = Field(
-        default_factory=list, description="The list of pre-processing callback configurations for the table."
+        default_factory=list,
+        description="The list of pre-processing callback configurations for the table.",
+    )
+    pre_filters: list[str] = Field(
+        default_factory=list,
+        description="The list of pre-processing filter configurations for the table.",
     )
     callbacks: list[str] = Field(
-        default_factory=list, description="The list of callback configurations for the table."
+        default_factory=list,
+        description="The list of callback configurations for the table.",
     )
-    post_callbacks: list[str] = Field(
-        default_factory=list, description="The list of post-processing callback configurations for the table."
+    filters: list[str] = Field(
+        default_factory=list,
+        description="The list of filter configurations for the table.",
+    )
+    post_join_callbacks: list[str] = Field(
+        default_factory=list,
+        description="The list of callback configurations applied after joins.",
+    )
+    post_join_filters: list[str] = Field(
+        default_factory=list,
+        description="The list of filter configurations applied after post-join callbacks.",
+    )
+    transformations: list[str] = Field(
+        default_factory=list,
+        description="The list of frame transformation configurations for the table.",
     )
 
     @computed_field
@@ -78,6 +114,7 @@ class JoinTableConfig(BaseTableConfig):
         how: Join type ("left", "inner", "outer", "right")
         join_params: Computed dictionary of join parameters for Polars
     """
+
     both_on: list[str] = Field(
         default_factory=list,
         description="List of columns to be used for joining table on both sides.",
@@ -120,12 +157,13 @@ class TableConfig(BaseDatasetConfig, BaseTableConfig):
         name: Human-readable name of the configuration
         version: Version string for the configuration
         identifier: Computed hierarchical identifier (e.g., "openicu.config.classname.version.name")
-        identifier_tuple: Tuple of (class_name, version, name)
+        identifier_tuple: Tuple of (class_name, dataset, version, name)
         uuid: UUID generated from the identifier
         dataset: Name of the dataset this table belongs to
         join: List of tables to join before event extraction
         events: List of MEDS events to extract from this table
     """
+
     __open_icu_config_type__: ClassVar[str] = "dataset"
 
     join: list[JoinTableConfig] = Field(
@@ -141,8 +179,23 @@ class TableConfig(BaseDatasetConfig, BaseTableConfig):
         event_defaults = MEDSEventFieldDefaultConfig(**data.get("event_defaults", {}))
 
         events = data.pop("events", [])
+
         for event in events:
-            event["columns"] = event_defaults.apply_defaults(event.get("columns", {}))
+            event["code_prefix"] = _get_or_default(
+                event,
+                "code_prefix",
+                event_defaults.code_prefix or [],
+            )
+            event["code_suffix"] = _get_or_default(
+                event,
+                "code_suffix",
+                event_defaults.code_suffix or [],
+            )
+
+            event["columns"] = event_defaults.apply_defaults(
+                event.get("columns", {})
+            )
+
         data["events"] = events
 
         super().__init__(**data)

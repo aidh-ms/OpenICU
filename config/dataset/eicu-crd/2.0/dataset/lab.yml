@@ -4,6 +4,8 @@ columns:
   # subject_id and extentions
   - name: patientunitstayid
     type: int64
+  - name: labid
+    type: int64
   # db columns - times
   - name: labresultoffset
     type: int64
@@ -17,7 +19,7 @@ columns:
   - name: labresulttext
     type: str
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, labresultoffset, output=event_timestamp)
 
 join:
@@ -47,8 +49,10 @@ event_defaults:
   time: col(event_timestamp)
   extension:
     stay_id: col(patientunitstayid)
+    lab_id: col(labid)
+
 events:
-  - name: labevent
+  - name: LAB
     columns:
       code:
         - col(labname)

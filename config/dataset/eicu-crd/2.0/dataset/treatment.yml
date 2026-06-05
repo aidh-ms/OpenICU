@@ -11,7 +11,7 @@ columns:
   - name: treatmentstring
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, treatmentoffset, output=event_timestamp)
 
 join:
@@ -37,12 +37,10 @@ event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
-    hadm_id: const(None)
     stay_id: col(patientunitstayid)
 
 events:
-  - name: treatment
+  - name: TREATMENT
     columns:
-      text_value: col(treatmentstring)
-    filters:
-      - drop_na(treatmentstring)
+      code:
+        - col(treatmentstring)

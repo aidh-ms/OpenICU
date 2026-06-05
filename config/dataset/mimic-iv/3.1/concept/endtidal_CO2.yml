@@ -2,7 +2,7 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
+      event: CHART
       code: (228640//EtCO2)
     columns:
       numeric_value: col(numeric_value)

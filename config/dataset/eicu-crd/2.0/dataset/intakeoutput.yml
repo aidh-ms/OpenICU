@@ -4,8 +4,12 @@ columns:
   # subject_id and extensions
   - name: patientunitstayid
     type: int64
+  - name: intakeoutputid
+    type: int64
   # db fields - times
   - name: intakeoutputoffset
+    type: int64
+  - name: intakeoutputentryoffset
     type: int64
   # db fields - values
   - name: intaketotal
@@ -15,7 +19,9 @@ columns:
   - name: dialysistotal
     type: float32
   - name: nettotal
-    type: float32
+    type: float64
+  - name: cellpath
+    type: string
   - name: celllabel
     type: string
   - name: cellvaluenumeric
@@ -23,8 +29,9 @@ columns:
   - name: cellvaluetext
     type: string
 
-post_callbacks:
+post_join_callbacks:
   - add_offset(admission_timestamp, intakeoutputoffset, output=event_timestamp)
+  - add_offset(admission_timestamp, intakeoutputentryoffset, output=entered_timestamp)
 
 join:
   - name: patient
@@ -49,35 +56,14 @@ event_defaults:
   subject_id: col(patienthealthsystemstayid)
   time: col(event_timestamp)
   extension:
-    hadm_id: const(None)
     stay_id: col(patientunitstayid)
+    intakeoutput_id: col(intakeoutputid)
+    available_time: col(entered_timestamp)
 
 events:
-  - name: intaketotal
+  - name: INTAKE_OUTPUT
     columns:
       code:
-        - const("mL")
-      numeric_value: col(intaketotal)
-  - name: outputtotal
-    columns:
-      code:
-        - const("mL")
-      numeric_value: col(outputtotal)
-  - name: dialysistotal
-    columns:
-      code:
-        - const("mL")
-      numeric_value: col(dialysistotal)
-  - name: nettotal
-    columns:
-      code:
-        - const("mL")
-      numeric_value: col(nettotal)
-  - name: cellevent
-    columns:
-      code:
-        - col(celllabel)
+        - col(cellpath)
       numeric_value: col(cellvaluenumeric)
       text_value: col(cellvaluetext)
-    filters:
-      - drop_na(celllabel)

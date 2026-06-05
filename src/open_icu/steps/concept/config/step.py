@@ -1,7 +1,7 @@
 """Concept step configuration models.
 
 This module defines the configuration structure for the concept step,
-including dataset path specifications and custom extraction settings.
+including dataset-specific concept configuration paths and extraction step references.
 """
 from pathlib import Path
 

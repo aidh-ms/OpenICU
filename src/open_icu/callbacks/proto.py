@@ -4,7 +4,7 @@ import polars as pl
 from polars import LazyFrame
 
 AstAtom = Union[int, float, bool, str, None]
-AstValue = Union[AstAtom, pl.Expr, "CallbackProtocol", list["AstValue"]]
+AstValue = Union[AstAtom, pl.Expr, "CallbackProtocol", list["AstValue"], tuple["AstValue"]]
 CallbackResult = pl.Expr
 
 
