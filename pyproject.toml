@@ -40,6 +40,11 @@ changelog = "https://github.com/aidh-ms/OpenICU/releases"
 issues = "https://github.com/aidh-ms/OpenICU/issues"
 documentation = "https://github.com/aidh-ms/OpenICU/wiki"
 
+[project.scripts]
+openicu-ricu-convert = "open_icu.adapter.converters.ricu.cli:main"
+openicu-ricu-compare-outputs = "open_icu.adapter.converters.ricu.validation.compare_cli:main"
+openicu-yaib-dyn = "open_icu.adapter.export.yaib.cli:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -70,13 +75,13 @@ addopts = [
     "--cov-report=xml",
     "--import-mode=importlib",
 ]
+
 [[tool.mypy.overrides]]
 module = [
     "pyarrow.*",
     "flexible_schema.*",
 ]
 follow_untyped_imports = true
-
 
 [tool.mypy]
 python_version = "3.13"
