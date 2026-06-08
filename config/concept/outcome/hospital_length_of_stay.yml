@@ -1,6 +1,6 @@
-name: lymphocytes
+name: hospital_length_of_stay
 version: 1.0.0
-unit: '%'
+unit: days
 extension_columns:
   dataset: col("dataset")
   table: col("table")

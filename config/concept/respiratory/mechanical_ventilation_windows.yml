@@ -1,6 +1,6 @@
-name: lymphocytes
+name: mechanical_ventilation_windows
 version: 1.0.0
-unit: '%'
+unit: None
 extension_columns:
   dataset: col("dataset")
   table: col("table")

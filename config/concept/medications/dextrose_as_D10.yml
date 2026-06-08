@@ -1,6 +1,6 @@
-name: prothrombin_time_per_international_normalized_ratio
+name: dextrose_as_D10
 version: 1.0.0
-unit: None
+unit: ml/hr
 extension_columns:
   dataset: col("dataset")
   table: col("table")

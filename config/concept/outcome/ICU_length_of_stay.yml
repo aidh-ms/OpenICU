@@ -1,6 +1,6 @@
-name: dextrose_(as_D10)
+name: ICU_length_of_stay
 version: 1.0.0
-unit: ml/hr
+unit: days
 extension_columns:
   dataset: col("dataset")
   table: col("table")

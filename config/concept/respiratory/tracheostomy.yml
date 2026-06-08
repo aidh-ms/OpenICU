@@ -1,6 +1,6 @@
-name: lymphocytes
+name: tracheostomy
 version: 1.0.0
-unit: '%'
+unit: boolean
 extension_columns:
   dataset: col("dataset")
   table: col("table")
