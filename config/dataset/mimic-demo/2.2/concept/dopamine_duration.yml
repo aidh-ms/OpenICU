@@ -1,16 +1,26 @@
 type: simple
 mappings:
   - pattern:
-      table: inputevents_cv
-      event: result
-      code: ()
-    columns:
+      table: inputevents
+      event: INFUSION_START
+      code: (30043(//.*)?|30125(//.*)?|30307(//.*)?)
+    columns: &id001
       numeric_value: col(numeric_value)
       text_value: col(text_value)
   - pattern:
-      table: inputevents_mv
-      event: result
-      code: (221662//Dopamine)
-    columns:
+      table: inputevents
+      event: INFUSION_END
+      code: (30043(//.*)?|30125(//.*)?|30307(//.*)?)
+    columns: *id001
+  - pattern:
+      table: inputevents
+      event: INFUSION_START
+      code: (221662(//.*)?)
+    columns: &id002
       numeric_value: col(numeric_value)
       text_value: col(text_value)
+  - pattern:
+      table: inputevents
+      event: INFUSION_END
+      code: (221662(//.*)?)
+    columns: *id002

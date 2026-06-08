@@ -2,11 +2,13 @@ path: icu/datetimeevents.csv.gz
 
 columns:
   # subject_id and extentions
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: subject_id
+  - name: caregiver_id
     type: int64
   # db fields - times
   - name: charttime
@@ -17,11 +19,13 @@ columns:
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+  - name: value
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: itemid
     type: int64
-  - name: value
-    type: string
   - name: valueuom
     type: string
   - name: warning
@@ -46,21 +50,17 @@ event_defaults:
   extension:
     hadm_id: col(hadm_id)
     stay_id: col(stay_id)
+    caregiver_id: col(caregiver_id)
 
 events:
-  - name: result
+  - name: TIMESTAMP_OF
     columns:
       time: col(charttime)
       code:
         - col(itemid)
         - col(label)
-        - col(valueuom)
-      text_value: col(value)
-    filters:
-      - drop_na(text_value)
-  - name: warning
-    columns:
-      time: col(storetime)
-      numeric_value: col(warning)
-    filters:
-      - drop_na(numeric_value)
+      extension:
+        available_time: col(storetime)
+        datetime_value: col(value)
+        datetime_uom: col(valueuom)
+        warning: col(warning)

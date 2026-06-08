@@ -2,15 +2,15 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
-      code: (220227//Arterial O2 Saturation)
+      event: CHART
+      code: (834(//.*)?|220227(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
   - pattern:
       table: labevents
-      event: result
-      code: (50817//Oxygen Saturation)
+      event: LAB
+      code: (50817(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

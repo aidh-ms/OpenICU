@@ -2,8 +2,8 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
-      code: (228640//EtCO2)
+      event: CHART
+      code: (1817(//.*)?|228640(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

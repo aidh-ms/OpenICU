@@ -2,15 +2,15 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
-      code: (223835//Inspired O2 Fraction)
+      event: CHART
+      code: (3420(//.*)?|223835(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
   - pattern:
       table: labevents
-      event: result
-      code: (50816//Oxygen)
+      event: LAB
+      code: (50816(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

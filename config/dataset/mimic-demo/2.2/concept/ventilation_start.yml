@@ -2,8 +2,8 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: result
-      code: (223849//Ventilator Mode|223848//Ventilator Type|224695//Peak Insp. Pressure|224697//Mean Airway Pressure|224705//P High (APRV)|224687//Minute Volume|224704//ATC %|224746//Transpulmonary Pressure (Exp. Hold)|224706//P Low (APRV)|224709//T Low (APRV)|224684//Tidal Volume (set)|224747//Transpulmonary Pressure (Insp. Hold)|224703//ZATC Tube \#|224685//Tidal Volume (observed)|224696//Plateau Pressure|224707//T High (APRV)|224701//PSV Level|224750//Nitric Oxide Tank Pressure|227187//Pinsp (Draeger only)|224700//Total PEEP Level|224702//PCV Level|220339//PEEP set|224419//Negative Insp. Force|224686//Tidal Volume (spontaneous)|224738//Inspiratory Time|226873//Inspiratory Ratio)
+      event: CHART
+      code: (1(//.*)?|60(//.*)?|218(//.*)?|221(//.*)?|223(//.*)?|436(//.*)?|437(//.*)?|444(//.*)?|445(//.*)?|448(//.*)?|449(//.*)?|450(//.*)?|459(//.*)?|501(//.*)?|502(//.*)?|503(//.*)?|505(//.*)?|506(//.*)?|535(//.*)?|543(//.*)?|639(//.*)?|654(//.*)?|667(//.*)?|668(//.*)?|669(//.*)?|670(//.*)?|671(//.*)?|672(//.*)?|681(//.*)?|682(//.*)?|683(//.*)?|684(//.*)?|686(//.*)?|1211(//.*)?|1340(//.*)?|1486(//.*)?|1600(//.*)?|1655(//.*)?|2000(//.*)?|3459(//.*)?|5865(//.*)?|5866(//.*)?|220339(//.*)?|223848(//.*)?|223849(//.*)?|224419(//.*)?|224684(//.*)?|224685(//.*)?|224686(//.*)?|224687(//.*)?|224695(//.*)?|224696(//.*)?|224697(//.*)?|224700(//.*)?|224701(//.*)?|224702(//.*)?|224703(//.*)?|224704(//.*)?|224705(//.*)?|224706(//.*)?|224707(//.*)?|224709(//.*)?|224738(//.*)?|224746(//.*)?|224747(//.*)?|224750(//.*)?|226873(//.*)?|227187(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
