@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: outputevents
+      event: result
+      code: (226559//Foley|226560//Void|226563//Suprapubic|226557//R Ureteral Stent|226561//Condom Cath|226565//L Nephrostomy|226566//Urine and GU Irrigant Out|226584//Ileoconduit|227510//TF Residual|226567//Straight Cath|226558//L Ureteral Stent|226564//R Nephrostomy)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

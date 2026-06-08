@@ -1,0 +1,16 @@
+type: simple
+mappings:
+  - pattern:
+      table: chartevents
+      event: result
+      code: (223762//Temperature Celsius)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+  - pattern:
+      table: chartevents
+      event: result
+      code: (224027//Skin Temperature|223761//Temperature Fahrenheit)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
