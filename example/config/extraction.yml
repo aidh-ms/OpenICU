@@ -2,72 +2,75 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /workspaces/config/dataset/mimic-iv/3.1/dataset/
-    # includes:
-    #   - openicu.config.dataset.mimic-iv.3.1.prescriptions
-    #   - openicu.config.dataset.mimic-iv.3.1.outputevents
-    #   - openicu.config.dataset.mimic-iv.3.1.drgcodes
-    #   - openicu.config.dataset.mimic-iv.3.1.services
-    #   - openicu.config.dataset.mimic-iv.3.1.emar
-    #   - openicu.config.dataset.mimic-iv.3.1.patients
-    #   - openicu.config.dataset.mimic-iv.3.1.omr
-    #   - openicu.config.dataset.mimic-iv.3.1.icustays
-    #   - openicu.config.dataset.mimic-iv.3.1.datetimeevent
-    #   - openicu.config.dataset.mimic-iv.3.1.hcpcsevents
-    #   - openicu.config.dataset.mimic-iv.3.1.microbiologyevents
-    #   - openicu.config.dataset.mimic-iv.3.1.procedureevents
-    #   - openicu.config.dataset.mimic-iv.3.1.chartevents
-    #   - openicu.config.dataset.mimic-iv.3.1.ingredientevents
-    #   - openicu.config.dataset.mimic-iv.3.1.inputevents
-    #   - openicu.config.dataset.mimic-iv.3.1.diagnoses_icd
-    #   - openicu.config.dataset.mimic-iv.3.1.admissions
-    #   - openicu.config.dataset.mimic-iv.3.1.labevents
-  - path: /workspaces/config/dataset/nwicu/0.1.0/dataset/
-    # includes:
-    #   - openicu.config.dataset.nwicu.0.1.0.prescriptions
-    #   - openicu.config.dataset.nwicu.0.1.0.patients
-    #   - openicu.config.dataset.nwicu.0.1.0.icustays
-    #   - openicu.config.dataset.nwicu.0.1.0.procedureevents
-    #   - openicu.config.dataset.nwicu.0.1.0.chartevents
-    #   - openicu.config.dataset.nwicu.0.1.0.admissions
-    #   - openicu.config.dataset.nwicu.0.1.0.labevents
-  - path: /workspaces/config/dataset/eicu-crd/2.0/dataset/
-    # includes:
-    #     - openicu.config.dataset.eicu-crd.2.0.treatment
-    #     - openicu.config.dataset.eicu-crd.2.0.diagnosis
-    #     - openicu.config.dataset.eicu-crd.2.0.medication
-    #     - openicu.config.dataset.eicu-crd.2.0.intakeoutput
-    #     - openicu.config.dataset.eicu-crd.2.0.lab
-    #     - openicu.config.dataset.eicu-crd.2.0.respiratorycare
-    #     - openicu.config.dataset.eicu-crd.2.0.patient
-    #     - openicu.config.dataset.eicu-crd.2.0.careplangoal
-    #     - openicu.config.dataset.eicu-crd.2.0.vitalaperiodic
-    #     - openicu.config.dataset.eicu-crd.2.0.careplaninfectiousdisease
-    #     - openicu.config.dataset.eicu-crd.2.0.respiratorycharting
-    #     - openicu.config.dataset.eicu-crd.2.0.careplangeneral
-    #     - openicu.config.dataset.eicu-crd.2.0.nursecharting
-    #     - openicu.config.dataset.eicu-crd.2.0.nurseassessment
-    #     - openicu.config.dataset.eicu-crd.2.0.nursecare
-    #     - openicu.config.dataset.eicu-crd.2.0.infusiondrug
-    #     - openicu.config.dataset.eicu-crd.2.0.apachepatientresult
-    #     - openicu.config.dataset.eicu-crd.2.0.vitalperiodic
-    #     - openicu.config.dataset.eicu-crd.2.0.note
-    #     - openicu.config.dataset.eicu-crd.2.0.customlab
-    #     - openicu.config.dataset.eicu-crd.2.0.pasthistory
-    #     - openicu.config.dataset.eicu-crd.2.0.admissiondrug
-    #     - openicu.config.dataset.eicu-crd.2.0.careplaneol
-    #     - openicu.config.dataset.eicu-crd.2.0.allergy
-    #     - openicu.config.dataset.eicu-crd.2.0.apacheapsvar
-    #     - openicu.config.dataset.eicu-crd.2.0.admissiondx
-    #     - openicu.config.dataset.eicu-crd.2.0.apachepredvar
-    #     - openicu.config.dataset.eicu-crd.2.0.physicalexam
-    #     - openicu.config.dataset.eicu-crd.2.0.microlab
+  - path: /workspaces/config/dataset/mimic-demo/2.2/dataset
+  # - path: /workspaces/config/dataset/mimic-iv/3.1/dataset/
+  #   # includes:
+  #   #   - openicu.config.dataset.mimic-iv.3.1.prescriptions
+  #   #   - openicu.config.dataset.mimic-iv.3.1.outputevents
+  #   #   - openicu.config.dataset.mimic-iv.3.1.drgcodes
+  #   #   - openicu.config.dataset.mimic-iv.3.1.services
+  #   #   - openicu.config.dataset.mimic-iv.3.1.emar
+  #   #   - openicu.config.dataset.mimic-iv.3.1.patients
+  #   #   - openicu.config.dataset.mimic-iv.3.1.omr
+  #   #   - openicu.config.dataset.mimic-iv.3.1.icustays
+  #   #   - openicu.config.dataset.mimic-iv.3.1.datetimeevent
+  #   #   - openicu.config.dataset.mimic-iv.3.1.hcpcsevents
+  #   #   - openicu.config.dataset.mimic-iv.3.1.microbiologyevents
+  #   #   - openicu.config.dataset.mimic-iv.3.1.procedureevents
+  #   #   - openicu.config.dataset.mimic-iv.3.1.chartevents
+  #   #   - openicu.config.dataset.mimic-iv.3.1.ingredientevents
+  #   #   - openicu.config.dataset.mimic-iv.3.1.inputevents
+  #   #   - openicu.config.dataset.mimic-iv.3.1.diagnoses_icd
+  #   #   - openicu.config.dataset.mimic-iv.3.1.admissions
+  #   #   - openicu.config.dataset.mimic-iv.3.1.labevents
+  # - path: /workspaces/config/dataset/nwicu/0.1.0/dataset/
+  #   # includes:
+  #   #   - openicu.config.dataset.nwicu.0.1.0.prescriptions
+  #   #   - openicu.config.dataset.nwicu.0.1.0.patients
+  #   #   - openicu.config.dataset.nwicu.0.1.0.icustays
+  #   #   - openicu.config.dataset.nwicu.0.1.0.procedureevents
+  #   #   - openicu.config.dataset.nwicu.0.1.0.chartevents
+  #   #   - openicu.config.dataset.nwicu.0.1.0.admissions
+  #   #   - openicu.config.dataset.nwicu.0.1.0.labevents
+  # - path: /workspaces/config/dataset/eicu-crd/2.0/dataset/
+  #   # includes:
+  #   #     - openicu.config.dataset.eicu-crd.2.0.treatment
+  #   #     - openicu.config.dataset.eicu-crd.2.0.diagnosis
+  #   #     - openicu.config.dataset.eicu-crd.2.0.medication
+  #   #     - openicu.config.dataset.eicu-crd.2.0.intakeoutput
+  #   #     - openicu.config.dataset.eicu-crd.2.0.lab
+  #   #     - openicu.config.dataset.eicu-crd.2.0.respiratorycare
+  #   #     - openicu.config.dataset.eicu-crd.2.0.patient
+  #   #     - openicu.config.dataset.eicu-crd.2.0.careplangoal
+  #   #     - openicu.config.dataset.eicu-crd.2.0.vitalaperiodic
+  #   #     - openicu.config.dataset.eicu-crd.2.0.careplaninfectiousdisease
+  #   #     - openicu.config.dataset.eicu-crd.2.0.respiratorycharting
+  #   #     - openicu.config.dataset.eicu-crd.2.0.careplangeneral
+  #   #     - openicu.config.dataset.eicu-crd.2.0.nursecharting
+  #   #     - openicu.config.dataset.eicu-crd.2.0.nurseassessment
+  #   #     - openicu.config.dataset.eicu-crd.2.0.nursecare
+  #   #     - openicu.config.dataset.eicu-crd.2.0.infusiondrug
+  #   #     - openicu.config.dataset.eicu-crd.2.0.apachepatientresult
+  #   #     - openicu.config.dataset.eicu-crd.2.0.vitalperiodic
+  #   #     - openicu.config.dataset.eicu-crd.2.0.note
+  #   #     - openicu.config.dataset.eicu-crd.2.0.customlab
+  #   #     - openicu.config.dataset.eicu-crd.2.0.pasthistory
+  #   #     - openicu.config.dataset.eicu-crd.2.0.admissiondrug
+  #   #     - openicu.config.dataset.eicu-crd.2.0.careplaneol
+  #   #     - openicu.config.dataset.eicu-crd.2.0.allergy
+  #   #     - openicu.config.dataset.eicu-crd.2.0.apacheapsvar
+  #   #     - openicu.config.dataset.eicu-crd.2.0.admissiondx
+  #   #     - openicu.config.dataset.eicu-crd.2.0.apachepredvar
+  #   #     - openicu.config.dataset.eicu-crd.2.0.physicalexam
+  #   #     - openicu.config.dataset.eicu-crd.2.0.microlab
 
 config:
   data:
-    - name: mimic-iv
-      path: /workspaces/example/data/physionet.org/files/mimiciv/3.1
-    - name: eicu-crd
-      path: /workspaces/example/data/physionet.org/files/eicu-crd/2.0
-    - name: nwicu
-      path: /workspaces/example/data/physionet.org/files/nwicu-northwestern-icu/0.1.0
+    - name: mimic-demo
+      path: /workspaces/example/data/physionet.org/files/mimiciv-demo/2.2
+    # - name: mimic-iv
+    #   path: /workspaces/example/data/physionet.org/files/mimiciv/3.1
+    # - name: eicu-crd
+    #   path: /workspaces/example/data/physionet.org/files/eicu-crd/2.0
+    # - name: nwicu
+    #   path: /workspaces/example/data/physionet.org/files/nwicu-northwestern-icu/0.1.0

@@ -10,9 +10,11 @@ config_files:
 config:
   extraction_step: Extraction
   dataset_configs:
-    - name: mimic-iv
-      path: /workspaces/config/dataset/mimic-iv/3.1/concept/
-    - name: eicu-crd
-      path: /workspaces/config/dataset/eicu-crd/2.0/concept/
-    - name: nwicu
-      path: /workspaces/config/dataset/nwicu/0.1.0/concept/
+    - name: mimic-demo
+      path: /workspaces/config/dataset/mimic-demo/2.2/concept/
+    # - name: mimic-iv
+    #   path: /workspaces/config/dataset/mimic-iv/3.1/concept/
+    # - name: eicu-crd
+    #   path: /workspaces/config/dataset/eicu-crd/2.0/concept/
+    # - name: nwicu
+    #   path: /workspaces/config/dataset/nwicu/0.1.0/concept/
