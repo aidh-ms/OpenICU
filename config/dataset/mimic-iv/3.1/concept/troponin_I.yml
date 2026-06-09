@@ -3,7 +3,7 @@ mappings:
   - pattern:
       table: labevents
       event: LAB
-      code: (51002//Troponin I)
+      code: (51002(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
