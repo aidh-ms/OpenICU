@@ -1,0 +1,6 @@
+name: body_fluid_sampling
+version: 1.0.0
+unit: boolean
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

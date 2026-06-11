@@ -1,6 +1,6 @@
 name: eosinophils
 version: 1.0.0
-unit: "%"
+unit: '%'
 extension_columns:
   dataset: col("dataset")
   table: col("table")
