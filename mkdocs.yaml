@@ -1,6 +1,7 @@
 site_name: OpenICU
 docs_dir: docs
 nav:
+  - Home: index.md
   - Getting Started:
       - Package Overview: "getting_started/overview.md"
       - Installation: "getting_started/installation.md"
@@ -27,10 +28,10 @@ nav:
   - API Reference: reference/
 
 copyright: Copyright &copy; 2023 AIDH MS
+repo_url: "https://github.com/aidh-ms/OpenICU"
 
 theme:
   name: material
-  repo_url: "https://github.com/aidh-ms/OpenICU"
   features:
     - navigation.tabs
     - navigation.footer
@@ -39,8 +40,6 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/aidh-ms/OpenICU
-    - icon: fontawesome/brands/python
-      link: https://pypi.org/project/ # TODO change this to your project name
 
 extra_css:
   - assets/css/code_select.css
@@ -71,6 +70,6 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: ["open_icu"]
+          paths: ["src"]
           options:
             docstring_style: google

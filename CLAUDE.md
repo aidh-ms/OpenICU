@@ -64,7 +64,7 @@ Dataset, version, and name are inferred from file paths for dataset-bound config
 
 - Python 3.13+, line length 120 (Ruff), typed defs required, `uv` for everything.
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `infra:`.
-- Tests in `tests/` (`test_*.py`), importlib import mode, coverage on `src/` (currently only a placeholder test exists).
+- Tests in `tests/` (`test_*.py`), importlib import mode, coverage on `src/` with an enforced `--cov-fail-under` floor. The suite covers the expression DSL, callbacks, config models/registries, storage, end-to-end step runs on synthetic fixtures (`tests/steps/conftest.py`), and validation of every shipped YAML in `config/` (`tests/test_shipped_configs.py`). Step tests must use the `clean_registries` autouse fixture pattern — the config registries are global singletons.
 - Docs: README + `docs/` (MkDocs: getting_started/, user_guide/, arc42 in arc/). Keep README, docs/user_guide, and this file in sync with architecture changes.
 
 ## Common Workflows
