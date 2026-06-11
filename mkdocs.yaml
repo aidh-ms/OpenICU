@@ -10,6 +10,7 @@ nav:
   - User Guide:
       - Projects and the Pipeline: "user_guide/pipeline.md"
       - Extraction Configuration: "user_guide/extraction.md"
+      - Dataset Versions and Variants: "user_guide/versioning.md"
       - Concept Configuration: "user_guide/concepts.md"
       - Expression Language: "user_guide/expressions.md"
   - Architecture:

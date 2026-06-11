@@ -142,6 +142,8 @@ If the same event file already exists (e.g. when several table configs write to 
 
 ## Adding a new dataset
 
+> For a new *version* of an already-supported dataset, or a *variant* like a demo subset, don't copy the configs — declare the differences against a reference version with `extends.yml`. See [dataset versions and variants](versioning.md).
+
 1. Create `config/dataset/<your-dataset>/<version>/dataset/` and add one YAML per source table, as above.
 2. Reference the directory from your extraction step's `config_files` and add the dataset's name and data path under `config.data`.
 3. Run the extraction step and inspect `metadata/codes.parquet` to verify the extracted codes.
