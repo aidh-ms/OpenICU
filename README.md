@@ -22,6 +22,7 @@ OpenICU is the spiritual successor to dataset-harmonisation tools like [`ricu`](
 - **One concept, many datasets.** Define a clinical concept (e.g. *heart rate*, *norepinephrine rate*, *antibiotics*) once; map it per dataset with small YAML files. Extraction code stays identical across MIMIC-IV, eICU-CRD, NWICU, and custom sources.
 - **MEDS-native output.** All output is written as MEDS-compliant Parquet (`subject_id`, `time`, `code`, `numeric_value`, `text_value`, plus configurable extension columns) with full metadata (`dataset.json`, `codes.parquet`) — ready for MEDS-compatible downstream tooling.
 - **Declarative, versioned, reproducible.** Every table, event, and concept is a versioned YAML config with a stable identifier. The exact merged configuration used for a run is snapshotted into the output project, so results can be traced and reproduced.
+- **Versions and variants as diffs.** New dataset versions and variants (like the eICU demo) `extend` a reference version and state only their differences — no copied configs to keep in sync. The entire eICU demo configuration is two small files.
 - **Fully offline.** Designed for sensitive medical data: no network access required, nothing leaves your secure perimeter.
 - **Scales down and up.** Polars lazy streaming lets you process full MIMIC-IV on a 16–32 GB laptop, without a database server or cluster.
 - **Extensible.** Add new datasets by writing YAML (no Python required); add new transformation callbacks or complex concept logic in Python where YAML isn't enough.
@@ -49,9 +50,10 @@ OpenICU ships with ready-to-use extraction and concept configurations under [`co
 
 | Dataset | Version | Extraction configs | Concept mappings |
 | --- | --- | --- | --- |
-| [MIMIC-IV](https://physionet.org/content/mimiciv/3.1/) | 3.1 | 20 tables (ICU + hosp) | ~80 concepts |
+| [MIMIC-IV](https://physionet.org/content/mimiciv/3.1/) | 3.1, 2.2 | 19 tables (ICU + hosp) | ~80 concepts |
+| [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) | 2.2 | inherited from MIMIC-IV via `extends` | inherited |
 | [eICU-CRD](https://physionet.org/content/eicu-crd/2.0/) | 2.0 | 14 tables | in progress |
-| [eICU-CRD demo](https://physionet.org/content/eicu-crd-demo/2.0/) | 2.0 | 6 tables | in progress |
+| [eICU-CRD demo](https://physionet.org/content/eicu-crd-demo/2.0/) | 2.0 | inherited from eICU-CRD via `extends` | inherited |
 | [NWICU](https://physionet.org/content/nwicu/0.1.0/) | 0.1.0 | 9 tables | in progress |
 
 The shared concept dictionary in [`config/concept/`](config/concept/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
@@ -225,7 +227,7 @@ Arithmetic, comparisons, and boolean logic work as ordinary expressions (`col(we
 - [Package overview](docs/getting_started/overview.md)
 - [Installation](docs/getting_started/installation.md)
 - [Basic usage](docs/getting_started/basic_usage.md)
-- User guide: [pipeline & projects](docs/user_guide/pipeline.md) · [extraction configs](docs/user_guide/extraction.md) · [concept configs](docs/user_guide/concepts.md) · [expression language](docs/user_guide/expressions.md)
+- User guide: [pipeline & projects](docs/user_guide/pipeline.md) · [extraction configs](docs/user_guide/extraction.md) · [dataset versions & variants](docs/user_guide/versioning.md) · [concept configs](docs/user_guide/concepts.md) · [expression language](docs/user_guide/expressions.md)
 - [Contributing](docs/getting_started/contributing.md)
 - Architecture documentation following [arc42](https://docs.arc42.org/home/) in [`docs/arc/`](docs/arc/)
 

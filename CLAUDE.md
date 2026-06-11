@@ -54,11 +54,12 @@ with OpenICUProject(project_path) as project:
 config/
 ├── concept/<category>/<name>.yml                      # dataset-agnostic concept (name, version, unit)
 └── dataset/<dataset>/<version>/
+    ├── extends.yml                                    # optional: inherit from a reference version
     ├── dataset/<table>.yml                            # extraction table configs
     └── concept/<name>.yml                             # per-dataset concept mappings (type: simple|derived|complex)
 ```
 
-Dataset, version, and name are inferred from file paths for dataset-bound configs. Bundled: mimic-iv 3.1 (most complete), eicu-crd 2.0, eicu-demo 2.0, nwicu 0.1.0; ~90 shared concepts. Step configs (see `example/config/{extraction,concept}.yml`) select `config_files` (with optional `includes`/`excludes` by identifier) and dataset data paths.
+Dataset, version, and name are inferred from file paths for dataset-bound configs. A version dir with an `extends.yml` (keys: `dataset`, `version`) inherits all configs from the referenced version: files deep-merge (dicts merge, lists/scalars replace), `deleted: true` tombstones an inherited config, chains resolve recursively, and identity always comes from the extending version's directory (`src/open_icu/config/inheritance.py`; hooks in `registry.load_configs` and `ConceptConfig.load`). Diffs stack forward in time: the oldest fully-specified version is the reference (mimic-iv 2.2 is the reference; 3.1 and mimic-iv-demo 2.2 are marker-only extends; eicu-demo 2.0 extends eicu-crd 2.0 with one path override). A version dir may contain *only* an `extends.yml`. Bundled: mimic-iv 3.1 (most complete), eicu-crd 2.0, eicu-demo 2.0, nwicu 0.1.0; ~90 shared concepts. Step configs (see `example/config/{extraction,concept}.yml`) select `config_files` (with optional `includes`/`excludes` by identifier) and dataset data paths.
 
 ## Important Conventions
 
