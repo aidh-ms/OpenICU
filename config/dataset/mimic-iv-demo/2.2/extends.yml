@@ -1,0 +1,5 @@
+# The openly available 100-patient demo ships the same tables with the same
+# schema and file names as full MIMIC-IV v2.2, so all table configs and
+# concept mappings are inherited; only the dataset identity differs.
+dataset: mimic-iv
+version: "2.2"

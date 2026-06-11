@@ -2,15 +2,19 @@
 
 These tests make sure that every bundled YAML file parses into its Pydantic
 model and that every embedded expression string is valid in the expression
-DSL (correct syntax, only registered callbacks). They guard the configuration
-library — the part of OpenICU most contributors will touch.
+DSL (correct syntax, only registered callbacks). Dataset configs are resolved
+through the version inheritance mechanism (extends.yml) first, so both
+physical files and inherited/merged configs are validated. They guard the
+configuration library — the part of OpenICU most contributors will touch.
 """
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 
 from open_icu.callbacks.interpreter import ExprInterpreter
+from open_icu.config.inheritance import resolve_effective_configs
 from open_icu.steps.concept.config.concept import ConceptConfig
 from open_icu.steps.concept.config.derived import DerivedDatasetConceptConfig
 from open_icu.steps.concept.config.simple import SimpleDatasetConceptConfig
@@ -19,13 +23,39 @@ from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 REPO_ROOT = Path(__file__).parents[1]
 CONFIG_ROOT = REPO_ROOT / "config"
 
-TABLE_CONFIG_FILES = sorted(CONFIG_ROOT.glob("dataset/*/*/dataset/*.yml"))
+# Version dirs may be marker-only (just an extends.yml, no physical dataset/
+# or concept/ subdirectory), so collect by version dir rather than globbing
+# for the subdirectories themselves.
+VERSION_DIRS = sorted(d for d in CONFIG_ROOT.glob("dataset/*/*") if d.is_dir())
+TABLE_CONFIG_DIRS = [
+    d / "dataset" for d in VERSION_DIRS if (d / "dataset").is_dir() or (d / "extends.yml").is_file()
+]
 CONCEPT_FILES = sorted(CONFIG_ROOT.glob("concept/*/*.yml"))
-DATASET_CONCEPT_DIRS = sorted(d for d in CONFIG_ROOT.glob("dataset/*/*/concept") if d.is_dir())
+DATASET_CONCEPT_DIRS = [
+    d / "concept" for d in VERSION_DIRS if (d / "concept").is_dir() or (d / "extends.yml").is_file()
+]
 
 
 def relative_id(path: Path) -> str:
     return str(path.relative_to(CONFIG_ROOT))
+
+
+def effective_table_cases() -> list[Any]:
+    """One test case per effective table config of each dataset version."""
+    cases = []
+    for subdir in TABLE_CONFIG_DIRS:
+        for name in sorted(resolve_effective_configs(subdir)):
+            cases.append(pytest.param(subdir, name, id=f"{relative_id(subdir)}/{name}"))
+    return cases
+
+
+def load_effective_table(subdir: Path, name: str) -> TableConfig:
+    """Build a TableConfig from effective data, raising on validation errors."""
+    data = resolve_effective_configs(subdir)[name]
+    data.setdefault("dataset", subdir.parent.parent.name)
+    data.setdefault("version", subdir.parent.name)
+    data.setdefault("name", Path(name).name)
+    return TableConfig(**data)
 
 
 def assert_expressions_parse(expressions: list[str], source: str) -> None:
@@ -69,31 +99,32 @@ def collect_event_expressions(table: TableConfig) -> list[str]:
     return expressions
 
 
-@pytest.mark.parametrize("config_file", TABLE_CONFIG_FILES, ids=relative_id)
-def test_table_config_parses(config_file: Path) -> None:
-    table = TableConfig.load(config_file)
+@pytest.mark.parametrize(("subdir", "name"), effective_table_cases())
+def test_table_config_parses(subdir: Path, name: str) -> None:
+    table = load_effective_table(subdir, name)
 
-    assert table.dataset == config_file.parents[2].name
-    assert table.version == config_file.parents[1].name
-    assert table.events, f"{relative_id(config_file)} defines no events"
+    assert table.dataset == subdir.parent.parent.name
+    assert table.version == subdir.parent.name
+    assert table.events, f"{relative_id(subdir)}/{name} defines no events"
 
     for event in table.events:
         assert event.columns.subject_id is not None, (
-            f"{relative_id(config_file)} event {event.name}: missing subject_id mapping"
+            f"{relative_id(subdir)}/{name} event {event.name}: missing subject_id mapping"
         )
         assert event.columns.time is not None, (
-            f"{relative_id(config_file)} event {event.name}: missing time mapping"
+            f"{relative_id(subdir)}/{name} event {event.name}: missing time mapping"
         )
 
 
-@pytest.mark.parametrize("config_file", TABLE_CONFIG_FILES, ids=relative_id)
-def test_table_config_expressions_are_valid(config_file: Path) -> None:
-    table = TableConfig.load(config_file)
+@pytest.mark.parametrize(("subdir", "name"), effective_table_cases())
+def test_table_config_expressions_are_valid(subdir: Path, name: str) -> None:
+    table = load_effective_table(subdir, name)
+    source = f"{relative_id(subdir)}/{name}"
 
-    assert_expressions_parse(collect_table_expressions(table), relative_id(config_file))
+    assert_expressions_parse(collect_table_expressions(table), source)
     for join_table in table.join:
-        assert_expressions_parse(collect_table_expressions(join_table), relative_id(config_file))
-    assert_expressions_parse(collect_event_expressions(table), relative_id(config_file))
+        assert_expressions_parse(collect_table_expressions(join_table), source)
+    assert_expressions_parse(collect_event_expressions(table), source)
 
 
 @pytest.mark.parametrize("concept_file", CONCEPT_FILES, ids=relative_id)
@@ -127,19 +158,65 @@ def test_concept_parses_with_all_dataset_mappings(concept_file: Path) -> None:
             assert_expressions_parse(dataset_concept.filters, source)
 
 
+def test_demo_dataset_inherits_full_table_set() -> None:
+    """eicu-demo must inherit the complete eicu-crd table set via extends.yml."""
+    full = set(resolve_effective_configs(CONFIG_ROOT / "dataset" / "eicu-crd" / "2.0" / "dataset"))
+    demo = set(resolve_effective_configs(CONFIG_ROOT / "dataset" / "eicu-demo" / "2.0" / "dataset"))
+    assert demo == full
+
+    demo_infusion = load_effective_table(CONFIG_ROOT / "dataset" / "eicu-demo" / "2.0" / "dataset", "infusiondrug")
+    assert demo_infusion.path == "infusiondrug.csv.gz"  # demo's lowercase file name
+    assert demo_infusion.dataset == "eicu-demo"
+    assert demo_infusion.events  # inherited from eicu-crd
+
+
+def test_mimic_versions_inherit_reference_configs() -> None:
+    """mimic-iv 3.1 and the demo must inherit the 2.2 reference configs unchanged."""
+    reference = resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv" / "2.2" / "dataset")
+    assert resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv" / "3.1" / "dataset") == reference
+    assert resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "dataset") == reference
+    assert len(reference) >= 19
+
+    # identity comes from the version dir, not from where the files live
+    labevents = load_effective_table(CONFIG_ROOT / "dataset" / "mimic-iv" / "3.1" / "dataset", "labevents")
+    assert labevents.dataset == "mimic-iv"
+    assert labevents.version == "3.1"
+    assert labevents.identifier == "openicu.config.dataset.mimic-iv.3.1.labevents"
+
+    demo_labevents = load_effective_table(CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "dataset", "labevents")
+    assert demo_labevents.dataset == "mimic-iv-demo"
+    assert demo_labevents.version == "2.2"
+
+
+def test_mimic_demo_inherits_concept_mappings() -> None:
+    """Concept mappings must resolve for the demo through the marker-only concept dir."""
+    concept = ConceptConfig.load(
+        CONFIG_ROOT / "concept" / "vitals" / "heart_rate.yml",
+        dataset_paths=[CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "concept"],
+    )
+    dataset_concept = concept.get_dataset_concept("mimic-iv-demo")
+    assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
+    assert dataset_concept.version == "2.2"
+    assert dataset_concept.mappings
+    assert dataset_concept.mappings[0].pattern.dataset == "mimic-iv-demo"
+
+
 def test_every_dataset_mapping_has_a_concept_definition() -> None:
-    """Each per-dataset mapping file must correspond to a shared concept definition."""
+    """Each effective per-dataset mapping must correspond to a shared concept definition."""
     concept_names = {f.stem for f in CONCEPT_FILES}
     missing = {
-        f"{mapping_file.parents[2].name}: {mapping_file.stem}"
+        f"{concept_dir.parent.parent.name}: {name}"
         for concept_dir in DATASET_CONCEPT_DIRS
-        for mapping_file in concept_dir.glob("*.yml")
-        if mapping_file.stem not in concept_names
+        for name in resolve_effective_configs(concept_dir)
+        if Path(name).name not in concept_names
     }
     assert not missing, f"dataset mappings without a concept definition: {sorted(missing)}"
 
 
 def test_config_inventory_is_nonempty() -> None:
-    assert len(TABLE_CONFIG_FILES) >= 40
+    assert len(effective_table_cases()) >= 50
     assert len(CONCEPT_FILES) >= 80
-    assert len(DATASET_CONCEPT_DIRS) >= 3
+    # Marker-only versions (extends.yml) count even without a physical
+    # concept/ dir; only empty dirs without a marker (nwicu) are not
+    # guaranteed to survive a fresh clone.
+    assert len(DATASET_CONCEPT_DIRS) >= 5
