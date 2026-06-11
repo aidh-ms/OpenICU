@@ -83,7 +83,7 @@ events:
       numeric_value: col(heartrate)
   - name: vitalperiodicid
     columns:
-      code:
+      code: []
       numeric_value: col(observationoffset)
   - name: temperature
     columns:
