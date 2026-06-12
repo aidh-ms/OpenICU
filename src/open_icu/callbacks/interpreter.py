@@ -4,8 +4,8 @@ from typing import Tuple
 from polars import LazyFrame
 
 from open_icu.callbacks._callbacks.algebra import Add, Divide, Multiply, Subtract
-from open_icu.callbacks._callbacks.logical import And, Or, Not
-from open_icu.callbacks._callbacks.comparison import GreaterThan, LessThan, GreaterEqual, LessEqual, Equal, NotEqual
+from open_icu.callbacks._callbacks.comparison import Equal, GreaterEqual, GreaterThan, LessEqual, LessThan, NotEqual
+from open_icu.callbacks._callbacks.logical import And, Not, Or
 from open_icu.callbacks.proto import AstValue, CallbackProtocol, CallbackResult
 from open_icu.callbacks.registry import registry
 
@@ -20,7 +20,7 @@ class ExprInterpreter(ast.NodeVisitor):
 
     def visit_List(self, node) -> AstValue:
         return [self.visit(e) for e in node.elts]
-    
+
     def visit_Tuple(self, node) -> AstValue:
         return tuple(self.visit(e) for e in node.elts)
 
@@ -68,7 +68,7 @@ class ExprInterpreter(ast.NodeVisitor):
             return Or(left, right)
 
         raise NotImplementedError(type(node.op))
-    
+
     def visit_BoolOp(self, node) -> AstValue:
         if not node.values:
             raise ValueError("Empty boolean operation is not supported")
@@ -128,7 +128,7 @@ class ExprInterpreter(ast.NodeVisitor):
         if isinstance(node, ast.Name):
             return node.id
         raise ValueError("Only simple calls allowed")
-    
+
     def generic_visit(self, node):
         raise ValueError(f"Unsupported syntax: {ast.dump(node)}")
 
