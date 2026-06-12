@@ -8,8 +8,12 @@ required — useful for trying OpenICU end-to-end).
 
 - `2.2/` — **extends `mimic-iv/2.2`** (see `2.2/extends.yml`), the reference
   configuration. The demo ships all tables referenced by the configurations
-  with identical schema and file names, so everything — table configs and
-  concept mappings — is inherited; there are no overrides.
+  with the same schema and file names, so table configs and concept mappings
+  are inherited. One export quirk requires an override:
+
+    - `dataset/procedureevents.yml` — the demo ships the
+      `originalamount`/`originalrate` headers in UPPERCASE, unlike every
+      full MIMIC-IV release.
 
 ## Working with inherited configs
 

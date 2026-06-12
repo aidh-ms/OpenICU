@@ -171,11 +171,29 @@ def test_demo_dataset_inherits_full_table_set() -> None:
 
 
 def test_mimic_versions_inherit_reference_configs() -> None:
-    """mimic-iv 3.1 and the demo must inherit the 2.2 reference configs unchanged."""
+    """mimic-iv 3.1 and the demo must inherit the 2.2 reference configs.
+
+    All full MIMIC-IV releases share the same schema for the configured
+    tables, so 3.1 inherits 2.2 unchanged. Only the demo *export* deviates:
+    it ships procedureevents' originalamount/originalrate headers uppercase.
+    """
     reference = resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv" / "2.2" / "dataset")
-    assert resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv" / "3.1" / "dataset") == reference
-    assert resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "dataset") == reference
+    v31 = resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv" / "3.1" / "dataset")
+    demo = resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "dataset")
     assert len(reference) >= 19
+
+    # full releases are schema-identical
+    assert v31 == reference
+
+    # the demo overrides exactly one table: the procedureevents column casing
+    assert {name for name in reference if demo[name] != reference[name]} == {"procedureevents"}
+    demo_columns = {c["name"] for c in demo["procedureevents"]["columns"]}
+    assert {"ORIGINALAMOUNT", "ORIGINALRATE"} <= demo_columns
+    reference_columns = {c["name"] for c in reference["procedureevents"]["columns"]}
+    assert {"originalamount", "originalrate"} <= reference_columns
+    # everything but the columns is inherited
+    assert demo["procedureevents"]["events"] == reference["procedureevents"]["events"]
+    assert demo["procedureevents"]["join"] == reference["procedureevents"]["join"]
 
     # identity comes from the version dir, not from where the files live
     labevents = load_effective_table(CONFIG_ROOT / "dataset" / "mimic-iv" / "3.1" / "dataset", "labevents")
