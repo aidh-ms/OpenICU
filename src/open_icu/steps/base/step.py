@@ -35,7 +35,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
     Attributes:
         _project: The OpenICU project containing this step
         _config: Configuration for this step
-        _registery: Configuration registry for loading external configs
+        _registry: Configuration registry for loading external configs
         _workspace_dir: Workspace directory for intermediate files
         _dataset: Output dataset for final results
         _step_name: Normalized name of this step (lowercase)
@@ -46,7 +46,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         Args:
             project: The OpenICU project to operate within
             config: Configuration for this step
-            registery: Configuration registry for loading external configs
+            registry: Configuration registry for loading external configs
         """
         self._project = project
         self._config = config
@@ -193,7 +193,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         Placeholder for running registered hooks after extraction completes.
         Currently not implemented.
         """
-        # TODO run hooks from registery after extraction
+        # TODO run hooks from registry after extraction
         pass
 
     def collect(self) -> None:
