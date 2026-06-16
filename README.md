@@ -169,17 +169,27 @@ OpenICU is configured at three levels — see the [documentation](#documentation
 
 ```yaml
 path: icu/chartevents.csv.gz
+
 columns:
   - name: subject_id
     type: int64
   - name: charttime
     type: datetime
     params: { format: "%Y-%m-%d %H:%M:%S" }
-  # ...
+  - name: itemid
+    type: int64
+  - name: value
+    type: string
+  - name: valuenum
+    type: float32
+  - name: valueuom
+    type: string
+
 join:
   - path: icu/d_items.csv.gz
     both_on: [itemid]
     columns: [{ name: itemid, type: int64 }, { name: label, type: string }]
+
 events:
   - name: CHART
     columns:
@@ -189,6 +199,8 @@ events:
       numeric_value: col(valuenum)
       text_value: col(value)
 ```
+
+`name` is a technical event identifier used by the extraction step. It is not included in the generated MEDS `code`; the code is built from the automatic dataset/table prefix, optional `code_prefix`, configured `columns.code` components, and optional `code_suffix`.
 
 **Concept configs** (`config/concept/<category>/*.yml`) define dataset-agnostic clinical concepts:
 
@@ -205,11 +217,13 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: CHART
+      event: CHART  # technical extraction event identifier, not part of `code`
       code: (220045//Heart Rate)
     columns:
       numeric_value: col(numeric_value)
 ```
+
+Here, `event` selects the technical extraction event stream; it is not matched as part of the MEDS `code`.
 
 Wherever values are computed, configs use a small **expression language** with composable callbacks — e.g. reconstructing absolute timestamps from eICU's relative offsets:
 
