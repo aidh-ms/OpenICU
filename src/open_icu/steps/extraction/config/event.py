@@ -22,13 +22,14 @@ class MEDSEventFieldConfig(BaseModel):
     """Field mapping configuration for a MEDS event.
 
     Specifies which source columns map to each MEDS standard column. The code
-    column can be a list of additional code parts that will be concatenated with
-    "//" separator after the event name.
+    column can be a list of event-specific code parts that will be concatenated
+    with the automatic dataset/table prefix, optional event-level code_prefix,
+    and optional event-level code_suffix when the final MEDS code is built.
 
     Attributes:
         subject_id: Column name for subject/patient identifier
         time: Column name for event timestamp
-        code: List of additional code parts to append after the event name
+        code: List of event-specific code parts used in generated MEDS codes
         numeric_value: Column name for numeric measurement value (optional)
         text_value: Column name for text value (optional)
         extension: Dictionary mapping MEDS extension columns to source columns
@@ -38,7 +39,7 @@ class MEDSEventFieldConfig(BaseModel):
     time: str = Field(..., description="The timestamp column name.")
     code: list[str] = Field(
         default_factory=list,
-        description="Additional code parts appended after the event name.",
+        description="Event-specific code parts used in generated MEDS codes.",
     )
     numeric_value: str | None = Field(None, description="The numeric value column name.")
     text_value: str | None = Field(None, description="The text value column name.")
@@ -57,9 +58,9 @@ class MEDSEventFieldDefaultConfig(BaseModel):
     Attributes:
         subject_id: Default column name for subject identifier
         time: Default column name for timestamp
-        code: Default list of additional code parts appended after the event name
-        code_prefix: Code parts inserted after automatic db/table and before event name
-        code_suffix: Code parts appended after event-specific code parts
+        code: Default list of event-specific code parts used in generated MEDS codes
+        code_prefix: Code parts inserted after automatic dataset/table prefix and before columns.code
+        code_suffix: Code parts appended after columns.code
         numeric_value: Default column name for numeric value
         text_value: Default column name for text value
         extension: Default extension column mappings
@@ -75,15 +76,15 @@ class MEDSEventFieldDefaultConfig(BaseModel):
     )
     code: list[str] | None = Field(
         None,
-        description="Default additional code parts appended after the event name.",
+        description="Default event-specific code parts used in generated MEDS codes.",
     )
     code_prefix: list[str] | None = Field(
         None,
-        description="Default code parts inserted after automatic db/table and before event name.",
+        description="Default code parts inserted after automatic dataset/table prefix and before columns.code.",
     )
     code_suffix: list[str] | None = Field(
         None,
-        description="Default code parts appended after event-specific code parts.",
+        description="Default code parts appended after columns.code.",
     )
     numeric_value: str | None = Field(
         None,
@@ -150,14 +151,15 @@ class MEDSEventFieldDefaultConfig(BaseModel):
 class EventConfig(BaseModel):
     """Configuration for a single MEDS event to extract from a table.
 
-    Defines an event type to extract, including its name, optional code
-    prefix/suffix parts, column mappings, and optional callbacks to apply before
-    writing.
+    Defines an event type to extract, including its technical name, optional
+    code prefix/suffix parts, column mappings, and optional callbacks to apply
+    before writing. The event name is used for output file naming and concept
+    mapping, but it is not included in generated MEDS codes.
 
     Attributes:
-        name: Name of the event (used in output filename and code construction)
-        code_prefix: Code parts inserted after automatic db/table and before event name
-        code_suffix: Code parts appended after event-specific code parts
+        name: Technical event identifier used for output file naming and concept mapping
+        code_prefix: Code parts inserted after automatic dataset/table prefix and before columns.code
+        code_suffix: Code parts appended after columns.code
         columns: Column mapping configuration for this event
         pre_callbacks: Callbacks to apply before MEDS column mapping
         callbacks: Callbacks to apply after MEDS column mapping and code construction
@@ -166,14 +168,17 @@ class EventConfig(BaseModel):
         output_filters: Filters to apply after selecting final MEDS output columns
     """
 
-    name: str = Field(..., description="The name of the event.")
+    name: str = Field(
+        ...,
+        description="Technical event identifier used for output file naming and concept mapping.",
+    )
     code_prefix: list[str] = Field(
         default_factory=list,
-        description="Code parts inserted after automatic db/table and before event name.",
+        description="Code parts inserted after automatic dataset/table prefix and before columns.code.",
     )
     code_suffix: list[str] = Field(
         default_factory=list,
-        description="Code parts appended after event-specific code parts.",
+        description="Code parts appended after columns.code.",
     )
     columns: MEDSEventFieldConfig = Field(
         ...,
