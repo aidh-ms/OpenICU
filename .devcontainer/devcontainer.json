@@ -19,7 +19,7 @@
             "userGid": "1000",
             "upgradePackages": "true"
         },
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+		"ghcr.io/devcontainers/features/docker-in-docker:": {
 			"moby": false
 		}
     },
