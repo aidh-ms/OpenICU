@@ -1,6 +1,0 @@
-name: dextrose_(as_D10)
-version: 1.0.0
-unit: ml/hr
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

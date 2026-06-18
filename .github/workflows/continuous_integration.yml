@@ -15,8 +15,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      code-quality: write
+    # permissions:
+    #   code-quality: write
     strategy:
       matrix:
         python-version: ["3.13"]  # Add more Python versions to test here
@@ -40,10 +40,10 @@ jobs:
     - name: Test with pytest
       run: uv run pytest .
 
-    - name: Upload coverage report
-      if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-      uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
-      with:
-        file: coverage.xml
-        language: Python
-        label: code-coverage/pytest
+    # - name: Upload coverage report
+    #   if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    #   uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
+    #   with:
+    #     file: coverage.xml
+    #     language: Python
+    #     label: code-coverage/pytest

@@ -1,0 +1,19 @@
+type: simple
+mappings:
+  - pattern:
+      table: patients
+      event: MEDS_BIRTH
+      code: anchor_age
+    columns: &id001
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+  - pattern:
+      table: patients
+      event: GENDER
+      code: anchor_age
+    columns: *id001
+  - pattern:
+      table: patients
+      event: MEDS_DEATH
+      code: anchor_age
+    columns: *id001

@@ -71,51 +71,54 @@ event_defaults:
     micro_specimen_id: col(micro_specimen_id)
     order_provider_id: col(order_provider_id)
 
+callbacks:
+  - add_offset(chartdate, 1, offset_unit="days", output=chartdate_plus1)
+  - add_offset(storedate, 1, offset_unit="days", output=storedate_plus1)
+
 events:
   - name: MICROBIOLOGY_SPECIMEN
     columns:
-      # TODO: move chartdate to end of day
-      time: first_not_null(charttime, chartdate, output=time)
+      time: first_not_null(charttime, chartdate_plus1, output=time)
       code:
         - col(spec_itemid)
         - col(spec_type_desc)
       extension:
-        available_time: first_not_null(charttime, chartdate, output=available_time)
+        available_time: first_not_null(charttime, chartdate_plus1, output=available_time)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_TEST
     columns:
-      time: first_not_null(charttime, chartdate, output=time)
+      time: first_not_null(charttime, chartdate_plus1, output=time)
       code:
         - col(test_itemid)
         - col(test_name)
       extension:
-        available_time: first_not_null(charttime, chartdate, output=available_time)
+        available_time: first_not_null(charttime, chartdate_plus1, output=available_time)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_ORGANISM
     columns:
-      time: first_not_null(charttime, chartdate, output=time)
+      time: first_not_null(charttime, chartdate_plus1, output=time)
       code:
         - col(org_itemid)
         - col(org_name)
       text_value: col(quantity)
       extension:
-        available_time: first_not_null(storetime, storedate, output=available_time)
+        available_time: first_not_null(storetime, storedate_plus1, output=available_time)
         isolate_num: col(isolate_num)
         comments: col(comments)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_SUSCEPTIBILITY
     columns:
-      time: first_not_null(charttime, chartdate, output=time)
+      time: first_not_null(charttime, chartdate_plus1, output=time)
       code:
         - col(ab_itemid)
         - col(ab_name)
       numeric_value: col(dilution_value)
       text_value: col(interpretation)
       extension:
-        available_time: first_not_null(storetime, storedate, output=available_time)
+        available_time: first_not_null(storetime, storedate_plus1, output=available_time)
         dilution_text: col(dilution_text)
         dilution_comparison: col(dilution_comparison)
     filters:
