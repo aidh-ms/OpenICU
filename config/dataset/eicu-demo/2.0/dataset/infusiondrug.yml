@@ -1,0 +1,4 @@
+# The demo distribution names this file in lowercase, unlike the full
+# eICU-CRD's infusionDrug.csv.gz. Everything else is inherited via
+# ../extends.yml.
+path: infusiondrug.csv.gz

@@ -4,237 +4,80 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OpenICU is an open-source Python framework for extracting, preprocessing, and analyzing ICU time series data from diverse datasets (MIMIC, eICU, etc.). The project converts heterogeneous ICU data into the standardized MEDS (Medical Event Data Standard) format, enabling reproducible research workflows.
+OpenICU is an open-source Python framework for extracting and harmonising ICU time series data from heterogeneous datasets (MIMIC-IV, eICU-CRD, NWICU, custom institutional data) into the standardized MEDS (Medical Event Data Standard) format. It is a Python successor to R tools like `ricu`: clinical concepts are defined once and mapped per dataset via declarative YAML, so the same analysis code runs against any supported dataset.
 
-**Key Goals:**
-- Support multiple ICU data sources (public datasets like MIMIC, eICU, and custom institutional data)
-- Extract medical concepts using declarative YAML configurations
-- Export to MEDS format for standardized analysis
-- Operate fully offline for medical data privacy compliance
+**Key goals:** multiple data sources, declarative YAML configuration, MEDS-compliant output, fully offline operation (medical data privacy), laptop-scale performance via Polars lazy streaming.
 
 ## Development Commands
 
-### Environment Setup
 ```bash
-# The project uses uv for dependency management
-# Dependencies are already installed in the dev container
+uv sync --all-groups          # install all dependencies (dev container has them already)
 
-# Install dependencies manually if needed:
-uv sync
-uv sync --all-groups  # Install with dev and docs groups
-```
-
-### Testing
-```bash
-# Run all tests with coverage
-uv run pytest
-
-# Run tests without coverage reports
-uv run pytest --no-cov
-
-# Run a specific test file
-uv run pytest tests/test_example.py
-
-# Run a specific test
+uv run pytest                 # all tests with coverage
+uv run pytest --no-cov        # without coverage
 uv run pytest tests/test_example.py::test_function_name
-```
 
-### Code Quality
-```bash
-# Format code with ruff
-uv run ruff format
+uv run ruff format            # format
+uv run ruff check --fix       # lint (line length 120)
+uv run ty check .             # type checking (ty, used in CI; a [tool.mypy] config also exists)
 
-# Lint code with ruff
-uv run ruff check
-
-# Lint with auto-fix
-uv run ruff check --fix
-
-# Type checking with mypy
-uv run mypy src/
-```
-
-### Documentation
-```bash
-# Serve documentation locally
-uv run mkdocs serve
-
-# Build documentation
-uv run mkdocs build
-```
-
-### Jupyter Notebooks
-```bash
-# Launch JupyterLab for examples
-uv run jupyter lab
-
-# Example notebooks are in example/ directory
-# - example_mimic.ipynb: Full MIMIC-IV extraction workflow
-# - example_eicu.ipynb: eICU extraction workflow
+uv run mkdocs serve           # docs locally
+uv run jupyter lab            # example notebook: example/pipeline.ipynb
 ```
 
 ## Architecture
 
-### Core Components
+The pipeline is **project + steps**, all processing on **Polars LazyFrames** (streaming `sink_parquet`), all configuration in **Pydantic v2** models loaded from YAML.
 
-**1. Configuration System (`src/open_icu/config/`)**
-   - `source.py`: Defines data source configurations (SourceConfig, TableConfig, EventConfig)
-   - `concept.py`: Medical concept definitions (currently a placeholder)
-   - `utils.py`: YAML config loading utilities
-   - Configuration files live in `configs/source/` (e.g., `mimic.yml`, `eicu.yml`)
+Public API (`src/open_icu/__init__.py`): `OpenICUProject`, `ExtractionStep`, `ConceptStep`.
 
-**2. MEDS Processing (`src/open_icu/meds/`)**
-   - `processor.py`: Core ETL logic - reads source data, performs joins, transforms to MEDS format
-   - `processor_rs.py`: Rust-based processor (untracked file, likely in development)
-   - `schema.py`: PyArrow schema definitions for MEDS data validation
-   - `project.py`: MEDSProject class for managing output directory structure
+```python
+with OpenICUProject(project_path) as project:
+    ExtractionStep.load(project, config_path / "extraction.yml").run()
+    ConceptStep.load(project, config_path / "concept.yml").run()
+```
 
-### Configuration-Driven Architecture
+### Modules (`src/open_icu/`)
 
-The system uses a declarative YAML configuration approach:
+- **`config/`** — `BaseConfig` (name + version → deterministic identifier `openicu.config.<type>.<...>` and uuid5; YAML load/save) and `BaseConfigRegistry` (generic registry with `includes`/`excludes` filtering, recursive directory loading).
+- **`storage/`** — `OpenICUProject` (manages `datasets/`, `workspace/`, `configs/` directories), `WorkspaceDir`, `MEDSDataset` (writes `metadata/dataset.json` validated against the MEDS schema and `metadata/codes.parquet` code vocabulary).
+- **`steps/base/`** — `ConfigurableBaseStep.run()` lifecycle: `setup_config` (load YAML into the step's singleton registry, snapshot merged configs to `<project>/configs/`) → `setup_project` → `extract` (abstract) → `hooks` (TODO, no-op) → `collect` (copy workspace parquet to `datasets/<step>/data/` + write metadata). Steps are **skipped** when `overwrite: false` and outputs exist.
+- **`steps/extraction/`** — reads raw CSV/CSV.GZ tables per `TableConfig`: typed `scan_csv`, datetime parsing, lookup joins, then per event: column mapping to MEDS, code assembly as `dataset//table//code_prefix//code parts//code_suffix`, casts (`subject_id` Int64, `time` Datetime[us], `code` Str, `numeric_value` Float32, `text_value` Str + extension columns), sink to `workspace/<step>/<dataset>/<version>/<table>/<EVENT>.parquet` (appends if file exists). Callback/filter hook order: table `pre_callbacks` → `pre_filters` → datetime → `callbacks` → `filters`; per join `post_join_*`; table `post_join_*` → `transformations`; per event `pre_callbacks` → mapping → `callbacks` → `filters` → `transformations` → select/cast → `output_filters`.
+- **`steps/concept/`** — harmonises extraction output into dataset-agnostic concepts. `ConceptConfig` (name, version, unit → output code `name//unit`) + per-dataset configs discovered by matching filename in `dataset_configs` paths. Three types (pydantic discriminated union on `type`): `simple` (regex on code column per mapping pattern), `derived` (depends on other concepts; dependency graph resolved with `graphlib.TopologicalSorter`; joins concept parquets), `complex` (dotted-path Python `ConceptTransformer` called with the project). Output: `workspace/<step>/<concept name>/<version>/<dataset>.parquet`.
+- **`steps/sharding/`** — **work in progress**: `extract()` is a no-op, `ShardingConfig` is a sketch; not exported from the package.
+- **`callbacks/`** — the YAML expression DSL. `interpreter.py` parses Python-syntax expression strings with `ast` (no eval): bare names = column refs, literals, operators (`+ - * /`, comparisons, `& |`/`and or not`), calls = registered callbacks. Callback classes implement `__init__(args) / __call__(lf) -> pl.Expr` (or LazyFrame for transformations), registered via `@register_callback_cls` under snake_case of the class name (`AddOffset` → `add_offset`). Built-ins in `_callbacks/`: col, const, cast, replace, to_datetime, add_offset, set_time, first_not_null, max, drop_na, drop_if, first_distinct, split_explode, arithmetic/comparison/logic.
+- **`utils/`** — dotted-path importer, camel→snake, generic-type introspection. **`logging.py`** — `configure_logging`/`get_logger` under the `open_icu` logger.
 
-1. **Source Configurations** (`configs/source/`): Define how to map raw ICU data tables to MEDS events
-   - Specify tables, fields, data types, and joins
-   - Define events to extract (e.g., medications, chart events, ICU stays)
-   - Map source columns to MEDS schema fields (subject_id, time, code, numeric_value, text_value)
-   - Support for calculated datetime fields and field constants
+### Configuration layout (`config/`)
 
-2. **Processing Flow**:
-   - Load source config from YAML
-   - Read source data tables using Dask (for scalability)
-   - Apply field type conversions and datetime calculations
-   - Perform table joins (e.g., joining item IDs with labels)
-   - Extract events per configuration
-   - Concatenate multi-field codes (e.g., "label//unit")
-   - Write to Parquet files in MEDS format
-   - Generate metadata (codes.parquet, dataset.json)
+```
+config/
+├── concept/<category>/<name>.yml                      # dataset-agnostic concept (name, version, unit)
+└── dataset/<dataset>/<version>/
+    ├── extends.yml                                    # optional: inherit from a reference version
+    ├── dataset/<table>.yml                            # extraction table configs
+    └── concept/<name>.yml                             # per-dataset concept mappings (type: simple|derived|complex)
+```
 
-3. **MEDS Schema**:
-   - Standard fields: subject_id, time, code, numeric_value, text_value
-   - Extension fields: hadm_id, stay_id (hospital admission ID, ICU stay ID)
-   - All data validated against PyArrow schema
-
-### Key Design Patterns
-
-- **Pydantic Models**: All configs use Pydantic for validation with computed fields
-- **Dask DataFrames**: Used for parallel, out-of-core processing of large datasets
-- **PyArrow Backend**: String data uses PyArrow for memory efficiency
-- **Partition-based Processing**: map_partitions used for custom transformations
-- **MEDS Compliance**: Outputs conform to MEDS v0.4.0+ standard
-
-## Data Flow Example
-
-For MIMIC-IV medications table:
-1. Read `icu/inputevents.csv` (starttime, endtime, amount, rate, itemid)
-2. Join with `icu/d_items.csv` (itemid → label)
-3. Extract two events:
-   - "dosage" event: endtime + label//amountuom → numeric_value=amount
-   - "rate" event: starttime + label//rateuom → numeric_value=rate
-4. Write to `output/data/mimic_medications_{event}_{partition}.parquet`
-5. Accumulate unique codes to `output/metadata/codes.parquet`
+Dataset, version, and name are inferred from file paths for dataset-bound configs. A version dir with an `extends.yml` (keys: `dataset`, `version`) inherits all configs from the referenced version: files deep-merge (dicts merge, lists/scalars replace), `deleted: true` tombstones an inherited config, chains resolve recursively, and identity always comes from the extending version's directory (`src/open_icu/config/inheritance.py`; hooks in `registry.load_configs` and `ConceptConfig.load`). Diffs stack forward in time: the oldest fully-specified version is the reference (mimic-iv 2.2 is the reference; 3.1 and mimic-iv-demo 2.2 are marker-only extends; eicu-demo 2.0 extends eicu-crd 2.0 with one path override). A version dir may contain *only* an `extends.yml`. Bundled: mimic-iv 3.1 (most complete), eicu-crd 2.0, eicu-demo 2.0, nwicu 0.1.0; ~90 shared concepts. Step configs (see `example/config/{extraction,concept}.yml`) select `config_files` (with optional `includes`/`excludes` by identifier) and dataset data paths.
 
 ## Important Conventions
 
-### Code Style
-- Line length: 120 characters (Ruff configured)
-- Python version: 3.13+ (specified in .python-version)
-- Use Ruff for formatting and linting (follows Black-compatible style)
-- Type hints required: mypy strict mode (`disallow_untyped_defs = true`)
-- String storage: Use PyArrow backend for pandas/dask string columns
-
-### Testing
-- Test discovery: `test_*.py` or `*_test.py` pattern
-- Coverage required on src/ directory
-- Deprecation warnings are filtered in pytest config
-- Import mode: importlib (not prepend/append)
-
-### Commit Convention
-Follow Conventional Commits specification:
-- `feat:` for new features
-- `fix:` for bug fixes
-- `docs:` for documentation changes
-- `refactor:` for code refactoring
-- `test:` for test additions/corrections
-- `chore:` for maintenance tasks
-- `infra:` for infrastructure changes
-
-### File Organization
-- Source code: `src/open_icu/`
-- Tests: `tests/` (mirrors src structure)
-- Configs: `configs/source/` (YAML)
-- Examples: `example/` (Jupyter notebooks)
-- Docs: `docs/` (MkDocs with arc42 structure)
-- MIMIC data example: `example/data/uncompressed/mimiciv/3.1/`
+- Python 3.13+, line length 120 (Ruff), typed defs required, `uv` for everything.
+- Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `infra:`.
+- Tests in `tests/` (`test_*.py`), importlib import mode, coverage on `src/` with an enforced `--cov-fail-under` floor. The suite covers the expression DSL, callbacks, config models/registries, storage, end-to-end step runs on synthetic fixtures (`tests/steps/conftest.py`), and validation of every shipped YAML in `config/` (`tests/test_shipped_configs.py`). Step tests must use the `clean_registries` autouse fixture pattern — the config registries are global singletons.
+- Docs: README + `docs/` (MkDocs: getting_started/, user_guide/, arc42 in arc/). Keep README, docs/user_guide, and this file in sync with architecture changes.
 
 ## Common Workflows
 
-### Adding Support for a New Data Source
+**Add a dataset:** create `config/dataset/<name>/<version>/dataset/*.yml` table configs (pure YAML, no Python); reference from an extraction step config under `config_files` + `config.data`; verify via `datasets/extraction/metadata/codes.parquet`.
 
-1. Create YAML config in `configs/source/your_source.yml`
-2. Define tables, fields, join relationships, and events
-3. Ensure datetime fields are properly configured (use CalcDatetimeFieldConfig if needed)
-4. Test extraction with a Jupyter notebook in `example/`
-5. Verify output schema matches MEDS format
+**Add a concept:** define `config/concept/<category>/<name>.yml`, then add a same-named mapping YAML per dataset under `config/dataset/<dataset>/<version>/concept/`.
 
-### Extending the MEDS Schema
-
-1. Modify `OpenICUMEDSData` class in `src/open_icu/meds/schema.py`
-2. Add new extension fields with Optional() PyArrow types
-3. Update `MEDSFieldsConfig.extension` in source configs
-4. Update processor to handle new fields in column_order
-
-### Running End-to-End Extraction
-
-```python
-from pathlib import Path
-from open_icu.config.utils import load_yaml_configs
-from open_icu.config.source import SourceConfig
-from open_icu.meds.processor import process_table
-from open_icu.meds.project import MEDSProject
-
-# Load configurations
-configs = load_yaml_configs(Path("configs/source"), SourceConfig)
-
-# Create output project
-project = MEDSProject(project_path=Path("output"), overwrite=False)
-
-# Process each table
-for config in configs:
-    for table in config.tables:
-        process_table(
-            table=table,
-            path=Path("data/source"),  # Path to source data
-            output_path=project.project_path,
-            src=config.name
-        )
-
-# Write metadata
-project.write_metadata({"dataset_name": "my_dataset", "dataset_version": "1.0"})
-```
-
-## Dependencies
-
-Key external libraries:
-- **dask[complete]**: Parallel dataframe processing
-- **duckdb**: SQL analytics engine (potential future use)
-- **meds**: MEDS standard library and schema validation
-- **pandas**: Data manipulation (with pyarrow backend)
-- **polars**: Alternative dataframe library (not yet utilized)
-- **pydantic**: Configuration validation
-- **pyarrow**: Columnar data format and type system
-- **pyyaml**: YAML config parsing
-
-## Arc42 Documentation
-
-The project follows arc42 architecture documentation in `docs/arc/`:
-- Requirements are tracked by ID (F1-F9 for functional, Q1-Q7 for quality)
-- Target users: Clinical researchers and data engineers
-- Key quality goals: Reproducibility, usability, privacy, extensibility
-- System must operate fully offline (no data leaves secure perimeter)
+**Add a callback:** new class in `src/open_icu/callbacks/_callbacks/`, decorate with `@register_callback_cls`, export in `callbacks/__init__.py`; it becomes available in YAML as snake_case.
 
 ## Notes
 
-- The project is in active development - some architecture docs are incomplete (building_block.md, strategy.md)
-- Rust processor (`processor_rs.py`) appears to be a performance optimization effort
-- Large datasets (MIMIC-IV) are processed with 6+ Dask workers for parallelism
-- The codebase is ~500 lines of core Python code (excluding tests/examples)
+- Active development, pre-1.0; config formats may still change.
+- The sharding step and step `hooks()` are open work.
+- The docs site builds with `uv run mkdocs build`; API reference pages are generated by `docs/scripts/gen_ref_pages.py`.

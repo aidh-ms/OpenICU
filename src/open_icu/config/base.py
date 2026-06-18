@@ -156,7 +156,10 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         Args:
             path: Base directory path for saving the configuration
         """
-        path = Path(path, *self.identifier_tuple).with_suffix(".yml")
+        # Append the suffix instead of using Path.with_suffix, which would swallow
+        # dotted name parts (e.g. version "1.0.0" -> "1.0.yml").
+        *parents, last = self.identifier_tuple
+        path = Path(path, *parents, f"{last}.yml")
         path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(path, "w") as f:

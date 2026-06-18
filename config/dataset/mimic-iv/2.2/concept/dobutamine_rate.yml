@@ -1,6 +1,7 @@
 type: simple
 mappings:
   - pattern:
+<<<<<<< HEAD
       table: inputevents
       event: INFUSION_START
       code: (221653(//.*)?)
@@ -12,3 +13,18 @@ mappings:
       event: INFUSION_END
       code: (221653(//.*)?)
     columns: *id001
+=======
+      table: respiratorycharting
+      event: RESPIRATORY_CHART
+      code: (FiO2(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+  - pattern:
+      table: lab
+      event: LAB
+      code: (FiO2(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+>>>>>>> origin/main

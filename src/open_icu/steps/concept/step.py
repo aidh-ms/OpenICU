@@ -343,9 +343,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         output_dataset_path.rmdir()
 
     def get_path_for_concept_table(self, table: BaseConceptTable, dataset: str) -> Path:
-        concept_tuple = ConceptConfig.ensure_prefix(table.concept).split(("."))
+        concept = self._registry.get(table.concept)
+        if concept is None:
+            raise FileNotFoundError(f"concept not found in registry ({table.concept})")
         assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept_tuple[1:])
+        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
         return output_data_path / f"{dataset}.parquet"
 
     def extract_derived_concept(
@@ -412,7 +414,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         columns = dataset_concept.event.model_dump()
         extension = concept.extension_columns.copy()
-        extension.update(columns.pop("extension"))
+        extension.update(columns.pop("extension") or {})
         mapping = {
             col_expr: col_name
             for col_name, col_expr in columns.items()
