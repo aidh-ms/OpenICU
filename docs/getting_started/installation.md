@@ -6,17 +6,25 @@ The supported Python versions for this Python library are the following:
 
 * 3.13 or newer
 
-## Installing from Source
+## Installing
 
-OpenICU has not been published to PyPI yet. Until the first release, install it directly from GitHub.
+You can install OpenICU via PyPI or from source.
 
-**With pip**
+### With PyPI
 ```bash
-pip install git+https://github.com/aidh-ms/OpenICU
+# with pip
+pip install open-icu
+
+# with uv
+uv add open-icu
 ```
 
-**With uv**
+### With GitHub
 ```bash
+# with pip
+pip install git+https://github.com/aidh-ms/OpenICU
+
+# with uv
 uv add git+https://github.com/aidh-ms/OpenICU
 ```
 
