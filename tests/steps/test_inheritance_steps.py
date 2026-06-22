@@ -27,10 +27,10 @@ def demo_dirs(tmp_path: Path, data_dir: Path, table_config_dir: Path, concept_co
 
     # Demo config: extends testdb 1.0; only the diff is spelled out.
     demo_version_dir = tmp_path / "config" / "testdb-demo" / "1.0"
-    (demo_version_dir / "dataset").mkdir(parents=True)
+    (demo_version_dir / "tables").mkdir(parents=True)
     (demo_version_dir / "extends.yml").write_text("dataset: testdb\nversion: '1.0'\n")
-    (demo_version_dir / "dataset" / "vitals.yml").write_text("path: vitals_demo.csv\n")
-    (demo_version_dir / "dataset" / "measurements.yml").write_text("deleted: true\n")
+    (demo_version_dir / "tables" / "vitals.yml").write_text("path: vitals_demo.csv\n")
+    (demo_version_dir / "tables" / "measurements.yml").write_text("deleted: true\n")
 
     # Step configs covering both datasets.
     (tmp_path / "extraction.yml").write_text(
@@ -40,7 +40,7 @@ version: 1.0.0
 
 config_files:
   - path: {table_config_dir}
-  - path: {demo_version_dir / "dataset"}
+  - path: {demo_version_dir / "tables"}
 
 config:
   data:
@@ -56,15 +56,15 @@ name: Concept
 version: 1.0.0
 
 config_files:
-  - path: {tmp_path / "config" / "concept"}
+  - path: {tmp_path / "config" / "concepts"}
 
 config:
   extraction_step: Extraction
   dataset_configs:
     - name: testdb
-      path: {tmp_path / "config" / "testdb" / "1.0" / "concept"}
+      path: {tmp_path / "config" / "testdb" / "1.0" / "mappings"}
     - name: testdb-demo
-      path: {demo_version_dir / "concept"}
+      path: {demo_version_dir / "mappings"}
 """
     )
 

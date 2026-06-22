@@ -13,7 +13,7 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/dataset/mimic-iv/3.1/dataset/
+  - path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/tables/
 
 config:
   data:
@@ -33,13 +33,13 @@ name: Concept
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/concept
+  - path: /path/to/OpenICU/config/concepts
 
 config:
   extraction_step: Extraction
   dataset_configs:
     - name: mimic-iv
-      path: /path/to/OpenICU/config/dataset/mimic-iv/3.1/concept/
+      path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/mappings/
 ```
 
 - `config_files` points at the dataset-agnostic concept dictionary.

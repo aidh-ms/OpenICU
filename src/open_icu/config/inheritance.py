@@ -1,6 +1,6 @@
 """Dataset configuration inheritance across versions and variants.
 
-A dataset version directory (``config/dataset/<dataset>/<version>/``) may
+A dataset version directory (``config/datasets/<dataset>/<version>/``) may
 contain an ``extends.yml`` marker that references another version as its base:
 
 ```yaml
@@ -8,8 +8,8 @@ dataset: eicu-crd
 version: "2.0"
 ```
 
-Configuration files in the version's subdirectories (``dataset/``,
-``concept/``) are then resolved against the base, like a diff applied on top
+Configuration files in the version's subdirectories (``tables/``,
+``mappings/``) are then resolved against the base, like a diff applied on top
 of a reference version:
 
 - Files that exist only in the base are inherited unchanged.
@@ -45,7 +45,7 @@ def has_extends(subdir: Path) -> bool:
 
     Args:
         subdir: A config subdirectory of a version directory
-            (e.g. ``.../<dataset>/<version>/dataset``)
+            (e.g. ``.../<dataset>/<version>/tables``)
 
     Returns:
         True if the version directory contains an ``extends.yml`` marker
@@ -126,7 +126,8 @@ def resolve_effective_configs(subdir: Path) -> dict[str, dict[str, Any]]:
 
     Args:
         subdir: A config subdirectory of a version directory
-            (e.g. ``.../<dataset>/<version>/dataset``)
+            (e.g. ``.../<dataset>/<version>/tables`` or
+            ``.../<dataset>/<version>/mappings``)
 
     Returns:
         Mapping of configuration name (file stem, including any relative

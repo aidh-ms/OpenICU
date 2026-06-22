@@ -11,7 +11,7 @@ required — useful for trying OpenICU end-to-end).
   automatically, since the demo contains the same tables with the same
   schema. Only the differences are spelled out:
 
-    - `dataset/infusiondrug.yml` — the demo names the file
+    - `tables/infusiondrug.yml` — the demo names the file
       `infusiondrug.csv.gz` (lowercase), unlike the full dataset's
       `infusionDrug.csv.gz`.
 

@@ -78,7 +78,7 @@ uv run pytest .
 
 ## Contributing dataset or concept configurations
 
-- New **dataset support** lives in `config/dataset/<dataset>/<version>/dataset/` (one YAML per source table). See the [extraction configuration guide](../user_guide/extraction.md).
-- New **concepts** consist of a dataset-agnostic definition in `config/concept/<category>/` plus one mapping per dataset in `config/dataset/<dataset>/<version>/concept/`. See the [concept configuration guide](../user_guide/concepts.md).
+- New **dataset support** lives in `config/datasets/<dataset>/<version>/tables/` (one YAML per source table). See the [extraction configuration guide](../user_guide/extraction.md).
+- New **concepts** consist of a dataset-agnostic definition in `config/concepts/<category>/` plus one mapping per dataset in `config/datasets/<dataset>/<version>/mappings/`. See the [concept configuration guide](../user_guide/concepts.md).
 
 When adding concept mappings, please document the source items (e.g. MIMIC `itemid`s) you considered, so reviewers can verify completeness.

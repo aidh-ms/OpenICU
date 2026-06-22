@@ -56,7 +56,7 @@ OpenICU ships with ready-to-use extraction and concept configurations under [`co
 | [eICU-CRD demo](https://physionet.org/content/eicu-crd-demo/2.0/) | 2.0 | inherited from eICU-CRD via `extends` | inherited |
 | [NWICU](https://physionet.org/content/nwicu/0.1.0/) | 0.1.0 | 9 tables | in progress |
 
-The shared concept dictionary in [`config/concept/`](config/concept/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
+The shared concept dictionary in [`config/concepts/`](config/concepts/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
 
 > [!NOTE]
 > Access to the public datasets themselves requires the usual credentialing on [PhysioNet](https://physionet.org/). OpenICU works on the downloaded CSV/CSV.GZ files — no database setup needed.
@@ -92,7 +92,7 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/dataset/mimic-iv/3.1/dataset/
+  - path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/tables/
 
 config:
   data:
@@ -107,13 +107,13 @@ name: Concept
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/concept
+  - path: /path/to/OpenICU/config/concepts
 
 config:
   extraction_step: Extraction
   dataset_configs:
     - name: mimic-iv
-      path: /path/to/OpenICU/config/dataset/mimic-iv/3.1/concept/
+      path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/mappings/
 ```
 
 **3. Run the pipeline:**
@@ -165,7 +165,7 @@ A complete runnable example lives in [`example/pipeline.ipynb`](example/pipeline
 
 OpenICU is configured at three levels — see the [documentation](#documentation) for the full reference.
 
-**Dataset/table configs** (`config/dataset/<dataset>/<version>/dataset/*.yml`) describe how to turn one raw table into MEDS events: typed columns, joins, and event definitions.
+**Dataset/table configs** (`config/datasets/<dataset>/<version>/tables/*.yml`) describe how to turn one raw table into MEDS events: typed columns, joins, and event definitions.
 
 ```yaml
 path: icu/chartevents.csv.gz
@@ -202,7 +202,7 @@ events:
 
 `name` is a technical event identifier used by the extraction step. It is not included in the generated MEDS `code`; the code is built from the automatic dataset/table prefix, optional `code_prefix`, configured `columns.code` components, and optional `code_suffix`.
 
-**Concept configs** (`config/concept/<category>/*.yml`) define dataset-agnostic clinical concepts:
+**Concept configs** (`config/concepts/<category>/*.yml`) define dataset-agnostic clinical concepts:
 
 ```yaml
 name: heart_rate
@@ -210,7 +210,7 @@ version: 1.0.0
 unit: bpm
 ```
 
-**Concept mappings** (`config/dataset/<dataset>/<version>/concept/*.yml`) connect a concept to dataset-specific codes:
+**Concept mappings** (`config/datasets/<dataset>/<version>/mappings/*.yml`) connect a concept to dataset-specific codes:
 
 ```yaml
 type: simple

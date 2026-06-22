@@ -21,9 +21,9 @@ def make_version(
     files: dict[str, str],
     extends: tuple[str, str] | None = None,
 ) -> Path:
-    """Create config/dataset-style version directory with a dataset/ subdir."""
+    """Create a version directory with a tables/ subdir."""
     version_dir = root / dataset / version
-    subdir = version_dir / "dataset"
+    subdir = version_dir / "tables"
     subdir.mkdir(parents=True, exist_ok=True)
     for name, content in files.items():
         (subdir / f"{name}.yml").write_text(content)
@@ -58,7 +58,7 @@ class TestVersionChain:
     def test_no_marker_is_chain_of_one(self, tmp_path: Path) -> None:
         version_dir = make_version(tmp_path, "db", "1.0", {"t": "path: t.csv\n"})
         assert resolve_version_chain(version_dir) == [version_dir]
-        assert not has_extends(version_dir / "dataset")
+        assert not has_extends(version_dir / "tables")
 
     def test_chain_is_base_first(self, tmp_path: Path) -> None:
         base = make_version(tmp_path, "db", "1.0", {"t": "path: t.csv\n"})
@@ -66,7 +66,7 @@ class TestVersionChain:
         leaf = make_version(tmp_path, "db-demo", "1.1", {}, extends=("db", "1.1"))
 
         assert resolve_version_chain(leaf) == [base, mid, leaf]
-        assert has_extends(leaf / "dataset")
+        assert has_extends(leaf / "tables")
 
     def test_missing_base_raises(self, tmp_path: Path) -> None:
         version_dir = make_version(tmp_path, "db", "2.0", {}, extends=("db", "1.0"))
@@ -101,7 +101,7 @@ class TestEffectiveConfigs:
             tmp_path, "db-demo", "1.0", {"renamed": "path: lowercase.csv\n"}, extends=("db", "1.0")
         )
 
-        effective = resolve_effective_configs(version_dir / "dataset")
+        effective = resolve_effective_configs(version_dir / "tables")
 
         assert effective["unchanged"] == {"path": "unchanged.csv", "type": "csv"}
         # merged: path overridden, inherited keys kept
@@ -111,7 +111,7 @@ class TestEffectiveConfigs:
         make_version(tmp_path, "db", "1.0", {"notes": "path: notes.csv\n", "keep": "path: keep.csv\n"})
         version_dir = make_version(tmp_path, "db-demo", "1.0", {"notes": "deleted: true\n"}, extends=("db", "1.0"))
 
-        effective = resolve_effective_configs(version_dir / "dataset")
+        effective = resolve_effective_configs(version_dir / "tables")
         assert "notes" not in effective
         assert "keep" in effective
 
@@ -120,12 +120,12 @@ class TestEffectiveConfigs:
         make_version(tmp_path, "db", "1.1", {"t": "path: b.csv\n"}, extends=("db", "1.0"))
         version_dir = make_version(tmp_path, "db", "2.0", {"t": "type: csvgz\n"}, extends=("db", "1.1"))
 
-        effective = resolve_effective_configs(version_dir / "dataset")
+        effective = resolve_effective_configs(version_dir / "tables")
         assert effective["t"] == {"path": "b.csv", "type": "csvgz"}
 
     def test_without_marker_returns_own_files(self, tmp_path: Path) -> None:
         version_dir = make_version(tmp_path, "db", "1.0", {"t": "path: t.csv\n"})
-        assert resolve_effective_configs(version_dir / "dataset") == {"t": {"path": "t.csv"}}
+        assert resolve_effective_configs(version_dir / "tables") == {"t": {"path": "t.csv"}}
 
 
 class TestLoadConfigsWithInheritance:
@@ -133,28 +133,28 @@ class TestLoadConfigsWithInheritance:
         make_version(tmp_path, "db", "1.0", {"t": "path: t.csv\n"})
         version_dir = make_version(tmp_path, "db-demo", "2.0", {}, extends=("db", "1.0"))
 
-        configs = load_configs(version_dir / "dataset", TableConfig)
+        configs = load_configs(version_dir / "tables", TableConfig)
 
         assert len(configs) == 1
         assert configs[0].dataset == "db-demo"
         assert configs[0].version == "2.0"
         assert configs[0].name == "t"
-        assert configs[0].identifier == "openicu.config.dataset.db-demo.2.0.t"
+        assert configs[0].identifier == "openicu.config.table.db-demo.2.0.t"
         assert configs[0].path == "t.csv"
 
     def test_includes_excludes_apply_to_inherited_configs(self, tmp_path: Path) -> None:
         make_version(tmp_path, "db", "1.0", {"a": "path: a.csv\n", "b": "path: b.csv\n"})
         version_dir = make_version(tmp_path, "db-demo", "1.0", {}, extends=("db", "1.0"))
 
-        configs = load_configs(version_dir / "dataset", TableConfig, includes=["db-demo.1.0.a"])
+        configs = load_configs(version_dir / "tables", TableConfig, includes=["db-demo.1.0.a"])
         assert [c.name for c in configs] == ["a"]
 
-        configs = load_configs(version_dir / "dataset", TableConfig, excludes=["db-demo.1.0.a"])
+        configs = load_configs(version_dir / "tables", TableConfig, excludes=["db-demo.1.0.a"])
         assert [c.name for c in configs] == ["b"]
 
     def test_invalid_inherited_config_is_skipped(self, tmp_path: Path) -> None:
         make_version(tmp_path, "db", "1.0", {"bad": "columns: notalist\n", "good": "path: g.csv\n"})
         version_dir = make_version(tmp_path, "db-demo", "1.0", {}, extends=("db", "1.0"))
 
-        configs = load_configs(version_dir / "dataset", TableConfig)
+        configs = load_configs(version_dir / "tables", TableConfig)
         assert [c.name for c in configs] == ["good"]

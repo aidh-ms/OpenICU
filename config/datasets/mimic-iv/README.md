@@ -6,9 +6,9 @@ critical care database from the Beth Israel Deaconess Medical Center
 
 ## Versions
 
-- `2.2/` — **reference configuration**: 19 table configs (`dataset/`,
+- `2.2/` — **reference configuration**: 19 table configs (`tables/`,
   covering the `icu` and `hosp` modules) and the per-dataset concept
-  mappings (`concept/`) for the shared dictionary in `config/concept/`.
+  mappings (`mappings/`) for the shared dictionary in `config/concepts/`.
   This is the most complete dataset configuration in OpenICU.
 - `3.1/` — **extends `2.2`** (see `3.1/extends.yml`) with no overrides:
   v3.0/v3.1 only extended the data (stays through 2022) without schema
@@ -21,8 +21,8 @@ as a diff of `2.2`.
 
 ```
 <version>/
-├── dataset/<table>.yml   # how to read each source table and which MEDS events to emit
-└── concept/<name>.yml    # how shared concepts map onto this dataset's codes
+├── tables/<table>.yml   # how to read each source table and which MEDS events to emit
+└── mappings/<name>.yml  # how shared concepts map onto this dataset's codes
 ```
 
 New MIMIC-IV versions should extend the closest existing version via an

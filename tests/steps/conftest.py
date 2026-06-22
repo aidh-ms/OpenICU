@@ -134,7 +134,7 @@ def data_dir(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def table_config_dir(tmp_path: Path) -> Path:
-    config_dir = tmp_path / "config" / "testdb" / "1.0" / "dataset"
+    config_dir = tmp_path / "config" / "testdb" / "1.0" / "tables"
     config_dir.mkdir(parents=True)
     (config_dir / "vitals.yml").write_text(VITALS_TABLE_YML)
     (config_dir / "measurements.yml").write_text(MEASUREMENTS_TABLE_YML)
@@ -164,7 +164,7 @@ config:
 @pytest.fixture
 def concept_config(tmp_path: Path) -> Path:
     """Concept dictionary + per-dataset mappings + concept step config."""
-    concept_dir = tmp_path / "config" / "concept"
+    concept_dir = tmp_path / "config" / "concepts"
     concept_dir.mkdir(parents=True)
     (concept_dir / "heart_rate.yml").write_text(
         """\
@@ -180,7 +180,7 @@ extension_columns:
     (concept_dir / "patient_height.yml").write_text("name: patient_height\nversion: 1.0.0\nunit: m\n")
     (concept_dir / "bmi.yml").write_text("name: bmi\nversion: 1.0.0\nunit: kg/m2\n")
 
-    mapping_dir = tmp_path / "config" / "testdb" / "1.0" / "concept"
+    mapping_dir = tmp_path / "config" / "testdb" / "1.0" / "mappings"
     mapping_dir.mkdir(parents=True)
     (mapping_dir / "heart_rate.yml").write_text(
         """\
@@ -251,7 +251,7 @@ name: Concept
 version: 1.0.0
 
 config_files:
-  - path: {tmp_path / "config" / "concept"}
+  - path: {tmp_path / "config" / "concepts"}
 
 config:
   extraction_step: Extraction
