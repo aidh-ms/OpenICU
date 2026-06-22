@@ -11,7 +11,7 @@ required — useful for trying OpenICU end-to-end).
   with the same schema and file names, so table configs and concept mappings
   are inherited. One export quirk requires an override:
 
-    - `dataset/procedureevents.yml` — the demo ships the
+    - `tables/procedureevents.yml` — the demo ships the
       `originalamount`/`originalrate` headers in UPPERCASE, unlike every
       full MIMIC-IV release.
 

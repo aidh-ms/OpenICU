@@ -32,8 +32,8 @@ class TestTableConfig:
 
     def test_identifier_includes_dataset(self) -> None:
         table = make_table_config()
-        assert table.identifier_tuple == ("dataset", "mimic-iv", "3.1", "labevents")
-        assert table.identifier == "openicu.config.dataset.mimic-iv.3.1.labevents"
+        assert table.identifier_tuple == ("table", "mimic-iv", "3.1", "labevents")
+        assert table.identifier == "openicu.config.table.mimic-iv.3.1.labevents"
 
 
 class TestEventDefaults:

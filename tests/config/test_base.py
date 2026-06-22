@@ -70,7 +70,7 @@ class TestSerialization:
 
 class TestDatasetConfigPathInference:
     def test_dataset_version_name_inferred_from_path(self, tmp_path: Path) -> None:
-        config_file = tmp_path / "mimic-iv" / "3.1" / "dataset" / "labevents.yml"
+        config_file = tmp_path / "mimic-iv" / "3.1" / "tables" / "labevents.yml"
         config_file.parent.mkdir(parents=True)
         config_file.write_text("{}\n")
 

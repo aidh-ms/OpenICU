@@ -164,7 +164,7 @@ class TableConfig(BaseDatasetConfig, BaseTableConfig):
         events: List of MEDS events to extract from this table
     """
 
-    __open_icu_config_type__: ClassVar[str] = "dataset"
+    __open_icu_config_type__: ClassVar[str] = "table"
 
     join: list[JoinTableConfig] = Field(
         default_factory=list,

@@ -23,16 +23,16 @@ from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 REPO_ROOT = Path(__file__).parents[1]
 CONFIG_ROOT = REPO_ROOT / "config"
 
-# Version dirs may be marker-only (just an extends.yml, no physical dataset/
-# or concept/ subdirectory), so collect by version dir rather than globbing
+# Version dirs may be marker-only (just an extends.yml, no physical tables/
+# or mappings/ subdirectory), so collect by version dir rather than globbing
 # for the subdirectories themselves.
-VERSION_DIRS = sorted(d for d in CONFIG_ROOT.glob("dataset/*/*") if d.is_dir())
+VERSION_DIRS = sorted(d for d in CONFIG_ROOT.glob("datasets/*/*") if d.is_dir())
 TABLE_CONFIG_DIRS = [
-    d / "dataset" for d in VERSION_DIRS if (d / "dataset").is_dir() or (d / "extends.yml").is_file()
+    d / "tables" for d in VERSION_DIRS if (d / "tables").is_dir() or (d / "extends.yml").is_file()
 ]
-CONCEPT_FILES = sorted(CONFIG_ROOT.glob("concept/*/*.yml"))
+CONCEPT_FILES = sorted(CONFIG_ROOT.glob("concepts/*/*.yml"))
 DATASET_CONCEPT_DIRS = [
-    d / "concept" for d in VERSION_DIRS if (d / "concept").is_dir() or (d / "extends.yml").is_file()
+    d / "mappings" for d in VERSION_DIRS if (d / "mappings").is_dir() or (d / "extends.yml").is_file()
 ]
 
 
@@ -160,11 +160,11 @@ def test_concept_parses_with_all_dataset_mappings(concept_file: Path) -> None:
 
 def test_demo_dataset_inherits_full_table_set() -> None:
     """eicu-demo must inherit the complete eicu-crd table set via extends.yml."""
-    full = set(resolve_effective_configs(CONFIG_ROOT / "dataset" / "eicu-crd" / "2.0" / "dataset"))
-    demo = set(resolve_effective_configs(CONFIG_ROOT / "dataset" / "eicu-demo" / "2.0" / "dataset"))
+    full = set(resolve_effective_configs(CONFIG_ROOT / "datasets" / "eicu-crd" / "2.0" / "tables"))
+    demo = set(resolve_effective_configs(CONFIG_ROOT / "datasets" / "eicu-demo" / "2.0" / "tables"))
     assert demo == full
 
-    demo_infusion = load_effective_table(CONFIG_ROOT / "dataset" / "eicu-demo" / "2.0" / "dataset", "infusiondrug")
+    demo_infusion = load_effective_table(CONFIG_ROOT / "datasets" / "eicu-demo" / "2.0" / "tables", "infusiondrug")
     assert demo_infusion.path == "infusiondrug.csv.gz"  # demo's lowercase file name
     assert demo_infusion.dataset == "eicu-demo"
     assert demo_infusion.events  # inherited from eicu-crd
@@ -177,9 +177,9 @@ def test_mimic_versions_inherit_reference_configs() -> None:
     tables, so 3.1 inherits 2.2 unchanged. Only the demo *export* deviates:
     it ships procedureevents' originalamount/originalrate headers uppercase.
     """
-    reference = resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv" / "2.2" / "dataset")
-    v31 = resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv" / "3.1" / "dataset")
-    demo = resolve_effective_configs(CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "dataset")
+    reference = resolve_effective_configs(CONFIG_ROOT / "datasets" / "mimic-iv" / "2.2" / "tables")
+    v31 = resolve_effective_configs(CONFIG_ROOT / "datasets" / "mimic-iv" / "3.1" / "tables")
+    demo = resolve_effective_configs(CONFIG_ROOT / "datasets" / "mimic-iv-demo" / "2.2" / "tables")
     assert len(reference) >= 19
 
     # full releases are schema-identical
@@ -196,21 +196,21 @@ def test_mimic_versions_inherit_reference_configs() -> None:
     assert demo["procedureevents"]["join"] == reference["procedureevents"]["join"]
 
     # identity comes from the version dir, not from where the files live
-    labevents = load_effective_table(CONFIG_ROOT / "dataset" / "mimic-iv" / "3.1" / "dataset", "labevents")
+    labevents = load_effective_table(CONFIG_ROOT / "datasets" / "mimic-iv" / "3.1" / "tables", "labevents")
     assert labevents.dataset == "mimic-iv"
     assert labevents.version == "3.1"
-    assert labevents.identifier == "openicu.config.dataset.mimic-iv.3.1.labevents"
+    assert labevents.identifier == "openicu.config.table.mimic-iv.3.1.labevents"
 
-    demo_labevents = load_effective_table(CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "dataset", "labevents")
+    demo_labevents = load_effective_table(CONFIG_ROOT / "datasets" / "mimic-iv-demo" / "2.2" / "tables", "labevents")
     assert demo_labevents.dataset == "mimic-iv-demo"
     assert demo_labevents.version == "2.2"
 
 
 def test_mimic_demo_inherits_concept_mappings() -> None:
-    """Concept mappings must resolve for the demo through the marker-only concept dir."""
+    """Concept mappings must resolve for the demo through the marker-only mappings dir."""
     concept = ConceptConfig.load(
-        CONFIG_ROOT / "concept" / "vitals" / "heart_rate.yml",
-        dataset_paths=[CONFIG_ROOT / "dataset" / "mimic-iv-demo" / "2.2" / "concept"],
+        CONFIG_ROOT / "concepts" / "vitals" / "heart_rate.yml",
+        dataset_paths=[CONFIG_ROOT / "datasets" / "mimic-iv-demo" / "2.2" / "mappings"],
     )
     dataset_concept = concept.get_dataset_concept("mimic-iv-demo")
     assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
@@ -235,6 +235,6 @@ def test_config_inventory_is_nonempty() -> None:
     assert len(effective_table_cases()) >= 50
     assert len(CONCEPT_FILES) >= 80
     # Marker-only versions (extends.yml) count even without a physical
-    # concept/ dir; only empty dirs without a marker (nwicu) are not
+    # mappings/ dir; only empty dirs without a marker (nwicu) are not
     # guaranteed to survive a fresh clone.
     assert len(DATASET_CONCEPT_DIRS) >= 5

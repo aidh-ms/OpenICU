@@ -68,7 +68,7 @@ class TestConceptStepRobustness:
         self, tmp_path: Path, extraction_config: Path, concept_config: Path
     ) -> None:
         # Add a concept that has no mapping for testdb.
-        (tmp_path / "config" / "concept" / "orphan.yml").write_text(
+        (tmp_path / "config" / "concepts" / "orphan.yml").write_text(
             "name: orphan\nversion: 1.0.0\nunit: x\n"
         )
 
@@ -82,7 +82,7 @@ class TestConceptStepRobustness:
         self, tmp_path: Path, extraction_config: Path, concept_config: Path
     ) -> None:
         # Point a mapping at an event that does not exist.
-        mapping_dir = tmp_path / "config" / "testdb" / "1.0" / "concept"
+        mapping_dir = tmp_path / "config" / "testdb" / "1.0" / "mappings"
         (mapping_dir / "heart_rate.yml").write_text(
             """\
 type: simple

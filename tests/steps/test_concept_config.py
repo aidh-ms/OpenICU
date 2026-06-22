@@ -18,7 +18,7 @@ class TestConceptConfig:
         concept_file = tmp_path / "heart_rate.yml"
         concept_file.write_text("name: heart_rate\nversion: 1.0.0\nunit: bpm\n")
 
-        mapping_dir = tmp_path / "mimic-iv" / "3.1" / "concept"
+        mapping_dir = tmp_path / "mimic-iv" / "3.1" / "mappings"
         mapping_dir.mkdir(parents=True)
         (mapping_dir / "heart_rate.yml").write_text(
             "type: simple\n"
@@ -43,7 +43,7 @@ class TestConceptConfig:
         concept_file = tmp_path / "heart_rate.yml"
         concept_file.write_text("name: heart_rate\nversion: 1.0.0\nunit: bpm\n")
 
-        mapping_dir = tmp_path / "mimic-iv" / "3.1" / "concept"
+        mapping_dir = tmp_path / "mimic-iv" / "3.1" / "mappings"
         mapping_dir.mkdir(parents=True)
         (mapping_dir / "heart_rate.yml").write_text("type: nonsense\n")
 

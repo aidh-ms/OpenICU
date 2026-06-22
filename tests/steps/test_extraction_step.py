@@ -120,5 +120,5 @@ config:
 
     def test_config_snapshot_saved_to_project(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)
-        snapshot = project.configs_path / "dataset" / "testdb" / "1.0" / "vitals.yml"
+        snapshot = project.configs_path / "table" / "testdb" / "1.0" / "vitals.yml"
         assert snapshot.exists()

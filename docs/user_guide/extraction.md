@@ -5,7 +5,7 @@ The extraction step turns raw source tables into MEDS event streams. It is drive
 1. a **step config** that selects which table configs to load and where the raw data lives, and
 2. one **table config** per source table that describes columns, joins, and the events to emit.
 
-OpenICU ships table configs for MIMIC-IV 3.1, eICU-CRD 2.0, and NWICU 0.1.0 under `config/dataset/<dataset>/<version>/dataset/`. This page explains how they work, so you can adapt them or add your own datasets.
+OpenICU ships table configs for MIMIC-IV 3.1, eICU-CRD 2.0, and NWICU 0.1.0 under `config/datasets/<dataset>/<version>/tables/`. This page explains how they work, so you can adapt them or add your own datasets.
 
 ## Step configuration
 
@@ -14,9 +14,9 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /path/to/config/dataset/mimic-iv/3.1/dataset/
+  - path: /path/to/config/datasets/mimic-iv/3.1/tables/
     # includes:
-    #   - openicu.config.dataset.mimic-iv.3.1.labevents   # restrict to specific tables
+    #   - openicu.config.table.mimic-iv.3.1.labevents   # restrict to specific tables
 
 config:
   data:
@@ -144,7 +144,7 @@ If the same event file already exists (e.g. when several table configs write to 
 
 > For a new *version* of an already-supported dataset, or a *variant* like a demo subset, don't copy the configs — declare the differences against a reference version with `extends.yml`. See [dataset versions and variants](versioning.md).
 
-1. Create `config/dataset/<your-dataset>/<version>/dataset/` and add one YAML per source table, as above.
+1. Create `config/datasets/<your-dataset>/<version>/tables/` and add one YAML per source table, as above.
 2. Reference the directory from your extraction step's `config_files` and add the dataset's name and data path under `config.data`.
 3. Run the extraction step and inspect `metadata/codes.parquet` to verify the extracted codes.
 4. Optionally, add [concept mappings](concepts.md) so the shared concept dictionary covers your dataset.

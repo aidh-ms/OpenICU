@@ -259,7 +259,7 @@ def _load_inherited_configs[T: BaseConfig](
 
     Args:
         path: Config subdirectory of a version directory (e.g.
-            ``.../<dataset>/<version>/dataset``)
+            ``.../<dataset>/<version>/tables``)
         config_type: The configuration class to instantiate
         includes: If non-empty, only keep configurations with these identifiers
         excludes: If non-empty, skip configurations with these identifiers
