@@ -60,8 +60,9 @@ class ConceptTable(BaseConceptTable):
 
 
 class MEDSConceptTable(BaseModel):
-    subject_id: str | None = Field("subject_id", description="The default subject identifier column name.")
-    time: str | None = Field("time", description="The default timestamp column name.")
+    # None means the column is passed through unchanged from the input concept table.
+    subject_id: str | None = Field(None, description="Expression for the subject identifier column.")
+    time: str | None = Field(None, description="Expression for the timestamp column.")
     code: list[str] | None = Field(None, description="The default code column name.")
     numeric_value: str | None = Field(None, description="The default numeric value column name.")
     text_value: str | None = Field(None, description="The default text value column name.")
@@ -100,7 +101,7 @@ class DerivedDatasetConceptConfig(BaseDatasetConfig):
         from open_icu.steps.concept.config.concept import ConceptConfig  # Avoid circular import
 
         deps = {
-            ConceptConfig.ensure_prefix(concept)
-            for concept in self.table.concept
+            ConceptConfig.ensure_prefix(join_table.concept)
+            for join_table in self.join
         } | {ConceptConfig.ensure_prefix(self.table.concept)}
         return deps

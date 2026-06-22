@@ -28,7 +28,8 @@ class FirstDistinct(CallbackProtocol):
         """
         if len(fields) == 1 and isinstance(fields[0], list):
             self.fields: Sequence[AstValue] = fields[0]  # ty: ignore[invalid-assignment]
-        self.fields = fields
+        else:
+            self.fields = fields
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         """

@@ -1,0 +1,5 @@
+# MIMIC-IV v3.0/v3.1 only extended the data relative to v2.2 (stays through
+# 2022) without schema changes, and v3.1's labevents itemids are consistent
+# with v2.2 again — so v3.1 inherits the v2.2 reference configs unchanged.
+dataset: mimic-iv
+version: "2.2"

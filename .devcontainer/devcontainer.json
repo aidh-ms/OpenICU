@@ -21,8 +21,7 @@
         },
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"moby": false
-		},
-		"ghcr.io/devcontainers/features/node:2": {}
+		}
     },
 	"customizations": {
 		"vscode": {
@@ -43,8 +42,7 @@
 				"tamasfe.even-better-toml",
 				"redhat.vscode-yaml",
 				"esbenp.prettier-vscode",
-				"eamodio.gitlens",
-				"Anthropic.claude-code"
+				"eamodio.gitlens"
 			]
 		}
 	}

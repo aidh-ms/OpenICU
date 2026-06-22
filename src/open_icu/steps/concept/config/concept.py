@@ -5,6 +5,7 @@ import yaml
 from pydantic import Field, TypeAdapter, ValidationError, computed_field
 
 from open_icu.config.base import BaseConfig
+from open_icu.config.inheritance import has_extends, resolve_effective_configs
 from open_icu.logging import logger
 from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig
 from open_icu.steps.concept.config.derived import DerivedDatasetConceptConfig
@@ -73,27 +74,34 @@ class ConceptConfig(BaseConfig):
 
         name = data.get("name")
         paths = dataset_paths or []
+        adapter = TypeAdapter(DatasetConceptConfigUnion)
         for path in paths:
-            sub_file_path = path / f"{name}.yml"
-            if not sub_file_path.exists():
-                continue
-
-            adapter = TypeAdapter(DatasetConceptConfigUnion)
-            try:
+            if has_extends(path):
+                # Resolve the dataset's inheritance chain; the mapping may be
+                # inherited from (or merged with) a base version's config.
+                sub_data = resolve_effective_configs(path).get(str(name))
+                if sub_data is None:
+                    continue
+            else:
+                sub_file_path = path / f"{name}.yml"
+                if not sub_file_path.exists():
+                    continue
                 with open(sub_file_path, "r") as f:
                     sub_data = yaml.safe_load(f)
 
-                *_, dataset, version, _, _ = sub_file_path.parts
+            try:
+                # Identity always comes from the dataset directory itself,
+                # never from where an inherited file physically lives.
                 sub_data.update({
-                    "dataset": dataset,
-                    "version": version,
-                    "name": sub_file_path.stem,
+                    "dataset": path.parent.parent.name,
+                    "version": path.parent.name,
+                    "name": name,
                 })
 
                 dataset_concept = adapter.validate_python(sub_data)
                 data.setdefault("dataset_concepts", []).append(dataset_concept)
             except ValidationError:
-                logger.warning("failed to load dataset concept config for %s from %s", name, sub_file_path)
+                logger.warning("failed to load dataset concept config for %s from %s", name, path)
 
         for k, v in kwargs.items():
             if k not in data:

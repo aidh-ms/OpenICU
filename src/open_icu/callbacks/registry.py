@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Hashable
+from typing import Any, Hashable
 
 from open_icu.callbacks.proto import CallbackProtocol
 from open_icu.utils.name import camel_to_snake
@@ -91,7 +91,7 @@ class CallbackRegistry:
 registry = CallbackRegistry()
 
 
-def register_callback_cls[T: type[CallbackProtocol]](cls: T) -> Callable[..., T]:
+def register_callback_cls[T: type[CallbackProtocol]](cls: T) -> T:
     name = camel_to_snake(cls.__name__)
     registry.register(name, cls)
 
@@ -99,4 +99,4 @@ def register_callback_cls[T: type[CallbackProtocol]](cls: T) -> Callable[..., T]
     def wrapper(*args: Any, **kwargs: Any) -> T:
         return cls(*args, **kwargs)
 
-    return wrapper
+    return wrapper # ty: ignore[invalid-return-type]
