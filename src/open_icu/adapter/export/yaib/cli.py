@@ -1,4 +1,4 @@
-"""Command line entry point for the OpenICU -> YAIB dynamic table converter."""
+"""Command-line interface for building OpenICU -> YAIB dynamic tables."""
 
 from __future__ import annotations
 
@@ -8,48 +8,24 @@ from pathlib import Path
 from .transform import write_dynamic_table
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Convert OpenICU concept parquets to a YAIB/RICU-like dyn.parquet."
-    )
-    parser.add_argument("--concept-root", required=True, help="OpenICU workspace/concept directory")
-    parser.add_argument("--icustays-csv", required=True, help="MIMIC-IV icu/icustays.csv.gz")
-    parser.add_argument(
-        "--ricu-concept-dict",
-        default=None,
-        help="Path to ricu/inst/extdata/config/concept-dict.json",
-    )
-    parser.add_argument("--dataset", default="mimic-iv", help="OpenICU dataset filename stem")
-    parser.add_argument("--version", default=None, help="OpenICU concept version, e.g. 1.0.0")
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="Build a YAIB/RICU-like dyn.parquet from OpenICU concept parquets.")
+    parser.add_argument("--concept-root", required=True, help="OpenICU concept output root, e.g. workspace/concept")
+    parser.add_argument("--icustays-csv", required=True, help="MIMIC-IV icustays.csv.gz path")
+    parser.add_argument("--ricu-concept-dict", default=None, help="RICU concept-dict.json path")
+    parser.add_argument("--dataset", default="mimic-iv")
+    parser.add_argument("--version", default="1.0.0")
+    parser.add_argument("--aggregation-mode", choices=["mean", "ricu"], default="mean")
     parser.add_argument("--output", required=True, help="Output parquet path")
-    parser.add_argument(
-        "--aggregation-mode",
-        choices=["mean", "ricu"],
-        default="mean",
-        help="Use mean for every concept or RICU's aggregate field when present.",
-    )
-    parser.add_argument(
-        "--max-hours",
-        type=int,
-        default=168,
-        help="Maximum grid length in hours; YAIB base cohort uses 7*24 = 168.",
-    )
-    parser.add_argument(
-        "--no-grid",
-        action="store_true",
-        help="Do not expand to the full YAIB-like hourly stay grid.",
-    )
-    parser.add_argument(
-        "--missing-concepts",
-        choices=["warn", "fail", "ignore"],
-        default="warn",
-        help="How to handle dynamic variables without a matching OpenICU parquet.",
-    )
-    return parser.parse_args()
+    parser.add_argument("--max-hours", type=int, default=168, help="Maximum grid hour. Use -1 to disable cap.")
+    parser.add_argument("--grid-end-rounding", choices=["floor", "ceil"], default="floor")
+    parser.add_argument("--no-grid", action="store_true", help="Do not add complete stay/hour grid; keep observed concept keys only.")
+    parser.add_argument("--no-icu-window-filter", action="store_true", help="Do not require concept event timestamp to be inside intime/outtime.")
+    parser.add_argument("--missing-concepts", choices=["warn", "fail", "ignore"], default="warn")
+    args = parser.parse_args(argv)
 
+    max_hours = None if args.max_hours < 0 else args.max_hours
 
-def main() -> None:
-    args = parse_args()
     write_dynamic_table(
         output_path=Path(args.output),
         concept_root=Path(args.concept_root),
@@ -59,10 +35,11 @@ def main() -> None:
         version=args.version,
         aggregation_mode=args.aggregation_mode,
         include_grid=not args.no_grid,
-        max_hours=args.max_hours,
+        max_hours=max_hours,
+        grid_end_rounding=args.grid_end_rounding,
+        filter_to_icu_window=not args.no_icu_window_filter,
         missing_concepts=args.missing_concepts,
     )
-    print(f"Wrote {args.output}")
 
 
 if __name__ == "__main__":

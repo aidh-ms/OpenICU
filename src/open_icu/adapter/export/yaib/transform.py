@@ -14,6 +14,7 @@ from .ricu_meta import RicuConceptMeta
 
 AggregationMode = Literal["mean", "ricu"]
 MissingConcepts = Literal["warn", "fail", "ignore"]
+GridEndRounding = Literal["floor", "ceil"]
 
 
 def _range_filter_expr(ricu_meta: RicuConceptMeta, ricu_name: str) -> pl.Expr:
@@ -46,19 +47,28 @@ def _agg_expr(ricu_name: str, output_col: str, aggregate: str) -> pl.Expr:
     raise ValueError(f"Unsupported aggregation for {ricu_name!r}: {aggregate!r}")
 
 
-def map_events_to_stays(events: pl.LazyFrame, stays: pl.LazyFrame) -> pl.LazyFrame:
+def map_events_to_stays(
+    events: pl.LazyFrame,
+    stays: pl.LazyFrame,
+    *,
+    filter_to_icu_window: bool = True,
+) -> pl.LazyFrame:
     """Map subject-level OpenICU concept events to ICU stays.
 
-    An event is assigned to a stay iff
-    ``event.time >= intime`` and ``event.time <= outtime``.
+    If ``filter_to_icu_window`` is true, an event is assigned to a stay iff
+    ``event.time >= intime`` and ``event.time <= outtime``. The output time is
+    the rounded number of hours since ICU admission.
     """
-    return (
-        events.join(stays, on="subject_id", how="inner")
-        .filter(
+    mapped = events.join(stays, on="subject_id", how="inner")
+
+    if filter_to_icu_window:
+        mapped = mapped.filter(
             (pl.col("time") >= pl.col("intime"))
             & (pl.col("outtime").is_null() | (pl.col("time") <= pl.col("outtime")))
         )
-        .with_columns(
+
+    return (
+        mapped.with_columns(
             (
                 (pl.col("time") - pl.col("intime"))
                 .dt.total_seconds()
@@ -79,10 +89,11 @@ def aggregate_concept_hourly(
     ricu_name: str,
     ricu_meta: RicuConceptMeta,
     aggregation_mode: AggregationMode = "mean",
+    filter_to_icu_window: bool = True,
 ) -> pl.LazyFrame:
     """Load, range-filter, stay-map and aggregate one dynamic concept."""
     events = scan_openicu_concept(concept_file).filter(_range_filter_expr(ricu_meta, ricu_name))
-    mapped = map_events_to_stays(events, stays)
+    mapped = map_events_to_stays(events, stays, filter_to_icu_window=filter_to_icu_window)
     aggregate = "mean"
     if aggregation_mode == "ricu":
         aggregate = ricu_meta.aggregate_for(ricu_name, default="mean")
@@ -94,14 +105,26 @@ def aggregate_concept_hourly(
     )
 
 
-def make_yaib_grid(stays: pl.LazyFrame, max_hours: int = 168) -> pl.LazyFrame:
+def make_yaib_grid(
+    stays: pl.LazyFrame,
+    max_hours: int | None = 168,
+    *,
+    end_rounding: GridEndRounding = "floor",
+) -> pl.LazyFrame:
     """Create a YAIB-like hourly stay grid.
 
-    YAIB's base cohort maps dynamic variables to a grid derived from stay windows.
-    This function creates rows ``time = 0, 1, ..., min(los_hours_ceil, max_hours)``
-    for every ICU stay.
+    Creates rows ``time = 0, 1, ..., end_time`` for every ICU stay.
+
+    ``end_rounding='floor'`` is the current default because this matched the
+    observed ``ricu::stay_windows('miiv', interval = hours(1))`` end indices in
+    debugging. Use ``'ceil'`` only if you explicitly want the older behavior.
     """
-    return (
+    if end_rounding not in {"floor", "ceil"}:
+        raise ValueError("end_rounding must be 'floor' or 'ceil'.")
+
+    los_end_expr = pl.col("los_hours").floor() if end_rounding == "floor" else pl.col("los_hours").ceil()
+
+    grid = (
         stays.with_columns(
             (
                 (pl.col("outtime") - pl.col("intime"))
@@ -113,17 +136,25 @@ def make_yaib_grid(stays: pl.LazyFrame, max_hours: int = 168) -> pl.LazyFrame:
         .with_columns(
             pl.when(pl.col("los_hours").is_null() | (pl.col("los_hours") < 0))
             .then(0)
-            .otherwise(pl.col("los_hours").ceil().cast(pl.Int64))
-            .alias("los_hours_ceil")
+            .otherwise(los_end_expr.cast(pl.Int64))
+            .alias("los_end")
         )
-        .with_columns(pl.min_horizontal("los_hours_ceil", pl.lit(max_hours)).alias("end_time"))
-        .select("stay_id", pl.int_ranges(0, pl.col("end_time") + 1).alias("time"))
+    )
+
+    if max_hours is None:
+        grid = grid.with_columns(pl.col("los_end").alias("end_time"))
+    else:
+        grid = grid.with_columns(pl.min_horizontal("los_end", pl.lit(max_hours)).alias("end_time"))
+
+    return (
+        grid.select("stay_id", pl.int_ranges(0, pl.col("end_time") + 1).alias("time"))
         .explode("time")
         .with_columns(pl.col("time").cast(pl.Int64))
     )
 
 
 def outer_join_concepts(concept_tables: list[pl.LazyFrame]) -> pl.LazyFrame:
+    """Full-join all concept tables on stay_id/time."""
     if not concept_tables:
         raise ValueError("No concept tables to join.")
     return reduce(
@@ -143,7 +174,9 @@ def build_dynamic_table(
     concept_mapping: dict[str, str] | None = None,
     aggregation_mode: AggregationMode = "mean",
     include_grid: bool = True,
-    max_hours: int = 168,
+    max_hours: int | None = 168,
+    grid_end_rounding: GridEndRounding = "floor",
+    filter_to_icu_window: bool = True,
     missing_concepts: MissingConcepts = "warn",
 ) -> pl.LazyFrame:
     """Build the wide YAIB/RICU-like dynamic table.
@@ -177,6 +210,7 @@ def build_dynamic_table(
                 ricu_name=ricu_name,
                 ricu_meta=ricu_meta,
                 aggregation_mode=aggregation_mode,
+                filter_to_icu_window=filter_to_icu_window,
             )
         )
 
@@ -190,10 +224,11 @@ def build_dynamic_table(
     wide = outer_join_concepts(concept_tables)
 
     if include_grid:
-        grid = make_yaib_grid(stays, max_hours=max_hours)
+        grid = make_yaib_grid(stays, max_hours=max_hours, end_rounding=grid_end_rounding)
         wide = grid.join(wide, on=["stay_id", "time"], how="left")
 
-    ordered_cols = ["stay_id", "time"] + [v for v in vars_ if v in wide.collect_schema().names()]
+    present = wide.collect_schema().names()
+    ordered_cols = ["stay_id", "time"] + [v for v in vars_ if v in present]
     return wide.select(ordered_cols).sort("stay_id", "time")
 
 

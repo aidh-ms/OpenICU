@@ -278,12 +278,6 @@ class RICUToOpenICUMapper:
         )
 
     def _columns(self, concept: RICUConcept, item: RICUSourceItem) -> dict[str, str]:
-        if self.settings.logical_columns_mode == "boolean" and self._looks_like_logical_true(concept, item):
-            return {
-                "numeric_value": "const(1)",
-                "text_value": 'const("true")',
-            }
-
         return {
             "numeric_value": "col(numeric_value)",
             "text_value": "col(text_value)",

@@ -1,4 +1,4 @@
-"""Input/output helpers."""
+"""Input helpers for OpenICU concept parquets and MIMIC-IV ICU stays."""
 
 from __future__ import annotations
 
@@ -10,62 +10,76 @@ import polars as pl
 def find_concept_file(
     concept_root: str | Path,
     openicu_concept: str,
+    *,
     dataset: str = "mimic-iv",
     version: str | None = None,
 ) -> Path | None:
-    """Find one OpenICU concept parquet file.
+    """Find one OpenICU concept parquet.
 
-    Expected layout: ``<concept_root>/<concept>/<version>/<dataset>.parquet``.
-    If ``version`` is omitted, the lexicographically latest version directory is used.
+    Expected common layout:
+        <concept_root>/<concept>/<version>/<dataset>.parquet
+
+    The function also falls back to a recursive search for '<dataset>.parquet'
+    below the concept folder.
     """
     root = Path(concept_root)
     concept_dir = root / openicu_concept
-    if not concept_dir.exists():
-        return None
+    candidates: list[Path] = []
 
     if version is not None:
-        candidate = concept_dir / version / f"{dataset}.parquet"
-        return candidate if candidate.exists() else None
+        candidates.append(concept_dir / version / f"{dataset}.parquet")
+        candidates.append(concept_dir / version / f"{dataset.replace('-', '_')}.parquet")
 
-    candidates = sorted(concept_dir.glob(f"*/{dataset}.parquet"))
-    if not candidates:
-        return None
-    return candidates[-1]
+    candidates.append(concept_dir / f"{dataset}.parquet")
+    candidates.append(concept_dir / f"{dataset.replace('-', '_')}.parquet")
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+
+    if concept_dir.is_dir():
+        recursive = sorted(concept_dir.rglob(f"{dataset}.parquet"))
+        if recursive:
+            return recursive[0]
+        recursive = sorted(concept_dir.rglob(f"{dataset.replace('-', '_')}.parquet"))
+        if recursive:
+            return recursive[0]
+
+    return None
 
 
 def scan_openicu_concept(path: str | Path) -> pl.LazyFrame:
-    """Scan one OpenICU MEDS-like concept parquet.
+    """Scan an OpenICU MEDS-like concept parquet.
 
-    The converter currently needs ``subject_id``, ``time`` and ``numeric_value``.
-    Extension columns like ``dataset`` and ``table`` are intentionally ignored here.
+    Required columns after normalization:
+        subject_id, time, numeric_value
     """
     lf = pl.scan_parquet(path)
+    schema = lf.collect_schema()
     required = {"subject_id", "time", "numeric_value"}
-    missing = required - set(lf.collect_schema().names())
+    missing = sorted(required - set(schema.names()))
     if missing:
-        raise ValueError(f"Concept file {path} is missing columns: {sorted(missing)}")
-
-    return lf.select(
+        raise ValueError(f"Concept parquet {path} is missing columns: {missing}")
+    return lf.select([
         pl.col("subject_id").cast(pl.Int64),
-        pl.col("time").cast(pl.Datetime),
+        pl.col("time"),
         pl.col("numeric_value").cast(pl.Float64),
-    )
+    ])
 
 
 def scan_mimic_icustays(path: str | Path) -> pl.LazyFrame:
-    """Scan MIMIC-IV ``icu/icustays.csv.gz``.
-
-    Expected columns: ``subject_id``, ``stay_id``, ``intime``, ``outtime``.
-    """
+    """Scan MIMIC-IV icustays.csv.gz and normalize dtypes."""
     lf = pl.scan_csv(path, try_parse_dates=True)
-    required = {"subject_id", "stay_id", "intime", "outtime"}
-    missing = required - set(lf.collect_schema().names())
+    schema = lf.collect_schema()
+    required = {"subject_id", "hadm_id", "stay_id", "intime", "outtime"}
+    missing = sorted(required - set(schema.names()))
     if missing:
-        raise ValueError(f"ICU stays file {path} is missing columns: {sorted(missing)}")
+        raise ValueError(f"ICU stays file {path} is missing columns: {missing}")
 
-    return lf.select(
+    return lf.select([
         pl.col("subject_id").cast(pl.Int64),
+        pl.col("hadm_id").cast(pl.Int64),
         pl.col("stay_id").cast(pl.Int64),
         pl.col("intime").cast(pl.Datetime),
         pl.col("outtime").cast(pl.Datetime),
-    )
+    ])

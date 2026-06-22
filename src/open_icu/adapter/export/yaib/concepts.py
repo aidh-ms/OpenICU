@@ -1,8 +1,6 @@
-"""YAIB dynamic variable list and OpenICU concept mapping.
+"""YAIB dynamic variable list and RICU abbreviation -> OpenICU concept mapping."""
 
-The left-hand side uses the RICU/YAIB abbreviation. The right-hand side is the
-OpenICU concept directory name expected below ``workspace/concept``.
-"""
+from __future__ import annotations
 
 DYNAMIC_VARS: list[str] = [
     "alb", "alp", "alt", "ast", "be", "bicar", "bili", "bili_dir",
