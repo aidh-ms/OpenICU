@@ -22,10 +22,7 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "duckdb>=1.5.3",
     "meds>=0.4.0",
-    "pandas>=2.3.1",
-    "pandas-stubs>=3.0.3.260530",
     "polars>=1.41.2",
     "pyarrow>=24.0.0",
     "pydantic>=2.13.4",
@@ -76,21 +73,4 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-fail-under=80",
     "--import-mode=importlib",
-]
-[[tool.mypy.overrides]]
-module = [
-    "pyarrow.*",
-    "flexible_schema.*",
-]
-follow_untyped_imports = true
-
-
-[tool.mypy]
-python_version = "3.13"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-strict_optional = true
-exclude = [
-    "docs/*",
 ]
