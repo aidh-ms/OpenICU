@@ -1,0 +1,33 @@
+# Example configuration for OpenICU -> YAIB/RICU-like dynamic table export.
+# Paths are intentionally explicit so this notebook can be copied to project machines.
+
+paths:
+  concept_root: ../../example/output/project/workspace/concept
+  icustays_csv: ~/path/to/mimic-iv/3.1/icu/icustays.csv.gz
+  ricu_concept_dict: ~/path/to/ricu/inst/extdata/config/concept-dict.json
+  output_dir: ~/output/openicu_yaib_export
+
+openicu:
+  dataset: mimic-iv
+  version: 1.0.0
+
+export:
+  aggregation_mode: mean        # mean or ricu
+  include_grid: true
+  grid_end_rounding: floor      # floor matched the RICU stay-window debugging best
+  filter_to_icu_window: true
+  missing_concepts: warn        # warn, fail or ignore
+  dynamic_vars: null            # null means use the built-in YAIB/RICU dynamic variable list
+
+runs:
+  fourteen_days:
+    output_name: openicu_dyn_14d.parquet
+    max_hours: 336              # 14 * 24; this is the maximum hour index, inclusive
+
+  all_entries:
+    output_name: openicu_dyn_all.parquet
+    max_hours: null             # no max-hour cap
+
+validation:
+  reports_dir: reports
+  debug_concept: hr

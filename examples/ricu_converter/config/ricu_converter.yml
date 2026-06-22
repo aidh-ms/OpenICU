@@ -1,0 +1,37 @@
+# Example configuration for the RICU -> OpenICU concept config converter.
+# Paths are intentionally relative to the OpenICU repository root when possible.
+
+paths:
+  # Path to RICU's concept dictionary, for example:
+  # ~/R/x86_64-pc-linux-gnu-library/4.3/ricu/extdata/config/concept-dict.json
+  concept_dict: ~/path/to/ricu/inst/extdata/config/concept-dict.json
+
+  # Existing OpenICU config directory. Used to infer existing extraction event names.
+  openicu_config: ../../config
+
+  # Where generated OpenICU YAML files should be written.
+  output_config: ../../config
+
+conversion:
+  # Generate all currently supported RICU source variants in one run.
+  # miiv is the RICU key for MIMIC-IV. mimic_demo, eicu and eicu_demo are also supported.
+  sources:
+    - miiv
+    - mimic_demo
+    - eicu
+    - eicu_demo
+
+  # Leave null to generate all categories/concepts found in the RICU concept dictionary.
+  categories: null
+  concepts: null
+
+  # Derived concepts are skipped by default unless explicitly enabled.
+  include_derived: true
+  complex_stubs: false
+
+  # overwrite=false is safer when writing into a real OpenICU config directory.
+  # Set true for a clean generated output directory or regeneration after review.
+  overwrite: false
+
+  regex_prefix_mode: null
+  logical_columns_mode: null
