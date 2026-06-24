@@ -1,8 +1,9 @@
 """Tests for extraction step configuration models (table, event, column)."""
 
 import polars as pl
+import pytest
 
-from open_icu.steps.extraction.config.table import JoinTableConfig, TableConfig
+from open_icu.steps.extraction.config.table import JoinTableConfig, TableConfig, TableType
 
 
 def make_table_config(**overrides) -> TableConfig:
@@ -34,6 +35,28 @@ class TestTableConfig:
         table = make_table_config()
         assert table.identifier_tuple == ("table", "mimic-iv", "3.1", "labevents")
         assert table.identifier == "openicu.config.table.mimic-iv.3.1.labevents"
+
+
+class TestTableTypeInference:
+    @pytest.mark.parametrize(
+        ("path", "expected"),
+        [
+            ("measurement.parquet", TableType.PARQUET),
+            ("data.pq", TableType.PARQUET),
+            ("hosp/labevents.csv.gz", TableType.CSVGZ),
+            ("vitals.csv", TableType.CSV),
+            ("export_without_extension", TableType.PARQUET),  # default
+        ],
+    )
+    def test_type_inferred_from_path(self, path: str, expected: TableType) -> None:
+        assert make_table_config(path=path).type == expected
+
+    def test_explicit_type_is_not_overridden(self) -> None:
+        assert make_table_config(path="data.parquet", type="csvgz").type == TableType.CSVGZ
+
+    def test_join_table_type_inferred_from_path(self) -> None:
+        assert JoinTableConfig(path="d_items.csv.gz").type == TableType.CSVGZ
+        assert JoinTableConfig(path="d_items.parquet").type == TableType.PARQUET
 
 
 class TestEventDefaults:

@@ -16,7 +16,7 @@ from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.event import EventConfig
 from open_icu.steps.extraction.config.step import ExtractionStepConfig
-from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
+from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig, TableType
 from open_icu.steps.extraction.registry import dataset_config_registry
 from open_icu.storage.project import OpenICUProject
 
@@ -278,13 +278,27 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         if not file_path.exists():
             raise FileNotFoundError(f"file not found ({file_path})")
 
-        lf = pl.scan_csv(
-            file_path,
-            schema_overrides=table.dtypes,
-            infer_schema=False,
-            low_memory=True,
-        )
-        lf = lf.select(table.dtypes.keys())
+        if table.type == TableType.PARQUET:
+            lf = pl.scan_parquet(file_path)
+            lf = lf.select(table.dtypes.keys())
+            # Parquet carries its own schema, so cast the non-temporal columns to
+            # the declared dtypes. Datetime columns ("datetime" maps to String)
+            # are handled below to support both native timestamps and strings.
+            casts = [
+                pl.col(col.name).cast(col.dtype, strict=False)
+                for col in table.columns
+                if col.type != "datetime"
+            ]
+            if casts:
+                lf = lf.with_columns(casts)
+        else:
+            lf = pl.scan_csv(
+                file_path,
+                schema_overrides=table.dtypes,
+                infer_schema=False,
+                low_memory=True,
+            )
+            lf = lf.select(table.dtypes.keys())
 
         lf = self._apply_callbacks(
             lf,
@@ -297,11 +311,20 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             callback_type="Table pre-filter",
         )
 
-        for col in table.columns:
-            if col.type == "datetime":
-                lf = lf.with_columns(
-                    pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
-                )
+        datetime_cols = [col for col in table.columns if col.type == "datetime"]
+        if datetime_cols:
+            # CSV reads datetimes as strings; Parquet may store them either as
+            # native temporal types or as strings, so branch on the actual dtype.
+            schema = lf.collect_schema()
+            for col in datetime_cols:
+                if schema.get(col.name) == pl.String:
+                    lf = lf.with_columns(
+                        pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
+                    )
+                else:
+                    lf = lf.with_columns(
+                        pl.col(col.name).cast(pl.Datetime("us"), strict=False).alias(col.name)
+                    )
 
         lf = self._apply_callbacks(
             lf,
