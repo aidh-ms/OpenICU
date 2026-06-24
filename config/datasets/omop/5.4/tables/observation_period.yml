@@ -1,0 +1,44 @@
+path: observation_period.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: observation_period_id
+    type: int64
+  # db fields - times
+  - name: observation_period_start_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: observation_period_end_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  # db fields - values
+  - name: period_type_concept_id
+    type: int64
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    observation_period_id: col(observation_period_id)
+
+events:
+  - name: OBSERVATION_PERIOD_START
+    columns:
+      time: col(observation_period_start_date)
+      code:
+        - col(period_type_concept_id)
+    filters:
+      - drop_na(time)
+
+  - name: OBSERVATION_PERIOD_END
+    columns:
+      time: col(observation_period_end_date)
+      code:
+        - col(period_type_concept_id)
+    filters:
+      - drop_na(time)

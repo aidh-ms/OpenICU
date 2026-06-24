@@ -1,0 +1,69 @@
+path: specimen.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: specimen_id
+    type: int64
+  # db fields - times
+  - name: specimen_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: specimen_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: specimen_concept_id
+    type: int64
+  - name: specimen_source_value
+    type: string
+  - name: specimen_source_id
+    type: string
+  - name: specimen_type_concept_id
+    type: int64
+  - name: quantity
+    type: float64
+  - name: unit_concept_id
+    type: int64
+  - name: unit_source_value
+    type: string
+  - name: anatomic_site_concept_id
+    type: int64
+  - name: anatomic_site_source_value
+    type: string
+  - name: disease_status_concept_id
+    type: int64
+  - name: disease_status_source_value
+    type: string
+
+post_join_callbacks:
+  - first_not_null(specimen_datetime, specimen_date, output=specimen_time)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    specimen_id: col(specimen_id)
+    specimen_source_id: col(specimen_source_id)
+
+events:
+  - name: SPECIMEN
+    columns:
+      time: col(specimen_time)
+      code:
+        - col(specimen_concept_id)
+        - col(specimen_source_value)
+      numeric_value: col(quantity)
+      extension:
+        specimen_type_concept_id: col(specimen_type_concept_id)
+        unit_concept_id: col(unit_concept_id)
+        unit_source_value: col(unit_source_value)
+        anatomic_site_concept_id: col(anatomic_site_concept_id)
+        anatomic_site_source_value: col(anatomic_site_source_value)
+        disease_status_concept_id: col(disease_status_concept_id)
+    filters:
+      - drop_na(time)

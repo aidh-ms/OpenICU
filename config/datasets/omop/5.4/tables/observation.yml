@@ -1,0 +1,75 @@
+path: observation.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: observation_id
+    type: int64
+  - name: visit_occurrence_id
+    type: int64
+  - name: provider_id
+    type: int64
+  # db fields - times
+  - name: observation_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: observation_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: observation_concept_id
+    type: int64
+  - name: observation_source_value
+    type: string
+  - name: observation_type_concept_id
+    type: int64
+  - name: value_as_number
+    type: float64
+  - name: value_as_string
+    type: string
+  - name: value_as_concept_id
+    type: int64
+  - name: value_source_value
+    type: string
+  - name: qualifier_concept_id
+    type: int64
+  - name: qualifier_source_value
+    type: string
+  - name: unit_concept_id
+    type: int64
+  - name: unit_source_value
+    type: string
+
+post_join_callbacks:
+  - first_not_null(observation_datetime, observation_date, output=observation_time)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    observation_id: col(observation_id)
+    visit_occurrence_id: col(visit_occurrence_id)
+    provider_id: col(provider_id)
+
+events:
+  - name: OBSERVATION
+    columns:
+      time: col(observation_time)
+      code:
+        - col(observation_concept_id)
+        - col(observation_source_value)
+        - col(unit_source_value)
+      numeric_value: col(value_as_number)
+      text_value: col(value_as_string)
+      extension:
+        observation_type_concept_id: col(observation_type_concept_id)
+        value_as_concept_id: col(value_as_concept_id)
+        value_source_value: col(value_source_value)
+        qualifier_concept_id: col(qualifier_concept_id)
+        unit_concept_id: col(unit_concept_id)
+    filters:
+      - drop_na(time)
