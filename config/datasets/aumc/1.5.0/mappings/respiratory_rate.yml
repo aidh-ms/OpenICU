@@ -1,0 +1,13 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   3024171 = Respiratory rate
+#   3007646 = Breath rate spontaneous and mechanical --on ventilator
+#   3026892 = Breath rate spontaneous --on ventilator
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(3024171|3007646|3026892)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

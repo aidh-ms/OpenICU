@@ -1,0 +1,12 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   3048816 = Calcium.ionized [Moles/volume] adjusted to pH 7.4 in Blood
+#   3021119 = Calcium.ionized [Moles/volume] in Blood
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(3048816|3021119)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
