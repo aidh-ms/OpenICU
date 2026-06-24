@@ -73,6 +73,31 @@ class TestOpenICUProject:
         assert project.workspace == {"extraction": workspace}
         assert project.datasets == {"extraction": dataset}
 
+    def test_rediscovers_existing_datasets_on_reopen(self, tmp_path: Path) -> None:
+        """Re-opening a project registers datasets already on disk, so a later
+        step can resolve an earlier step's output without re-running it."""
+        project_path = tmp_path / "project"
+
+        # First session: produce an extraction dataset with one data file.
+        first = OpenICUProject(project_path)
+        extraction = first.add_dataset("extraction")
+        table_dir = extraction.data_path / "aumc" / "1.5.0" / "measurement"
+        table_dir.mkdir(parents=True)
+        pl.DataFrame({"code": ["aumc//measurement//1"]}).write_parquet(table_dir / "MEASUREMENT.parquet")
+
+        # Second session: a fresh project instance at the same path.
+        reopened = OpenICUProject(project_path)
+
+        assert "extraction" in reopened.datasets
+        rediscovered = reopened.datasets["extraction"]
+        assert rediscovered.data_path == extraction.data_path
+        # contents are preserved (overwrite=False), not wiped
+        assert (table_dir / "MEASUREMENT.parquet").exists()
+
+    def test_fresh_project_discovers_no_datasets(self, tmp_path: Path) -> None:
+        project = OpenICUProject(tmp_path / "project")
+        assert project.datasets == {}
+
 
 class TestMEDSDataset:
     def test_write_metadata(self, tmp_path: Path) -> None:

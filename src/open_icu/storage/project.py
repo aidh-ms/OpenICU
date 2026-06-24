@@ -60,6 +60,8 @@ class OpenICUProject(FileStorage):
         self._datasets = {}
         self._workspace = {}
 
+        self._discover_datasets()
+
     def __enter__(self) -> "OpenICUProject":
         """Enter context manager.
 
@@ -164,3 +166,28 @@ class OpenICUProject(FileStorage):
         )
         self._datasets[name] = dataset
         return dataset
+
+    def _discover_datasets(self) -> None:
+        """Register MEDS datasets already present on disk under ``datasets/``.
+
+        A dataset is otherwise only registered when its producing step runs in
+        the current session (via :meth:`add_dataset`). Rediscovering existing
+        datasets when the project is opened lets a later step resolve the output
+        of an earlier step that ran in a previous session — e.g. running the
+        concept step against a project whose extraction output is already on
+        disk — without having to re-run it. Existing contents are preserved
+        (``overwrite=False``).
+        """
+        if not self.datasets_path.is_dir():
+            return
+
+        for dataset_path in sorted(self.datasets_path.iterdir()):
+            if not dataset_path.is_dir():
+                continue
+
+            logger.info(
+                "Discovered existing dataset '%s' at %s",
+                dataset_path.name,
+                dataset_path,
+            )
+            self.add_dataset(dataset_path.name, overwrite=False)
