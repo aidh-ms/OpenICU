@@ -1,0 +1,90 @@
+path: drug_exposure.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: drug_exposure_id
+    type: int64
+  - name: visit_occurrence_id
+    type: int64
+  - name: provider_id
+    type: int64
+  # db fields - times
+  - name: drug_exposure_start_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: drug_exposure_start_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  - name: drug_exposure_end_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: drug_exposure_end_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: drug_concept_id
+    type: int64
+  - name: drug_source_value
+    type: string
+  - name: drug_type_concept_id
+    type: int64
+  - name: quantity
+    type: float64
+  - name: days_supply
+    type: int64
+  - name: route_concept_id
+    type: int64
+  - name: route_source_value
+    type: string
+  - name: dose_unit_source_value
+    type: string
+  - name: stop_reason
+    type: string
+
+post_join_callbacks:
+  - first_not_null(drug_exposure_start_datetime, drug_exposure_start_date, output=drug_start)
+  - first_not_null(drug_exposure_end_datetime, drug_exposure_end_date, output=drug_end)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    drug_exposure_id: col(drug_exposure_id)
+    visit_occurrence_id: col(visit_occurrence_id)
+    provider_id: col(provider_id)
+
+events:
+  - name: DRUG_START
+    columns:
+      time: col(drug_start)
+      code:
+        - col(drug_concept_id)
+        - col(drug_source_value)
+      numeric_value: col(quantity)
+      extension:
+        drug_type_concept_id: col(drug_type_concept_id)
+        route_concept_id: col(route_concept_id)
+        route_source_value: col(route_source_value)
+        dose_unit_source_value: col(dose_unit_source_value)
+        days_supply: col(days_supply)
+    filters:
+      - drop_na(time)
+
+  - name: DRUG_END
+    columns:
+      time: col(drug_end)
+      code:
+        - col(drug_concept_id)
+        - col(drug_source_value)
+      text_value: col(stop_reason)
+    filters:
+      - drop_na(time)

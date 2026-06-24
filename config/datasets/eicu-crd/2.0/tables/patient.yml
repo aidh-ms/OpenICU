@@ -76,7 +76,7 @@ events:
   - name: GENDER
     columns:
       time: col(birth_timestamp)
-      code: 
+      code:
         - col(gender_1)
   - name: ICU_ADMISSION
     columns:

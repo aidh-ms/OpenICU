@@ -1,0 +1,84 @@
+path: device_exposure.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: device_exposure_id
+    type: int64
+  - name: visit_occurrence_id
+    type: int64
+  - name: provider_id
+    type: int64
+  # db fields - times
+  - name: device_exposure_start_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: device_exposure_start_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  - name: device_exposure_end_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: device_exposure_end_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: device_concept_id
+    type: int64
+  - name: device_source_value
+    type: string
+  - name: device_type_concept_id
+    type: int64
+  - name: unique_device_id
+    type: string
+  - name: quantity
+    type: int64
+  - name: unit_concept_id
+    type: int64
+  - name: unit_source_value
+    type: string
+
+post_join_callbacks:
+  - first_not_null(device_exposure_start_datetime, device_exposure_start_date, output=device_start)
+  - first_not_null(device_exposure_end_datetime, device_exposure_end_date, output=device_end)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    device_exposure_id: col(device_exposure_id)
+    visit_occurrence_id: col(visit_occurrence_id)
+    provider_id: col(provider_id)
+
+events:
+  - name: DEVICE_START
+    columns:
+      time: col(device_start)
+      code:
+        - col(device_concept_id)
+        - col(device_source_value)
+      numeric_value: col(quantity)
+      extension:
+        device_type_concept_id: col(device_type_concept_id)
+        unique_device_id: col(unique_device_id)
+        unit_concept_id: col(unit_concept_id)
+        unit_source_value: col(unit_source_value)
+    filters:
+      - drop_na(time)
+
+  - name: DEVICE_END
+    columns:
+      time: col(device_end)
+      code:
+        - col(device_concept_id)
+        - col(device_source_value)
+    filters:
+      - drop_na(time)
