@@ -1,0 +1,10 @@
+# HiRID v1.1.1 -- observations variableid(s) 24000170 [ricu mchc]; converts to the concept unit (* 0.16114)
+type: simple
+mappings:
+  - pattern:
+      table: observations
+      event: OBSERVATION
+      code: "(24000170)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value) * 0.16114
+      text_value: col(text_value)

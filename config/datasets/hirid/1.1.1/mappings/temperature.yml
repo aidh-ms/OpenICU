@@ -1,0 +1,10 @@
+# HiRID v1.1.1 -- observations variableid(s) 410, 400, 7100 [ricu temp]
+type: simple
+mappings:
+  - pattern:
+      table: observations
+      event: OBSERVATION
+      code: "(410|400|7100)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
