@@ -260,6 +260,27 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             del lf
             gc.collect()
 
+    @staticmethod
+    def _resolve_source(table: BaseTableConfig, path: Path) -> Path | list[Path]:
+        """Resolve a table path to a concrete source for Polars scanners.
+
+        A plain path must point at a single existing file. A path containing a
+        glob character (``*``, ``?`` or ``[``) is expanded relative to the
+        dataset root, which supports datasets distributed as many partitioned
+        files (e.g. HiRID's ``observation_tables/parquet/part-*.parquet``).
+        Both ``scan_parquet`` and ``scan_csv`` accept the resulting list.
+        """
+        if any(char in table.path for char in "*?["):
+            matches = sorted(path.glob(table.path))
+            if not matches:
+                raise FileNotFoundError(f"no files match ({path / table.path})")
+            return matches
+
+        file_path = path / table.path
+        if not file_path.exists():
+            raise FileNotFoundError(f"file not found ({file_path})")
+        return file_path
+
     def _read_table(self, table: BaseTableConfig, path: Path) -> pl.LazyFrame:
         """Read and transform a table from CSV.
 
@@ -274,12 +295,10 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         Returns:
             LazyFrame with the transformed table data
         """
-        file_path = path / table.path
-        if not file_path.exists():
-            raise FileNotFoundError(f"file not found ({file_path})")
+        source = self._resolve_source(table, path)
 
         if table.type == TableType.PARQUET:
-            lf = pl.scan_parquet(file_path)
+            lf = pl.scan_parquet(source)
             lf = lf.select(table.dtypes.keys())
             # Parquet carries its own schema, so cast the non-temporal columns to
             # the declared dtypes. Datetime columns ("datetime" maps to String)
@@ -293,7 +312,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 lf = lf.with_columns(casts)
         else:
             lf = pl.scan_csv(
-                file_path,
+                source,
                 schema_overrides=table.dtypes,
                 infer_schema=False,
                 low_memory=True,
