@@ -1,0 +1,89 @@
+# SICdb v1.0.6 (PhysioNet) -- data_float_h (high-resolution numeric signals,
+# long format, keyed on DataID). Time reconstruction and the d_references join are
+# identical to laboratory.yml; code reads
+# sic//data_float_h//<DataID>//<ReferenceName>//<ReferenceUnit>.
+#
+# NOTE: each row is emitted as a single MEDS event using the validated value `Val`
+# at its `Offset` (matching ricu's val_var). The two extra columns SICdb carries on
+# this table -- `cnt` (number of underlying raw samples) and `rawdata` (the packed
+# sub-row high-resolution waveform) -- are intentionally NOT read or decoded, so the
+# true high-frequency signal is not expanded. Decoding `rawdata` would be a separate
+# feature (and a large increase in row count).
+path: data_float_h.csv
+
+columns:
+  - name: CaseID
+    type: int64
+  # db fields - times
+  - name: Offset
+    type: int64
+  # db fields - values
+  - name: DataID
+    type: int64
+  - name: Val
+    type: float32
+
+join:
+  # (A) this case -> PatientID and this case's OffsetAfterFirstAdmission.
+  - name: cases
+    path: cases.csv
+    columns:
+      - name: CaseID
+        type: int64
+      - name: PatientID
+        type: int64
+      - name: OffsetAfterFirstAdmission
+        type: int64
+    both_on:
+      - CaseID
+  # (B) the patient's FIRST admission -> first_admission_year (one row per patient).
+  - name: cases
+    path: cases.csv
+    columns:
+      - name: PatientID
+        type: int64
+      - name: AdmissionYear
+        type: int64
+      - name: OffsetAfterFirstAdmission
+        type: int64
+    pre_filters:
+      - drop_if(OffsetAfterFirstAdmission != 0)
+    callbacks:
+      - col(AdmissionYear, output=first_admission_year)
+    both_on:
+      - PatientID
+  # (C) human-readable signal name + unit.
+  - name: d_references
+    path: d_references.csv
+    columns:
+      - name: ReferenceGlobalID
+        type: int64
+      - name: ReferenceName
+        type: str
+      - name: ReferenceUnit
+        type: str
+    left_on:
+      - DataID
+    right_on:
+      - ReferenceGlobalID
+
+post_join_callbacks:
+  - to_datetime(first_admission_year, 1, 1, "00:00:00", output=year_base)
+  - add_offset(year_base, OffsetAfterFirstAdmission + Offset, offset_unit="seconds", output=event_time)
+
+event_defaults:
+  subject_id: col(PatientID)
+  time: col(event_time)
+  extension:
+    case_id: col(CaseID)
+
+events:
+  - name: OBSERVATION
+    columns:
+      code:
+        - col(DataID)
+        - col(ReferenceName)
+        - col(ReferenceUnit)
+      numeric_value: col(Val)
+    filters:
+      - drop_na(time)
