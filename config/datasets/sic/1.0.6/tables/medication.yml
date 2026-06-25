@@ -1,0 +1,87 @@
+# SICdb v1.0.6 (PhysioNet) -- medication (drug administrations, keyed on DrugID).
+#
+# Same patient-timeline reconstruction and d_references join as the other tables;
+# code reads sic//medication//<DrugID>//<ReferenceName>//<ReferenceUnit>.
+#
+# NOTE: provided for completeness. The concept mappings for drug rates/durations are
+# deferred (they need derived/complex handling of SICdb dosing), so nothing keys on
+# this table yet.
+path: medication.csv
+
+columns:
+  # subject_id and extensions (medication already carries PatientID)
+  - name: PatientID
+    type: int64
+  - name: CaseID
+    type: int64
+  # db fields - times
+  - name: Offset
+    type: int64
+  # db fields - values
+  - name: DrugID
+    type: int64
+  - name: Amount
+    type: float32
+
+join:
+  # (A) this case's OffsetAfterFirstAdmission.
+  - name: cases
+    path: cases.csv
+    columns:
+      - name: CaseID
+        type: int64
+      - name: OffsetAfterFirstAdmission
+        type: int64
+    both_on:
+      - CaseID
+  # (B) the patient's FIRST admission -> first_admission_year.
+  - name: cases
+    path: cases.csv
+    columns:
+      - name: PatientID
+        type: int64
+      - name: AdmissionYear
+        type: int64
+      - name: OffsetAfterFirstAdmission
+        type: int64
+    pre_filters:
+      - drop_if(OffsetAfterFirstAdmission != 0)
+    callbacks:
+      - col(AdmissionYear, output=first_admission_year)
+    both_on:
+      - PatientID
+  # (C) human-readable drug name + unit.
+  - name: d_references
+    path: d_references.csv
+    columns:
+      - name: ReferenceGlobalID
+        type: int64
+      - name: ReferenceName
+        type: str
+      - name: ReferenceUnit
+        type: str
+    left_on:
+      - DrugID
+    right_on:
+      - ReferenceGlobalID
+
+post_join_callbacks:
+  - to_datetime(first_admission_year, 1, 1, "00:00:00", output=year_base)
+  - add_offset(year_base, OffsetAfterFirstAdmission + Offset, offset_unit="seconds", output=event_time)
+
+event_defaults:
+  subject_id: col(PatientID)
+  time: col(event_time)
+  extension:
+    case_id: col(CaseID)
+
+events:
+  - name: MEDICATION
+    columns:
+      code:
+        - col(DrugID)
+        - col(ReferenceName)
+        - col(ReferenceUnit)
+      numeric_value: col(Amount)
+    filters:
+      - drop_na(time)

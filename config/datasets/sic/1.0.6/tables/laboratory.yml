@@ -1,0 +1,86 @@
+# SICdb v1.0.6 (PhysioNet) -- laboratory (long format, keyed on LaboratoryID).
+#
+# Offset is "seconds from this case's admission". The event timestamp is rebuilt on
+# the patient timeline (anchored at the first admission year) as
+#   Jan1(first_admission_year) + OffsetAfterFirstAdmission + Offset.
+# The human-readable analyte name and unit are joined in from d_references (keyed on
+# ReferenceGlobalID), so the code reads sic//laboratory//<id>//<ReferenceName>//<ReferenceUnit>.
+path: laboratory.csv
+
+columns:
+  # subject_id is resolved via the cases join (PatientID); CaseID is the stay.
+  - name: CaseID
+    type: int64
+  # db fields - times
+  - name: Offset
+    type: int64
+  # db fields - values
+  - name: LaboratoryID
+    type: int64
+  - name: LaboratoryValue
+    type: float32
+
+join:
+  # (A) this case -> PatientID and this case's OffsetAfterFirstAdmission.
+  - name: cases
+    path: cases.csv
+    columns:
+      - name: CaseID
+        type: int64
+      - name: PatientID
+        type: int64
+      - name: OffsetAfterFirstAdmission
+        type: int64
+    both_on:
+      - CaseID
+  # (B) the patient's FIRST admission -> first_admission_year (one row per patient).
+  - name: cases
+    path: cases.csv
+    columns:
+      - name: PatientID
+        type: int64
+      - name: AdmissionYear
+        type: int64
+      - name: OffsetAfterFirstAdmission
+        type: int64
+    pre_filters:
+      - drop_if(OffsetAfterFirstAdmission != 0)
+    callbacks:
+      - col(AdmissionYear, output=first_admission_year)
+    both_on:
+      - PatientID
+  # (C) human-readable analyte name + unit.
+  - name: d_references
+    path: d_references.csv
+    columns:
+      - name: ReferenceGlobalID
+        type: int64
+      - name: ReferenceName
+        type: str
+      - name: ReferenceUnit
+        type: str
+    left_on:
+      - LaboratoryID
+    right_on:
+      - ReferenceGlobalID
+
+post_join_callbacks:
+  - to_datetime(first_admission_year, 1, 1, "00:00:00", output=year_base)
+  - add_offset(year_base, OffsetAfterFirstAdmission + Offset, offset_unit="seconds", output=event_time)
+
+event_defaults:
+  subject_id: col(PatientID)
+  time: col(event_time)
+  extension:
+    case_id: col(CaseID)
+
+events:
+  - name: LAB
+    columns:
+      code:
+        - col(LaboratoryID)
+        - col(ReferenceName)
+        - col(ReferenceUnit)
+      numeric_value: col(LaboratoryValue)
+    filters:
+      - drop_na(time)

@@ -1,0 +1,9 @@
+# SICdb v1.0.6 -- cases HEIGHT event [ricu height]
+type: simple
+mappings:
+  - pattern:
+      table: cases
+      event: HEIGHT
+      code: "(height)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
