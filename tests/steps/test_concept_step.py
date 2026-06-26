@@ -1,19 +1,28 @@
 """End-to-end tests for the concept step on synthetic fixture data."""
-
 from pathlib import Path
 
 import polars as pl
 import pytest
 
 from open_icu import ConceptStep, ExtractionStep, OpenICUProject
+from tests.steps.conftest import load_concept_config, load_extracation_config
 
 
 @pytest.fixture
 def project(tmp_path: Path, extraction_config: Path, concept_config: Path) -> OpenICUProject:
     project = OpenICUProject(tmp_path / "project")
-    print(f"Project path: {concept_config} {extraction_config}")
-    ExtractionStep.load(project, extraction_config).run()
-    ConceptStep.load(project, concept_config).run()
+
+    load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+    load_concept_config(
+        tmp_path / "config" / "concepts",
+        [tmp_path / "config" / "testdb" / "1.0" / "mappings"],
+    )
+
+    extraction_step =ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step.run()
+    concept_step = ConceptStep.load(project, tmp_path / "concept.yml")
+    concept_step.run()
+
     return project
 
 
@@ -74,6 +83,10 @@ class TestConceptStepRobustness:
         )
 
         project = OpenICUProject(tmp_path / "project")
+        load_concept_config(
+            tmp_path / "config" / "concepts" / "orphan.yml",
+            [],
+        )
         ExtractionStep.load(project, extraction_config).run()
         ConceptStep.load(project, concept_config).run()  # must not raise
 
@@ -98,6 +111,11 @@ mappings:
         )
 
         project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+        load_concept_config(
+            tmp_path / "config" / "concepts",
+            [tmp_path / "config" / "testdb" / "1.0" / "mappings"],
+        )
         ExtractionStep.load(project, extraction_config).run()
         ConceptStep.load(project, concept_config).run()  # must not raise
 

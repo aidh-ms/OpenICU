@@ -1,3 +1,4 @@
+import sys
 from importlib.resources import files
 from pathlib import Path
 
@@ -14,6 +15,8 @@ def auto_load_configs():
     configuration files in the package's 'configs' directory and registers
     them with the appropriate registries.
     """
+    if "pytest" in sys.modules:
+        return
 
     module_path = Path(str(files("open_icu")))
     config_path = module_path.parent.parent / "configs"

@@ -5,7 +5,6 @@ the demo provides no table or concept configs of its own except a file-path
 override for vitals and a tombstone for measurements — mirroring how a real
 demo dataset (e.g. eICU demo) differs from its full counterpart.
 """
-
 import shutil
 from pathlib import Path
 
@@ -13,6 +12,7 @@ import polars as pl
 import pytest
 
 from open_icu import ConceptStep, ExtractionStep, OpenICUProject
+from tests.steps.conftest import load_concept_config, load_extracation_config
 
 
 @pytest.fixture
@@ -70,8 +70,18 @@ config:
 @pytest.fixture
 def project(tmp_path: Path, demo_dirs: None) -> OpenICUProject:
     project = OpenICUProject(tmp_path / "project")
-    ExtractionStep.load(project, tmp_path / "extraction.yml").run()
-    ConceptStep.load(project, tmp_path / "concept.yml").run()
+
+    load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+    load_concept_config(
+          tmp_path / "config" / "concepts",
+          [tmp_path / "config" / "testdb" / "1.0" / "mappings"],
+      )
+
+    extraction_step =ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step.run()
+    concept_step = ConceptStep.load(project, tmp_path / "concept.yml")
+    concept_step.run()
+
     return project
 
 
