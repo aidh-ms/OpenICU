@@ -41,28 +41,25 @@ version: 1.0.0
 config:
   data:
     - name: testdb
-      version: {demo_version_dir}
+      version: "1.0"
       path: {data_dir}
     - name: testdb-demo
-      version: {demo_version_dir}
+      version: "1.0"
       path: {demo_data}
 """
     )
     (tmp_path / "concept.yml").write_text(
-        f"""\
+        """\
 name: Concept
 version: 1.0.0
 
-config_files:
-  - path: {tmp_path / "config" / "concepts"}
-
 config:
   extraction_step: Extraction
-  dataset_configs:
+  mapping_configs:
     - name: testdb
-      path: {tmp_path / "config" / "testdb" / "1.0" / "mappings"}
+      version: "1.0"
     - name: testdb-demo
-      path: {demo_version_dir / "mappings"}
+      version: "1.0"
 """
     )
 
@@ -72,9 +69,13 @@ def project(tmp_path: Path, demo_dirs: None) -> OpenICUProject:
     project = OpenICUProject(tmp_path / "project")
 
     load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+    load_extracation_config(tmp_path / "config" / "testdb-demo" / "1.0" / "tables")
     load_concept_config(
           tmp_path / "config" / "concepts",
-          [tmp_path / "config" / "testdb" / "1.0" / "mappings"],
+          [
+              tmp_path / "config" / "testdb" / "1.0" / "mappings",
+              tmp_path / "config" / "testdb-demo" / "1.0" / "mappings"
+          ],
       )
 
     extraction_step =ExtractionStep.load(project, tmp_path / "extraction.yml")
