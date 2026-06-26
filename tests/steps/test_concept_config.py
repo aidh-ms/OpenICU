@@ -33,11 +33,11 @@ class TestConceptConfig:
         concept = ConceptConfig.load(concept_file, dataset_paths=[mapping_dir])
 
         assert len(concept.dataset_concepts) == 1
-        dataset_concept = concept.get_dataset_concept("mimic-iv")
+        dataset_concept = concept.get_dataset_concept("mimic-iv", "3.1")
         assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
         assert dataset_concept.dataset == "mimic-iv"
         assert dataset_concept.version == "3.1"
-        assert concept.get_dataset_concept("eicu-crd") is None
+        assert concept.get_dataset_concept("eicu-crd", "2.0") is None
 
     def test_load_skips_invalid_dataset_concept(self, tmp_path: Path) -> None:
         concept_file = tmp_path / "heart_rate.yml"

@@ -249,7 +249,7 @@ def test_mimic_demo_inherits_concept_mappings() -> None:
         CONFIG_ROOT / "concepts" / "vitals" / "heart_rate.yml",
         dataset_paths=[CONFIG_ROOT / "datasets" / "mimic-iv-demo" / "2.2" / "mappings"],
     )
-    dataset_concept = concept.get_dataset_concept("mimic-iv-demo")
+    dataset_concept = concept.get_dataset_concept("mimic-iv-demo", "2.2")
     assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
     assert dataset_concept.version == "2.2"
     assert dataset_concept.mappings
