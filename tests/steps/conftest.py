@@ -149,12 +149,10 @@ def extraction_config(tmp_path: Path, data_dir: Path, table_config_dir: Path) ->
 name: Extraction
 version: 1.0.0
 
-config_files:
-  - path: {table_config_dir}
-
 config:
   data:
     - name: testdb
+      version: "1.0"
       path: {data_dir}
 """
     )
@@ -250,13 +248,11 @@ event:
 name: Concept
 version: 1.0.0
 
-config_files:
-  - path: {tmp_path / "config" / "concepts"}
-
 config:
   extraction_step: Extraction
   dataset_configs:
     - name: testdb
+      version: "1.0"
       path: {mapping_dir}
 """
     )

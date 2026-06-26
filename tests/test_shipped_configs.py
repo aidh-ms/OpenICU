@@ -22,7 +22,7 @@ from open_icu.steps.concept.config.simple import SimpleDatasetConceptConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 
 REPO_ROOT = Path(__file__).parents[1]
-CONFIG_ROOT = REPO_ROOT / "config"
+CONFIG_ROOT = REPO_ROOT / "configs"
 
 # Version dirs may be marker-only (just an extends.yml, no physical tables/
 # or mappings/ subdirectory), so collect by version dir rather than globbing

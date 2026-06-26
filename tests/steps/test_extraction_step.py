@@ -91,11 +91,11 @@ class TestExtractionStep:
 name: Extraction
 version: 1.0.0
 
-config_files:
-  - path: {table_config_dir}
-
 config:
-  data: []
+  data:
+    - name: test
+      path: {table_config_dir}
+      version: "1.0"
 """
         )
 
@@ -165,11 +165,11 @@ events:
             f"""\
 name: Extraction
 version: 1.0.0
-config_files:
-  - path: {config_dir}
+
 config:
   data:
     - name: pqdb
+      path: {config_dir}
       path: {data_dir}
 """
         )

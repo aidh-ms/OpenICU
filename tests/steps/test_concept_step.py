@@ -11,6 +11,7 @@ from open_icu import ConceptStep, ExtractionStep, OpenICUProject
 @pytest.fixture
 def project(tmp_path: Path, extraction_config: Path, concept_config: Path) -> OpenICUProject:
     project = OpenICUProject(tmp_path / "project")
+    print(f"Project path: {concept_config} {extraction_config}")
     ExtractionStep.load(project, extraction_config).run()
     ConceptStep.load(project, concept_config).run()
     return project

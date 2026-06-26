@@ -38,15 +38,13 @@ def demo_dirs(tmp_path: Path, data_dir: Path, table_config_dir: Path, concept_co
 name: Extraction
 version: 1.0.0
 
-config_files:
-  - path: {table_config_dir}
-  - path: {demo_version_dir / "tables"}
-
 config:
   data:
     - name: testdb
+      version: {demo_version_dir}
       path: {data_dir}
     - name: testdb-demo
+      version: {demo_version_dir}
       path: {demo_data}
 """
     )
