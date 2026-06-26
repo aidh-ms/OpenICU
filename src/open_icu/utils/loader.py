@@ -19,10 +19,14 @@ def auto_load_configs():
         return
 
     module_path = Path(str(files("open_icu")))
-    config_path = module_path.parent.parent / "configs"
+    config_path = module_path / "configs"
+    dev_path = module_path.parent.parent / "configs"
 
     if not (config_path.exists() and config_path.is_dir()):
-        return
+        if dev_path.exists() and dev_path.is_dir():
+            config_path = dev_path
+        else:
+            return
 
     mapping_paths = []
     for dataset_path in (config_path / "datasets").iterdir():
