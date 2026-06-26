@@ -150,6 +150,25 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             return pl.DataFrame()
         return pl.read_parquet(codes_path)
 
+    def apply_limits(self, concept: ConceptConfig, lf: pl.LazyFrame) -> pl.LazyFrame:
+        if concept.limits.min is not None:
+            lf = lf.with_columns(
+                pl.when(pl.col("numeric_value") < concept.limits.min)
+                .then(None)
+                .otherwise(pl.col("numeric_value"))
+                .alias("numeric_value")
+            )
+
+        if concept.limits.max is not None:
+            lf = lf.with_columns(
+                pl.when(pl.col("numeric_value") > concept.limits.max)
+                .then(None)
+                .otherwise(pl.col("numeric_value"))
+                .alias("numeric_value")
+            )
+
+        return lf
+
     def extract_simple_concept(
         self,
         concept: ConceptConfig,
@@ -270,21 +289,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     pl.col("text_value").cast(pl.String),
                 ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
 
-                if concept.limits.min is not None:
-                    lf = lf.with_columns(
-                        pl.when(pl.col("numeric_value") < concept.limits.min)
-                        .then(None)
-                        .otherwise(pl.col("numeric_value"))
-                        .alias("numeric_value")
-                    )
-
-                if concept.limits.max is not None:
-                    lf = lf.with_columns(
-                        pl.when(pl.col("numeric_value") > concept.limits.max)
-                        .then(None)
-                        .otherwise(pl.col("numeric_value"))
-                        .alias("numeric_value")
-                    )
+                lf = self.apply_limits(concept, lf)
 
                 output_file = output_dataset_path / f"{str(uuid4())}.parquet"
                 logger.debug(
@@ -419,21 +424,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             pl.col("text_value").cast(pl.String),
         ] + [pl.col(col).cast(pl.String) for col in extension.keys()])
 
-        if concept.limits.min is not None:
-            lf = lf.with_columns(
-                pl.when(pl.col("numeric_value") < concept.limits.min)
-                .then(None)
-                .otherwise(pl.col("numeric_value"))
-                .alias("numeric_value")
-            )
-
-        if concept.limits.max is not None:
-            lf = lf.with_columns(
-                pl.when(pl.col("numeric_value") > concept.limits.max)
-                .then(None)
-                .otherwise(pl.col("numeric_value"))
-                .alias("numeric_value")
-            )
+        lf = self.apply_limits(concept, lf)
 
         assert self._workspace_dir is not None
         output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
