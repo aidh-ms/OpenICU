@@ -1,0 +1,85 @@
+path: visit_occurrence.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: visit_occurrence_id
+    type: int64
+  - name: provider_id
+    type: int64
+  - name: care_site_id
+    type: int64
+  # db fields - times
+  - name: visit_start_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: visit_start_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  - name: visit_end_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: visit_end_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: visit_concept_id
+    type: int64
+  - name: visit_source_value
+    type: string
+  - name: visit_type_concept_id
+    type: int64
+  - name: admitted_from_concept_id
+    type: int64
+  - name: admitted_from_source_value
+    type: string
+  - name: discharged_to_concept_id
+    type: int64
+  - name: discharged_to_source_value
+    type: string
+
+post_join_callbacks:
+  - first_not_null(visit_start_datetime, visit_start_date, output=visit_start)
+  - first_not_null(visit_end_datetime, visit_end_date, output=visit_end)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    visit_occurrence_id: col(visit_occurrence_id)
+    visit_type_concept_id: col(visit_type_concept_id)
+    provider_id: col(provider_id)
+    care_site_id: col(care_site_id)
+
+events:
+  - name: VISIT_START
+    columns:
+      time: col(visit_start)
+      code:
+        - col(visit_concept_id)
+        - col(visit_source_value)
+      extension:
+        admitted_from_concept_id: col(admitted_from_concept_id)
+        admitted_from_source_value: col(admitted_from_source_value)
+    filters:
+      - drop_na(time)
+
+  - name: VISIT_END
+    columns:
+      time: col(visit_end)
+      code:
+        - col(visit_concept_id)
+        - col(visit_source_value)
+      extension:
+        discharged_to_concept_id: col(discharged_to_concept_id)
+        discharged_to_source_value: col(discharged_to_source_value)
+    filters:
+      - drop_na(time)

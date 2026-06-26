@@ -75,9 +75,13 @@ events:
         ref_range_lower: col(ref_range_lower)
 ```
 
+### File format
+
+The source file format is set with `type` (`parquet`, `csv`, or `csvgz`). You usually omit it: when `type` is not given it is inferred from the `path` extension (`.parquet`/`.pq` → parquet, `.csv.gz` → csvgz, `.csv` → csv), and any path without a recognised extension defaults to **parquet**. The bundled PhysioNet datasets are gzipped CSV (`.csv.gz`), so they read as `csvgz`; an OMOP export of Parquet files reads as `parquet` with no extra configuration.
+
 ### Columns and types
 
-Only the columns listed under `columns` are read from the source file. Available types: `str`/`string`, `int`/`int8`–`int64`, `uint8`–`uint64`, `float`/`float32`/`float64`, `decimal`, `bool`/`boolean`, and `datetime`. Datetime columns are read as strings and parsed with the `params` you provide (e.g. `format`).
+Only the columns listed under `columns` are read from the source file. Available types: `str`/`string`, `int`/`int8`–`int64`, `uint8`–`uint64`, `float`/`float32`/`float64`, `decimal`, `bool`/`boolean`, and `datetime`. For CSV sources every column is read as text and cast to the declared type; Parquet columns are cast from their stored types. Datetime columns are parsed with the `params` you provide (e.g. `format`) when stored as strings, while native Parquet timestamp/date columns are used directly.
 
 ### Joins
 

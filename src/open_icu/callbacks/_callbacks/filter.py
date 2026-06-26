@@ -36,7 +36,7 @@ class FirstDistinct(CallbackProtocol):
         """
         cols = [to_col_name(f) for f in self.fields]
         return pl.struct(cols).is_first_distinct()
-    
+
 @register_callback_cls
 class DropIf(CallbackProtocol):
     """

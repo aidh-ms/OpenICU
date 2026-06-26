@@ -1,0 +1,73 @@
+path: procedure_occurrence.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: procedure_occurrence_id
+    type: int64
+  - name: visit_occurrence_id
+    type: int64
+  - name: provider_id
+    type: int64
+  # db fields - times
+  - name: procedure_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: procedure_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  - name: procedure_end_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: procedure_end_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: procedure_concept_id
+    type: int64
+  - name: procedure_source_value
+    type: string
+  - name: procedure_type_concept_id
+    type: int64
+  - name: modifier_concept_id
+    type: int64
+  - name: modifier_source_value
+    type: string
+  - name: quantity
+    type: int64
+
+post_join_callbacks:
+  - first_not_null(procedure_datetime, procedure_date, output=procedure_time)
+  - first_not_null(procedure_end_datetime, procedure_end_date, output=procedure_end)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    procedure_occurrence_id: col(procedure_occurrence_id)
+    visit_occurrence_id: col(visit_occurrence_id)
+    provider_id: col(provider_id)
+
+events:
+  - name: PROCEDURE
+    columns:
+      time: col(procedure_time)
+      code:
+        - col(procedure_concept_id)
+        - col(procedure_source_value)
+      numeric_value: col(quantity)
+      extension:
+        procedure_end: col(procedure_end)
+        procedure_type_concept_id: col(procedure_type_concept_id)
+        modifier_concept_id: col(modifier_concept_id)
+        modifier_source_value: col(modifier_source_value)
+    filters:
+      - drop_na(time)
