@@ -270,6 +270,22 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     pl.col("text_value").cast(pl.String),
                 ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
 
+                if concept.limits.min is not None:
+                    lf = lf.with_columns(
+                        pl.when(pl.col("numeric_value") < concept.limits.min)
+                        .then(None)
+                        .otherwise(pl.col("numeric_value"))
+                        .alias("numeric_value")
+                    )
+
+                if concept.limits.max is not None:
+                    lf = lf.with_columns(
+                        pl.when(pl.col("numeric_value") > concept.limits.max)
+                        .then(None)
+                        .otherwise(pl.col("numeric_value"))
+                        .alias("numeric_value")
+                    )
+
                 output_file = output_dataset_path / f"{str(uuid4())}.parquet"
                 logger.debug(
                     "Writing temporary concept file for %s to %s",
@@ -402,6 +418,22 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             pl.col("numeric_value").cast(pl.Float32),
             pl.col("text_value").cast(pl.String),
         ] + [pl.col(col).cast(pl.String) for col in extension.keys()])
+
+        if concept.limits.min is not None:
+            lf = lf.with_columns(
+                pl.when(pl.col("numeric_value") < concept.limits.min)
+                .then(None)
+                .otherwise(pl.col("numeric_value"))
+                .alias("numeric_value")
+            )
+
+        if concept.limits.max is not None:
+            lf = lf.with_columns(
+                pl.when(pl.col("numeric_value") > concept.limits.max)
+                .then(None)
+                .otherwise(pl.col("numeric_value"))
+                .alias("numeric_value")
+            )
 
         assert self._workspace_dir is not None
         output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
