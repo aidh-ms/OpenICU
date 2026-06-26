@@ -45,12 +45,12 @@ build-backend = "hatchling.build"
 packages = ["src/open_icu"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"config" = "config"
+"configs" = "configs"
 
 [tool.hatch.build.targets.sdist]
 include = [
     "src/open_icu",
-    "config",
+    "configs",
 ]
 
 [dependency-groups]

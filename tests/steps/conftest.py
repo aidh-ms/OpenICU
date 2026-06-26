@@ -4,13 +4,15 @@ Builds a tiny synthetic ICU dataset ("testdb") with a vitals table and an item
 lookup table, plus the matching extraction and concept configurations, so the
 steps can be exercised end-to-end without any real data.
 """
-
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 
+from open_icu.config.registry import load_configs
+from open_icu.steps.concept.config.concept import ConceptConfig
 from open_icu.steps.concept.registry import concept_config_registry
+from open_icu.steps.extraction.config.table import TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registry
 
 VITALS_CSV = """\
@@ -149,12 +151,10 @@ def extraction_config(tmp_path: Path, data_dir: Path, table_config_dir: Path) ->
 name: Extraction
 version: 1.0.0
 
-config_files:
-  - path: {table_config_dir}
-
 config:
   data:
     - name: testdb
+      version: "1.0"
       path: {data_dir}
 """
     )
@@ -246,18 +246,34 @@ event:
 
     config_file = tmp_path / "concept.yml"
     config_file.write_text(
-        f"""\
+        """\
 name: Concept
 version: 1.0.0
 
-config_files:
-  - path: {tmp_path / "config" / "concepts"}
-
 config:
   extraction_step: Extraction
-  dataset_configs:
+  mapping_configs:
     - name: testdb
-      path: {mapping_dir}
+      version: "1.0"
 """
     )
     return config_file
+
+
+def load_extracation_config(config_path: Path) -> None:
+    concepts = load_configs(
+        config_path,
+        config_type=TableConfig,
+    )
+    for concept in concepts:
+        dataset_config_registry.register(concept)
+
+
+def load_concept_config(config_path: Path, mapping_paths: list[Path]) -> None:
+    concepts = load_configs(
+        config_path,
+        config_type=ConceptConfig,
+        dataset_paths=mapping_paths,
+    )
+    for concept in concepts:
+        concept_config_registry.register(concept)

@@ -67,8 +67,18 @@ The shared concept dictionary in [`config/concepts/`](config/concepts/) currentl
 
 ## Installation
 
-OpenICU requires **Python 3.13+**. Until the first PyPI release, install from GitHub:
+OpenICU requires **Python 3.13+**. You can install OpenICU via PyPI or from source.
 
+### With PyPI
+```bash
+# with pip
+pip install open-icu
+
+# with uv
+uv add open-icu
+```
+
+### With GitHub
 ```bash
 # with pip
 pip install git+https://github.com/aidh-ms/OpenICU

@@ -1,17 +1,21 @@
 """End-to-end tests for the extraction step on synthetic fixture data."""
-
 from datetime import datetime
 from pathlib import Path
 
 import polars as pl
 
 from open_icu import ExtractionStep, OpenICUProject
+from tests.steps.conftest import load_extracation_config
 
 
 def run_extraction(tmp_path: Path, extraction_config: Path) -> OpenICUProject:
     project = OpenICUProject(tmp_path / "project")
-    step = ExtractionStep.load(project, extraction_config)
-    step.run()
+
+    load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+
+    extraction_step =ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step.run()
+
     return project
 
 
@@ -80,6 +84,8 @@ class TestExtractionStep:
         output = project.datasets_path / "extraction" / "data" / "testdb" / "1.0" / "vitals" / "CHART.parquet"
         first_mtime = output.stat().st_mtime_ns
 
+        load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+
         step = ExtractionStep.load(project, extraction_config)
         step.run()
         assert output.stat().st_mtime_ns == first_mtime
@@ -91,15 +97,16 @@ class TestExtractionStep:
 name: Extraction
 version: 1.0.0
 
-config_files:
-  - path: {table_config_dir}
-
 config:
-  data: []
+  data:
+    - name: test
+      path: {table_config_dir}
+      version: "1.0"
 """
         )
 
         project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
         ExtractionStep.load(project, config_file).run()  # must not raise
 
         data_path = project.datasets_path / "extraction" / "data"
@@ -111,6 +118,7 @@ config:
         (data_dir / "vitals.csv").unlink()
 
         project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
         ExtractionStep.load(project, extraction_config).run()  # must not raise
 
         data_path = project.datasets_path / "extraction" / "data"
@@ -165,16 +173,17 @@ events:
             f"""\
 name: Extraction
 version: 1.0.0
-config_files:
-  - path: {config_dir}
+
 config:
   data:
     - name: pqdb
+      version: "1.0"
       path: {data_dir}
 """
         )
 
         project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(config_dir)
         ExtractionStep.load(project, config_file).run()
 
         output = project.datasets_path / "extraction" / "data" / "pqdb" / "1.0" / "vitals" / "CHART.parquet"

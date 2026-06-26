@@ -109,15 +109,16 @@ class ConceptConfig(BaseConfig):
 
         return cls(**data)
 
-    def get_dataset_concept(self, dataset_name: str) -> DatasetConceptConfigUnion | None:
+    def get_dataset_concept(self, dataset_name: str, version: str) -> DatasetConceptConfigUnion | None:
         """Get the dataset-specific concept configuration for a given dataset name.
 
         Args:
             dataset_name: Name of the dataset to retrieve the concept configuration for
+            version: Version of the dataset
         Returns:
             The DatasetConceptConfig instance for the specified dataset, or None if not found
         """
         for dataset_concept in self.dataset_concepts:
-            if dataset_concept.dataset == dataset_name:
+            if dataset_concept.dataset == dataset_name and dataset_concept.version == version:
                 return dataset_concept
         return None

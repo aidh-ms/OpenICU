@@ -14,7 +14,6 @@ from uuid import uuid4
 import polars as pl
 
 from open_icu.callbacks.interpreter import parse_expr
-from open_icu.config.registry import load_configs
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.concept.config.concept import (
@@ -53,64 +52,24 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         config = ConceptStepConfig.load(config_path)
         return cls(project, config, concept_config_registry)
 
-    def setup_config(self) -> None:
-        """Load external configuration files into the registry.
-
-        Processes each ConfigFileConfig from the step configuration, loading
-        YAML files into the registry with specified filtering and overwrite
-        behavior. Saves the consolidated configuration to the project's
-        configs directory.
-        """
-        dataset_paths = [
-            dataset_config.path
-            for dataset_config in self._config.config.dataset_configs
-        ]
-
-        for config in self._config.config_files:
-            logger.debug(
-                "Loading concepts from %s (overwrite=%s)",
-                config.path,
-                config.overwrite,
-            )
-            concepts = load_configs(
-                config.path,
-                ConceptConfig,
-                includes=config.includes,
-                excludes=config.excludes,
-                dataset_paths=dataset_paths,
-            )
-            for concept in concepts:
-                logger.debug(
-                    "Registering concept '%s' (overwrite=%s)",
-                    concept.name,
-                    config.overwrite,
-                )
-                self._registry.register(concept, overwrite=config.overwrite)
-
-        logger.info(
-            "Saving merged configuration to %s",
-            self._project.configs_path,
-        )
-
-        self._registry.save(self._project.configs_path)
-
     def extract(self) -> None:
         datasets = {
-            dataset_config.name
-            for dataset_config in self._config.config.dataset_configs
+            (dataset_config.name, dataset_config.version)
+            for dataset_config in self._config.config.mapping_configs
         }
 
-        for dataset in datasets:
-            logger.info("Processing concepts for dataset %s", dataset)
+        for dataset, version in datasets:
+            logger.info("Processing concepts for dataset %s (version %s)", dataset, version)
             depend_concepts = dict()
 
             for concept in self._registry.values():
-                dataset_concept = concept.get_dataset_concept(dataset)
+                dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
                     logger.debug(
-                        "skipping concept %s for dataset %s: no dataset-specific config found",
+                        "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
                         concept.name,
                         dataset,
+                        version,
                     )
                     continue
 
@@ -142,12 +101,13 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 concept = self._registry.get(concept_id)
                 assert concept is not None
 
-                dataset_concept = concept.get_dataset_concept(dataset)
+                dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
                     logger.debug(
-                        "skipping concept %s for dataset %s: no dataset-specific config found",
+                        "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
                         concept.name,
                         dataset,
+                        version,
                     )
                     continue
 

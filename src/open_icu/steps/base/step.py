@@ -140,18 +140,6 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         behavior. Saves the consolidated configuration to the project's
         configs directory.
         """
-        for config in self._config.config_files:
-            logger.debug(
-                "Loading config file %s (overwrite=%s)",
-                config.path,
-                config.overwrite,
-            )
-            self._registry.load(
-                config.path,
-                overwrite=config.overwrite,
-                includes=config.includes,
-                excludes=config.excludes
-            )
 
         logger.info(
             "Saving merged configuration to %s",

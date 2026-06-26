@@ -22,7 +22,7 @@ from open_icu.steps.concept.config.simple import SimpleDatasetConceptConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 
 REPO_ROOT = Path(__file__).parents[1]
-CONFIG_ROOT = REPO_ROOT / "config"
+CONFIG_ROOT = REPO_ROOT / "configs"
 
 # Version dirs may be marker-only (just an extends.yml, no physical tables/
 # or mappings/ subdirectory), so collect by version dir rather than globbing
@@ -249,7 +249,7 @@ def test_mimic_demo_inherits_concept_mappings() -> None:
         CONFIG_ROOT / "concepts" / "vitals" / "heart_rate.yml",
         dataset_paths=[CONFIG_ROOT / "datasets" / "mimic-iv-demo" / "2.2" / "mappings"],
     )
-    dataset_concept = concept.get_dataset_concept("mimic-iv-demo")
+    dataset_concept = concept.get_dataset_concept("mimic-iv-demo", "2.2")
     assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
     assert dataset_concept.version == "2.2"
     assert dataset_concept.mappings

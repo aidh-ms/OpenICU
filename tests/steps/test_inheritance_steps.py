@@ -5,7 +5,6 @@ the demo provides no table or concept configs of its own except a file-path
 override for vitals and a tombstone for measurements — mirroring how a real
 demo dataset (e.g. eICU demo) differs from its full counterpart.
 """
-
 import shutil
 from pathlib import Path
 
@@ -13,6 +12,7 @@ import polars as pl
 import pytest
 
 from open_icu import ConceptStep, ExtractionStep, OpenICUProject
+from tests.steps.conftest import load_concept_config, load_extracation_config
 
 
 @pytest.fixture
@@ -38,33 +38,28 @@ def demo_dirs(tmp_path: Path, data_dir: Path, table_config_dir: Path, concept_co
 name: Extraction
 version: 1.0.0
 
-config_files:
-  - path: {table_config_dir}
-  - path: {demo_version_dir / "tables"}
-
 config:
   data:
     - name: testdb
+      version: "1.0"
       path: {data_dir}
     - name: testdb-demo
+      version: "1.0"
       path: {demo_data}
 """
     )
     (tmp_path / "concept.yml").write_text(
-        f"""\
+        """\
 name: Concept
 version: 1.0.0
 
-config_files:
-  - path: {tmp_path / "config" / "concepts"}
-
 config:
   extraction_step: Extraction
-  dataset_configs:
+  mapping_configs:
     - name: testdb
-      path: {tmp_path / "config" / "testdb" / "1.0" / "mappings"}
+      version: "1.0"
     - name: testdb-demo
-      path: {demo_version_dir / "mappings"}
+      version: "1.0"
 """
     )
 
@@ -72,8 +67,22 @@ config:
 @pytest.fixture
 def project(tmp_path: Path, demo_dirs: None) -> OpenICUProject:
     project = OpenICUProject(tmp_path / "project")
-    ExtractionStep.load(project, tmp_path / "extraction.yml").run()
-    ConceptStep.load(project, tmp_path / "concept.yml").run()
+
+    load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+    load_extracation_config(tmp_path / "config" / "testdb-demo" / "1.0" / "tables")
+    load_concept_config(
+          tmp_path / "config" / "concepts",
+          [
+              tmp_path / "config" / "testdb" / "1.0" / "mappings",
+              tmp_path / "config" / "testdb-demo" / "1.0" / "mappings"
+          ],
+      )
+
+    extraction_step =ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step.run()
+    concept_step = ConceptStep.load(project, tmp_path / "concept.yml")
+    concept_step.run()
+
     return project
 
 

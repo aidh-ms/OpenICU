@@ -57,208 +57,210 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
         The extracted data is written to workspace_dir/dataset/table/event.parquet
         """
-        paths = {
-            cfg.name: cfg.path
-            for cfg in self._config.config.data
-        }
+        for cfg in self._config.config.data:
+            for table in self._registry.filter(
+                cfg.name,
+                cfg.version,
+                includes=cfg.includes,
+                excludes=cfg.excludes,
 
-        for table in self._registry.values():
-            path = paths.get(table.dataset)
-            if path is None:
-                logger.warning(
-                    "Skipping table %s: dataset path not found (%s)",
-                    table.name,
-                    table.dataset,
-                )
-                continue
-
-            try:
-                lf = self._read_table(table, path)
-
-                for join_table in table.join:
-                    # Use broadcast join with small right table
-                    logger.debug(
-                        "Joining table %s with %s",
-                        table.name,
-                        join_table.path,
-                    )
-                    join_lf = self._read_table(join_table, path)
-
-                    lf = lf.join(
-                        join_lf,
-                        how=join_table.how,  # ty: ignore[invalid-argument-type]
-                        coalesce=True,  # Reduces memory by coalescing join keys
-                        **join_table.join_params,  # ty: ignore[invalid-argument-type]
-                    )
-
-                    lf = self._apply_callbacks(
-                        lf,
-                        join_table.post_join_callbacks,
-                        callback_type="Post-join callback",
-                    )
-                    lf = self._apply_filters(
-                        lf,
-                        join_table.post_join_filters,
-                        callback_type="Post-join filter",
-                    )
-
-            except FileNotFoundError as e:
-                logger.warning("Skipping table %s: %s", table.name, e)
-                continue
-
-            logger.info("Processing table %s", table.name)
-
-            lf = self._apply_callbacks(
-                lf,
-                table.post_join_callbacks,
-                callback_type="Table post-join callback",
-            )
-            lf = self._apply_filters(
-                lf,
-                table.post_join_filters,
-                callback_type="Table post-join filter",
-            )
-            lf = self._apply_transformations(
-                lf,
-                table.transformations,
-                callback_type="Table transformation",
-            )
-
-            for event in table.events:
-                logger.debug(
-                    "Processing event %s for table %s",
-                    event.name,
-                    table.name,
-                )
-
-                event_identifier: tuple[str, ...] = table.identifier_tuple[1:] + (event.name,)
-                event_lf = lf
-
-                event_lf = self._apply_callbacks(
-                    event_lf,
-                    event.pre_callbacks,
-                    callback_type="Event pre-callback",
-                )
-
-                # Add missing columns
-                if event.columns.text_value is None:
-                    event_lf = event_lf.with_columns(
-                        pl.lit(None, dtype=pl.String).alias("text_value")
-                    )
-                if event.columns.numeric_value is None:
-                    event_lf = event_lf.with_columns(
-                        pl.lit(None, dtype=pl.Float32).alias("numeric_value")
-                    )
-
-                # Rename columns
-                columns = event.columns.model_dump()
-                extension = columns.pop("extension")
-                columns.pop("code", None)
-
-                for col_name, col_expr in columns.items():
-                    if col_expr is not None:
-                        event_lf = event_lf.with_columns(
-                            self._parse_expr(
-                                event_lf,
-                                col_expr,
-                                callback_type="Event column mapping",
-                            ).alias(col_name)
-                        )
-
-                for col_name, col_expr in extension.items():
-                    if col_expr is not None:
-                        event_lf = event_lf.with_columns(
-                            self._parse_expr(
-                                event_lf,
-                                col_expr,
-                                callback_type="Event extension mapping",
-                            ).alias(col_name)
-                        )
-
-                # Create code column.
-                #
-                # Final code structure:
-                # db_name // table_name // code_prefix // columns.code // code_suffix
-                #
-                # db_name and table_name are automatic. code_prefix, columns.code,
-                # and code_suffix are configured. columns.code contains optional
-                # user-defined code parts such as unit, route, specimen, or method.
-                code_expr = self._build_code_expr(event_lf, table, event)
-
-                # Add constructed MEDS code column
-                event_lf = event_lf.with_columns(code_expr)
-
-                # Apply event callbacks
-                event_lf = self._apply_callbacks(
-                    event_lf,
-                    event.callbacks,
-                    callback_type="Event callback",
-                )
-
-                event_lf = self._apply_filters(
-                    event_lf,
-                    event.filters,
-                    callback_type="Event filter",
-                )
-
-                event_lf = self._apply_transformations(
-                    event_lf,
-                    event.transformations,
-                    callback_type="Event transformation",
-                )
-
-                # Reorder columns
-                event_lf = event_lf.select([
-                    pl.col("subject_id").cast(pl.Int64),
-                    pl.col("time").cast(pl.Datetime(time_unit="us")),
-                    pl.col("code").cast(pl.String),
-                    pl.col("numeric_value").cast(pl.Float32, strict=False),
-                    pl.col("text_value").cast(pl.String),
-                ] + [pl.col(col) for col in event.columns.extension.keys()])
-
-                event_lf = self._apply_filters(
-                    event_lf,
-                    event.output_filters,
-                    callback_type="Event output filter",
-                )
-
-                # Ensure output directory exists
-                assert self._workspace_dir is not None
-                output_data_path = Path(self._workspace_dir.path, *event_identifier[:-1])
-                output_data_path.mkdir(parents=True, exist_ok=True)
-
-                # Write to parquet with streaming
-                output_file = output_data_path / f"{event.name}.parquet"
+            ):
                 logger.info(
-                    "Writing event %s for table %s to %s",
-                    event.name,
+                    "Extracting table %s from dataset %s (version %s)",
                     table.name,
-                    output_file,
+                    cfg.name,
+                    cfg.version,
+                )
+                self._extract(table, cfg.path)
+
+    def _extract(self, table: TableConfig, path: Path) -> None:
+        try:
+            lf = self._read_table(table, path)
+
+            for join_table in table.join:
+                # Use broadcast join with small right table
+                logger.debug(
+                    "Joining table %s with %s",
+                    table.name,
+                    join_table.path,
+                )
+                join_lf = self._read_table(join_table, path)
+
+                lf = lf.join(
+                    join_lf,
+                    how=join_table.how,  # ty: ignore[invalid-argument-type]
+                    coalesce=True,  # Reduces memory by coalescing join keys
+                    **join_table.join_params,  # ty: ignore[invalid-argument-type]
                 )
 
-                if output_file.exists():
-                    logger.info(
-                        "Existing output found for event %s, appending to it",
-                        event.name,
+                lf = self._apply_callbacks(
+                    lf,
+                    join_table.post_join_callbacks,
+                    callback_type="Post-join callback",
+                )
+                lf = self._apply_filters(
+                    lf,
+                    join_table.post_join_filters,
+                    callback_type="Post-join filter",
+                )
+
+        except FileNotFoundError as e:
+            logger.warning("Skipping table %s: %s", table.name, e)
+            return
+
+        logger.info("Processing table %s", table.name)
+
+        lf = self._apply_callbacks(
+            lf,
+            table.post_join_callbacks,
+            callback_type="Table post-join callback",
+        )
+        lf = self._apply_filters(
+            lf,
+            table.post_join_filters,
+            callback_type="Table post-join filter",
+        )
+        lf = self._apply_transformations(
+            lf,
+            table.transformations,
+            callback_type="Table transformation",
+        )
+
+        for event in table.events:
+            logger.debug(
+                "Processing event %s for table %s",
+                event.name,
+                table.name,
+            )
+
+            event_identifier: tuple[str, ...] = table.identifier_tuple[1:] + (event.name,)
+            event_lf = lf
+
+            event_lf = self._apply_callbacks(
+                event_lf,
+                event.pre_callbacks,
+                callback_type="Event pre-callback",
+            )
+
+            # Add missing columns
+            if event.columns.text_value is None:
+                event_lf = event_lf.with_columns(
+                    pl.lit(None, dtype=pl.String).alias("text_value")
+                )
+            if event.columns.numeric_value is None:
+                event_lf = event_lf.with_columns(
+                    pl.lit(None, dtype=pl.Float32).alias("numeric_value")
+                )
+
+            # Rename columns
+            columns = event.columns.model_dump()
+            extension = columns.pop("extension")
+            columns.pop("code", None)
+
+            for col_name, col_expr in columns.items():
+                if col_expr is not None:
+                    event_lf = event_lf.with_columns(
+                        self._parse_expr(
+                            event_lf,
+                            col_expr,
+                            callback_type="Event column mapping",
+                        ).alias(col_name)
                     )
 
-                    existing_lf = pl.scan_parquet(output_file)
-
-                    event_lf = pl.concat(
-                        [existing_lf, event_lf],
-                        how="vertical",
+            for col_name, col_expr in extension.items():
+                if col_expr is not None:
+                    event_lf = event_lf.with_columns(
+                        self._parse_expr(
+                            event_lf,
+                            col_expr,
+                            callback_type="Event extension mapping",
+                        ).alias(col_name)
                     )
-                    tmp_output_file = output_data_path / f"{event.name}.tmp.parquet"
 
-                    event_lf.sink_parquet(tmp_output_file)
-                    tmp_output_file.replace(output_file)
-                else:
-                    event_lf.sink_parquet(output_file)
+            # Create code column.
+            #
+            # Final code structure:
+            # db_name // table_name // code_prefix // columns.code // code_suffix
+            #
+            # db_name and table_name are automatic. code_prefix, columns.code,
+            # and code_suffix are configured. columns.code contains optional
+            # user-defined code parts such as unit, route, specimen, or method.
+            code_expr = self._build_code_expr(event_lf, table, event)
 
-                del event_lf
+            # Add constructed MEDS code column
+            event_lf = event_lf.with_columns(code_expr)
 
-            del lf
-            gc.collect()
+            # Apply event callbacks
+            event_lf = self._apply_callbacks(
+                event_lf,
+                event.callbacks,
+                callback_type="Event callback",
+            )
+
+            event_lf = self._apply_filters(
+                event_lf,
+                event.filters,
+                callback_type="Event filter",
+            )
+
+            event_lf = self._apply_transformations(
+                event_lf,
+                event.transformations,
+                callback_type="Event transformation",
+            )
+
+            # Reorder columns
+            event_lf = event_lf.select([
+                pl.col("subject_id").cast(pl.Int64),
+                pl.col("time").cast(pl.Datetime(time_unit="us")),
+                pl.col("code").cast(pl.String),
+                pl.col("numeric_value").cast(pl.Float32, strict=False),
+                pl.col("text_value").cast(pl.String),
+            ] + [pl.col(col) for col in event.columns.extension.keys()])
+
+            event_lf = self._apply_filters(
+                event_lf,
+                event.output_filters,
+                callback_type="Event output filter",
+            )
+
+            # Ensure output directory exists
+            assert self._workspace_dir is not None
+            output_data_path = Path(self._workspace_dir.path, *event_identifier[:-1])
+            output_data_path.mkdir(parents=True, exist_ok=True)
+
+            # Write to parquet with streaming
+            output_file = output_data_path / f"{event.name}.parquet"
+            logger.info(
+                "Writing event %s for table %s to %s",
+                event.name,
+                table.name,
+                output_file,
+            )
+
+            if output_file.exists():
+                logger.info(
+                    "Existing output found for event %s, appending to it",
+                    event.name,
+                )
+
+                existing_lf = pl.scan_parquet(output_file)
+
+                event_lf = pl.concat(
+                    [existing_lf, event_lf],
+                    how="vertical",
+                )
+                tmp_output_file = output_data_path / f"{event.name}.tmp.parquet"
+
+                event_lf.sink_parquet(tmp_output_file)
+                tmp_output_file.replace(output_file)
+            else:
+                event_lf.sink_parquet(output_file)
+
+            del event_lf
+
+        del lf
+        gc.collect()
 
     def _read_table(self, table: BaseTableConfig, path: Path) -> pl.LazyFrame:
         """Read and transform a table from CSV.
