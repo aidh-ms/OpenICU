@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Annotated, Self
 
 import yaml
-from pydantic import Field, TypeAdapter, ValidationError, computed_field
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError, computed_field
 
 from open_icu.config.base import BaseConfig
 from open_icu.config.inheritance import has_extends, resolve_effective_configs
@@ -19,6 +19,17 @@ DatasetConceptConfigUnion = Annotated[
 ]
 
 
+class ConceptLimits(BaseModel):
+    """Configuration for concept limits.
+
+    Attributes:
+        min: Minimum value for the concept.
+        max: Maximum value for the concept.
+    """
+    min: float | None = Field(None, description="Minimum value for the concept.")
+    max: float | None = Field(None, description="Maximum value for the concept.")
+
+
 class ConceptConfig(BaseConfig):
     """Configuration for a concept table.
 
@@ -30,11 +41,13 @@ class ConceptConfig(BaseConfig):
         uuid: UUID generated from the identifier
         unit: Unit of measurement for the concept values
         extension_columns: Dictionary of extension columns to include in the concept table
+        limits: Configuration for concept limits
         dataset_concepts: List of DatasetConceptConfig objects defining how to extract concept data per dataset
     """
     __open_icu_config_type__ = "concept"
 
     unit: str = Field(..., description="Unit of measurement for the concept values.")
+    limits: ConceptLimits = Field(default_factory=ConceptLimits)
     extension_columns: dict[str, str] = Field(
         default_factory=dict,
         description="Dictionary of extension columns to include in the concept table.",
