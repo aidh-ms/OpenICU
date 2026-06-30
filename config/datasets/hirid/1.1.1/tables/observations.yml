@@ -9,7 +9,7 @@
 # readable variable name and unit are joined in from hirid_variable_reference.csv
 # and appended to the code (like mimic-iv's d_labitems.label), so the code reads
 # hirid//observations//<variableid>//<Variable Name>//<Unit>.
-path: observation_tables/parquet/*.parquet
+path: raw_stage/observation_tables/parquet/*.parquet
 
 columns:
   # subject_id and extensions
@@ -40,7 +40,7 @@ columns:
 
 join:
   - name: hirid_variable_reference
-    path: hirid_variable_reference.csv
+    path: reference_data/hirid_variable_reference.csv
     columns:
       - name: ID
         type: int64

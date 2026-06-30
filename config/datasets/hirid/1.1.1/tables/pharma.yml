@@ -8,7 +8,7 @@
 # NOTE: this table config is provided for completeness. The concept mappings for
 # drug rates/durations are deferred (they need `derived`/`complex` handling of
 # HiRID's per-record dosing), so no mappings key on this table yet.
-path: pharma_records/parquet/*.parquet
+path: raw_stage/pharma_records/parquet/*.parquet
 
 columns:
   # subject_id and extensions
@@ -41,7 +41,7 @@ columns:
 
 join:
   - name: hirid_variable_reference
-    path: hirid_variable_reference.csv
+    path: reference_data/hirid_variable_reference.csv
     columns:
       - name: ID
         type: int64

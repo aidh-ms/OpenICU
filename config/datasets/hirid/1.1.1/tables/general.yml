@@ -4,7 +4,7 @@
 # reference_data.tar.gz. Columns: patientid, admissiontime, sex, age,
 # discharge_status. HiRID has no recorded date of birth, so MEDS_BIRTH is
 # derived from admissiontime minus age years (cf. eicu patient.yml).
-path: general_table.csv
+path: reference_data/general_table.csv
 
 columns:
   # subject_id
