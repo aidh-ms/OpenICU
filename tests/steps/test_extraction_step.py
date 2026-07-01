@@ -231,6 +231,7 @@ config_files:
 config:
   data:
     - name: partdb
+      version: "1.0"
       path: {tmp_path / "data" / "partdb"}
 """
         )
