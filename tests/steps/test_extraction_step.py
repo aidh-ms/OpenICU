@@ -246,6 +246,7 @@ config:
         )
 
         project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(tmp_path / "config" / "partdb" / "1.0" / "tables")
         ExtractionStep.load(project, config_file).run()
 
         output = project.datasets_path / "extraction" / "data" / "partdb" / "1.0" / "observations" / "OBS.parquet"
