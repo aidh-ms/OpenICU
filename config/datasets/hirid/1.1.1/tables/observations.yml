@@ -1,0 +1,75 @@
+# HiRID v1.1.1 (PhysioNet) -- raw observation_tables.
+#
+# Distributed as many partitioned parquet parts; the glob path below reads them
+# all at once. Paths are relative to the dataset root configured in the
+# extraction step -- adjust them to match how you extracted the PhysioNet
+# tarballs (observation_tables_parquet.tar.gz and reference_data.tar.gz).
+#
+# Long format: one row per measurement, keyed on `variableid`. The human-
+# readable variable name and unit are joined in from hirid_variable_reference.csv
+# and appended to the code (like mimic-iv's d_labitems.label), so the code reads
+# hirid//observations//<variableid>//<Variable Name>//<Unit>.
+path: raw_stage/observation_tables/parquet/*.parquet
+
+columns:
+  # subject_id and extensions
+  - name: patientid
+    type: int64
+  # db fields - times
+  - name: datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  - name: entertime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: variableid
+    type: int64
+  - name: value
+    type: float32
+  - name: stringvalue
+    type: str
+  - name: type
+    type: str
+  - name: status
+    type: int64
+
+join:
+  - name: hirid_variable_reference
+    path: reference_data/hirid_variable_reference.csv
+    columns:
+      - name: ID
+        type: int64
+      - name: Variable Name
+        type: str
+      - name: Unit
+        type: str
+    left_on:
+      - variableid
+    right_on:
+      - ID
+
+event_defaults:
+  subject_id: col(patientid)
+  time: col(datetime)
+  extension:
+    available_time: col(entertime)
+
+events:
+  - name: OBSERVATION
+    columns:
+      code:
+        - col(variableid)
+        - col("Variable Name")
+        - col("Unit")
+      numeric_value: col(value)
+      text_value: col(stringvalue)
+      extension:
+        type: col(type)
+        status: col(status)
+    filters:
+      - drop_na(time)

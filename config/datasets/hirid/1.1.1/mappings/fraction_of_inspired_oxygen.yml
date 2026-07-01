@@ -1,0 +1,10 @@
+# HiRID v1.1.1 -- observations variableid(s) 2010 [ricu fio2]
+type: simple
+mappings:
+  - pattern:
+      table: observations
+      event: OBSERVATION
+      code: "(2010)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

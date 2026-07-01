@@ -1,0 +1,69 @@
+# HiRID v1.1.1 (PhysioNet) -- general_table (one row per admission).
+#
+# Path is relative to the dataset root; adjust to match your extraction of
+# reference_data.tar.gz. Columns: patientid, admissiontime, sex, age,
+# discharge_status. HiRID has no recorded date of birth, so MEDS_BIRTH is
+# derived from admissiontime minus age years (cf. eicu patient.yml).
+path: reference_data/general_table.csv
+
+columns:
+  # subject_id
+  - name: patientid
+    type: int64
+  # db fields - times
+  - name: admissiontime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: sex
+    type: str
+  - name: age
+    type: int64
+  - name: discharge_status
+    type: str
+
+post_join_callbacks:
+  # Harmonise sex to Male/Female (mirrors ricu's apply_map(M->Male, F->Female)).
+  - replace(sex == "M", "Male", sex, output=sex_label)
+  - replace(sex_label == "F", "Female", sex_label, output=sex_label)
+  # Pseudo date of birth = admission time shifted back by age years.
+  - add_offset(admissiontime, age * -365.25, offset_unit="days", output=birth_timestamp)
+
+event_defaults:
+  subject_id: col(patientid)
+  time: col(admissiontime)
+
+events:
+  - name: SEX
+    columns:
+      code:
+        - const(sex)
+      text_value: col(sex_label)
+
+  - name: AGE
+    columns:
+      code:
+        - const(age)
+      numeric_value: col(age)
+
+  - name: MORTALITY
+    columns:
+      code:
+        - const(mortality)
+      text_value: col(discharge_status)
+
+  - name: ICU_ADMISSION
+    columns:
+      code:
+        - const(admission)
+      extension:
+        available_time: col(admissiontime)
+
+  - name: MEDS_BIRTH
+    columns:
+      time: col(birth_timestamp)
+    filters:
+      - drop_na(time)
+      - first_distinct(subject_id, time)

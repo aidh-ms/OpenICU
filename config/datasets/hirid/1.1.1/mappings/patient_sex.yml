@@ -1,0 +1,9 @@
+# HiRID v1.1.1 -- general_table SEX event [ricu sex]
+type: simple
+mappings:
+  - pattern:
+      table: general
+      event: SEX
+      code: "(sex)(//.*)?$"
+    columns:
+      text_value: col(text_value)

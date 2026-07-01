@@ -194,3 +194,63 @@ config:
         assert df["time"].to_list() == [datetime(2024, 1, 1, 8, 0), datetime(2024, 1, 2, 10, 0)]
         assert df["numeric_value"].to_list() == [80.0, 120.0]
         assert df["code"].to_list() == ["pqdb//vitals", "pqdb//vitals"]
+
+    def test_reads_glob_partitioned_parquet(self, tmp_path: Path) -> None:
+        """A glob path reads many partitioned part files (e.g. HiRID's raw dumps)."""
+        parts_dir = tmp_path / "data" / "partdb" / "observation_tables" / "parquet"
+        parts_dir.mkdir(parents=True)
+        pl.DataFrame({"subject_id": [1], "charttime": [datetime(2024, 1, 1, 8, 0)], "valuenum": [80.0]}).write_parquet(
+            parts_dir / "part-0.parquet"
+        )
+        pl.DataFrame(
+            {"subject_id": [2], "charttime": [datetime(2024, 1, 2, 10, 0)], "valuenum": [120.0]}
+        ).write_parquet(parts_dir / "part-1.parquet")
+
+        config_dir = tmp_path / "config" / "partdb" / "1.0" / "tables"
+        config_dir.mkdir(parents=True)
+        (config_dir / "observations.yml").write_text(
+            """\
+path: observation_tables/parquet/*.parquet
+columns:
+  - name: subject_id
+    type: int64
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: valuenum
+    type: float32
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+events:
+  - name: OBS
+    columns:
+      numeric_value: col(valuenum)
+"""
+        )
+
+        config_file = tmp_path / "extraction.yml"
+        config_file.write_text(
+            f"""\
+name: Extraction
+version: 1.0.0
+config_files:
+  - path: {config_dir}
+config:
+  data:
+    - name: partdb
+      version: "1.0"
+      path: {tmp_path / "data" / "partdb"}
+"""
+        )
+
+        project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(tmp_path / "config" / "partdb" / "1.0" / "tables")
+        ExtractionStep.load(project, config_file).run()
+
+        output = project.datasets_path / "extraction" / "data" / "partdb" / "1.0" / "observations" / "OBS.parquet"
+        df = pl.read_parquet(output).sort("subject_id")
+        # both part files are read and concatenated
+        assert df.height == 2
+        assert df["numeric_value"].to_list() == [80.0, 120.0]

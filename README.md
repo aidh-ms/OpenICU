@@ -57,8 +57,9 @@ OpenICU ships with ready-to-use extraction and concept configurations under [`co
 | [NWICU](https://physionet.org/content/nwicu/0.1.0/) | 0.1.0 | 9 tables | in progress |
 | [OMOP CDM](https://ohdsi.github.io/CommonDataModel/) | 5.4 | 11 tables (reusable model reference, read from Parquet) | — *(added per OMOP dataset)* |
 | [AmsterdamUMCdb](https://github.com/AmsterdamUMC/AmsterdamUMCdb) (OMOP, via [AMSTEL](https://github.com/AmsterdamUMC/AMSTEL)) | 1.5.0 | inherited from OMOP CDM via `extends` | ~60 concepts (in progress) |
+| [HiRID](https://physionet.org/content/hirid/1.1.1/) | 1.1.1 | 3 tables (native long format) | ~60 concepts (in progress) |
 
-The **OMOP CDM 5.4** entry is a reusable *model* configuration rather than a single dataset: any data exported to the OMOP Common Data Model inherits its table configs via `extends` and adds only concept mappings. **AmsterdamUMCdb** is the first such dataset, read through its [AMSTEL](https://github.com/AmsterdamUMC/AMSTEL) OMOP CDM 5.4 export, with concept mappings keyed on the OMOP `concept_id`s that AMSTEL assigns.
+The **OMOP CDM 5.4** entry is a reusable *model* configuration rather than a single dataset: any data exported to the OMOP Common Data Model inherits its table configs via `extends` and adds only concept mappings. **AmsterdamUMCdb** is the first such dataset, read through its [AMSTEL](https://github.com/AmsterdamUMC/AMSTEL) OMOP CDM 5.4 export, with concept mappings keyed on the OMOP `concept_id`s that AMSTEL assigns. **HiRID** is read in its native long format (`observations`/`pharma`/`general`), with concept mappings keyed on HiRID `variableid`s and unit conversions ported from [`ricu`](https://github.com/eth-mds/ricu).
 
 The shared concept dictionary in [`config/concepts/`](config/concepts/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
 
@@ -263,9 +264,9 @@ Arithmetic, comparisons, and boolean logic work as ordinary expressions (`col(we
 
 OpenICU is in active development (pre-1.0); configuration formats may still change between minor versions. Current focus areas:
 
-- Completing concept mappings for eICU-CRD, NWICU, and AmsterdamUMCdb
+- Completing concept mappings for eICU-CRD, NWICU, AmsterdamUMCdb, and HiRID
 - The sharding step for analysis-ready data partitioning
-- Additional datasets (e.g. HiRID) and broader OMOP CDM coverage
+- Additional datasets and broader OMOP CDM coverage
 
 Contributions of dataset configurations and concept definitions are especially welcome — they are pure YAML and require no changes to the framework itself.
 

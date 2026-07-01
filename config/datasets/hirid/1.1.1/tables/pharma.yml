@@ -1,0 +1,71 @@
+# HiRID v1.1.1 (PhysioNet) -- raw pharma_records (medication administrations).
+#
+# Distributed as many partitioned parquet parts; the glob path reads them all.
+# Keyed on `pharmaid`; the drug name is joined in from hirid_variable_reference.csv
+# (the same reference table also covers pharma variables) and appended to the
+# code -> hirid//pharma//<pharmaid>//<Variable Name>//<doseunit>.
+#
+# NOTE: this table config is provided for completeness. The concept mappings for
+# drug rates/durations are deferred (they need `derived`/`complex` handling of
+# HiRID's per-record dosing), so no mappings key on this table yet.
+path: raw_stage/pharma_records/parquet/*.parquet
+
+columns:
+  # subject_id and extensions
+  - name: patientid
+    type: int64
+  - name: infusionid
+    type: int64
+  - name: typeid
+    type: int64
+  - name: recordstatus
+    type: int64
+  # db fields - times
+  - name: givenat
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  - name: enteredentryat
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: pharmaid
+    type: int64
+  - name: givendose
+    type: float32
+  - name: doseunit
+    type: str
+
+join:
+  - name: hirid_variable_reference
+    path: reference_data/hirid_variable_reference.csv
+    columns:
+      - name: ID
+        type: int64
+      - name: Variable Name
+        type: str
+    left_on:
+      - pharmaid
+    right_on:
+      - ID
+
+event_defaults:
+  subject_id: col(patientid)
+  time: col(givenat)
+  extension:
+    available_time: col(enteredentryat)
+    infusion_id: col(infusionid)
+
+events:
+  - name: PHARMA
+    columns:
+      code:
+        - col(pharmaid)
+        - col("Variable Name")
+        - col(doseunit)
+      numeric_value: col(givendose)
+    filters:
+      - drop_na(time)
