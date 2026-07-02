@@ -4,8 +4,8 @@ The concept step turns dataset-specific event streams into **harmonised clinical
 
 Concepts are configured in two parts:
 
-1. a **concept definition** — dataset-independent, shared by everyone (`config/concepts/<category>/<name>.yml`), and
-2. one **concept mapping per dataset** — how to find that concept in a specific dataset (`config/datasets/<dataset>/<version>/mappings/<name>.yml`).
+1. a **concept definition** — dataset-independent, shared by everyone (`configs/concepts/<category>/<name>.yml`), and
+2. one **concept mapping per dataset** — how to find that concept in a specific dataset (`configs/datasets/<dataset>/<version>/mappings/<name>.yml`).
 
 The two are connected by file name: when a concept named `heart_rate` is loaded, OpenICU looks for `heart_rate.yml` in every directory listed under the step's `dataset_configs`.
 
@@ -16,15 +16,15 @@ name: Concept
 version: 1.0.0
 
 config_files:
-  - path: /path/to/config/concepts        # the concept dictionary
+  - path: /path/to/configs/concepts       # the concept dictionary
 
 config:
   extraction_step: Extraction            # which step's output to read
   dataset_configs:
     - name: mimic-iv                     # dataset name used during extraction
-      path: /path/to/config/datasets/mimic-iv/3.1/mappings/
+      path: /path/to/configs/datasets/mimic-iv/3.1/mappings/
     - name: eicu-crd
-      path: /path/to/config/datasets/eicu-crd/2.0/mappings/
+      path: /path/to/configs/datasets/eicu-crd/2.0/mappings/
 ```
 
 ## Concept definitions
@@ -127,6 +127,6 @@ with the standard MEDS columns (`subject_id`, `time`, `code`, `numeric_value`, `
 
 ## Adding a new concept
 
-1. Define it in `config/concepts/<category>/<your_concept>.yml` (name, version, unit).
-2. For each dataset, find the relevant source codes — `datasets/extraction/metadata/codes.parquet` is your friend — and write a mapping in `config/datasets/<dataset>/<version>/mappings/<your_concept>.yml`.
+1. Define it in `configs/concepts/<category>/<your_concept>.yml` (name, version, unit).
+2. For each dataset, find the relevant source codes — `datasets/extraction/metadata/codes.parquet` is your friend — and write a mapping in `configs/datasets/<dataset>/<version>/mappings/<your_concept>.yml`.
 3. Re-run the concept step (with `overwrite: true`, or `includes` limited to your concept while iterating).

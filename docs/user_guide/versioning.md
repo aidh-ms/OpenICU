@@ -1,6 +1,6 @@
 # Dataset versions and variants
 
-Dataset configurations live under `config/datasets/<dataset>/<version>/`. Without further measures, supporting a new dataset *version* (MIMIC-IV 3.0 → 3.1) or a *variant* (the eICU demo subset) would mean copying every table and concept YAML — and keeping the copies in sync forever.
+Dataset configurations live under `configs/datasets/<dataset>/<version>/`. Without further measures, supporting a new dataset *version* (MIMIC-IV 3.0 → 3.1) or a *variant* (the eICU demo subset) would mean copying every table and concept YAML — and keeping the copies in sync forever.
 
 OpenICU avoids this with **configuration inheritance**: a version can declare a reference version and spell out only its differences, like a diff applied on top of a base.
 
@@ -9,7 +9,7 @@ OpenICU avoids this with **configuration inheritance**: a version can declare a 
 Place an `extends.yml` marker in the version directory:
 
 ```
-config/datasets/eicu-demo/2.0/
+configs/datasets/eicu-demo/2.0/
 ├── extends.yml          # <- the marker
 ├── tables/
 │   └── infusiondrug.yml # only the differences
@@ -41,13 +41,13 @@ Bases may themselves extend other versions — chains resolve recursively, and c
 The eICU demo distribution contains all tables of the full eICU-CRD with the same schema (just ~2,500 patients instead of ~200,000). Its complete configuration is therefore:
 
 ```yaml
-# config/datasets/eicu-demo/2.0/extends.yml
+# configs/datasets/eicu-demo/2.0/extends.yml
 dataset: eicu-crd
 version: "2.0"
 ```
 
 ```yaml
-# config/datasets/eicu-demo/2.0/tables/infusiondrug.yml
+# configs/datasets/eicu-demo/2.0/tables/infusiondrug.yml
 # The demo names this file in lowercase, unlike the full dataset's
 # infusionDrug.csv.gz.
 path: infusiondrug.csv.gz
@@ -60,7 +60,7 @@ Two small files instead of fourteen copied table configs — and when the eICU-C
 For a hypothetical MIMIC-IV 3.1 → 4.0 upgrade where one table gained a column and another was renamed:
 
 ```
-config/datasets/mimic-iv/4.0/
+configs/datasets/mimic-iv/4.0/
 ├── extends.yml                  # dataset: mimic-iv / version: "3.1"
 └── tables/
     ├── labevents.yml            # restated columns list (lists replace wholesale)

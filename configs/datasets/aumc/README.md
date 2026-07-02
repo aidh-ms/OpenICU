@@ -13,7 +13,7 @@ OMOP CDM 5.4 by the [AMSTEL ETL](https://github.com/AmsterdamUMC/AMSTEL).
 
 ## Concept mappings
 
-The shared concepts in `config/concepts/` are ricu-derived. Because AUMCdb is
+The shared concepts in `configs/concepts/` are ricu-derived. Because AUMCdb is
 read as OMOP, each mapping keys on the **OMOP `*_concept_id`** that AMSTEL
 assigned to the corresponding AUMCdb item — taken from AMSTEL's Usagi mapping
 files (`data/mappings/*.usagi.csv`). A `simple` mapping therefore matches codes

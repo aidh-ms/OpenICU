@@ -27,7 +27,7 @@ self-documenting and harmonisation can key on the leading numeric id.
 
 ## Concept mappings
 
-The shared concepts in `config/concepts/` are ricu-derived, and so are these
+The shared concepts in `configs/concepts/` are ricu-derived, and so are these
 mappings: the HiRID `variableid`s and unit conversions are taken from
 [`ricu`](https://github.com/eth-mds/ricu)'s `hirid` entries in
 `concept-dict.json`. A `simple` mapping matches codes of the form

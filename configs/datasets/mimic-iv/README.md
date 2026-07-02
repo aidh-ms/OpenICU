@@ -8,7 +8,7 @@ critical care database from the Beth Israel Deaconess Medical Center
 
 - `2.2/` — **reference configuration**: 19 table configs (`tables/`,
   covering the `icu` and `hosp` modules) and the per-dataset concept
-  mappings (`mappings/`) for the shared dictionary in `config/concepts/`.
+  mappings (`mappings/`) for the shared dictionary in `configs/concepts/`.
   This is the most complete dataset configuration in OpenICU.
 - `3.1/` — **extends `2.2`** (see `3.1/extends.yml`) with no overrides:
   v3.0/v3.1 only extended the data (stays through 2022) without schema
