@@ -1,6 +1,6 @@
 """Dataset configuration inheritance across versions and variants.
 
-A dataset version directory (``config/datasets/<dataset>/<version>/``) may
+A dataset version directory (``configs/datasets/<dataset>/<version>/``) may
 contain an ``extends.yml`` marker that references another version as its base:
 
 ```yaml

@@ -30,7 +30,7 @@ See the [user guide](../user_guide/pipeline.md) for a detailed walk through the 
 
 ## Bundled configurations
 
-The repository ships curated configurations under `config/`:
+The repository ships curated configurations under `configs/`:
 
 - **Extraction configs** for MIMIC-IV 3.1, eICU-CRD 2.0 (full and demo), and NWICU 0.1.0.
 - **A concept dictionary** of ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications, neurological scores, respiratory parameters, fluid output, and demographics, with per-dataset mappings (most complete for MIMIC-IV).

@@ -38,7 +38,7 @@ cd OpenICU
 uv sync --all-groups
 ```
 
-Cloning the repository is also currently the easiest way to get the bundled dataset and concept configurations in `config/`, which you reference by path from your pipeline configuration.
+Cloning the repository is also currently the easiest way to get the bundled dataset and concept configurations in `configs/`, which you reference by path from your pipeline configuration.
 
 ## Dependencies
 

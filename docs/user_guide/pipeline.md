@@ -89,7 +89,7 @@ openicu.config.<type>.<...>.<name|version>
 
 For example, the bundled MIMIC-IV labevents table config is `openicu.config.table.mimic-iv.3.1.labevents`, and the heart rate concept is `openicu.config.concept.heart_rate.1.0.0`. These identifiers are what you list in `includes`/`excludes`, and they determine the file layout when configs are snapshotted into the project. A deterministic UUID is derived from each identifier as well.
 
-For dataset-bound configs the name, dataset, and version are inferred from the file's location (`config/datasets/<dataset>/<version>/tables/<name>.yml`), so the YAML files themselves stay minimal.
+For dataset-bound configs the name, dataset, and version are inferred from the file's location (`configs/datasets/<dataset>/<version>/tables/<name>.yml`), so the YAML files themselves stay minimal.
 
 ## The MEDS output
 

@@ -1,4 +1,4 @@
-"""Validation tests for the configurations shipped in config/.
+"""Validation tests for the configurations shipped in configs/.
 
 These tests make sure that every bundled YAML file parses into its Pydantic
 model and that every embedded expression string is valid in the expression

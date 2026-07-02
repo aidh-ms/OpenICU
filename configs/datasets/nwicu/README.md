@@ -9,7 +9,7 @@ PhysioNet access).
 - `0.1.0/` — current configuration: 9 table configs (`tables/`). Concept
   mappings (`mappings/`) are not yet written — contributions welcome, see
   `docs/user_guide/concepts.md`. Since NWICU follows the MIMIC schema
-  closely, the MIMIC-IV mappings in `config/datasets/mimic-iv/3.1/mappings/`
+  closely, the MIMIC-IV mappings in `configs/datasets/mimic-iv/3.1/mappings/`
   are a good starting point.
 
 ## Layout

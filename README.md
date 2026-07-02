@@ -46,7 +46,7 @@ Each step reads its inputs and writes its outputs as a self-contained MEDS datas
 
 ## Supported datasets
 
-OpenICU ships with ready-to-use extraction and concept configurations under [`config/`](config/):
+OpenICU ships with ready-to-use extraction and concept configurations under [`configs/`](configs/):
 
 | Dataset | Version | Extraction configs | Concept mappings |
 | --- | --- | --- | --- |
@@ -61,7 +61,7 @@ OpenICU ships with ready-to-use extraction and concept configurations under [`co
 
 The **OMOP CDM 5.4** entry is a reusable *model* configuration rather than a single dataset: any data exported to the OMOP Common Data Model inherits its table configs via `extends` and adds only concept mappings. **AmsterdamUMCdb** is the first such dataset, read through its [AMSTEL](https://github.com/AmsterdamUMC/AMSTEL) OMOP CDM 5.4 export, with concept mappings keyed on the OMOP `concept_id`s that AMSTEL assigns. **HiRID** is read in its native long format (`observations`/`pharma`/`general`), with concept mappings keyed on HiRID `variableid`s and unit conversions ported from [`ricu`](https://github.com/eth-mds/ricu).
 
-The shared concept dictionary in [`config/concepts/`](config/concepts/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
+The shared concept dictionary in [`configs/concepts/`](configs/concepts/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
 
 > [!NOTE]
 > Access to the public datasets themselves requires the usual credentialing (e.g. [PhysioNet](https://physionet.org/) for MIMIC-IV/eICU/NWICU, a data-use agreement for AmsterdamUMCdb). OpenICU works on the downloaded files directly — Parquet (e.g. OMOP exports), CSV, or gzipped CSV — with no database setup needed.
@@ -107,7 +107,7 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/tables/
+  - path: /path/to/OpenICU/configs/datasets/mimic-iv/3.1/tables/
 
 config:
   data:
@@ -122,13 +122,13 @@ name: Concept
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/concepts
+  - path: /path/to/OpenICU/configs/concepts
 
 config:
   extraction_step: Extraction
   dataset_configs:
     - name: mimic-iv
-      path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/mappings/
+      path: /path/to/OpenICU/configs/datasets/mimic-iv/3.1/mappings/
 ```
 
 **3. Run the pipeline:**
@@ -180,7 +180,7 @@ A complete runnable example lives in [`example/pipeline.ipynb`](example/pipeline
 
 OpenICU is configured at three levels — see the [documentation](#documentation) for the full reference.
 
-**Dataset/table configs** (`config/datasets/<dataset>/<version>/tables/*.yml`) describe how to turn one raw table into MEDS events: typed columns, joins, and event definitions.
+**Dataset/table configs** (`configs/datasets/<dataset>/<version>/tables/*.yml`) describe how to turn one raw table into MEDS events: typed columns, joins, and event definitions.
 
 ```yaml
 path: icu/chartevents.csv.gz
@@ -217,7 +217,7 @@ events:
 
 `name` is a technical event identifier used by the extraction step. It is not included in the generated MEDS `code`; the code is built from the automatic dataset/table prefix, optional `code_prefix`, configured `columns.code` components, and optional `code_suffix`.
 
-**Concept configs** (`config/concepts/<category>/*.yml`) define dataset-agnostic clinical concepts:
+**Concept configs** (`configs/concepts/<category>/*.yml`) define dataset-agnostic clinical concepts:
 
 ```yaml
 name: heart_rate
@@ -225,7 +225,7 @@ version: 1.0.0
 unit: bpm
 ```
 
-**Concept mappings** (`config/datasets/<dataset>/<version>/mappings/*.yml`) connect a concept to dataset-specific codes:
+**Concept mappings** (`configs/datasets/<dataset>/<version>/mappings/*.yml`) connect a concept to dataset-specific codes:
 
 ```yaml
 type: simple
@@ -289,7 +289,7 @@ If you use OpenICU in your research, please cite it via the metadata in [`CITATI
 ## Related projects
 
 - [MEDS](https://github.com/Medical-Event-Data-Standard/meds) — the Medical Event Data Standard that OpenICU targets
-- [`ricu`](https://github.com/eth-mds/ricu) — R package for ICU data harmonisation that inspired OpenICU's concept dictionary
+- [ricu](https://github.com/eth-mds/ricu) — R package for ICU data harmonisation that inspired OpenICU's concept dictionary
 - [YAIB](https://github.com/rvandewater/YAIB) — Yet Another ICU Benchmark, a complementary benchmarking framework
 
 ## License
