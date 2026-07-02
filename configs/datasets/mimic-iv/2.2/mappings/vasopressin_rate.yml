@@ -5,4 +5,4 @@ mappings:
       event: INFUSION_END
       code: (222315(//.*)?)
     columns:
-      numeric_value: rate / 60
+      numeric_value: convert_unit(rate, rateuom, "units/hour", 1/60)
