@@ -29,8 +29,6 @@ class ConvertUnit(CallbackProtocol):
         from_unit = to_expr(lf, self.from_unit)
         factor = to_expr(lf, self.factor)
 
-        print(f"ConvertUnit: value={value_expr}, unit={unit_expr}, from_unit={from_unit}, factor={factor}")
-
         expr = (
             pl.when(unit_expr == from_unit)
             .then(value_expr * factor)
