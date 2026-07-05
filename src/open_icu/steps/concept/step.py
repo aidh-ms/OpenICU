@@ -128,7 +128,10 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept.identifier,
                         dataset,
                     )
-                    dataset_concept.fn(self._project)
+                    self.extract_complex_concept(
+                        concept,
+                        dataset_concept,
+                    )
 
     @property
     def extraction_dataset(self):
@@ -149,6 +152,18 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             logger.warning("skipping concept step: extraction codes.parquet not found")
             return pl.DataFrame()
         return pl.read_parquet(codes_path)
+
+    def concept_output_dir(self, concept: ConceptConfig) -> Path:
+        """Return the workspace directory a concept's per-dataset parquet files are written to.
+
+        Args:
+            concept: The concept configuration to resolve the output directory for
+
+        Returns:
+            Path of the form ``<workspace>/<step>/<concept name>/<version>``
+        """
+        assert self._workspace_dir is not None
+        return Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
 
     def apply_limits(self, concept: ConceptConfig, lf: pl.LazyFrame) -> pl.LazyFrame:
         if concept.limits.min is not None:
@@ -179,8 +194,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             concept.identifier,
             dataset_concept.dataset,
         )
-        assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path = self.concept_output_dir(concept)
         output_dataset_path = output_data_path / dataset_concept.dataset
         output_dataset_path.mkdir(parents=True, exist_ok=True)
 
@@ -327,9 +341,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         concept = self._registry.get(table.concept)
         if concept is None:
             raise FileNotFoundError(f"concept not found in registry ({table.concept})")
-        assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
-        return output_data_path / f"{dataset}.parquet"
+        return self.concept_output_dir(concept) / f"{dataset}.parquet"
 
     def extract_derived_concept(
         self,
@@ -426,8 +438,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         lf = self.apply_limits(concept, lf)
 
-        assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path = self.concept_output_dir(concept)
         output_data_path.mkdir(parents=True, exist_ok=True)
 
         logger.info(
@@ -440,3 +451,27 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         del lf
         gc.collect()
+
+    def extract_complex_concept(
+        self,
+        concept: ConceptConfig,
+        dataset_concept: ComplexDatasetConceptConfig,
+    ) -> None:
+        """Extract a complex concept by delegating to its configured transformer.
+
+        The transformer class referenced by the mapping's ``concept_transformer``
+        dotted path is instantiated with the concept, the per-dataset mapping
+        config, and the mapping's ``kwargs``, then called with this step. It is
+        expected to write its per-dataset parquet output below
+        ``self.concept_output_dir(concept)`` so ``collect()`` picks it up.
+
+        Args:
+            concept: The concept configuration the transformer runs for
+            dataset_concept: The dataset-specific complex mapping configuration
+        """
+        logger.debug(
+            "Extracting complex concept %s for dataset %s",
+            concept.identifier,
+            dataset_concept.dataset,
+        )
+        dataset_concept.build_transformer(concept)(self)
