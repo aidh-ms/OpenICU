@@ -1,0 +1,12 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   3005785 = Creatine kinase.MB [Mass/volume] in Serum or Plasma
+#   3029790 = Creatine kinase.MB [Enzymatic activity/volume] in Serum or Plasma
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(3005785|3029790)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

@@ -183,6 +183,41 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             logger.debug("Saving configuration %s", config.identifier)
             config.save(path)
 
+    def filter(
+        self,
+        *args: str,
+        includes: list[str] | None = None,
+        excludes: list[str] | None = None,
+    ) -> list[T]:
+        """Filter configurations by identifier components.
+
+        Args:
+            *args: Identifier components to filter by (e.g., class_name, version, name)
+            includes: If specified, only include configurations with these identifiers
+            excludes: If specified, skip configurations with these identifiers
+
+        Returns:
+            List of configuration objects matching the filter criteria
+        """
+        term = self.get_identifier(".".join(args))
+        _excludes = [self.get_identifier(id) for id in excludes or []]
+        _includes = [self.get_identifier(id) for id in includes or []]
+
+        filtered_configs = []
+        for config in self._registry.values():
+            if term not in config.identifier:
+                continue
+
+            if (
+                (_excludes and config.identifier in _excludes) or
+                (_includes and config.identifier not in _includes)
+            ):
+                continue
+
+            filtered_configs.append(config)
+
+        return filtered_configs
+
 
 def load_configs[T: BaseConfig](
     path: Path,

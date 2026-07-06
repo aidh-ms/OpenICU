@@ -9,7 +9,7 @@ from enum import StrEnum, auto
 from typing import Any, ClassVar
 
 from polars.datatypes import DataTypeClass
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 from open_icu.config.base import BaseDatasetConfig
 from open_icu.steps.extraction.config.column import ColumnConfig
@@ -30,6 +30,25 @@ class TableType(StrEnum):
 
     CSV = auto()
     CSVGZ = auto()
+    PARQUET = auto()
+
+
+# File-extension hints used to infer the table format when ``type`` is omitted.
+# Parquet is the default for any path without a recognised extension.
+_TYPE_BY_SUFFIX: list[tuple[tuple[str, ...], TableType]] = [
+    ((".parquet", ".pq"), TableType.PARQUET),
+    ((".csv.gz", ".csv.bz2", ".csv.zip", ".gz"), TableType.CSVGZ),
+    ((".csv",), TableType.CSV),
+]
+
+
+def _infer_table_type(path: str) -> TableType:
+    """Infer the table format from a file path, defaulting to Parquet."""
+    lowered = path.lower()
+    for suffixes, table_type in _TYPE_BY_SUFFIX:
+        if lowered.endswith(suffixes):
+            return table_type
+    return TableType.PARQUET
 
 
 class BaseTableConfig(BaseModel, metaclass=ABCMeta):
@@ -40,7 +59,8 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
 
     Attributes:
         path: File path to the table data relative to dataset root
-        type: Table file format (currently only CSV supported)
+        type: Table file format (parquet, csv, or csvgz); inferred from the path
+            extension when omitted, defaulting to parquet
         columns: List of column configurations
         pre_callbacks: Callbacks to apply before column processing
         pre_filters: Filters to apply before column processing
@@ -56,8 +76,9 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
 
     path: str = Field(..., description="The file path to the table data.")
     type: TableType = Field(
-        TableType.CSVGZ,
-        description="The type of the table (e.g. csv, json).",
+        TableType.PARQUET,
+        description="The table file format. Defaults to Parquet; when omitted it is "
+        "inferred from the path extension (.parquet/.csv/.csv.gz).",
     )
     columns: list[ColumnConfig] = Field(
         default_factory=list,
@@ -91,6 +112,14 @@ class BaseTableConfig(BaseModel, metaclass=ABCMeta):
         default_factory=list,
         description="The list of frame transformation configurations for the table.",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _default_type_from_path(cls, data: Any) -> Any:
+        """Infer ``type`` from the path extension when it is not given explicitly."""
+        if isinstance(data, dict) and not data.get("type") and data.get("path"):
+            data = {**data, "type": _infer_table_type(str(data["path"]))}
+        return data
 
     @computed_field
     @property

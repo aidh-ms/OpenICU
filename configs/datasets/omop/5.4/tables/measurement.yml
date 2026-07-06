@@ -1,0 +1,76 @@
+path: measurement.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: measurement_id
+    type: int64
+  - name: visit_occurrence_id
+    type: int64
+  - name: provider_id
+    type: int64
+  # db fields - times
+  - name: measurement_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: measurement_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: measurement_concept_id
+    type: int64
+  - name: measurement_source_value
+    type: string
+  - name: measurement_type_concept_id
+    type: int64
+  - name: operator_concept_id
+    type: int64
+  - name: value_as_number
+    type: float64
+  - name: value_as_concept_id
+    type: int64
+  - name: value_source_value
+    type: string
+  - name: unit_concept_id
+    type: int64
+  - name: unit_source_value
+    type: string
+  - name: range_low
+    type: float64
+  - name: range_high
+    type: float64
+
+post_join_callbacks:
+  - first_not_null(measurement_datetime, measurement_date, output=measurement_time)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    measurement_id: col(measurement_id)
+    visit_occurrence_id: col(visit_occurrence_id)
+    provider_id: col(provider_id)
+
+events:
+  - name: MEASUREMENT
+    columns:
+      time: col(measurement_time)
+      code:
+        - col(measurement_concept_id)
+        - col(measurement_source_value)
+        - col(unit_source_value)
+      numeric_value: col(value_as_number)
+      text_value: col(value_source_value)
+      extension:
+        measurement_type_concept_id: col(measurement_type_concept_id)
+        operator_concept_id: col(operator_concept_id)
+        value_as_concept_id: col(value_as_concept_id)
+        unit_concept_id: col(unit_concept_id)
+        range_low: col(range_low)
+        range_high: col(range_high)
+    filters:
+      - drop_na(time)

@@ -5,7 +5,7 @@ The extraction step turns raw source tables into MEDS event streams. It is drive
 1. a **step config** that selects which table configs to load and where the raw data lives, and
 2. one **table config** per source table that describes columns, joins, and the events to emit.
 
-OpenICU ships table configs for MIMIC-IV 3.1, eICU-CRD 2.0, and NWICU 0.1.0 under `config/datasets/<dataset>/<version>/tables/`. This page explains how they work, so you can adapt them or add your own datasets.
+OpenICU ships table configs for MIMIC-IV 3.1, eICU-CRD 2.0, and NWICU 0.1.0 under `configs/datasets/<dataset>/<version>/tables/`. This page explains how they work, so you can adapt them or add your own datasets.
 
 ## Step configuration
 
@@ -14,7 +14,7 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /path/to/config/datasets/mimic-iv/3.1/tables/
+  - path: /path/to/configs/datasets/mimic-iv/3.1/tables/
     # includes:
     #   - openicu.config.table.mimic-iv.3.1.labevents   # restrict to specific tables
 
@@ -75,9 +75,13 @@ events:
         ref_range_lower: col(ref_range_lower)
 ```
 
+### File format
+
+The source file format is set with `type` (`parquet`, `csv`, or `csvgz`). You usually omit it: when `type` is not given it is inferred from the `path` extension (`.parquet`/`.pq` → parquet, `.csv.gz` → csvgz, `.csv` → csv), and any path without a recognised extension defaults to **parquet**. The bundled PhysioNet datasets are gzipped CSV (`.csv.gz`), so they read as `csvgz`; an OMOP export of Parquet files reads as `parquet` with no extra configuration.
+
 ### Columns and types
 
-Only the columns listed under `columns` are read from the source file. Available types: `str`/`string`, `int`/`int8`–`int64`, `uint8`–`uint64`, `float`/`float32`/`float64`, `decimal`, `bool`/`boolean`, and `datetime`. Datetime columns are read as strings and parsed with the `params` you provide (e.g. `format`).
+Only the columns listed under `columns` are read from the source file. Available types: `str`/`string`, `int`/`int8`–`int64`, `uint8`–`uint64`, `float`/`float32`/`float64`, `decimal`, `bool`/`boolean`, and `datetime`. For CSV sources every column is read as text and cast to the declared type; Parquet columns are cast from their stored types. Datetime columns are parsed with the `params` you provide (e.g. `format`) when stored as strings, while native Parquet timestamp/date columns are used directly.
 
 ### Joins
 
@@ -144,7 +148,7 @@ If the same event file already exists (e.g. when several table configs write to 
 
 > For a new *version* of an already-supported dataset, or a *variant* like a demo subset, don't copy the configs — declare the differences against a reference version with `extends.yml`. See [dataset versions and variants](versioning.md).
 
-1. Create `config/datasets/<your-dataset>/<version>/tables/` and add one YAML per source table, as above.
+1. Create `configs/datasets/<your-dataset>/<version>/tables/` and add one YAML per source table, as above.
 2. Reference the directory from your extraction step's `config_files` and add the dataset's name and data path under `config.data`.
 3. Run the extraction step and inspect `metadata/codes.parquet` to verify the extracted codes.
 4. Optionally, add [concept mappings](concepts.md) so the shared concept dictionary covers your dataset.

@@ -1,0 +1,12 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   21490853 = Invasive Systolic blood pressure
+#   21492239 = Systolic blood pressure by Noninvasive
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(21490853|21492239)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

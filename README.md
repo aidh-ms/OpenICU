@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)](https://github.com/aidh-ms/OpenICU/blob/main/pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**OpenICU** is an open-source Python framework for extracting and harmonising intensive care unit (ICU) data from heterogeneous sources — such as [MIMIC-IV](https://physionet.org/content/mimiciv/), [eICU-CRD](https://physionet.org/content/eicu-crd/), and your own institutional database exports — into the standardised [MEDS](https://github.com/Medical-Event-Data-Standard/meds) (Medical Event Data Standard) format.
+**OpenICU** is an open-source Python framework for extracting and harmonising intensive care unit (ICU) data from heterogeneous sources — such as [MIMIC-IV](https://physionet.org/content/mimiciv/), [eICU-CRD](https://physionet.org/content/eicu-crd/), [AmsterdamUMCdb](https://github.com/AmsterdamUMC/AmsterdamUMCdb) (via OMOP CDM), and your own institutional or [OMOP CDM](https://ohdsi.github.io/CommonDataModel/) database exports — into the standardised [MEDS](https://github.com/Medical-Event-Data-Standard/meds) (Medical Event Data Standard) format.
 
 Instead of writing one-off SQL or pandas scripts for every dataset and every study, you describe *what* to extract in declarative YAML configurations and let OpenICU handle the *how*: typed reading, joins, timestamp reconstruction, unit-aware event codes, and cross-dataset concept harmonisation. OpenICU ships with curated configurations for public ICU datasets and a growing dictionary of clinical concepts (vital signs, laboratory values, vasopressors, ventilation, and more), so the same study code can run against any supported dataset.
 
@@ -22,7 +22,7 @@ OpenICU is the spiritual successor to dataset-harmonisation tools like [`ricu`](
 - **One concept, many datasets.** Define a clinical concept (e.g. *heart rate*, *norepinephrine rate*, *antibiotics*) once; map it per dataset with small YAML files. Extraction code stays identical across MIMIC-IV, eICU-CRD, NWICU, and custom sources.
 - **MEDS-native output.** All output is written as MEDS-compliant Parquet (`subject_id`, `time`, `code`, `numeric_value`, `text_value`, plus configurable extension columns) with full metadata (`dataset.json`, `codes.parquet`) — ready for MEDS-compatible downstream tooling.
 - **Declarative, versioned, reproducible.** Every table, event, and concept is a versioned YAML config with a stable identifier. The exact merged configuration used for a run is snapshotted into the output project, so results can be traced and reproduced.
-- **Versions and variants as diffs.** New dataset versions and variants (like the eICU demo) `extend` a reference version and state only their differences — no copied configs to keep in sync. The entire eICU demo configuration is two small files.
+- **Versions and variants as diffs.** New dataset versions and variants (like the eICU demo) `extend` a reference version and state only their differences — no copied configs to keep in sync. The entire eICU demo configuration is two small files. The same mechanism works *across* datasets: the AmsterdamUMCdb config simply `extend`s the shared OMOP CDM model, inheriting all of its table configs.
 - **Fully offline.** Designed for sensitive medical data: no network access required, nothing leaves your secure perimeter.
 - **Scales down and up.** Polars lazy streaming lets you process full MIMIC-IV on a 16–32 GB laptop, without a database server or cluster.
 - **Extensible.** Add new datasets by writing YAML (no Python required); add new transformation callbacks or complex concept logic in Python where YAML isn't enough.
@@ -33,12 +33,12 @@ OpenICU organises processing as a pipeline of **steps** that operate inside a **
 
 ```mermaid
 flowchart LR
-    A[Raw source data<br>CSV/CSV.GZ] -->|ExtractionStep| B[Dataset-level MEDS events<br>e.g. mimic-iv//chartevents//220045//Heart Rate//bpm]
+    A[Raw source data<br>Parquet / CSV / CSV.GZ] -->|ExtractionStep| B[Dataset-level MEDS events<br>e.g. mimic-iv//chartevents//220045//Heart Rate//bpm]
     B -->|ConceptStep| C[Harmonised concepts<br>e.g. heart_rate//bpm]
     C --> D[Your analysis /<br>MEDS ecosystem tools]
 ```
 
-1. **Extraction step** — reads the raw tables of each dataset (typed CSV scan, lookup-table joins, timestamp reconstruction) and emits one MEDS event stream per configured event. Event codes preserve full provenance: `dataset//table//itemid//label//unit`.
+1. **Extraction step** — reads the raw tables of each dataset (typed Parquet/CSV scan, lookup-table joins, timestamp reconstruction) and emits one MEDS event stream per configured event. Event codes preserve full provenance: `dataset//table//itemid//label//unit`.
 2. **Concept step** — maps dataset-specific event codes onto shared, dataset-agnostic clinical concepts using pattern matching (*simple* concepts), computation over other concepts (*derived* concepts), or custom Python transformers (*complex* concepts). Concept dependencies are resolved automatically.
 3. **Sharding step** *(in development)* — re-partitions harmonised data into analysis-ready shards.
 
@@ -46,7 +46,7 @@ Each step reads its inputs and writes its outputs as a self-contained MEDS datas
 
 ## Supported datasets
 
-OpenICU ships with ready-to-use extraction and concept configurations under [`config/`](config/):
+OpenICU ships with ready-to-use extraction and concept configurations under [`configs/`](configs/):
 
 | Dataset | Version | Extraction configs | Concept mappings |
 | --- | --- | --- | --- |
@@ -55,16 +55,31 @@ OpenICU ships with ready-to-use extraction and concept configurations under [`co
 | [eICU-CRD](https://physionet.org/content/eicu-crd/2.0/) | 2.0 | 14 tables | in progress |
 | [eICU-CRD demo](https://physionet.org/content/eicu-crd-demo/2.0/) | 2.0 | inherited from eICU-CRD via `extends` | inherited |
 | [NWICU](https://physionet.org/content/nwicu/0.1.0/) | 0.1.0 | 9 tables | in progress |
+| [OMOP CDM](https://ohdsi.github.io/CommonDataModel/) | 5.4 | 11 tables (reusable model reference, read from Parquet) | — *(added per OMOP dataset)* |
+| [AmsterdamUMCdb](https://github.com/AmsterdamUMC/AmsterdamUMCdb) (OMOP, via [AMSTEL](https://github.com/AmsterdamUMC/AMSTEL)) | 1.5.0 | inherited from OMOP CDM via `extends` | ~60 concepts (in progress) |
+| [HiRID](https://physionet.org/content/hirid/1.1.1/) | 1.1.1 | 3 tables (native long format) | ~60 concepts (in progress) |
 
-The shared concept dictionary in [`config/concepts/`](config/concepts/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
+The **OMOP CDM 5.4** entry is a reusable *model* configuration rather than a single dataset: any data exported to the OMOP Common Data Model inherits its table configs via `extends` and adds only concept mappings. **AmsterdamUMCdb** is the first such dataset, read through its [AMSTEL](https://github.com/AmsterdamUMC/AMSTEL) OMOP CDM 5.4 export, with concept mappings keyed on the OMOP `concept_id`s that AMSTEL assigns. **HiRID** is read in its native long format (`observations`/`pharma`/`general`), with concept mappings keyed on HiRID `variableid`s and unit conversions ported from [`ricu`](https://github.com/eth-mds/ricu).
+
+The shared concept dictionary in [`configs/concepts/`](configs/concepts/) currently covers ~90 concepts across vital signs, blood gas, clinical chemistry, hematology, medications (incl. vasopressors and antibiotics), neurological scores, respiratory parameters, fluid output, and demographics.
 
 > [!NOTE]
-> Access to the public datasets themselves requires the usual credentialing on [PhysioNet](https://physionet.org/). OpenICU works on the downloaded CSV/CSV.GZ files — no database setup needed.
+> Access to the public datasets themselves requires the usual credentialing (e.g. [PhysioNet](https://physionet.org/) for MIMIC-IV/eICU/NWICU, a data-use agreement for AmsterdamUMCdb). OpenICU works on the downloaded files directly — Parquet (e.g. OMOP exports), CSV, or gzipped CSV — with no database setup needed.
 
 ## Installation
 
-OpenICU requires **Python 3.13+**. Until the first PyPI release, install from GitHub:
+OpenICU requires **Python 3.13+**. You can install OpenICU via PyPI or from source.
 
+### With PyPI
+```bash
+# with pip
+pip install open-icu
+
+# with uv
+uv add open-icu
+```
+
+### With GitHub
 ```bash
 # with pip
 pip install git+https://github.com/aidh-ms/OpenICU
@@ -92,7 +107,7 @@ name: Extraction
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/tables/
+  - path: /path/to/OpenICU/configs/datasets/mimic-iv/3.1/tables/
 
 config:
   data:
@@ -107,13 +122,13 @@ name: Concept
 version: 1.0.0
 
 config_files:
-  - path: /path/to/OpenICU/config/concepts
+  - path: /path/to/OpenICU/configs/concepts
 
 config:
   extraction_step: Extraction
   dataset_configs:
     - name: mimic-iv
-      path: /path/to/OpenICU/config/datasets/mimic-iv/3.1/mappings/
+      path: /path/to/OpenICU/configs/datasets/mimic-iv/3.1/mappings/
 ```
 
 **3. Run the pipeline:**
@@ -165,7 +180,7 @@ A complete runnable example lives in [`example/pipeline.ipynb`](example/pipeline
 
 OpenICU is configured at three levels — see the [documentation](#documentation) for the full reference.
 
-**Dataset/table configs** (`config/datasets/<dataset>/<version>/tables/*.yml`) describe how to turn one raw table into MEDS events: typed columns, joins, and event definitions.
+**Dataset/table configs** (`configs/datasets/<dataset>/<version>/tables/*.yml`) describe how to turn one raw table into MEDS events: typed columns, joins, and event definitions.
 
 ```yaml
 path: icu/chartevents.csv.gz
@@ -202,7 +217,7 @@ events:
 
 `name` is a technical event identifier used by the extraction step. It is not included in the generated MEDS `code`; the code is built from the automatic dataset/table prefix, optional `code_prefix`, configured `columns.code` components, and optional `code_suffix`.
 
-**Concept configs** (`config/concepts/<category>/*.yml`) define dataset-agnostic clinical concepts:
+**Concept configs** (`configs/concepts/<category>/*.yml`) define dataset-agnostic clinical concepts:
 
 ```yaml
 name: heart_rate
@@ -210,7 +225,7 @@ version: 1.0.0
 unit: bpm
 ```
 
-**Concept mappings** (`config/datasets/<dataset>/<version>/mappings/*.yml`) connect a concept to dataset-specific codes:
+**Concept mappings** (`configs/datasets/<dataset>/<version>/mappings/*.yml`) connect a concept to dataset-specific codes:
 
 ```yaml
 type: simple
@@ -249,10 +264,9 @@ Arithmetic, comparisons, and boolean logic work as ordinary expressions (`col(we
 
 OpenICU is in active development (pre-1.0); configuration formats may still change between minor versions. Current focus areas:
 
-- Completing concept mappings for eICU-CRD and NWICU
+- Completing concept mappings for eICU-CRD, NWICU, AmsterdamUMCdb, and HiRID
 - The sharding step for analysis-ready data partitioning
-- Additional datasets (e.g. MIMIC-IV demo, HiRID, AmsterdamUMCdb)
-- A first PyPI release
+- Additional datasets and broader OMOP CDM coverage
 
 Contributions of dataset configurations and concept definitions are especially welcome — they are pure YAML and require no changes to the framework itself.
 
@@ -275,7 +289,7 @@ If you use OpenICU in your research, please cite it via the metadata in [`CITATI
 ## Related projects
 
 - [MEDS](https://github.com/Medical-Event-Data-Standard/meds) — the Medical Event Data Standard that OpenICU targets
-- [`ricu`](https://github.com/eth-mds/ricu) — R package for ICU data harmonisation that inspired OpenICU's concept dictionary
+- [ricu](https://github.com/eth-mds/ricu) — R package for ICU data harmonisation that inspired OpenICU's concept dictionary
 - [YAIB](https://github.com/rvandewater/YAIB) — Yet Another ICU Benchmark, a complementary benchmarking framework
 
 ## License

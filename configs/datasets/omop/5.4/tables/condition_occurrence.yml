@@ -1,0 +1,72 @@
+path: condition_occurrence.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: condition_occurrence_id
+    type: int64
+  - name: visit_occurrence_id
+    type: int64
+  - name: provider_id
+    type: int64
+  # db fields - times
+  - name: condition_start_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: condition_start_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  - name: condition_end_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: condition_end_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: condition_concept_id
+    type: int64
+  - name: condition_source_value
+    type: string
+  - name: condition_type_concept_id
+    type: int64
+  - name: condition_status_concept_id
+    type: int64
+  - name: condition_status_source_value
+    type: string
+  - name: stop_reason
+    type: string
+
+post_join_callbacks:
+  - first_not_null(condition_start_datetime, condition_start_date, output=condition_start)
+  - first_not_null(condition_end_datetime, condition_end_date, output=condition_end)
+
+event_defaults:
+  subject_id: col(person_id)
+  extension:
+    condition_occurrence_id: col(condition_occurrence_id)
+    visit_occurrence_id: col(visit_occurrence_id)
+    provider_id: col(provider_id)
+
+events:
+  - name: CONDITION
+    columns:
+      time: col(condition_start)
+      code:
+        - col(condition_concept_id)
+        - col(condition_source_value)
+      extension:
+        condition_end: col(condition_end)
+        condition_type_concept_id: col(condition_type_concept_id)
+        condition_status_concept_id: col(condition_status_concept_id)
+        stop_reason: col(stop_reason)
+    filters:
+      - drop_na(time)

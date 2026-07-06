@@ -1,0 +1,17 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   21490586 = Blood temperature
+#   21490588 = Esophageal temperature
+#   3022060 = Rectal temperature
+#   21490870 = Bladder temperature via Foley
+#   3025085 = Axillary temperature
+#   3006322 = Oral temperature
+#   3025163 = Tympanic membrane temperature
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(21490586|21490588|3022060|21490870|3025085|3006322|3025163)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

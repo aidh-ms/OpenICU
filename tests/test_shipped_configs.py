@@ -1,4 +1,4 @@
-"""Validation tests for the configurations shipped in config/.
+"""Validation tests for the configurations shipped in configs/.
 
 These tests make sure that every bundled YAML file parses into its Pydantic
 model and that every embedded expression string is valid in the expression
@@ -11,6 +11,7 @@ configuration library — the part of OpenICU most contributors will touch.
 from pathlib import Path
 from typing import Any
 
+import polars as pl
 import pytest
 
 from open_icu.callbacks.interpreter import ExprInterpreter
@@ -21,7 +22,7 @@ from open_icu.steps.concept.config.simple import SimpleDatasetConceptConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
 
 REPO_ROOT = Path(__file__).parents[1]
-CONFIG_ROOT = REPO_ROOT / "config"
+CONFIG_ROOT = REPO_ROOT / "configs"
 
 # Version dirs may be marker-only (just an extends.yml, no physical tables/
 # or mappings/ subdirectory), so collect by version dir rather than globbing
@@ -65,6 +66,20 @@ def assert_expressions_parse(expressions: list[str], source: str) -> None:
             interpreter.eval(expr)
         except Exception as e:  # noqa: BLE001 - reported with context
             pytest.fail(f"invalid expression in {source}: {expr!r} ({e})")
+
+
+def assert_regex_compiles(regex: str, source: str) -> None:
+    """Validate a mapping regex against the engine that runs it (Polars str.contains).
+
+    Concept mappings filter the extracted ``code`` column with ``pl.col("code").
+    str.contains(mapping.regex)``. A malformed regex (e.g. unbalanced parentheses)
+    parses fine as YAML and only fails at concept-step runtime, so validate it
+    against the real engine here -- not Python's ``re``, whose syntax differs.
+    """
+    try:
+        pl.select(pl.lit("x").str.contains(regex))
+    except Exception as e:  # noqa: BLE001 - reported with context
+        pytest.fail(f"invalid mapping regex in {source}: {regex!r} ({e})")
 
 
 def collect_table_expressions(table: BaseTableConfig) -> list[str]:
@@ -148,6 +163,7 @@ def test_concept_parses_with_all_dataset_mappings(concept_file: Path) -> None:
                     if value is not None
                 ]
                 assert_expressions_parse(expressions + mapping.filters, source)
+                assert_regex_compiles(mapping.regex, source)
 
         if isinstance(dataset_concept, DerivedDatasetConceptConfig):
             for concept_table in (dataset_concept.table, *dataset_concept.join):
@@ -168,6 +184,27 @@ def test_demo_dataset_inherits_full_table_set() -> None:
     assert demo_infusion.path == "infusiondrug.csv.gz"  # demo's lowercase file name
     assert demo_infusion.dataset == "eicu-demo"
     assert demo_infusion.events  # inherited from eicu-crd
+
+
+def test_aumc_inherits_omop_tables() -> None:
+    """aumc 1.5.0 is read through its OMOP CDM 5.4 export, so it inherits the
+    omop table set unchanged via extends.yml.
+
+    Guards the cross-dataset *model* inheritance: the table definitions come from
+    omop, while identity (dataset/version) and the parquet default come from the
+    extending aumc directory.
+    """
+    omop = resolve_effective_configs(CONFIG_ROOT / "datasets" / "omop" / "5.4" / "tables")
+    aumc = resolve_effective_configs(CONFIG_ROOT / "datasets" / "aumc" / "1.5.0" / "tables")
+    assert set(aumc) == set(omop)
+    assert len(omop) == 11
+
+    measurement = load_effective_table(CONFIG_ROOT / "datasets" / "aumc" / "1.5.0" / "tables", "measurement")
+    assert measurement.dataset == "aumc"
+    assert measurement.version == "1.5.0"
+    assert measurement.identifier == "openicu.config.table.aumc.1.5.0.measurement"
+    assert measurement.type == "parquet"  # parquet default flows through inheritance
+    assert measurement.events  # inherited from omop
 
 
 def test_mimic_versions_inherit_reference_configs() -> None:
@@ -212,7 +249,7 @@ def test_mimic_demo_inherits_concept_mappings() -> None:
         CONFIG_ROOT / "concepts" / "vitals" / "heart_rate.yml",
         dataset_paths=[CONFIG_ROOT / "datasets" / "mimic-iv-demo" / "2.2" / "mappings"],
     )
-    dataset_concept = concept.get_dataset_concept("mimic-iv-demo")
+    dataset_concept = concept.get_dataset_concept("mimic-iv-demo", "2.2")
     assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
     assert dataset_concept.version == "2.2"
     assert dataset_concept.mappings

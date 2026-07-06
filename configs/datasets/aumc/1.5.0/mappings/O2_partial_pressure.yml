@@ -1,0 +1,12 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   3027315 = Oxygen [Partial pressure] in Blood
+#   3027801 = Oxygen [Partial pressure] in Arterial blood
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(3027315|3027801)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
