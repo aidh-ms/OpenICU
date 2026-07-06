@@ -95,7 +95,7 @@ events:
         - col(itemid)
         - col(label)
       extension:
-        available_time: max(storetime, starttime, output=acailable_time)
+        available_time: max(storetime, starttime, output=available_time)
         ordercategoryname: col(ordercategoryname)
         secondaryordercategoryname: col(secondaryordercategoryname)
         ordercomponenttypedescription: col(ordercomponenttypedescription)
