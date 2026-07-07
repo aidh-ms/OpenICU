@@ -1,9 +1,10 @@
 """Concept step implementation for converting ICU data to MEDS format.
 
 This module implements the ConceptStep class that orchestrates the extraction
-of data from source CSV files, applies transformations via callbacks, performs
-joins, and outputs MEDS-compliant Parquet files.
+of concept events from extracted MEDS event files, applies mappings based on
+code patterns, and outputs MEDS-compliant Parquet files.
 """
+
 import gc
 from functools import cached_property
 from graphlib import TopologicalSorter
@@ -13,7 +14,6 @@ from uuid import uuid4
 import polars as pl
 
 from open_icu.callbacks.interpreter import parse_expr
-from open_icu.config.registry import load_configs
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.concept.config.concept import (
@@ -37,6 +37,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
     mappings based on code patterns, and writes MEDS-compliant Parquet files
     to the workspace directory.
     """
+
     @classmethod
     def load(cls, project: OpenICUProject, config_path: Path) -> "ConceptStep":
         """Load a concept step from a configuration file.
@@ -51,64 +52,24 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         config = ConceptStepConfig.load(config_path)
         return cls(project, config, concept_config_registry)
 
-    def setup_config(self) -> None:
-        """Load external configuration files into the registry.
-
-        Processes each ConfigFileConfig from the step configuration, loading
-        YAML files into the registry with specified filtering and overwrite
-        behavior. Saves the consolidated configuration to the project's
-        configs directory.
-        """
-        dataset_paths = [
-            dataset_config.path
-            for dataset_config in self._config.config.dataset_configs
-        ]
-
-        for config in self._config.config_files:
-            logger.debug(
-                "Loading concepts from %s (overwrite=%s)",
-                config.path,
-                config.overwrite,
-            )
-            concepts = load_configs(
-                config.path,
-                ConceptConfig,
-                includes=config.includes,
-                excludes=config.excludes,
-                dataset_paths=dataset_paths,
-            )
-            for concept in concepts:
-                logger.debug(
-                    "Registering concept '%s' (overwrite=%s)",
-                    concept.name,
-                    config.overwrite,
-                )
-                self._registry.register(concept, overwrite=config.overwrite)
-
-        logger.info(
-            "Saving merged configuration to %s",
-            self._project.configs_path,
-        )
-
-        self._registry.save(self._project.configs_path)
-
     def extract(self) -> None:
         datasets = {
-            dataset_config.name
-            for dataset_config in self._config.config.dataset_configs
+            (dataset_config.name, dataset_config.version)
+            for dataset_config in self._config.config.mapping_configs
         }
 
-        for dataset in datasets:
-            logger.info("Processing concepts for dataset %s", dataset)
+        for dataset, version in datasets:
+            logger.info("Processing concepts for dataset %s (version %s)", dataset, version)
             depend_concepts = dict()
 
             for concept in self._registry.values():
-                dataset_concept = concept.get_dataset_concept(dataset)
+                dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
-                    logger.warning(
-                        "skipping concept %s for dataset %s: no dataset-specific config found",
+                    logger.debug(
+                        "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
                         concept.name,
-                        dataset
+                        dataset,
+                        version,
                     )
                     continue
 
@@ -139,6 +100,16 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 )
                 concept = self._registry.get(concept_id)
                 assert concept is not None
+
+                dataset_concept = concept.get_dataset_concept(dataset, version)
+                if dataset_concept is None:
+                    logger.debug(
+                        "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
+                        concept.name,
+                        dataset,
+                        version,
+                    )
+                    continue
 
                 if isinstance(dataset_concept, DerivedDatasetConceptConfig):
                     logger.debug(
@@ -179,6 +150,25 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             return pl.DataFrame()
         return pl.read_parquet(codes_path)
 
+    def apply_limits(self, concept: ConceptConfig, lf: pl.LazyFrame) -> pl.LazyFrame:
+        if concept.limits.min is not None:
+            lf = lf.with_columns(
+                pl.when(pl.col("numeric_value") < concept.limits.min)
+                .then(None)
+                .otherwise(pl.col("numeric_value"))
+                .alias("numeric_value")
+            )
+
+        if concept.limits.max is not None:
+            lf = lf.with_columns(
+                pl.when(pl.col("numeric_value") > concept.limits.max)
+                .then(None)
+                .otherwise(pl.col("numeric_value"))
+                .alias("numeric_value")
+            )
+
+        return lf
+
     def extract_simple_concept(
         self,
         concept: ConceptConfig,
@@ -195,33 +185,76 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         output_dataset_path.mkdir(parents=True, exist_ok=True)
 
         for mapping in dataset_concept.mappings:
-            mapping_codes = self.codes_df.filter(pl.col("code").str.contains(mapping.regex))["code"]
+            dataset = mapping.pattern.dataset
+            version = mapping.pattern.version
+            table = mapping.pattern.table
+            event = mapping.pattern.event
 
-            for dataset, version, table, event in mapping_codes.str.split("//").list.head(4).unique().to_list():
-                data_path = self.extraction_dataset.data_path / dataset / version / table / f"{event}.parquet"
+            if dataset is None:
+                logger.warning(
+                    "skipping mapping for concept %s: dataset is not configured",
+                    concept.name,
+                )
+                continue
+
+            if version is None:
+                logger.warning(
+                    "skipping mapping for concept %s: version is not configured",
+                    concept.name,
+                )
+                continue
+
+            if table is None:
+                logger.warning(
+                    "skipping mapping for concept %s: table is not configured",
+                    concept.name,
+                )
+                continue
+
+            table_path = self.extraction_dataset.data_path / dataset / version / table
+
+            if event is None:
+                data_paths = sorted(table_path.glob("*.parquet"))
+            else:
+                data_paths = [table_path / f"{event}.parquet"]
+
+            if not data_paths:
+                logger.warning(
+                    "skipping mapping for concept %s: no event files found in %s",
+                    concept.name,
+                    table_path,
+                )
+                continue
+
+            for data_path in data_paths:
                 if not data_path.exists():
                     logger.warning(
                         "skipping mapping for concept %s: file not found (%s)",
                         concept.name,
-                        data_path
+                        data_path,
                     )
                     continue
+
+                event_name = data_path.stem
 
                 logger.debug(
                     "Loading source event %s/%s/%s/%s for concept %s",
                     dataset,
                     version,
                     table,
-                    event,
+                    event_name,
                     concept.identifier,
                 )
-                lf = pl.scan_parquet(data_path).filter(pl.col("code").is_in(mapping_codes))
+
+                lf = pl.scan_parquet(data_path).filter(
+                    pl.col("code").str.contains(mapping.regex)
+                )
 
                 # extension columns
                 lf = lf.with_columns(pl.lit(dataset).alias("dataset"))
                 lf = lf.with_columns(pl.lit(version).alias("version"))
                 lf = lf.with_columns(pl.lit(table).alias("table"))
-                lf = lf.with_columns(pl.lit(event).alias("event"))
+                lf = lf.with_columns(pl.lit(event_name).alias("event"))
                 for col_name, col_expr in concept.extension_columns.items():
                     lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
 
@@ -229,18 +262,25 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 if mapping.columns.text_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("text_value"))
                 else:
-                    lf = lf.with_columns(parse_expr(lf, mapping.columns.text_value).alias("text_value"))
+                    lf = lf.with_columns(
+                        parse_expr(lf, mapping.columns.text_value).alias("text_value")
+                    )
 
                 if mapping.columns.numeric_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
                 else:
-                    lf = lf.with_columns(parse_expr(lf, mapping.columns.numeric_value).alias("numeric_value"))
+                    expr = parse_expr(lf, mapping.columns.numeric_value)
+
+                    lf = lf.with_columns(
+                        expr.cast(pl.Float64, strict=False).alias("numeric_value")
+                    )
 
                 # code column
                 lf = lf.with_columns(pl.lit(concept.code).alias("code"))
 
                 for expr in mapping.filters:
                     lf = lf.filter(parse_expr(lf, expr))
+
                 lf = lf.select([
                     pl.col("subject_id").cast(pl.Int64),
                     pl.col("time").cast(pl.Datetime(time_unit="us")),
@@ -248,6 +288,8 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     pl.col("numeric_value").cast(pl.Float32),
                     pl.col("text_value").cast(pl.String),
                 ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
+
+                lf = self.apply_limits(concept, lf)
 
                 output_file = output_dataset_path / f"{str(uuid4())}.parquet"
                 logger.debug(
@@ -282,9 +324,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         output_dataset_path.rmdir()
 
     def get_path_for_concept_table(self, table: BaseConceptTable, dataset: str) -> Path:
-        concept_tuple = ConceptConfig.ensure_prefix(table.concept).split(("."))
+        concept = self._registry.get(table.concept)
+        if concept is None:
+            raise FileNotFoundError(f"concept not found in registry ({table.concept})")
         assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept_tuple[1:])
+        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
         return output_data_path / f"{dataset}.parquet"
 
     def extract_derived_concept(
@@ -297,6 +341,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             concept.identifier,
             dataset_concept.dataset,
         )
+
         def _read_table(file_path: Path, table: BaseConceptTable) -> pl.LazyFrame:
             if not file_path.exists():
                 raise FileNotFoundError(f"file not found ({file_path})")
@@ -321,7 +366,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         try:
             lf = _read_table(
                 self.get_path_for_concept_table(dataset_concept.table, dataset_concept.dataset),
-                dataset_concept.table
+                dataset_concept.table,
             )
             post_callbacks = [*dataset_concept.table.post_callbacks]
 
@@ -335,7 +380,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 lf = lf.join(
                     _read_table(
                         self.get_path_for_concept_table(join_table, dataset_concept.dataset),
-                        join_table
+                        join_table,
                     ),
                     how=join_table.how,  # ty: ignore[invalid-argument-type]
                     **join_table.join_params,  # ty: ignore[invalid-argument-type]
@@ -350,7 +395,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         columns = dataset_concept.event.model_dump()
         extension = concept.extension_columns.copy()
-        extension.update(columns.pop("extension"))
+        extension.update(columns.pop("extension") or {})
         mapping = {
             col_expr: col_name
             for col_name, col_expr in columns.items()
@@ -378,6 +423,8 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             pl.col("numeric_value").cast(pl.Float32),
             pl.col("text_value").cast(pl.String),
         ] + [pl.col(col).cast(pl.String) for col in extension.keys()])
+
+        lf = self.apply_limits(concept, lf)
 
         assert self._workspace_dir is not None
         output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])

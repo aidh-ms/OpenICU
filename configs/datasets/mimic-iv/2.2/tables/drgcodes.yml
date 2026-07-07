@@ -1,0 +1,55 @@
+path: hosp/drgcodes.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  # db fields - times
+  # db fields - values
+  - name: drg_type
+    type: string
+  - name: drg_code
+    type: string
+  - name: description
+    type: string
+  - name: drg_severity
+    type: int64
+  - name: drg_mortality
+    type: int64
+
+
+join:
+  - name: admissions
+    path: hosp/admissions.csv.gz
+    columns:
+      # subject_id and extensions
+      - name: hadm_id
+        type: int64
+      # db fields - times
+      - name: dischtime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+      # db fields - values
+    both_on:
+      - hadm_id
+
+event_defaults:
+  subject_id: col(subject_id)
+  extension:
+    hadm_id: col(hadm_id)
+
+events:
+  - name: DRG
+    columns:
+      time: col(dischtime)
+      code:
+        - col(drg_type)
+        - col(drg_code)
+        - col(description)
+      extension:
+        available_time: col(dischtime)
+        drg_severity: col(drg_severity)
+        drg_mortality: col(drg_mortality)

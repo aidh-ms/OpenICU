@@ -1,0 +1,12 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   21490852 = Invasive Mean blood pressure
+#   21492241 = Mean blood pressure by Noninvasive
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(21490852|21492241)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

@@ -1,0 +1,42 @@
+path: death.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  # db fields - times
+  - name: death_date
+    type: datetime
+    params:
+      format: "%Y-%m-%d"
+      strict: false
+  - name: death_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: death_type_concept_id
+    type: int64
+  - name: cause_concept_id
+    type: int64
+  - name: cause_source_value
+    type: string
+
+post_join_callbacks:
+  - first_not_null(death_datetime, death_date, output=dod)
+
+event_defaults:
+  subject_id: col(person_id)
+  time: col(dod)
+
+events:
+  - name: MEDS_DEATH
+    columns:
+      time: col(dod)
+      extension:
+        death_type_concept_id: col(death_type_concept_id)
+        cause_concept_id: col(cause_concept_id)
+        cause_source_value: col(cause_source_value)
+    filters:
+      - drop_na(time)

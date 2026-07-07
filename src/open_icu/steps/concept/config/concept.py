@@ -2,9 +2,10 @@ from pathlib import Path
 from typing import Annotated, Self
 
 import yaml
-from pydantic import Field, TypeAdapter, ValidationError, computed_field
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError, computed_field
 
 from open_icu.config.base import BaseConfig
+from open_icu.config.inheritance import has_extends, resolve_effective_configs
 from open_icu.logging import logger
 from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig
 from open_icu.steps.concept.config.derived import DerivedDatasetConceptConfig
@@ -18,6 +19,17 @@ DatasetConceptConfigUnion = Annotated[
 ]
 
 
+class ConceptLimits(BaseModel):
+    """Configuration for concept limits.
+
+    Attributes:
+        min: Minimum value for the concept.
+        max: Maximum value for the concept.
+    """
+    min: float | None = Field(None, description="Minimum value for the concept.")
+    max: float | None = Field(None, description="Maximum value for the concept.")
+
+
 class ConceptConfig(BaseConfig):
     """Configuration for a concept table.
 
@@ -29,11 +41,13 @@ class ConceptConfig(BaseConfig):
         uuid: UUID generated from the identifier
         unit: Unit of measurement for the concept values
         extension_columns: Dictionary of extension columns to include in the concept table
+        limits: Configuration for concept limits
         dataset_concepts: List of DatasetConceptConfig objects defining how to extract concept data per dataset
     """
     __open_icu_config_type__ = "concept"
 
     unit: str = Field(..., description="Unit of measurement for the concept values.")
+    limits: ConceptLimits = Field(default_factory=ConceptLimits)
     extension_columns: dict[str, str] = Field(
         default_factory=dict,
         description="Dictionary of extension columns to include in the concept table.",
@@ -73,27 +87,34 @@ class ConceptConfig(BaseConfig):
 
         name = data.get("name")
         paths = dataset_paths or []
+        adapter = TypeAdapter(DatasetConceptConfigUnion)
         for path in paths:
-            sub_file_path = path / f"{name}.yml"
-            if not sub_file_path.exists():
-                continue
-
-            adapter = TypeAdapter(DatasetConceptConfigUnion)
-            try:
+            if has_extends(path):
+                # Resolve the dataset's inheritance chain; the mapping may be
+                # inherited from (or merged with) a base version's config.
+                sub_data = resolve_effective_configs(path).get(str(name))
+                if sub_data is None:
+                    continue
+            else:
+                sub_file_path = path / f"{name}.yml"
+                if not sub_file_path.exists():
+                    continue
                 with open(sub_file_path, "r") as f:
                     sub_data = yaml.safe_load(f)
 
-                *_, dataset, version, _, _ = sub_file_path.parts
+            try:
+                # Identity always comes from the dataset directory itself,
+                # never from where an inherited file physically lives.
                 sub_data.update({
-                    "dataset": dataset,
-                    "version": version,
-                    "name": sub_file_path.stem,
+                    "dataset": path.parent.parent.name,
+                    "version": path.parent.name,
+                    "name": name,
                 })
 
                 dataset_concept = adapter.validate_python(sub_data)
                 data.setdefault("dataset_concepts", []).append(dataset_concept)
             except ValidationError:
-                logger.warning("failed to load dataset concept config for %s from %s", name, sub_file_path)
+                logger.warning("failed to load dataset concept config for %s from %s", name, path)
 
         for k, v in kwargs.items():
             if k not in data:
@@ -101,15 +122,16 @@ class ConceptConfig(BaseConfig):
 
         return cls(**data)
 
-    def get_dataset_concept(self, dataset_name: str) -> DatasetConceptConfigUnion | None:
+    def get_dataset_concept(self, dataset_name: str, version: str) -> DatasetConceptConfigUnion | None:
         """Get the dataset-specific concept configuration for a given dataset name.
 
         Args:
             dataset_name: Name of the dataset to retrieve the concept configuration for
+            version: Version of the dataset
         Returns:
             The DatasetConceptConfig instance for the specified dataset, or None if not found
         """
         for dataset_concept in self.dataset_concepts:
-            if dataset_concept.dataset == dataset_name:
+            if dataset_concept.dataset == dataset_name and dataset_concept.version == version:
                 return dataset_concept
         return None

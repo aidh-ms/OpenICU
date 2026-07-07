@@ -1,0 +1,115 @@
+path: hosp/admissions.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  - name: admit_provider_id
+    type: string
+  # db fields - times
+  - name: admittime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: dischtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: deathtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: edregtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: edouttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: admission_type
+    type: string
+  - name: admission_location
+    type: string
+  - name: discharge_location
+    type: string
+  - name: insurance
+    type: string
+  - name: language
+    type: string
+  - name: marital_status
+    type: string
+  - name: race
+    type: string
+  - name: hospital_expire_flag
+    type: int64
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(admittime)
+  extension:
+    available_time: col(admittime)
+    hadm_id: col(hadm_id)
+    admit_provider_id: col(admit_provider_id)
+
+events:
+  - name: ED_REGISTRATION
+    columns:
+      time: col(edregtime)
+      extension:
+        available_time: col(edregtime)
+    filters:
+      - drop_na(time)
+  - name: ED_OUT
+    columns:
+      time: col(edouttime)
+      extension:
+        available_time: col(edouttime)
+    filters:
+      - drop_na(time)
+
+
+  - name: HOSPITAL_ADMISSION
+    columns:
+      code:
+        - col(admission_type)
+        - col(admission_location)
+
+  - name: INSURANCE
+    columns:
+      code:
+        - col(insurance)
+
+  - name: LANGUAGE
+    columns:
+      code:
+        - col(language)
+
+  - name: MARITAL_STATUS
+    columns:
+      code:
+        - col(marital_status)
+
+  - name: ETHNICITY
+    columns:
+      code:
+        - col(race)
+
+  - name: HOSPITAL_DISCHARGE
+    columns:
+      time: col(dischtime)
+      code:
+        - col(discharge_location)
+      extension:
+        available_time: col(dischtime)
+
+  - name: MEDS_DEATH
+    columns:
+      time: col(deathtime)
+      extension:
+        available_time: col(deathtime)
+    filters:
+      - drop_na(time)

@@ -1,0 +1,60 @@
+# The demo export ships procedureevents' originalamount/originalrate headers
+# in UPPERCASE, unlike every full MIMIC-IV release (verified against full
+# v2.2: lowercase there). Column lists replace wholesale on inheritance, so
+# the full list is restated here; everything else (join, events) is
+# inherited from the mimic-iv/2.2 reference config.
+
+columns:
+  # subject_id and extensions
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  - name: caregiver_id
+    type: int64
+  - name: orderid
+    type: int64
+  - name: linkorderid
+    type: int64
+  # db fields - times
+  - name: starttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: endtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: storetime
+    type: datetime
+    params:
+      strict: false
+  # db fields - values
+  - name: itemid
+    type: int64
+  - name: value
+    type: float32
+  - name: valueuom
+    type: string
+  - name: location
+    type: string
+  - name: locationcategory
+    type: string
+  - name: ordercategoryname
+    type: string
+  - name: ordercategorydescription
+    type: string
+  - name: patientweight
+    type: float32
+  - name: isopenbag
+    type: int8
+  - name: continueinnextdept
+    type: int8
+  - name: statusdescription
+    type: string
+  - name: ORIGINALAMOUNT
+    type: float32
+  - name: ORIGINALRATE
+    type: float32

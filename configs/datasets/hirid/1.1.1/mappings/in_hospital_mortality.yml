@@ -1,0 +1,9 @@
+# HiRID v1.1.1 -- general_table MORTALITY event [ricu death/discharge_status]
+type: simple
+mappings:
+  - pattern:
+      table: general
+      event: MORTALITY
+      code: "(mortality)(//.*)?$"
+    columns:
+      text_value: col(text_value)

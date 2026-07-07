@@ -1,0 +1,14 @@
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
+#   3014315 = Urine output
+#   3007123 = Urine output --post void
+#   3016267 = Urine output by in and out urethral catheter
+#   21491173 = Urine output measured by nephrostomy
+type: simple
+mappings:
+  - pattern:
+      table: measurement
+      event: MEASUREMENT
+      code: "(3014315|3007123|3016267|21491173)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

@@ -1,0 +1,68 @@
+path: person.parquet
+
+columns:
+  # subject_id and extensions
+  - name: person_id
+    type: int64
+  - name: person_source_value
+    type: string
+  # db fields - times
+  - name: year_of_birth
+    type: int64
+  - name: month_of_birth
+    type: int64
+  - name: day_of_birth
+    type: int64
+  - name: birth_datetime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+      strict: false
+  # db fields - values
+  - name: gender_concept_id
+    type: int64
+  - name: gender_source_value
+    type: string
+  - name: race_concept_id
+    type: int64
+  - name: race_source_value
+    type: string
+  - name: ethnicity_concept_id
+    type: int64
+  - name: ethnicity_source_value
+    type: string
+
+post_join_callbacks:
+  # birth_datetime is nullable in OMOP; fall back to the mandatory date parts.
+  - to_datetime(year_of_birth, month_of_birth, day_of_birth, "00:00:00", output=dob_from_parts)
+  - to_datetime(year_of_birth, 1, 1, "00:00:00", output=dob_from_year)
+  - first_not_null(birth_datetime, dob_from_parts, dob_from_year, output=dob)
+
+event_defaults:
+  subject_id: col(person_id)
+  time: col(dob)
+  extension:
+    person_source_value: col(person_source_value)
+
+events:
+  - name: MEDS_BIRTH
+    columns:
+      time: col(dob)
+
+  - name: GENDER
+    columns:
+      code:
+        - col(gender_concept_id)
+        - col(gender_source_value)
+
+  - name: RACE
+    columns:
+      code:
+        - col(race_concept_id)
+        - col(race_source_value)
+
+  - name: ETHNICITY
+    columns:
+      code:
+        - col(ethnicity_concept_id)
+        - col(ethnicity_source_value)

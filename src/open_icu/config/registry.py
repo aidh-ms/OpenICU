@@ -12,6 +12,7 @@ from typing import cast
 from pydantic import ValidationError
 
 from open_icu.config.base import BaseConfig
+from open_icu.config.inheritance import has_extends, resolve_effective_configs
 from open_icu.logging import get_logger
 from open_icu.utils.type import get_generic_type
 
@@ -182,6 +183,41 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             logger.debug("Saving configuration %s", config.identifier)
             config.save(path)
 
+    def filter(
+        self,
+        *args: str,
+        includes: list[str] | None = None,
+        excludes: list[str] | None = None,
+    ) -> list[T]:
+        """Filter configurations by identifier components.
+
+        Args:
+            *args: Identifier components to filter by (e.g., class_name, version, name)
+            includes: If specified, only include configurations with these identifiers
+            excludes: If specified, skip configurations with these identifiers
+
+        Returns:
+            List of configuration objects matching the filter criteria
+        """
+        term = self.get_identifier(".".join(args))
+        _excludes = [self.get_identifier(id) for id in excludes or []]
+        _includes = [self.get_identifier(id) for id in includes or []]
+
+        filtered_configs = []
+        for config in self._registry.values():
+            if term not in config.identifier:
+                continue
+
+            if (
+                (_excludes and config.identifier in _excludes) or
+                (_includes and config.identifier not in _includes)
+            ):
+                continue
+
+            filtered_configs.append(config)
+
+        return filtered_configs
+
 
 def load_configs[T: BaseConfig](
     path: Path,
@@ -209,9 +245,15 @@ def load_configs[T: BaseConfig](
     _includes = [config_type.ensure_prefix(id) for id in includes or []]
     _excludes = [config_type.ensure_prefix(id) for id in excludes or []]
 
+    # Resolve through the version inheritance chain first: a marker-only
+    # version may have no physical subdirectory of its own at all.
+    if has_extends(path):
+        return _load_inherited_configs(path, config_type, _includes, _excludes)
+
     configs = []
     if not path.exists():
         logger.warning("Path does not exists: %s", path)
+
     for file_path in path.rglob("*.*"):
         if (
             not file_path.is_file()
@@ -229,6 +271,55 @@ def load_configs[T: BaseConfig](
         if (
             (_excludes and config.identifier in _excludes) or
             (_includes and config.identifier not in _includes)
+        ):
+            logger.debug("Skip loading configuration: %s", config.identifier)
+            continue
+
+        configs.append(config)
+    return configs
+
+
+def _load_inherited_configs[T: BaseConfig](
+    path: Path,
+    config_type: type[T],
+    includes: list[str],
+    excludes: list[str],
+) -> list[T]:
+    """Load configurations for a version subdirectory with an extends chain.
+
+    Resolves the effective configuration data across the version's
+    inheritance chain and constructs configuration objects whose identity
+    (dataset, version, name) is taken from the extending version's directory,
+    regardless of where an inherited file physically lives.
+
+    Args:
+        path: Config subdirectory of a version directory (e.g.
+            ``.../<dataset>/<version>/tables``)
+        config_type: The configuration class to instantiate
+        includes: If non-empty, only keep configurations with these identifiers
+        excludes: If non-empty, skip configurations with these identifiers
+
+    Returns:
+        List of successfully loaded configuration objects
+    """
+    version_dir = path.parent
+
+    configs = []
+    for name, data in resolve_effective_configs(path).items():
+        data.setdefault("dataset", version_dir.parent.name)
+        data.setdefault("version", version_dir.name)
+        data.setdefault("name", Path(name).name)
+
+        try:
+            config = config_type(**data)
+            logger.debug("Loaded inherited configuration %s from %s", config.identifier, path)
+        except ValidationError:
+            logger.warning("failed to load inherited config '%s' from %s", name, path)
+            continue
+
+        if (
+            (excludes and config.identifier in excludes) or
+            (includes and config.identifier not in includes)
         ):
             logger.debug("Skip loading configuration: %s", config.identifier)
             continue

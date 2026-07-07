@@ -40,7 +40,6 @@ class Sum(CallbackProtocol):
                 return expr
             return expr.alias(self.output)
 
-
         expr = pl.sum_horizontal(exprs)
         if self.output is None:
             return expr
@@ -93,7 +92,6 @@ class Product(CallbackProtocol):
                 return expr
             return expr.alias(self.output)
 
-
         expr = pl.fold(acc=pl.lit(1), function=operator.mul, exprs=exprs)
         if self.output is None:
             return expr
@@ -109,6 +107,20 @@ class Divide(CallbackProtocol):
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.dividend) / to_expr(lf, self.divisor)
+        if self.output is None:
+            return expr
+        return expr.alias(self.output)
+
+
+@register_callback_cls
+class FloorDivide(CallbackProtocol):
+    def __init__(self, dividend: AstValue, divisor: AstValue, output: Optional[str] = None) -> None:
+        self.dividend = dividend
+        self.divisor = divisor
+        self.output = output
+
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        expr = to_expr(lf, self.dividend) // to_expr(lf, self.divisor)
         if self.output is None:
             return expr
         return expr.alias(self.output)

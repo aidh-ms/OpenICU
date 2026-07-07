@@ -1,0 +1,9 @@
+# HiRID v1.1.1 -- general_table AGE event [ricu age]
+type: simple
+mappings:
+  - pattern:
+      table: general
+      event: AGE
+      code: "(age)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)

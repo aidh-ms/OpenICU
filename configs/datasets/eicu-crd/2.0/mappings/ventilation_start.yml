@@ -1,0 +1,33 @@
+type: simple
+mappings:
+  - pattern:
+      table: respiratorycare
+      event: VENTILATION_START
+      code: ventstartoffset
+    columns: &id001
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+  - pattern:
+      table: respiratorycare
+      event: VENTILATION_END
+      code: ventstartoffset
+    columns: *id001
+  - pattern:
+      table: respiratorycare
+      event: VENTILATION_START
+      code: priorventstartoffset
+    columns: &id002
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+  - pattern:
+      table: respiratorycare
+      event: VENTILATION_END
+      code: priorventstartoffset
+    columns: *id002
+  - pattern:
+      table: respiratorycharting
+      event: RESPIRATORY_CHART
+      code: (Start(//.*)?|Continued(//.*)?|respFlowPtVentData(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

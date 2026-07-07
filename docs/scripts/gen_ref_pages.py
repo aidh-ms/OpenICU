@@ -1,4 +1,9 @@
-"""Generate the code reference pages and navigation."""
+"""Generate API reference pages from the source tree for mkdocstrings.
+
+Invoked by the mkdocs-gen-files plugin (see mkdocs.yaml). Creates one page per
+public module under ``reference/`` plus a SUMMARY.md consumed by
+mkdocs-literate-nav.
+"""
 
 from pathlib import Path
 
@@ -6,12 +11,12 @@ import mkdocs_gen_files
 
 nav = mkdocs_gen_files.Nav()
 
-root = Path(__file__).parent.parent.parent
-src = root / "pyaki"
+root = Path(__file__).parents[2]
+src = root / "src"
 
 for path in sorted(src.rglob("*.py")):
-    module_path = path.relative_to(src.parent).with_suffix("")
-    doc_path = path.relative_to(src.parent).with_suffix(".md")
+    module_path = path.relative_to(src).with_suffix("")
+    doc_path = path.relative_to(src).with_suffix(".md")
     full_doc_path = Path("reference", doc_path)
 
     parts = tuple(module_path.parts)
@@ -23,11 +28,19 @@ for path in sorted(src.rglob("*.py")):
     elif parts[-1] == "__main__":
         continue
 
+    if not parts:
+        continue
+
+    # Skip private modules (e.g. open_icu.callbacks._callbacks); their public
+    # members are re-exported and documented via the parent package.
+    if any(part.startswith("_") for part in parts):
+        continue
+
     nav[parts] = doc_path.as_posix()
 
     with mkdocs_gen_files.open(full_doc_path, "w") as fd:
-        ident = ".".join(parts)
-        fd.write(f"::: {ident}")
+        identifier = ".".join(parts)
+        fd.write(f"::: {identifier}\n")
 
     mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
 
