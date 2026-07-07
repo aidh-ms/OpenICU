@@ -1,0 +1,17 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformers.windowed.WindowedSumTransformer
+concepts:
+  - sofa_respiration.1.0.0
+  - sofa_coagulation.1.0.0
+  - sofa_liver.1.0.0
+  - sofa_cardiovascular.1.0.0
+  - sofa_cns.1.0.0
+  - sofa_renal.1.0.0
+kwargs:
+  terms:
+    - sofa_respiration
+    - sofa_coagulation
+    - sofa_liver
+    - sofa_cardiovascular
+    - sofa_cns
+    - sofa_renal

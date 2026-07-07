@@ -1,0 +1,8 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformers.sofa.SofaCardiovascularTransformer
+concepts:
+  - mean_arterial_pressure.1.0.0
+  - dopamine_rate.1.0.0
+  - dobutamine_rate.1.0.0
+  - epinephrine_rate.1.0.0
+  - norepinephrine_rate.1.0.0

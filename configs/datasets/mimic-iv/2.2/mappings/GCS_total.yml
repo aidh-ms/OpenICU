@@ -1,0 +1,11 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformers.windowed.WindowedSumTransformer
+concepts:
+  - GCS_eye.1.0.0
+  - GCS_motor.1.0.0
+  - GCS_verbal.1.0.0
+kwargs:
+  terms:
+    - GCS_eye
+    - GCS_motor
+    - GCS_verbal

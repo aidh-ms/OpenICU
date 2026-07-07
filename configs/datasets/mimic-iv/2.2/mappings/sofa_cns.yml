@@ -1,0 +1,4 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformers.sofa.SofaCnsTransformer
+concepts:
+  - GCS_total.1.0.0
