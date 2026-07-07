@@ -36,6 +36,13 @@ class TestIdentity:
         assert DemoConfig.ensure_prefix("foo") == "openicu.config.demo.foo"
         assert DemoConfig.ensure_prefix("openicu.config.demo.foo") == "openicu.config.demo.foo"
 
+    def test_ensure_prefix_matches_lowercased_identifier(self) -> None:
+        # identifiers are lowercased, so a mixed-case reference (e.g. a dependency
+        # on GCS_total) must normalise to the same key to resolve in the registry
+        config = DemoConfig(name="GCS_total", version="1.0.0")
+        assert DemoConfig.ensure_prefix("GCS_total.1.0.0") == config.identifier
+        assert DemoConfig.ensure_prefix(config.identifier) == config.identifier
+
 
 class TestSerialization:
     def test_save_load_round_trip(self, tmp_path: Path) -> None:

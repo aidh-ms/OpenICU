@@ -28,6 +28,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         identifier_tuple: Tuple of (class_name, version, name)
         uuid: UUID generated from the identifier
     """
+
     __open_icu_config_type__: ClassVar[str] = "base"
 
     name: str = Field(..., description="Name of the configuration.")
@@ -117,7 +118,11 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         Returns:
             The identifier string with the correct prefix
         """
+        # Identifiers are built lowercased (see build_identifier), so a reference
+        # must be normalised to match — otherwise a mixed-case concept name (e.g.
+        # GCS_total) used as a dependency would never resolve against the registry.
         prefix = cls.prefix()
+        identifier = identifier.lower()
         if not identifier.startswith(prefix):
             return f"{prefix}.{identifier}"
         return identifier
@@ -172,6 +177,7 @@ class BaseDatasetConfig(BaseConfig):
     Inherits from BaseConfig and can be extended with dataset-specific
     attributes and methods in the future.
     """
+
     dataset: str = Field(..., description="Name of the dataset associated with this dataset configuration.")
 
     @classmethod
