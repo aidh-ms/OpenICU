@@ -1,0 +1,5 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformers.sepsis.SuspectedInfectionTransformer
+concepts:
+  - antibiotics.1.0.0
+  - body_fluid_sampling.1.0.0
