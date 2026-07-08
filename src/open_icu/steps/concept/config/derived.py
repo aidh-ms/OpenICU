@@ -38,7 +38,7 @@ class JoinConceptTable(BaseConceptTable):
         description="List of columns to be used for joining table on the right side.",
     )
     how: str = Field(
-        "outer",
+        "full",
         description="Type of join to be performed (e.g. inner, left, right, outer).",
     )
 
