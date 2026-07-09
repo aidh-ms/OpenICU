@@ -5,7 +5,7 @@
 #   Jan1(first_admission_year) + OffsetAfterFirstAdmission + Offset.
 # The human-readable analyte name and unit are joined in from d_references (keyed on
 # ReferenceGlobalID), so the code reads sic//laboratory//<id>//<ReferenceName>//<ReferenceUnit>.
-path: laboratory.csv
+path: laboratory.csv.gz
 
 columns:
   # subject_id is resolved via the cases join (PatientID); CaseID is the stay.
@@ -23,7 +23,7 @@ columns:
 join:
   # (A) this case -> PatientID and this case's OffsetAfterFirstAdmission.
   - name: cases
-    path: cases.csv
+    path: cases.csv.gz
     columns:
       - name: CaseID
         type: int64
@@ -35,7 +35,7 @@ join:
       - CaseID
   # (B) the patient's FIRST admission -> first_admission_year (one row per patient).
   - name: cases
-    path: cases.csv
+    path: cases.csv.gz
     columns:
       - name: PatientID
         type: int64
@@ -51,7 +51,7 @@ join:
       - PatientID
   # (C) human-readable analyte name + unit.
   - name: d_references
-    path: d_references.csv
+    path: d_references.csv.gz
     columns:
       - name: ReferenceGlobalID
         type: int64

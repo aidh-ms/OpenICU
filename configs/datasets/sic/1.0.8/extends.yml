@@ -1,0 +1,5 @@
+# SICdb v1.0.8 only added LOINC mappings to the laboratory references
+# (LOINC_code/LOINC_short/LOINC_long columns on d_references) — no new cases,
+# tables, or signals — so v1.0.8 inherits the v1.0.7 configs unchanged.
+dataset: sic
+version: "1.0.7"

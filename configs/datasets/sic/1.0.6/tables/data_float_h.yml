@@ -9,7 +9,7 @@
 # sub-row high-resolution waveform) -- are intentionally NOT read or decoded, so the
 # true high-frequency signal is not expanded. Decoding `rawdata` would be a separate
 # feature (and a large increase in row count).
-path: data_float_h.csv
+path: data_float_h.csv.gz
 
 columns:
   - name: CaseID
@@ -26,7 +26,7 @@ columns:
 join:
   # (A) this case -> PatientID and this case's OffsetAfterFirstAdmission.
   - name: cases
-    path: cases.csv
+    path: cases.csv.gz
     columns:
       - name: CaseID
         type: int64
@@ -38,7 +38,7 @@ join:
       - CaseID
   # (B) the patient's FIRST admission -> first_admission_year (one row per patient).
   - name: cases
-    path: cases.csv
+    path: cases.csv.gz
     columns:
       - name: PatientID
         type: int64

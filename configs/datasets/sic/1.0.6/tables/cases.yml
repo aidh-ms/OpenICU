@@ -6,7 +6,7 @@
 # patient's stays are placed on one timeline anchored at the patient's FIRST
 # admission year (the OffsetAfterFirstAdmission == 0 row), with the per-case
 # OffsetAfterFirstAdmission spacing subsequent stays.
-path: cases.csv
+path: cases.csv.gz
 
 columns:
   # subject_id and extensions
@@ -32,7 +32,7 @@ columns:
 join:
   # Self-join to fetch each patient's FIRST admission year (one row per patient).
   - name: cases
-    path: cases.csv
+    path: cases.csv.gz
     columns:
       - name: PatientID
         type: int64
