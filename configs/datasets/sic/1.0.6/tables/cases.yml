@@ -1,0 +1,102 @@
+# SICdb v1.0.6 (PhysioNet) -- cases (one row per ICU admission).
+#
+# Paths are relative to the dataset root configured in the extraction step.
+# SICdb is fully de-identified: only the admission *year* is known and all times
+# are integer second-offsets. The MEDS subject is the PATIENT (PatientID); a
+# patient's stays are placed on one timeline anchored at the patient's FIRST
+# admission year (the OffsetAfterFirstAdmission == 0 row), with the per-case
+# OffsetAfterFirstAdmission spacing subsequent stays.
+path: cases.csv.gz
+
+columns:
+  # subject_id and extensions
+  - name: PatientID
+    type: int64
+  - name: CaseID
+    type: int64
+  # db fields - times
+  - name: AdmissionYear
+    type: int64
+  - name: OffsetAfterFirstAdmission
+    type: int64
+  # db fields - values
+  - name: Sex
+    type: int64
+  - name: AgeOnAdmission
+    type: int64
+  - name: HeightOnAdmission
+    type: float32
+  - name: WeightOnAdmission
+    type: float32
+
+join:
+  # Self-join to fetch each patient's FIRST admission year (one row per patient).
+  - name: cases
+    path: cases.csv.gz
+    columns:
+      - name: PatientID
+        type: int64
+      - name: AdmissionYear
+        type: int64
+      - name: OffsetAfterFirstAdmission
+        type: int64
+    pre_filters:
+      - drop_if(OffsetAfterFirstAdmission != 0)
+    callbacks:
+      - col(AdmissionYear, output=first_admission_year)
+    both_on:
+      - PatientID
+
+post_join_callbacks:
+  # Anchor the patient timeline at Jan 1 of the first admission year, then shift
+  # this case's admission by OffsetAfterFirstAdmission seconds.
+  - to_datetime(first_admission_year, 1, 1, "00:00:00", output=year_base)
+  - add_offset(year_base, OffsetAfterFirstAdmission, offset_unit="seconds", output=admission_base)
+  # Harmonise sex codes (ricu apply_map 735 -> Male, 736 -> Female).
+  - replace(Sex == 735, "Male", "Unknown", output=sex_label)
+  - replace(Sex == 736, "Female", sex_label, output=sex_label)
+  # No recorded date of birth -> derive from age at admission.
+  - add_offset(admission_base, AgeOnAdmission * -365.25, offset_unit="days", output=birth_timestamp)
+
+event_defaults:
+  subject_id: col(PatientID)
+  time: col(admission_base)
+  extension:
+    case_id: col(CaseID)
+
+events:
+  - name: SEX
+    columns:
+      code:
+        - const(sex)
+      text_value: col(sex_label)
+
+  - name: AGE
+    columns:
+      code:
+        - const(age)
+      numeric_value: col(AgeOnAdmission)
+
+  - name: HEIGHT
+    columns:
+      code:
+        - const(height)
+      numeric_value: col(HeightOnAdmission)
+
+  - name: WEIGHT
+    columns:
+      code:
+        - const(weight)
+      numeric_value: col(WeightOnAdmission)
+
+  - name: ICU_ADMISSION
+    columns:
+      code:
+        - const(admission)
+
+  - name: MEDS_BIRTH
+    columns:
+      time: col(birth_timestamp)
+    filters:
+      - drop_na(time)
+      - first_distinct(subject_id, time)

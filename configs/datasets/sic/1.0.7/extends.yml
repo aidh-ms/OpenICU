@@ -1,0 +1,7 @@
+# SICdb v1.0.7 removed 36 invalid cases, corrected the OffsetAfterFirstAdmission
+# calculation, and added hospital discharge timing, admission urgency, HFNC
+# therapy, and RASS/NRS-11 scores — all additive relative to v1.0.6, with no
+# schema changes to the tables read here, so v1.0.7 inherits the v1.0.6
+# reference configs unchanged.
+dataset: sic
+version: "1.0.6"

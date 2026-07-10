@@ -151,5 +151,5 @@ class TestDerivedConcept:
         derived = self.make_derived()
         join = derived.join[0]
         assert join.both_on == ["subject_id", "time"]
-        assert join.how == "outer"
+        assert join.how == "full"
         assert join.join_params == {"on": ["subject_id", "time"]}
