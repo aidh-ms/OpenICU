@@ -31,15 +31,6 @@ class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
         config = ShardingStepConfig.load(config_path)
         return cls(project, config, sharding_config_registry)
 
-    def setup_config(self) -> None:
-        """Persist the step configuration registry state.
-
-        Sharding currently has no external preset/config registry. Keeping this
-        method explicit avoids the old preset-loading logic while still fitting
-        into the shared ConfigurableBaseStep lifecycle.
-        """
-        self._registry.save(self._project.configs_path)
-
     @property
     def concept_dataset(self):
         """Return the dataset produced by the configured concept step."""

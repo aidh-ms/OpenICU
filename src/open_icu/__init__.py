@@ -17,7 +17,7 @@ Main Modules:
 - callbacks: Data transformation callbacks for LazyFrames
 - config: Configuration management and registry system
 - storage: Project, dataset, and workspace management
-- steps: Processing steps (extraction, concept)
+- steps: Processing steps (extraction, concept, sharding)
 - utils: Utility functions and helpers
 
 Usage:
