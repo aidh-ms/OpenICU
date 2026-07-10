@@ -1,16 +1,15 @@
-"""Sharding step implementation for building subject-oriented shards from concept data.
+"""Sharding step implementation.
 
-This module implements the ShardingStep class, which loads reusable sharding
-preset configurations, registers them in the sharding registry, and prepares
-the configuration required to build subject-oriented shard outputs.
+The sharding step takes the long-format concept output produced by the concept
+step and rewrites it into subject-oriented Parquet shard files. It deliberately
+keeps the output long-format; wide exports such as YAIB belong in separate
+export/adapter tooling.
 """
 
-from functools import cached_property
 from pathlib import Path
 
 import polars as pl
 
-from open_icu.config.registry import load_configs
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.sharding.config.sharding import ShardingConfig
@@ -20,247 +19,134 @@ from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
 
+CORE_COLUMNS = ["subject_id", "time", "code", "numeric_value", "text_value"]
+
 
 class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
-    """Sharding step for creating subject-oriented shard outputs from concept data."""
+    """Create subject-oriented long-format shards from concept Parquet files."""
 
     @classmethod
     def load(cls, project: OpenICUProject, config_path: Path) -> "ShardingStep":
-        """Load a sharding step from a configuration file.
-
-        Args:
-            project: The OpenICU project to operate within.
-            config_path: Path to the sharding step configuration YAML file.
-
-        Returns:
-            An initialized ShardingStep instance.
-        """
-        logger.info("Loading sharding step configuration from %s", config_path)
+        """Load a sharding step from a YAML configuration file."""
         config = ShardingStepConfig.load(config_path)
-        logger.debug("Loaded sharding step config with step name '%s'", config.name)
         return cls(project, config, sharding_config_registry)
 
     def setup_config(self) -> None:
-        """Load external sharding preset configurations into the registry.
+        """Persist the step configuration registry state.
 
-        Processes each configured config file source, loads matching sharding
-        preset configuration files, registers them in the sharding registry,
-        and saves the merged registry state to the project's config directory.
+        Sharding currently has no external preset/config registry. Keeping this
+        method explicit avoids the old preset-loading logic while still fitting
+        into the shared ConfigurableBaseStep lifecycle.
         """
-        logger.info("Setting up sharding configuration registry for step '%s'", self._step_name)
-
-        total_loaded = 0
-        total_registered = 0
-
-        for config in self._config.config_files:
-            logger.debug(
-                "Loading shardings from %s (overwrite=%s, includes=%s, excludes=%s)",
-                config.path,
-                config.overwrite,
-                config.includes,
-                config.excludes,
-            )
-            shardings = load_configs(
-                config.path,
-                ShardingConfig,
-                includes=config.includes,
-                excludes=config.excludes,
-            )
-
-            logger.info(
-                "Loaded %d sharding preset(s) from %s",
-                len(shardings),
-                config.path,
-            )
-            total_loaded += len(shardings)
-
-            for sharding in shardings:
-                logger.debug(
-                    "Registering sharding '%s' (overwrite=%s)",
-                    sharding.name,
-                    config.overwrite,
-                )
-                self._registry.register(sharding, overwrite=config.overwrite)
-                total_registered += 1
-
-        logger.info(
-            "Saving merged sharding configuration to %s",
-            self._project.configs_path,
-        )
         self._registry.save(self._project.configs_path)
-
-        logger.info(
-            "Finished setup_config for step '%s': loaded=%d, registered=%d",
-            self._step_name,
-            total_loaded,
-            total_registered,
-        )
-
-    def extract(self) -> None:
-        """Build subject-oriented shards from the configured concept data."""
-        logger.info("Starting extract for sharding step '%s'", self._step_name)
-
-        concept_root = self._project.workspace_path / self._config.config.concept_step.lower()
-
-        cnpt_paths: list[Path] = []
-
-
-        codes_metadata_path = self._project.datasets_path / "output/project/datasets/concept/metadata/codes.parquet"
-        ordered_codes = pl.read_parquet(codes_metadata_path)["code"]
-
-        for code in ordered_codes:
-            for ds_name in self._config.config.datasets.include:
-                path = concept_root / code.split("//")[0] / "1.0.0" / f"{ds_name}.parquet"
-
-                if path.exists():
-                    cnpt_paths.append(path)
-                else:
-                    logger.debug("Skipping missing concept file: %s", path)
-
-        if len(cnpt_paths) == 0:
-            logger.warning(
-                "Skipping sharding extract: no concept parquet files selected under %s",
-                concept_root,
-            )
-            return
-
-        logger.info("Building dataframe from %d concept parquet file(s)", len(cnpt_paths))
-
-        df = pl.DataFrame(
-            pl.concat(
-                [pl.scan_parquet(str(cnpt_path)) for cnpt_path in cnpt_paths],
-                how="vertical",
-            ).collect()
-        )
-
-        logger.info(
-            "Collected long-format dataframe with shape rows=%d, cols=%d",
-            df.height,
-            df.width,
-        )
-
-        output_dir = self._project.workspace_path / self._step_name
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        logger.info("Writing subject shards to %s", output_dir)
-
-        groups = df.partition_by("subject_id", as_dict=True)
-
-        logger.info("Partitioned dataframe into %d subject shard(s)", len(groups))
-
-        written_files = 0
-
-        for subject_id, df_subject in groups.items():
-            file_path = output_dir / f"subject_{subject_id[0]}.parquet"
-            logger.debug(
-                "Writing subject shard for subject_id=%s to %s with shape rows=%d, cols=%d",
-                subject_id[0],
-                file_path,
-                df_subject.height,
-                df_subject.width,
-            )
-            df_subject.sort("time").write_parquet(file_path)
-            written_files += 1
-
-        logger.info(
-            "Finished extract for sharding step '%s': wrote %d subject shard file(s)",
-            self._step_name,
-            written_files,
-        )
 
     @property
     def concept_dataset(self):
-        logger.debug(
-            "Resolving concept dataset for concept step '%s'",
-            self._config.config.concept_step.lower(),
-        )
-        concept_dataset = self._project.datasets.get(self._config.config.concept_step.lower())
-        if not concept_dataset:
-            logger.warning("Skipping sharding step: concept dataset not found")
-            return None
-
-        logger.debug(
-            "Resolved concept dataset '%s' with metadata path %s",
-            self._config.config.concept_step.lower(),
-            concept_dataset.metadata_path,
-        )
+        """Return the dataset produced by the configured concept step."""
+        concept_step_name = self._config.config.concept_step.lower()
+        concept_dataset = self._project.datasets.get(concept_step_name)
+        if concept_dataset is None:
+            logger.warning("Skipping sharding step: concept dataset '%s' not found", concept_step_name)
         return concept_dataset
 
-    @cached_property
-    def codes_df(self) -> pl.DataFrame:
-        logger.debug("Loading codes dataframe for sharding step '%s'", self._step_name)
+    def extract(self) -> None:
+        """Build subject-oriented shard files from selected concept files."""
+        assert self._workspace_dir is not None
 
         concept_dataset = self.concept_dataset
-        if not concept_dataset:
-            logger.warning("Skipping codes dataframe load: concept dataset not found")
-            return pl.DataFrame()
-
-        codes_path = concept_dataset.metadata_path / "codes.parquet"
-        logger.debug("Looking for codes parquet at %s", codes_path)
-
-        if not codes_path.exists():
-            logger.warning("Skipping codes dataframe load: codes.parquet not found at %s", codes_path)
-            return pl.DataFrame()
-
-        df = pl.read_parquet(codes_path)
-        logger.info(
-            "Loaded codes dataframe from %s with shape rows=%d, cols=%d",
-            codes_path,
-            df.height,
-            df.width,
-        )
-        return df
-
-    def collect(self) -> None:
-        """Collect workspace results into the final MEDS dataset.
-
-        Copies all Parquet files from the workspace directory to the dataset's
-        data directory, then writes dataset metadata and code vocabulary files
-        to complete the MEDS-compliant output.
-        """
-        if self._workspace_dir is None or self._dataset is None:
-            logger.debug(
-                "Skipping collect step '%s': workspace or dataset not initialized",
-                self._step_name,
-            )
+        if concept_dataset is None:
             return
 
-        logger.info(
-            "Collecting results for step '%s' into dataset at %s",
-            self._step_name,
-            self._dataset.data_path,
-        )
+        concept_files = self._selected_concept_files(concept_dataset.data_path)
+        if not concept_files:
+            logger.warning("Skipping sharding step: no concept files found below %s", concept_dataset.data_path)
+            return
 
-        workspace_files = list(self._workspace_dir.content)
-        logger.info(
-            "Workspace for step '%s' contains %d file(s)",
-            self._step_name,
-            len(workspace_files),
-        )
+        logger.info("Sharding %d concept file(s)", len(concept_files))
 
-        # for file_path in workspace_files:
-        #     relative_path = file_path.relative_to(self._workspace_dir._path)
-        #     dest_path = self._dataset.data_path / relative_path
-        #     dest_path.parent.mkdir(parents=True, exist_ok=True)
-        #
-        #     logger.debug("Copying %s -> %s", file_path, dest_path)
-        #
-        #     shutil.copy(file_path, dest_path)
+        subject_ids = self._subject_ids(concept_files)
+        if not subject_ids:
+            logger.warning("Skipping sharding step: no subjects found in selected concept files")
+            return
 
-        logger.debug(
-            "Collect copy phase is currently disabled for step '%s'",
-            self._step_name,
-        )
+        written_files = 0
+        for shard_idx, shard_subjects in enumerate(self._chunks(subject_ids, self._config.config.subjects_per_shard)):
+            output_file = self._workspace_dir.path / f"shard_{shard_idx:05d}.parquet"
+            logger.info(
+                "Writing shard %s with %d subject(s) to %s",
+                shard_idx,
+                len(shard_subjects),
+                output_file,
+            )
 
-        # self._dataset.write_metadata(self._config.dataset.metadata)
-        # self._dataset.write_codes()  # TODO: Need sth similar
+            lf = self._scan_core_columns(concept_files).filter(pl.col("subject_id").is_in(shard_subjects))
+            lf = lf.sort(["subject_id", "time", "code"])
+            lf.sink_parquet(output_file)
+            written_files += 1
 
-        logger.debug(
-            "Metadata/code writing is currently disabled for step '%s'",
-            self._step_name,
-        )
+        logger.info("Finished sharding step: wrote %d shard file(s)", written_files)
 
-        logger.info(
-            "Finished collecting results for step '%s'",
-            self._step_name,
-        )
+    def _selected_concept_files(self, concept_data_path: Path) -> list[Path]:
+        """Find concept Parquet files matching the configured dataset/concept filters."""
+        datasets = set(self._config.config.datasets)
+        concept_filters = self._normalize_concept_filters(self._config.config.concepts)
+
+        concept_files: list[Path] = []
+        for file_path in sorted(concept_data_path.rglob("*.parquet")):
+            if datasets and file_path.stem not in datasets:
+                continue
+
+            relative_concept_path = file_path.relative_to(concept_data_path).with_suffix("")
+            concept_path_without_dataset = Path(*relative_concept_path.parts[:-1])
+            if concept_filters and not self._matches_concept_filter(concept_path_without_dataset, concept_filters):
+                continue
+
+            concept_files.append(file_path)
+
+        return concept_files
+
+    @staticmethod
+    def _normalize_concept_filters(concepts: list[str]) -> set[str]:
+        return {concept.replace("\\", "/").strip("/").lower() for concept in concepts}
+
+    @staticmethod
+    def _matches_concept_filter(concept_path: Path, concept_filters: set[str]) -> bool:
+        concept_path_str = concept_path.as_posix().lower()
+        concept_name = concept_path.name.lower()
+        return concept_path_str in concept_filters or concept_name in concept_filters
+
+    def _subject_ids(self, concept_files: list[Path]) -> list[int]:
+        """Collect selected subject IDs from the selected concept files."""
+        lfs = [
+            pl.scan_parquet(file_path).select(pl.col("subject_id").cast(pl.Int64))
+            for file_path in concept_files
+        ]
+        lf = pl.concat(lfs, how="vertical").unique().sort("subject_id")
+
+        configured_subjects = self._config.config.subjects
+        if configured_subjects:
+            lf = lf.filter(pl.col("subject_id").is_in(configured_subjects))
+
+        return lf.collect(engine="streaming")["subject_id"].to_list()
+
+    @staticmethod
+    def _scan_core_columns(concept_files: list[Path]) -> pl.LazyFrame:
+        """Scan all selected concept files using the stable long-format columns."""
+        lfs = [
+            pl.scan_parquet(file_path).select(
+                [
+                    pl.col("subject_id").cast(pl.Int64),
+                    pl.col("time").cast(pl.Datetime(time_unit="us")),
+                    pl.col("code").cast(pl.String),
+                    pl.col("numeric_value").cast(pl.Float32),
+                    pl.col("text_value").cast(pl.String),
+                ]
+            )
+            for file_path in concept_files
+        ]
+        return pl.concat(lfs, how="vertical")
+
+    @staticmethod
+    def _chunks(values: list[int], chunk_size: int):
+        for start in range(0, len(values), chunk_size):
+            yield values[start : start + chunk_size]

@@ -1,66 +1,41 @@
-from pathlib import Path
+"""Configuration models for the sharding step."""
 
 from pydantic import BaseModel, Field
 
 from open_icu.steps.base.config import BaseStepConfig
-from open_icu.steps.sharding.config.selection import SelectionConfig
-
-
-class PresetRefConfig(BaseModel):
-    """Reference to a predefined sharding preset."""
-
-    name: str = Field(
-        ...,
-        description="Name of the sharding preset.",
-    )
-
-    path: Path | None = Field(
-        default=None,
-        description="Optional path to the preset definition. If omitted, a default path is used.",
-    )
 
 
 class CustomConfig(BaseModel):
-    """Custom configuration specific to the sharding step."""
+    """Configuration specific to the sharding step.
+
+    The sharding step reads the output of a preceding concept step and writes
+    long-format Parquet shards grouped by subject. Empty dataset or concept
+    lists mean "include all".
+    """
 
     concept_step: str = Field(
-        description="Name of the preceding concept step."
+        ...,
+        description="Name of the preceding concept step whose dataset should be sharded.",
     )
-
-    presets: list[PresetRefConfig] = Field(
+    datasets: list[str] = Field(
         default_factory=list,
-        description="References to sharding preset configurations to apply.",
+        description="Dataset names to include, e.g. mimic-iv. Empty means all datasets.",
     )
-
-    datasets: SelectionConfig = Field(
-        default_factory=SelectionConfig,
-        description="Additional dataset selection rules applied on top of presets.",
+    concepts: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Concept names or relative concept paths to include. "
+            "Examples: heart_rate, vital/heart_rate. Empty means all concepts."
+        ),
     )
-
-    concepts: SelectionConfig = Field(
-        default_factory=SelectionConfig,
-        description="Additional concept selection rules applied on top of presets.",
+    subjects: list[int] = Field(
+        default_factory=list,
+        description="Subject IDs to include. Empty means all subjects.",
     )
-
-    subjects: SelectionConfig = Field(
-        default_factory=SelectionConfig,
-        description="Subject selection rules.",
-    )
-
-    time_resolution: str | None = Field(
-        default=None,
-        description="Optional temporal resolution used for sharding output.",
-    )
-
-    presplit: bool = Field(
-        default=False,
-        description="Whether to split subjects before sharding.",
-    )
-
     subjects_per_shard: int = Field(
         default=1000,
         gt=0,
-        description="Number of subjects written per shard/file.",
+        description="Number of subjects written per shard file.",
     )
 
 
