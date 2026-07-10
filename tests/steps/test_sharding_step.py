@@ -70,12 +70,12 @@ config:
     with OpenICUProject(project_path) as project:
         concept_dataset = project.add_dataset("concept")
         write_concept_file(
-            concept_dataset.data_path / "vital" / "heart_rate" / "testdb.parquet",
+            concept_dataset.data_path / "heart_rate" / "1.0.0" / "testdb.parquet",
             [1, 2, 3],
             "heart_rate//bpm",
         )
         write_concept_file(
-            concept_dataset.data_path / "chemistry" / "lactate" / "otherdb.parquet",
+            concept_dataset.data_path / "lactate" / "1.0.0" / "otherdb.parquet",
             [1, 2, 3],
             "lactate//mmol/l",
         )
@@ -114,7 +114,7 @@ config:
     with OpenICUProject(project_path) as project:
         concept_dataset = project.add_dataset("concept")
         write_concept_file(
-            concept_dataset.data_path / "vital" / "heart_rate" / "testdb.parquet",
+            concept_dataset.data_path / "heart_rate" / "1.0.0" / "testdb.parquet",
             [1, 2, 3],
             "heart_rate//bpm",
         )
@@ -125,3 +125,55 @@ config:
     shard = pl.read_parquet(output_file)
 
     assert shard["subject_id"].to_list() == [2]
+
+def test_sharding_filters_concepts_using_real_concept_output_structure(
+    tmp_path: Path,
+) -> None:
+    project_path = tmp_path / "project"
+    config_file = tmp_path / "sharding.yml"
+    config_file.write_text(
+        """\
+name: Sharding
+version: 1.0.0
+overwrite: true
+
+config:
+  concept_step: Concept
+  concepts:
+    - heart_rate
+  subjects_per_shard: 100
+"""
+    )
+
+    with OpenICUProject(project_path) as project:
+        concept_dataset = project.add_dataset("concept")
+
+        write_concept_file(
+            concept_dataset.data_path
+            / "heart_rate"
+            / "1.0.0"
+            / "testdb.parquet",
+            [1, 2],
+            "heart_rate//bpm",
+        )
+        write_concept_file(
+            concept_dataset.data_path
+            / "lactate"
+            / "1.0.0"
+            / "testdb.parquet",
+            [1, 2],
+            "lactate//mmol/l",
+        )
+
+        ShardingStep.load(project, config_file).run()
+
+    output_file = (
+        project_path
+        / "datasets"
+        / "sharding"
+        / "data"
+        / "shard_00000.parquet"
+    )
+    shard = pl.read_parquet(output_file)
+
+    assert shard["code"].unique().to_list() == ["heart_rate//bpm"]

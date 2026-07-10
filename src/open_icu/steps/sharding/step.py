@@ -19,9 +19,6 @@ from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
 
-CORE_COLUMNS = ["subject_id", "time", "code", "numeric_value", "text_value"]
-
-
 class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
     """Create subject-oriented long-format shards from concept Parquet files."""
 
@@ -87,9 +84,22 @@ class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
             if datasets and file_path.stem not in datasets:
                 continue
 
-            relative_concept_path = file_path.relative_to(concept_data_path).with_suffix("")
-            concept_path_without_dataset = Path(*relative_concept_path.parts[:-1])
-            if concept_filters and not self._matches_concept_filter(concept_path_without_dataset, concept_filters):
+            relative_file_path = file_path.relative_to(concept_data_path)
+            relative_parts = relative_file_path.parts
+
+            if len(relative_parts) < 3:
+                logger.warning(
+                    "Skipping concept file with unexpected path structure: %s",
+                    file_path,
+                )
+                continue
+
+            concept_path = Path(*relative_parts[:-2])
+
+            if concept_filters and not self._matches_concept_filter(
+                concept_path,
+                concept_filters,
+            ):
                 continue
 
             concept_files.append(file_path)
