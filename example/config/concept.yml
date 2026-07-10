@@ -1,6 +1,5 @@
 name: Concept
 version: 1.0.0
-overwrite: true
 
 config:
   extraction_step: Extraction
