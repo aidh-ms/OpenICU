@@ -18,6 +18,7 @@ from open_icu.storage.workspace import WorkspaceDir
 
 logger = get_logger(__name__)
 
+
 class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMeta):
     """Abstract base class for configurable data processing steps.
 
@@ -40,6 +41,7 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
         _dataset: Output dataset for final results
         _step_name: Normalized name of this step (lowercase)
     """
+
     def __init__(self, project: OpenICUProject, config: SCT, registry: BaseConfigRegistry[CT]) -> None:
         """Initialize the processing step.
 
@@ -126,7 +128,6 @@ class ConfigurableBaseStep[SCT: BaseStepConfig, CT: BaseConfig](metaclass=ABCMet
                 "Skipping step '%s' because overwrite=False and both workspace and dataset already exist",
                 self._step_name,
             )
-
 
         assert isinstance(self._workspace_dir, WorkspaceDir)
         logger.debug("Step '%s': finished successfully", self._step_name)

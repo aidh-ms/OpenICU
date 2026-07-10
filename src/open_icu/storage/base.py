@@ -22,10 +22,11 @@ class FileStorage:
     Attributes:
         path: The managed directory path
     """
+
     def __init__(
-            self,
-            path: Path,
-            overwrite: bool = False,
+        self,
+        path: Path,
+        overwrite: bool = False,
     ) -> None:
         """Initialize the file storage.
 

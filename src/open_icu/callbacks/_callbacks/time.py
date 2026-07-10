@@ -75,7 +75,6 @@ class AddOffset(CallbackProtocol):
         self.offset_unit = offset_unit
         self.output = output
 
-
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         offset_expr = to_expr(lf, self.offset)
 

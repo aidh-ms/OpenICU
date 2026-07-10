@@ -12,6 +12,7 @@ class MappingColumnConfig(BaseModel):
         numeric_value: Column name for numeric values
         text_value: Column name for text values
     """
+
     numeric_value: str | None = Field(None, description="Column name for numeric values.")
     text_value: str | None = Field(None, description="Column name for text values.")
 
@@ -27,13 +28,13 @@ class MappingPatternConfig(BaseModel):
         code: Code value to match.
         regex: Regular expression pattern to match.
     """
+
     dataset: str | None = Field(None, description="Dataset name to match.")
     version: str | None = Field(None, description="Dataset version to match.")
     table: str | None = Field(None, description="Table name to match.")
     event: str | None = Field(None, description="Event name to match.")
     code: str | None = Field(None, description="Code value to match.")
     regex: str | None = Field(None, description="Regular expression pattern to match.")
-
 
 
 class MappingConfig(BaseModel):
@@ -44,6 +45,7 @@ class MappingConfig(BaseModel):
         columns: Column configuration for concept mapping.
         filters: The list of filter configurations for the mapping.
     """
+
     pattern: MappingPatternConfig = Field(..., description="Pattern configuration for concept mapping.")
     columns: MappingColumnConfig = Field(..., description="Column configuration for concept mapping.")
 
@@ -62,9 +64,7 @@ class MappingConfig(BaseModel):
             )
         )
 
-    filters: list[str] = Field(
-        default_factory=list, description="The list of filter configurations for the mapping."
-    )
+    filters: list[str] = Field(default_factory=list, description="The list of filter configurations for the mapping.")
 
 
 class SimpleDatasetConceptConfig(BaseDatasetConfig):
@@ -72,12 +72,11 @@ class SimpleDatasetConceptConfig(BaseDatasetConfig):
 
     Inherits from BaseDatasetConfig and adds dataset-specific attributes if needed.
     """
+
     __open_icu_config_type__ = "concept"
 
     mappings: list[MappingConfig] = Field(default_factory=list, description="List of concept mappings.")
-    type: Literal["simple"] = Field(
-        "simple", description="Type of concept: 'base', 'derived', or 'complex'."
-    )
+    type: Literal["simple"] = Field("simple", description="Type of concept: 'base', 'derived', or 'complex'.")
 
     @model_validator(mode="after")
     def inject_dataset_into_mappings(self) -> "SimpleDatasetConceptConfig":

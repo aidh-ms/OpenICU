@@ -126,6 +126,7 @@ config:
 
     assert shard["subject_id"].to_list() == [2]
 
+
 def test_sharding_filters_concepts_using_real_concept_output_structure(
     tmp_path: Path,
 ) -> None:
@@ -149,31 +150,19 @@ config:
         concept_dataset = project.add_dataset("concept")
 
         write_concept_file(
-            concept_dataset.data_path
-            / "heart_rate"
-            / "1.0.0"
-            / "testdb.parquet",
+            concept_dataset.data_path / "heart_rate" / "1.0.0" / "testdb.parquet",
             [1, 2],
             "heart_rate//bpm",
         )
         write_concept_file(
-            concept_dataset.data_path
-            / "lactate"
-            / "1.0.0"
-            / "testdb.parquet",
+            concept_dataset.data_path / "lactate" / "1.0.0" / "testdb.parquet",
             [1, 2],
             "lactate//mmol/l",
         )
 
         ShardingStep.load(project, config_file).run()
 
-    output_file = (
-        project_path
-        / "datasets"
-        / "sharding"
-        / "data"
-        / "shard_00000.parquet"
-    )
+    output_file = project_path / "datasets" / "sharding" / "data" / "shard_00000.parquet"
     shard = pl.read_parquet(output_file)
 
     assert shard["code"].unique().to_list() == ["heart_rate//bpm"]

@@ -19,6 +19,7 @@ from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
 
+
 class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
     """Create subject-oriented long-format shards from concept Parquet files."""
 
@@ -118,10 +119,7 @@ class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
 
     def _subject_ids(self, concept_files: list[Path]) -> list[int]:
         """Collect selected subject IDs from the selected concept files."""
-        lfs = [
-            pl.scan_parquet(file_path).select(pl.col("subject_id").cast(pl.Int64))
-            for file_path in concept_files
-        ]
+        lfs = [pl.scan_parquet(file_path).select(pl.col("subject_id").cast(pl.Int64)) for file_path in concept_files]
         lf = pl.concat(lfs, how="vertical").unique().sort("subject_id")
 
         configured_subjects = self._config.config.subjects

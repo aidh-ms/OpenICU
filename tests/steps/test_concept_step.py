@@ -1,4 +1,5 @@
 """End-to-end tests for the concept step on synthetic fixture data."""
+
 from pathlib import Path
 
 import polars as pl
@@ -18,7 +19,7 @@ def project(tmp_path: Path, extraction_config: Path, concept_config: Path) -> Op
         [tmp_path / "config" / "testdb" / "1.0" / "mappings"],
     )
 
-    extraction_step =ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step = ExtractionStep.load(project, tmp_path / "extraction.yml")
     extraction_step.run()
     concept_step = ConceptStep.load(project, tmp_path / "concept.yml")
     concept_step.run()
@@ -78,9 +79,7 @@ class TestConceptStepRobustness:
         self, tmp_path: Path, extraction_config: Path, concept_config: Path
     ) -> None:
         # Add a concept that has no mapping for testdb.
-        (tmp_path / "config" / "concepts" / "orphan.yml").write_text(
-            "name: orphan\nversion: 1.0.0\nunit: x\n"
-        )
+        (tmp_path / "config" / "concepts" / "orphan.yml").write_text("name: orphan\nversion: 1.0.0\nunit: x\n")
 
         project = OpenICUProject(tmp_path / "project")
         load_concept_config(

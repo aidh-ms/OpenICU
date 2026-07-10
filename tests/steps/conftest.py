@@ -4,6 +4,7 @@ Builds a tiny synthetic ICU dataset ("testdb") with a vitals table and an item
 lookup table, plus the matching extraction and concept configurations, so the
 steps can be exercised end-to-end without any real data.
 """
+
 from collections.abc import Iterator
 from pathlib import Path
 

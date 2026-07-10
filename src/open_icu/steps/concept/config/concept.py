@@ -12,10 +12,7 @@ from open_icu.steps.concept.config.derived import DerivedDatasetConceptConfig
 from open_icu.steps.concept.config.simple import SimpleDatasetConceptConfig
 
 DatasetConceptConfigUnion = Annotated[
-    SimpleDatasetConceptConfig
-    | DerivedDatasetConceptConfig
-    | ComplexDatasetConceptConfig,
-    Field(discriminator="type")
+    SimpleDatasetConceptConfig | DerivedDatasetConceptConfig | ComplexDatasetConceptConfig, Field(discriminator="type")
 ]
 
 
@@ -26,6 +23,7 @@ class ConceptLimits(BaseModel):
         min: Minimum value for the concept.
         max: Maximum value for the concept.
     """
+
     min: float | None = Field(None, description="Minimum value for the concept.")
     max: float | None = Field(None, description="Maximum value for the concept.")
 
@@ -44,6 +42,7 @@ class ConceptConfig(BaseConfig):
         limits: Configuration for concept limits
         dataset_concepts: List of DatasetConceptConfig objects defining how to extract concept data per dataset
     """
+
     __open_icu_config_type__ = "concept"
 
     unit: str = Field(..., description="Unit of measurement for the concept values.")
@@ -105,11 +104,13 @@ class ConceptConfig(BaseConfig):
             try:
                 # Identity always comes from the dataset directory itself,
                 # never from where an inherited file physically lives.
-                sub_data.update({
-                    "dataset": path.parent.parent.name,
-                    "version": path.parent.name,
-                    "name": name,
-                })
+                sub_data.update(
+                    {
+                        "dataset": path.parent.parent.name,
+                        "version": path.parent.name,
+                        "name": name,
+                    }
+                )
 
                 dataset_concept = adapter.validate_python(sub_data)
                 data.setdefault("dataset_concepts", []).append(dataset_concept)

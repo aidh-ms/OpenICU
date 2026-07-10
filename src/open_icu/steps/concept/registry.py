@@ -19,5 +19,6 @@ class ConceptConfigRegistry(BaseConfigRegistry[ConceptConfig]):
 
     pass
 
+
 concept_config_registry = ConceptConfigRegistry()
 """Global singleton instance of the concept configuration registry."""

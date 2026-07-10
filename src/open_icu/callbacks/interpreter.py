@@ -133,7 +133,7 @@ class ExprInterpreter(ast.NodeVisitor):
         raise ValueError(f"Unsupported syntax: {ast.dump(node)}")
 
 
-def parse_expr(lf : LazyFrame, expr: str) -> CallbackResult:
+def parse_expr(lf: LazyFrame, expr: str) -> CallbackResult:
     interpreter = ExprInterpreter()
     callback = interpreter.eval(expr)
 

@@ -18,6 +18,7 @@ from open_icu.storage.base import FileStorage
 
 logger = get_logger(__name__)
 
+
 class MEDSDataset(FileStorage):
     """MEDS format dataset storage manager.
 
@@ -31,9 +32,9 @@ class MEDSDataset(FileStorage):
     """
 
     def __init__(
-            self,
-            dataset_path: Path,
-            overwrite: bool = False,
+        self,
+        dataset_path: Path,
+        overwrite: bool = False,
     ) -> None:
         """Initialize the MEDS dataset storage.
 
@@ -118,10 +119,16 @@ class MEDSDataset(FileStorage):
             }
         )
         if dfs:
-            codes_df = pl.concat(dfs).unique().with_columns([
-                pl.lit(None).alias("description").cast(pl.String),
-                pl.lit(None).alias("parent_codes").cast(pl.String)
-            ])
+            codes_df = (
+                pl.concat(dfs)
+                .unique()
+                .with_columns(
+                    [
+                        pl.lit(None).alias("description").cast(pl.String),
+                        pl.lit(None).alias("parent_codes").cast(pl.String),
+                    ]
+                )
+            )
 
         logger.info(
             "Writing code vocabulary to %s",

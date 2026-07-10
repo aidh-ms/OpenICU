@@ -58,14 +58,13 @@ class FirstNotNull(CallbackProtocol):
             return expr
         return expr.alias(self.output)
 
+
 @register_callback_cls
 class Max(CallbackProtocol):
-    """
-    """
+    """ """
 
     def __init__(self, *fields: AstValue, output: Optional[str]) -> None:
-        """
-        """
+        """ """
         if len(fields) == 1 and isinstance(fields[0], list):
             self.fields: Sequence[AstValue] = fields[0]  # ty: ignore[invalid-assignment]
         else:
@@ -74,8 +73,7 @@ class Max(CallbackProtocol):
         self.output = output
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
-        """
-        """
+        """ """
         cols = [to_col_name(f) for f in self.fields]
 
         # Optional: empty list handling

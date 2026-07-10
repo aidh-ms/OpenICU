@@ -48,10 +48,7 @@ class Cast(CallbackProtocol):
 
         if dtype_key not in _DTYPE_MAP:
             allowed = ", ".join(sorted(_DTYPE_MAP))
-            raise ValueError(
-                f"Unsupported dtype '{self.dtype}'. "
-                f"Allowed dtypes are: {allowed}"
-            )
+            raise ValueError(f"Unsupported dtype '{self.dtype}'. Allowed dtypes are: {allowed}")
 
         expr = to_expr(lf, self.value).cast(
             _DTYPE_MAP[dtype_key],

@@ -12,11 +12,12 @@ from open_icu.steps.sharding.config.sharding import ShardingConfig
 class ShardingConfigRegistry(BaseConfigRegistry[ShardingConfig]):
     """Registry for sharding configuration objects.
 
-    Specialized registry for storing and retrieving ShardingConfig instances
-    that define how to shard data from config tables and transform them
-    into MEDS events.
+    Stores and retrieves ShardingConfig instances used to create
+    subject-oriented Parquet shards from concept-step output.
     """
+
     pass
+
 
 sharding_config_registry = ShardingConfigRegistry()
 """Global singleton instance of the sharding configuration registry."""

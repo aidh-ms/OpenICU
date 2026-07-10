@@ -124,5 +124,6 @@ def set_log_level(level: LogLevel) -> None:
     for handler in logger.handlers:
         handler.setLevel(level)
 
+
 # Create a default logger for this module
 logger = get_logger(__name__)
