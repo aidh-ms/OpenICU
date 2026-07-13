@@ -27,12 +27,11 @@ class MappingPatternConfig(BaseModel):
         code: Code value to match.
         regex: Regular expression pattern to match.
     """
-    dataset: str | None = Field(None, description="Dataset name to match.")
+    dataset: str = Field(..., description="Dataset name to match.")
     version: str | None = Field(None, description="Dataset version to match.")
-    table: str | None = Field(None, description="Table name to match.")
-    event: str | None = Field(None, description="Event name to match.")
-    code: str | None = Field(None, description="Code value to match.")
-    regex: str | None = Field(None, description="Regular expression pattern to match.")
+    table: str = Field(..., description="Table name to match.")
+    event: str = Field(..., description="Event name to match.")
+    code: str = Field(..., description="Code value to match.")
 
 
 
@@ -51,16 +50,7 @@ class MappingConfig(BaseModel):
     @property
     def regex(self) -> str:
         """Returns the regex pattern if defined in the mapping pattern."""
-        if self.pattern.regex is not None:
-            return self.pattern.regex
-
-        return "//".join(
-            (
-                self.pattern.dataset or "(.+?)",
-                self.pattern.table or "(.+?)",
-                self.pattern.code or "(.+?)",
-            )
-        )
+        return self.pattern.code or "(.+?)"
 
     filters: list[str] = Field(
         default_factory=list, description="The list of filter configurations for the mapping."
