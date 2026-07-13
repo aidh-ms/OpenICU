@@ -62,7 +62,11 @@ columns:
     type: int64
 
 post_join_callbacks:
-  - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
+  # eICU offsets are relative to ICU admission. hospitalAdmitOffset is normally
+  # negative, so subtracting it moves forward from hospital to ICU admission.
+  - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, output=hospital_admission_timestamp)
+  - add_offset(hospital_admission_timestamp, hospitaladmitoffset * -1, output=admission_timestamp)
+  - add_offset(admission_timestamp, hospitaldischargeoffset, output=hospital_discharge_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, output=discharge_timestamp)
   - add_offset(admission_timestamp, cast(replace(age == "> 89", "90", age), "int16") * 365.25, offset_unit="days", output=birth_timestamp)
   - replace((gender == "") or (gender == None), "Unknown", gender, output=gender_1)
@@ -78,6 +82,18 @@ events:
       time: col(birth_timestamp)
       code:
         - col(gender_1)
+
+  - name: HOSPITAL_ADMISSION
+    columns:
+      time: col(hospital_admission_timestamp)
+      code:
+        - col(hospitaladmitsource)
+      extension:
+        available_time: col(hospital_admission_timestamp)
+    filters:
+      - drop_na(time)
+      - first_distinct(subject_id, time)
+
   - name: ICU_ADMISSION
     columns:
       time: col(admission_timestamp)
@@ -126,6 +142,18 @@ events:
         - col(unittype)
       extension:
         available_time: col(discharge_timestamp)
+
+  - name: HOSPITAL_DISCHARGE
+    columns:
+      time: col(hospital_discharge_timestamp)
+      code:
+        - col(hospitaldischargelocation)
+      text_value: col(hospitaldischargestatus)
+      extension:
+        available_time: col(hospital_discharge_timestamp)
+    filters:
+      - drop_na(time)
+      - first_distinct(subject_id, time)
 
   - name: SUBJECT_WEIGHT
     columns:
