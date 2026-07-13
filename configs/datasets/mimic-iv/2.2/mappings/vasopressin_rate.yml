@@ -2,13 +2,17 @@ type: simple
 mappings:
   - pattern:
       table: inputevents
-      event: INFUSION_START
-      code: (222315(//.*)?)
-    columns: &id001
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
+      event: INFUSION_END
+      code: 222315(//.*)?
+      extensions:
+        rateuom: units/hour
+    columns:
+      numeric_value: col(rate) / 60
   - pattern:
       table: inputevents
       event: INFUSION_END
-      code: (222315(//.*)?)
-    columns: *id001
+      code: 222315(//.*)?
+      extensions:
+        rateuom: units/min
+    columns:
+      numeric_value: col(rate)

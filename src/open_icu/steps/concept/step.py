@@ -250,6 +250,12 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     pl.col("code").str.contains(mapping.regex)
                 )
 
+                for col_name, pattern in mapping.pattern.extensions.items():
+                    print(lf.head(5).collect())
+                    lf = lf.filter(
+                        pl.col(col_name).str.contains(pattern)
+                    )
+
                 # extension columns
                 lf = lf.with_columns(pl.lit(dataset).alias("dataset"))
                 lf = lf.with_columns(pl.lit(version).alias("version"))
