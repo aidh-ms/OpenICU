@@ -30,7 +30,7 @@ class MappingPatternConfig(BaseModel):
     dataset: str | None = Field(None, description="Dataset name to match.")
     version: str | None = Field(None, description="Dataset version to match.")
     table: str = Field(..., description="Table name to match.")
-    event: str = Field(..., description="Event name to match.")
+    event: str | None = Field(None, description="Event name to match.")
     code: str = Field(..., description="Code value to match.")
     extensions: dict[str, str] = Field(default_factory=dict, description="Additional pattern to filter the extension columns.")
 
