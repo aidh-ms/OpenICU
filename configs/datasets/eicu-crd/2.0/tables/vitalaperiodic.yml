@@ -56,7 +56,7 @@ join:
       - patientunitstayid
 
     callbacks:
-      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset, "minutes", output=admission_timestamp)
+      - to_datetime(hospitaldischargeyear, 1, 1, hospitaladmittime24, hospitaladmitoffset * -1, "minutes", output=admission_timestamp)
 
     post_join_callbacks:
       - add_offset(admission_timestamp, observationoffset, output=event_timestamp)
