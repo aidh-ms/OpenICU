@@ -42,10 +42,10 @@ class TestExtractionStep:
         )
 
         codes = set(df["code"].to_list())
-        assert "testdb//vitals//220045//Heart Rate//bpm" in codes
-        assert "testdb//vitals//220050//Systolic BP//mmHg" in codes
+        assert "220045//Heart Rate//bpm" in codes
+        assert "220050//Systolic BP//mmHg" in codes
         # unmatched join keys: the null label is skipped in the code, not rendered
-        assert "testdb//vitals//999999//units" in codes
+        assert "999999//units" in codes
 
     def test_join_and_values(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)
@@ -67,7 +67,7 @@ class TestExtractionStep:
 
         weight = pl.read_parquet(base / "WEIGHT.parquet")
         height = pl.read_parquet(base / "HEIGHT.parquet")
-        assert weight["code"].unique().to_list() == ["testdb//measurements//kg"]
+        assert weight["code"].unique().to_list() == ["kg"]
         assert weight["numeric_value"].to_list() == [80.0, 60.0]
         assert height["numeric_value"].to_list() == [2.0, 1.5]
 
@@ -77,7 +77,7 @@ class TestExtractionStep:
 
         assert (metadata_path / "dataset.json").exists()
         codes = pl.read_parquet(metadata_path / "codes.parquet")
-        assert "testdb//vitals//220045//Heart Rate//bpm" in codes["code"].to_list()
+        assert "220045//Heart Rate//bpm" in codes["code"].to_list()
 
     def test_rerun_is_skipped_without_overwrite(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)
@@ -164,6 +164,8 @@ event_defaults:
 events:
   - name: CHART
     columns:
+      code:
+        - const("CHART")
       numeric_value: col(valuenum)
 """
         )
@@ -193,7 +195,7 @@ config:
         assert df.schema["time"] == pl.Datetime(time_unit="us")  # native timestamp handled
         assert df["time"].to_list() == [datetime(2024, 1, 1, 8, 0), datetime(2024, 1, 2, 10, 0)]
         assert df["numeric_value"].to_list() == [80.0, 120.0]
-        assert df["code"].to_list() == ["pqdb//vitals", "pqdb//vitals"]
+        assert df["code"].to_list() == ["CHART", "CHART"]
 
     def test_reads_glob_partitioned_parquet(self, tmp_path: Path) -> None:
         """A glob path reads many partitioned part files (e.g. HiRID's raw dumps)."""
@@ -226,6 +228,8 @@ event_defaults:
 events:
   - name: OBS
     columns:
+      code:
+        - const("OBS")
       numeric_value: col(valuenum)
 """
         )
