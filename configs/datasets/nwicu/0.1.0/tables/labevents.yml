@@ -68,14 +68,20 @@ event_defaults:
 events:
   - name: labevent_id
     columns:
+      code:
+        - const("LABEVENT_ID")
       time: col(charttime)
       numeric_value: col(labevent_id)
   - name: specimen_id
     columns:
+      code:
+        - const("SPECIMEN_ID")
       time: col(charttime)
       numeric_value: col(specimen_id)
   - name: order_provider_id
     columns:
+      code:
+        - const("ORDER_PROVIDER_ID")
       time: col(charttime)
       text_value: col(order_provider_id)
     filters:
@@ -92,30 +98,40 @@ events:
       - drop_na(text_value)
   - name: ref_range_lower
     columns:
+      code:
+        - const("REF_RANGE_LOWER")
       time: col(charttime)
       numeric_value: col(ref_range_lower)
     filters:
       - drop_na(numeric_value)
   - name: ref_range_upper
     columns:
+      code:
+        - const("REF_RANGE_UPPER")
       time: col(charttime)
       numeric_value: col(ref_range_upper)
     filters:
       - drop_na(numeric_value)
   - name: flag
     columns:
+      code:
+        - const("FLAG")
       time: col(charttime)
       text_value: col(flag)
     filters:
       - drop_na(text_value)
   - name: priority
     columns:
+      code:
+        - const("PRIORITY")
       time: col(charttime)
       text_value: col(priority)
     filters:
       - drop_na(text_value)
   - name: comments
     columns:
+      code:
+        - const("COMMENTS")
       time: col(charttime)
       text_value: col(comments)
     filters:

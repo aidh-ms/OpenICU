@@ -34,11 +34,15 @@ event_defaults:
 events:
   - name: icu_admission
     columns:
+      code:
+        - const("ICU_ADMISSION")
       time: col(intime)
       extension:
         available_time: col(intime)
   - name: icu_discharge
     columns:
+      code:
+        - const("ICU_DISCHARGE")
       time: col(outtime)
       extension:
         available_time: col(outtime)

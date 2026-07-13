@@ -96,6 +96,8 @@ events:
 
   - name: MEDS_BIRTH
     columns:
+      code:
+        - const("MEDS_BIRTH")
       time: col(birth_timestamp)
     filters:
       - drop_na(time)
