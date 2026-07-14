@@ -185,31 +185,10 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         output_dataset_path.mkdir(parents=True, exist_ok=True)
 
         for mapping in dataset_concept.mappings:
-            dataset = mapping.pattern.dataset
-            version = mapping.pattern.version
+            dataset = dataset_concept.dataset
+            version = dataset_concept.version
             table = mapping.pattern.table
             event = mapping.pattern.event
-
-            if dataset is None:
-                logger.warning(
-                    "skipping mapping for concept %s: dataset is not configured",
-                    concept.name,
-                )
-                continue
-
-            if version is None:
-                logger.warning(
-                    "skipping mapping for concept %s: version is not configured",
-                    concept.name,
-                )
-                continue
-
-            if table is None:
-                logger.warning(
-                    "skipping mapping for concept %s: table is not configured",
-                    concept.name,
-                )
-                continue
 
             table_path = self.extraction_dataset.data_path / dataset / version / table
 
@@ -247,8 +226,14 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 )
 
                 lf = pl.scan_parquet(data_path).filter(
-                    pl.col("code").str.contains(mapping.regex)
+                    pl.col("code").str.contains(mapping.pattern.code)
                 )
+
+                for col_name, pattern in mapping.pattern.extensions.items():
+                    print(lf.head(5).collect())
+                    lf = lf.filter(
+                        pl.col(col_name).str.contains(pattern)
+                    )
 
                 # extension columns
                 lf = lf.with_columns(pl.lit(dataset).alias("dataset"))

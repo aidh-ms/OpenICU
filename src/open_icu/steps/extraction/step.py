@@ -377,10 +377,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         such as event names, units, routes, specimens, or methods, are provided
         through columns.code. The configured code suffix is appended last.
         """
-        code_parts: list[pl.Expr] = [
-            pl.lit(table.dataset),
-            pl.lit(table.name),
-        ]
+        code_parts: list[pl.Expr] = []
 
         code_parts.extend(
             self._parse_expr(
@@ -408,6 +405,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             )
             for expr in event.code_suffix
         )
+        if len(code_parts) == 1:
+            return code_parts[0].cast(pl.String).alias("code")
 
         return pl.concat_str(
             [expr.cast(pl.String) for expr in code_parts],

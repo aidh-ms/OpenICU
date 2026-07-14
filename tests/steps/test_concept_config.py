@@ -25,6 +25,7 @@ class TestConceptConfig:
             "mappings:\n"
             "  - pattern:\n"
             "      table: chartevents\n"
+            "      evnt: Heart Rate\n"
             "      code: (220045//Heart Rate)\n"
             "    columns:\n"
             "      numeric_value: col(numeric_value)\n"
@@ -50,26 +51,6 @@ class TestConceptConfig:
         concept = ConceptConfig.load(concept_file, dataset_paths=[mapping_dir])
         assert concept.dataset_concepts == []
 
-
-class TestSimpleConcept:
-    def test_dataset_and_version_injected_into_mappings(self) -> None:
-        config = SimpleDatasetConceptConfig.model_validate(
-            {
-                "name": "heart_rate",
-                "version": "3.1",
-                "dataset": "mimic-iv",
-                "mappings": [
-                    {
-                        "pattern": {"table": "chartevents", "code": "(220045//Heart Rate)"},
-                        "columns": {"numeric_value": "col(numeric_value)"},
-                    }
-                ],
-            }
-        )
-        pattern = config.mappings[0].pattern
-        assert pattern.dataset == "mimic-iv"
-        assert pattern.version == "3.1"
-
     def test_regex_built_from_pattern_parts(self) -> None:
         mapping = MappingConfig.model_validate(
             {
@@ -77,15 +58,11 @@ class TestSimpleConcept:
                 "columns": {},
             }
         )
-        assert mapping.regex == "mimic-iv//chartevents//(220045//Heart Rate)"
+        assert mapping.pattern.code == "(220045//Heart Rate)"
 
     def test_regex_uses_wildcards_for_missing_parts(self) -> None:
-        mapping = MappingConfig.model_validate({"pattern": {"code": "(220045)"}, "columns": {}})
-        assert mapping.regex == "(.+?)//(.+?)//(220045)"
-
-    def test_explicit_regex_wins(self) -> None:
-        mapping = MappingConfig.model_validate({"pattern": {"regex": "^custom$", "code": "ignored"}, "columns": {}})
-        assert mapping.regex == "^custom$"
+        mapping = MappingConfig.model_validate({"pattern": {"table": "example", "code": "(220045)", }, "columns": {}})
+        assert mapping.pattern.code == "(220045)"
 
 
 class TestComplexConcept:

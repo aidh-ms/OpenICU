@@ -29,6 +29,8 @@ event_defaults:
 events:
   - name: MEDS_BIRTH
     columns:
+      code:
+        - const("MEDS_BIRTH")
       time: col(dob)
       extension:
         available_time: col(dob)
@@ -43,6 +45,8 @@ events:
 
   - name: MEDS_DEATH
     columns:
+      code:
+        - const("MEDS_DEATH")
       time: col(dod_24)
       extension:
         available_time: col(dod_24)

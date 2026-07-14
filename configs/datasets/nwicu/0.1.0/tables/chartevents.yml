@@ -61,6 +61,8 @@ events:
       text_value: col(value)
   - name: warning
     columns:
+      code:
+        - const("WARNING")
       time: col(storetime)
       numeric_value: col(warning)
     filters:

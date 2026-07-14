@@ -50,4 +50,6 @@ events:
       text_value: col(event_txt)
   - name: scheduletime
     columns:
+      code:
+        - const("SCHEDULE_TIME")
       time: col(scheduletime)

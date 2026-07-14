@@ -28,9 +28,13 @@ event_defaults:
 events:
   - name: dob
     columns:
+      code:
+        - const("MEDS_BIRTH")
       time: col(dob)
   - name: dod
     columns:
+      code:
+        - const("MEDS_DEATH")
       time: col(dod)
   - name: gender
     columns:
