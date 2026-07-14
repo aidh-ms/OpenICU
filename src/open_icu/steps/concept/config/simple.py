@@ -25,7 +25,7 @@ class MappingPatternConfig(BaseModel):
         table: Table name to match.
         event: Event name to match.
         code: Code value to match.
-        regex: Regular expression pattern to match.
+        extensions: Additional pattern to filter the extension columns.
     """
     dataset: str | None = Field(None, description="Dataset name to match.")
     version: str | None = Field(None, description="Dataset version to match.")
