@@ -253,7 +253,7 @@ def test_mimic_demo_inherits_concept_mappings() -> None:
     assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
     assert dataset_concept.version == "2.2"
     assert dataset_concept.mappings
-    assert dataset_concept.mappings[0].pattern.dataset == "mimic-iv-demo"
+    assert dataset_concept.dataset == "mimic-iv-demo"
 
 
 def test_every_dataset_mapping_has_a_concept_definition() -> None:
