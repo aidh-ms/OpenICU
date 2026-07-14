@@ -406,7 +406,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             for expr in event.code_suffix
         )
         if len(code_parts) == 1:
-            return code_parts[0].alias("code")
+            return code_parts[0].cast(pl.String).alias("code")
 
         return pl.concat_str(
             [expr.cast(pl.String) for expr in code_parts],
