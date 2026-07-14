@@ -78,11 +78,11 @@ class TestSimpleConcept:
                 "columns": {},
             }
         )
-        assert mapping.regex == "(220045//Heart Rate)"
+        assert mapping.pattern.code == "(220045//Heart Rate)"
 
     def test_regex_uses_wildcards_for_missing_parts(self) -> None:
         mapping = MappingConfig.model_validate({"pattern": {"table": "example", "code": "(220045)", }, "columns": {}})
-        assert mapping.regex == "(220045)"
+        assert mapping.pattern.code == "(220045)"
 
 
 class TestComplexConcept:

@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, computed_field, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from open_icu.config.base import BaseDatasetConfig
 
@@ -45,13 +45,6 @@ class MappingConfig(BaseModel):
     """
     pattern: MappingPatternConfig = Field(..., description="Pattern configuration for concept mapping.")
     columns: MappingColumnConfig = Field(..., description="Column configuration for concept mapping.")
-
-    @computed_field
-    @property
-    def regex(self) -> str:
-        """Returns the regex pattern if defined in the mapping pattern."""
-        return self.pattern.code or "(.+?)"
-
     filters: list[str] = Field(
         default_factory=list, description="The list of filter configurations for the mapping."
     )

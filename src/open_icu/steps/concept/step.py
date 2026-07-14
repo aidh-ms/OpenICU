@@ -247,7 +247,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 )
 
                 lf = pl.scan_parquet(data_path).filter(
-                    pl.col("code").str.contains(mapping.regex)
+                    pl.col("code").str.contains(mapping.pattern.code)
                 )
 
                 for col_name, pattern in mapping.pattern.extensions.items():

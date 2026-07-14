@@ -163,7 +163,7 @@ def test_concept_parses_with_all_dataset_mappings(concept_file: Path) -> None:
                     if value is not None
                 ]
                 assert_expressions_parse(expressions + mapping.filters, source)
-                assert_regex_compiles(mapping.regex, source)
+                assert_regex_compiles(mapping.pattern.code, source)
 
         if isinstance(dataset_concept, DerivedDatasetConceptConfig):
             for concept_table in (dataset_concept.table, *dataset_concept.join):
