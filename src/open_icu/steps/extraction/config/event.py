@@ -23,8 +23,8 @@ class MEDSEventFieldConfig(BaseModel):
 
     Specifies which source columns map to each MEDS standard column. The code
     column can be a list of event-specific code parts that will be concatenated
-    with the automatic dataset/table prefix, optional event-level code_prefix,
-    and optional event-level code_suffix when the final MEDS code is built.
+    with optional event-level code_prefix, and optional event-level code_suffix
+    when the final MEDS code is built.
 
     Attributes:
         subject_id: Column name for subject/patient identifier
@@ -109,7 +109,7 @@ class MEDSEventFieldDefaultConfig(BaseModel):
         merge code_prefix or code_suffix into columns.code, because the final
         code is built later as:
 
-            db_name // table_name // code_prefix // columns.code // code_suffix
+            code_prefix // columns.code // code_suffix
 
         Args:
             event_column_config: Event-specific column configuration dictionary
