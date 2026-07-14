@@ -51,26 +51,6 @@ class TestConceptConfig:
         concept = ConceptConfig.load(concept_file, dataset_paths=[mapping_dir])
         assert concept.dataset_concepts == []
 
-
-class TestSimpleConcept:
-    def test_dataset_and_version_injected_into_mappings(self) -> None:
-        config = SimpleDatasetConceptConfig.model_validate(
-            {
-                "name": "heart_rate",
-                "version": "3.1",
-                "dataset": "mimic-iv",
-                "mappings": [
-                    {
-                        "pattern": {"table": "chartevents", "code": "(220045//Heart Rate)"},
-                        "columns": {"numeric_value": "col(numeric_value)"},
-                    }
-                ],
-            }
-        )
-        pattern = config.mappings[0].pattern
-        assert pattern.dataset == "mimic-iv"
-        assert pattern.version == "3.1"
-
     def test_regex_built_from_pattern_parts(self) -> None:
         mapping = MappingConfig.model_validate(
             {

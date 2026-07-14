@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 from open_icu.config.base import BaseDatasetConfig
 
@@ -20,15 +20,11 @@ class MappingPatternConfig(BaseModel):
     """Configuration for concept mapping patterns.
 
     Attributes:
-        dataset: Dataset name to match.
-        version: Dataset version to match.
         table: Table name to match.
         event: Event name to match.
         code: Code value to match.
         extensions: Additional pattern to filter the extension columns.
     """
-    dataset: str | None = Field(None, description="Dataset name to match.")
-    version: str | None = Field(None, description="Dataset version to match.")
     table: str = Field(..., description="Table name to match.")
     event: str | None = Field(None, description="Event name to match.")
     code: str = Field(..., description="Code value to match.")
@@ -61,10 +57,3 @@ class SimpleDatasetConceptConfig(BaseDatasetConfig):
     type: Literal["simple"] = Field(
         "simple", description="Type of concept: 'base', 'derived', or 'complex'."
     )
-
-    @model_validator(mode="after")
-    def inject_dataset_into_mappings(self) -> "SimpleDatasetConceptConfig":
-        for mapping in self.mappings:
-            mapping.pattern.dataset = self.dataset
-            mapping.pattern.version = self.version
-        return self
