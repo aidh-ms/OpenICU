@@ -1,0 +1,6 @@
+name: diagnosis
+version: 1.0.0
+unit: ICD10CM
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

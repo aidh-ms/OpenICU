@@ -7,14 +7,14 @@ from open_icu.utils.importer import import_callable
 
 if TYPE_CHECKING:
     from open_icu.steps.concept.config.concept import ConceptConfig
-    from open_icu.storage.project import OpenICUProject
+    from open_icu.steps.concept.step import ConceptStep
 
 
 class ConceptTransformerProtocol(Protocol):
 
     def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", **kwargs):
         ...
-    def __call__(self, project: "OpenICUProject") -> None:
+    def __call__(self, step: "ConceptStep") -> None:
         ...
 
 
@@ -33,17 +33,21 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
     kwargs: dict = Field(default_factory=dict, description="Additional keyword arguments to pass to the concept transformer function.")
     concepts: list[str] = Field(default_factory=list, description="The list of concept identifiers that this complex concept depends on.")
 
-    @computed_field
-    @property
-    def fn(self) -> ConceptTransformerProtocol:
-        """Dynamically import and return the concept transformer function based on the provided dotted path."""
+    def build_transformer(self, concept: "ConceptConfig") -> ConceptTransformerProtocol:
+        """Dynamically import and instantiate the concept transformer for the owning concept.
 
+        Args:
+            concept: The concept configuration this dataset-specific config belongs to
+
+        Returns:
+            A transformer instance that is called with the running ConceptStep
+        """
         transformer = cast(
             type[ConceptTransformerProtocol],
             import_callable(self.concept_transformer)
         )
         return transformer(
-            self.__class__.__bases__[0],
+            concept,
             self,
             **self.kwargs
         )

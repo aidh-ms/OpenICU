@@ -1,0 +1,7 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformers.icd.ICD9ToICD10Transformer
+kwargs:
+  table: diagnoses_icd
+  event: diagnoses
+  # dataset//table//<code>//<version>
+  code_pattern: '^[^/]+//diagnoses_icd//(?<icd_code>[^/]+)//(?<icd_version>[^/]+)$'

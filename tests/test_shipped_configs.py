@@ -16,10 +16,12 @@ import pytest
 
 from open_icu.callbacks.interpreter import ExprInterpreter
 from open_icu.config.inheritance import resolve_effective_configs
+from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig
 from open_icu.steps.concept.config.concept import ConceptConfig
 from open_icu.steps.concept.config.derived import DerivedDatasetConceptConfig
 from open_icu.steps.concept.config.simple import SimpleDatasetConceptConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig
+from open_icu.utils.importer import import_callable
 
 REPO_ROOT = Path(__file__).parents[1]
 CONFIG_ROOT = REPO_ROOT / "configs"
@@ -172,6 +174,16 @@ def test_concept_parses_with_all_dataset_mappings(concept_file: Path) -> None:
                     source,
                 )
             assert_expressions_parse(dataset_concept.filters, source)
+
+        if isinstance(dataset_concept, ComplexDatasetConceptConfig):
+            try:
+                import_callable(dataset_concept.concept_transformer)
+            except Exception as e:  # noqa: BLE001 - reported with context
+                pytest.fail(
+                    f"unimportable concept transformer in {source}: {dataset_concept.concept_transformer!r} ({e})"
+                )
+            if (code_pattern := dataset_concept.kwargs.get("code_pattern")) is not None:
+                assert_regex_compiles(code_pattern, source)
 
 
 def test_demo_dataset_inherits_full_table_set() -> None:

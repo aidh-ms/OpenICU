@@ -107,13 +107,32 @@ concepts:                           # dependencies, processed first
 kwargs: {}                          # extra arguments for the transformer
 ```
 
-The transformer is instantiated with the concept configuration and called with the `OpenICUProject`, giving it full access to read prior outputs and write its own:
+The transformer is instantiated with the concept definition, the per-dataset mapping config, and the YAML `kwargs`, then called with the running `ConceptStep` — giving it access to the project, the extraction output (`step.extraction_dataset`), and the workspace location for its own output (`step.concept_output_dir(concept)`):
 
 ```python
 class VentilationWindows:
     def __init__(self, concept, complex_config, **kwargs): ...
-    def __call__(self, project: OpenICUProject) -> None: ...
+    def __call__(self, step: ConceptStep) -> None: ...
 ```
+
+#### Built-in: ICD-9 → ICD-10 diagnosis harmonisation
+
+Datasets record diagnoses in a mix of ICD-9-CM and ICD-10-CM (MIMIC-IV contains both). For pooled downstream use — e.g. tokenised event streams for foundation models — the bundled `diagnosis` concept maps everything into a single ICD-10-CM vocabulary using the CMS General Equivalence Mappings (GEM, 2018), the same crosswalk used by ETHOS. The GEM is shipped with the package, so no download is needed.
+
+```yaml
+# configs/datasets/mimic-iv/2.2/mappings/diagnosis.yml
+type: complex
+concept_transformer: open_icu.steps.concept.transformers.icd.ICD9ToICD10Transformer
+kwargs:
+  table: diagnoses_icd          # extraction table to read
+  event: DIAGNOSIS              # extraction event (omit to scan all events)
+  # regex with named groups icd_version and icd_code, matched on the code column
+  code_pattern: '^[^/]+//diagnoses_icd//ICD//(?<icd_version>[^/]+)//(?<icd_code>[^/]+)//'
+  # default_version: "9"        # alternative to an icd_version group for
+                                # datasets without a version label
+```
+
+Output codes are `diagnosis//ICD10CM//<code>`; the source code and version are preserved in the `icd_code` / `icd_version` extension columns. The mapping policy is deterministic and lossless: native ICD-10 rows pass through unchanged, ICD-9 rows take the first GEM row (scenario 1 / choice 1) when several targets exist, and ICD-9 codes without any GEM target are kept as `diagnosis//ICD9CM//<code>` rather than dropped. Mappings ship for `mimic-iv` (inherited by 3.1 and the demo) and `nwicu`. eICU-CRD is not yet covered: its `diagnosis.icd9code` field stores unversioned, comma-separated ICD-9/ICD-10 code pairs for the same diagnosis, which needs deduplication and version inference first.
 
 ## Output layout
 
