@@ -23,8 +23,8 @@ class MEDSEventFieldConfig(BaseModel):
 
     Specifies which source columns map to each MEDS standard column. The code
     column can be a list of event-specific code parts that will be concatenated
-    with the automatic dataset/table prefix, optional event-level code_prefix,
-    and optional event-level code_suffix when the final MEDS code is built.
+    with optional event-level code_prefix, and optional event-level code_suffix
+    when the final MEDS code is built.
 
     Attributes:
         subject_id: Column name for subject/patient identifier
@@ -59,7 +59,7 @@ class MEDSEventFieldDefaultConfig(BaseModel):
         subject_id: Default column name for subject identifier
         time: Default column name for timestamp
         code: Default list of event-specific code parts used in generated MEDS codes
-        code_prefix: Code parts inserted after automatic dataset/table prefix and before columns.code
+        code_prefix: Code parts inserted after automatic prefix and before columns.code
         code_suffix: Code parts appended after columns.code
         numeric_value: Default column name for numeric value
         text_value: Default column name for text value
@@ -80,7 +80,7 @@ class MEDSEventFieldDefaultConfig(BaseModel):
     )
     code_prefix: list[str] | None = Field(
         None,
-        description="Default code parts inserted after automatic dataset/table prefix and before columns.code.",
+        description="Default code parts inserted before columns.code.",
     )
     code_suffix: list[str] | None = Field(
         None,
@@ -109,7 +109,7 @@ class MEDSEventFieldDefaultConfig(BaseModel):
         merge code_prefix or code_suffix into columns.code, because the final
         code is built later as:
 
-            db_name // table_name // code_prefix // columns.code // code_suffix
+            code_prefix // columns.code // code_suffix
 
         Args:
             event_column_config: Event-specific column configuration dictionary
@@ -158,7 +158,7 @@ class EventConfig(BaseModel):
 
     Attributes:
         name: Technical event identifier used for output file naming and concept mapping
-        code_prefix: Code parts inserted after automatic dataset/table prefix and before columns.code
+        code_prefix: Code parts inserted before columns.code
         code_suffix: Code parts appended after columns.code
         columns: Column mapping configuration for this event
         pre_callbacks: Callbacks to apply before MEDS column mapping
@@ -174,7 +174,7 @@ class EventConfig(BaseModel):
     )
     code_prefix: list[str] = Field(
         default_factory=list,
-        description="Code parts inserted after automatic dataset/table prefix and before columns.code.",
+        description="Code parts inserted before columns.code.",
     )
     code_suffix: list[str] = Field(
         default_factory=list,

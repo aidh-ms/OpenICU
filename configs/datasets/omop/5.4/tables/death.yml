@@ -33,6 +33,8 @@ event_defaults:
 events:
   - name: MEDS_DEATH
     columns:
+      code:
+        - const("MEDS_DEATH")
       time: col(dod)
       extension:
         death_type_concept_id: col(death_type_concept_id)

@@ -91,11 +91,17 @@ events:
         - col(race)
   - name: emergency_department_registration
     columns:
+      code:
+        - const("ED_REGISTRATION")
       time: col(edregtime)
   - name: emergency_department_discharge
     columns:
+      code:
+        - const("ED_OUT")
       time: col(edouttime)
   - name: hospital_expire_flag
     columns:
+      code:
+        - const("HOSPITAL_EXPIRE_FLAG")
       time: col(dischtime)
       numeric_value: col(hospital_expire_flag)

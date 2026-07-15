@@ -92,7 +92,7 @@ class TestInheritedExtraction:
         df = pl.read_parquet(output)
         assert df.height == 4
         # codes carry the demo dataset's identity, not the base's
-        assert "testdb-demo//vitals//220045//Heart Rate//bpm" in df["code"].to_list()
+        assert "220045//Heart Rate//bpm" in df["code"].to_list()
 
     def test_tombstoned_table_is_not_extracted(self, project: OpenICUProject) -> None:
         demo_data = project.datasets_path / "extraction" / "data" / "testdb-demo"

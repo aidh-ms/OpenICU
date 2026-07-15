@@ -157,7 +157,7 @@ def test_concept_parses_with_all_dataset_mappings(concept_file: Path) -> None:
                     value for value in (mapping.columns.numeric_value, mapping.columns.text_value) if value is not None
                 ]
                 assert_expressions_parse(expressions + mapping.filters, source)
-                assert_regex_compiles(mapping.regex, source)
+                assert_regex_compiles(mapping.pattern.code, source)
 
         if isinstance(dataset_concept, DerivedDatasetConceptConfig):
             for concept_table in (dataset_concept.table, *dataset_concept.join):
@@ -247,7 +247,7 @@ def test_mimic_demo_inherits_concept_mappings() -> None:
     assert isinstance(dataset_concept, SimpleDatasetConceptConfig)
     assert dataset_concept.version == "2.2"
     assert dataset_concept.mappings
-    assert dataset_concept.mappings[0].pattern.dataset == "mimic-iv-demo"
+    assert dataset_concept.dataset == "mimic-iv-demo"
 
 
 def test_every_dataset_mapping_has_a_concept_definition() -> None:
