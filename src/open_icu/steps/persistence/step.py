@@ -1,7 +1,7 @@
 """Persistence step implementation.
 
 The persistence step uses an extraction configuration to determine which
-source CSV tables are required and writes those source tables as Parquet files.
+source CSV columns are required and writes those columns as Parquet files.
 The generated files are independent artifacts and are not used by the
 extraction step.
 """
@@ -28,7 +28,7 @@ logger = get_logger(__name__)
 class PersistenceStep(
     ConfigurableBaseStep[ExtractionStepConfig, TableConfig]
 ):
-    """Persist source CSV tables selected by an extraction configuration."""
+    """Persist configured source CSV columns as Parquet files."""
 
     @classmethod
     def load(
