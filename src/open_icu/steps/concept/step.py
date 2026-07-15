@@ -54,7 +54,8 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
     def extract(self) -> None:
         datasets = {
-            (dataset_config.name, dataset_config.version) for dataset_config in self._config.config.mapping_configs
+            (dataset_config.name, dataset_config.version)
+            for dataset_config in self._config.config.mapping_configs
         }
 
         for dataset, version in datasets:
@@ -184,31 +185,10 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         output_dataset_path.mkdir(parents=True, exist_ok=True)
 
         for mapping in dataset_concept.mappings:
-            dataset = mapping.pattern.dataset
-            version = mapping.pattern.version
+            dataset = dataset_concept.dataset
+            version = dataset_concept.version
             table = mapping.pattern.table
             event = mapping.pattern.event
-
-            if dataset is None:
-                logger.warning(
-                    "skipping mapping for concept %s: dataset is not configured",
-                    concept.name,
-                )
-                continue
-
-            if version is None:
-                logger.warning(
-                    "skipping mapping for concept %s: version is not configured",
-                    concept.name,
-                )
-                continue
-
-            if table is None:
-                logger.warning(
-                    "skipping mapping for concept %s: table is not configured",
-                    concept.name,
-                )
-                continue
 
             table_path = self.extraction_dataset.data_path / dataset / version / table
 
@@ -245,7 +225,15 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     concept.identifier,
                 )
 
-                lf = pl.scan_parquet(data_path).filter(pl.col("code").str.contains(mapping.regex))
+                lf = pl.scan_parquet(data_path).filter(
+                    pl.col("code").str.contains(mapping.pattern.code)
+                )
+
+                for col_name, pattern in mapping.pattern.extensions.items():
+                    print(lf.head(5).collect())
+                    lf = lf.filter(
+                        pl.col(col_name).str.contains(pattern)
+                    )
 
                 # extension columns
                 lf = lf.with_columns(pl.lit(dataset).alias("dataset"))
@@ -259,14 +247,18 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 if mapping.columns.text_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("text_value"))
                 else:
-                    lf = lf.with_columns(parse_expr(lf, mapping.columns.text_value).alias("text_value"))
+                    lf = lf.with_columns(
+                        parse_expr(lf, mapping.columns.text_value).alias("text_value")
+                    )
 
                 if mapping.columns.numeric_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
                 else:
                     expr = parse_expr(lf, mapping.columns.numeric_value)
 
-                    lf = lf.with_columns(expr.cast(pl.Float64, strict=False).alias("numeric_value"))
+                    lf = lf.with_columns(
+                        expr.cast(pl.Float64, strict=False).alias("numeric_value")
+                    )
 
                 # code column
                 lf = lf.with_columns(pl.lit(concept.code).alias("code"))
@@ -274,16 +266,13 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 for expr in mapping.filters:
                     lf = lf.filter(parse_expr(lf, expr))
 
-                lf = lf.select(
-                    [
-                        pl.col("subject_id").cast(pl.Int64),
-                        pl.col("time").cast(pl.Datetime(time_unit="us")),
-                        pl.col("code").cast(pl.String),
-                        pl.col("numeric_value").cast(pl.Float32),
-                        pl.col("text_value").cast(pl.String),
-                    ]
-                    + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()]
-                )
+                lf = lf.select([
+                    pl.col("subject_id").cast(pl.Int64),
+                    pl.col("time").cast(pl.Datetime(time_unit="us")),
+                    pl.col("code").cast(pl.String),
+                    pl.col("numeric_value").cast(pl.Float32),
+                    pl.col("text_value").cast(pl.String),
+                ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
 
                 lf = self.apply_limits(concept, lf)
 
@@ -396,7 +385,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             col_expr: col_name
             for col_name, col_expr in columns.items()
             if col_expr is not None and not isinstance(col_expr, list)
-        } | {col_expr: col_name for col_name, col_expr in extension.items() if col_expr is not None}
+        } | {
+            col_expr: col_name
+            for col_name, col_expr in extension.items()
+            if col_expr is not None
+        }
 
         for col_expr, col_name in mapping.items():
             lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
@@ -408,16 +401,13 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             lf = lf.filter(parse_expr(lf, expr))
 
         # Reorder columns
-        lf = lf.select(
-            [
-                pl.col("subject_id").cast(pl.Int64),
-                pl.col("time").cast(pl.Datetime(time_unit="us")),
-                pl.col("code").cast(pl.String),
-                pl.col("numeric_value").cast(pl.Float32),
-                pl.col("text_value").cast(pl.String),
-            ]
-            + [pl.col(col).cast(pl.String) for col in extension.keys()]
-        )
+        lf = lf.select([
+            pl.col("subject_id").cast(pl.Int64),
+            pl.col("time").cast(pl.Datetime(time_unit="us")),
+            pl.col("code").cast(pl.String),
+            pl.col("numeric_value").cast(pl.Float32),
+            pl.col("text_value").cast(pl.String),
+        ] + [pl.col(col).cast(pl.String) for col in extension.keys()])
 
         lf = self.apply_limits(concept, lf)
 
