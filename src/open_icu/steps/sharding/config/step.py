@@ -9,8 +9,20 @@ class CustomConfig(BaseModel):
     """Configuration specific to the sharding step.
 
     The sharding step reads the output of a preceding concept step and writes
-    long-format Parquet shards grouped by subject. Empty dataset or concept
-    lists mean "include all".
+    long-format Parquet shards grouped by subject. Empty dataset, concept, or
+    subject lists mean "include all".
+
+    Attributes:
+        concept_step: Name of the preceding concept step whose output should be
+            sharded.
+        datasets: Dataset names to include. An empty list includes all
+            available datasets.
+        concepts: Concept names or relative concept paths to include. An empty
+            list includes all available concepts.
+        subjects: Subject IDs to include. An empty list includes all available
+            subjects.
+        subjects_per_shard: Maximum number of subjects written to each shard
+            file.
     """
 
     concept_step: str = Field(
