@@ -68,6 +68,8 @@ events:
         - col(prod_strength)
   - name: status
     columns:
+      code:
+        - const("STATUS")
       time: col(stoptime)
       text_value: col(status)
   - name: medication_stop

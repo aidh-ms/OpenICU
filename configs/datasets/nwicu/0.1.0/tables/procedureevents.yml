@@ -102,6 +102,8 @@ events:
       numeric_value: col(orderid)
   - name: linkorder
     columns:
+      code:
+        - col("LINKORDER")
       time: col(endtime)
       numeric_value: col(linkorderid)
   - name: weight

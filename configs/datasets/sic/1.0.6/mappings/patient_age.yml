@@ -1,0 +1,9 @@
+# SICdb v1.0.6 -- cases AGE event [ricu age]
+type: simple
+mappings:
+  - pattern:
+      table: cases
+      event: AGE
+      code: "(age)(//.*)?$"
+    columns:
+      numeric_value: col(numeric_value)

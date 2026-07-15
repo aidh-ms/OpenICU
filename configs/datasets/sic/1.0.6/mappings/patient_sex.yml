@@ -1,0 +1,9 @@
+# SICdb v1.0.6 -- cases SEX event [ricu sex]
+type: simple
+mappings:
+  - pattern:
+      table: cases
+      event: SEX
+      code: "(sex)(//.*)?$"
+    columns:
+      text_value: col(text_value)
