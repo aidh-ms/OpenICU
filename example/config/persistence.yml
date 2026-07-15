@@ -1,0 +1,15 @@
+name: Persistence
+version: 1.0.0
+
+config:
+  data:
+    - name: mimic-iv
+      version: "3.1"
+      path: /workspaces/example/data/physionet.org/files/mimiciv/3.1
+      tables:
+        - name: patients
+          path: hosp/patients.csv.gz
+        - name: admissions
+          path: hosp/admissions.csv.gz
+        - name: chartevents
+          path: icu/chartevents.csv.gz
