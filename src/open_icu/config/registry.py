@@ -29,6 +29,7 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
     Type Parameters:
         T: The type of configuration objects to store (must inherit from BaseConfig)
     """
+
     def __init__(self) -> None:
         """Initialize the registry storage."""
         self._registry: dict[str, T] = {}
@@ -208,10 +209,7 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
             if term not in config.identifier:
                 continue
 
-            if (
-                (_excludes and config.identifier in _excludes) or
-                (_includes and config.identifier not in _includes)
-            ):
+            if (_excludes and config.identifier in _excludes) or (_includes and config.identifier not in _includes):
                 continue
 
             filtered_configs.append(config)
@@ -220,11 +218,7 @@ class BaseConfigRegistry[T: BaseConfig](ABC):
 
 
 def load_configs[T: BaseConfig](
-    path: Path,
-    config_type: type[T],
-    includes: list[str] | None = None,
-    excludes: list[str] | None = None,
-    **kwargs
+    path: Path, config_type: type[T], includes: list[str] | None = None, excludes: list[str] | None = None, **kwargs
 ) -> list[T]:
     """Load all configuration files of a specific type from a directory.
 
@@ -255,10 +249,7 @@ def load_configs[T: BaseConfig](
         logger.warning("Path does not exists: %s", path)
 
     for file_path in path.rglob("*.*"):
-        if (
-            not file_path.is_file()
-            or file_path.suffix.lower() not in {".yml", ".yaml"}
-        ):
+        if not file_path.is_file() or file_path.suffix.lower() not in {".yml", ".yaml"}:
             continue
 
         try:
@@ -268,10 +259,7 @@ def load_configs[T: BaseConfig](
             logger.warning("failed to load config from %s", file_path)
             continue
 
-        if (
-            (_excludes and config.identifier in _excludes) or
-            (_includes and config.identifier not in _includes)
-        ):
+        if (_excludes and config.identifier in _excludes) or (_includes and config.identifier not in _includes):
             logger.debug("Skip loading configuration: %s", config.identifier)
             continue
 
@@ -317,10 +305,7 @@ def _load_inherited_configs[T: BaseConfig](
             logger.warning("failed to load inherited config '%s' from %s", name, path)
             continue
 
-        if (
-            (excludes and config.identifier in excludes) or
-            (includes and config.identifier not in includes)
-        ):
+        if (excludes and config.identifier in excludes) or (includes and config.identifier not in includes):
             logger.debug("Skip loading configuration: %s", config.identifier)
             continue
 

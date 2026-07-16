@@ -1,4 +1,3 @@
-
 from typing import Sequence
 
 import polars as pl
@@ -17,25 +16,27 @@ class DropNa(CallbackProtocol):
         return pl.col(self.column).is_not_null()
 
 
-
 @register_callback_cls
 class FirstDistinct(CallbackProtocol):
-    """
-    """
+    """Keep the first row for each distinct combination of columns."""
 
-    def __init__(self, *fields: AstValue) -> None:
+    def __init__(self, *columns: AstValue) -> None:
         """
+        Initialize the callback with the column names used to identify duplicates.
+
+        Column names can be passed as separate arguments, for example:
+        ``first_distinct(subject_id, time)``.
         """
-        if len(fields) == 1 and isinstance(fields[0], list):
-            self.fields: Sequence[AstValue] = fields[0]  # ty: ignore[invalid-assignment]
+        if len(columns) == 1 and isinstance(columns[0], list):
+            self.columns: Sequence[AstValue] = columns[0]  # ty: ignore[invalid-assignment]
         else:
-            self.fields = fields
+            self.columns = columns
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
-        """
-        """
-        cols = [to_col_name(f) for f in self.fields]
-        return pl.struct(cols).is_first_distinct()
+        """Select the first row for each distinct combination of column values."""
+        column_names = [to_col_name(column) for column in self.columns]
+        return pl.struct(column_names).is_first_distinct()
+
 
 @register_callback_cls
 class DropIf(CallbackProtocol):

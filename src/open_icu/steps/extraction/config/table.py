@@ -221,9 +221,7 @@ class TableConfig(BaseDatasetConfig, BaseTableConfig):
                 event_defaults.code_suffix or [],
             )
 
-            event["columns"] = event_defaults.apply_defaults(
-                event.get("columns", {})
-            )
+            event["columns"] = event_defaults.apply_defaults(event.get("columns", {}))
 
         data["events"] = events
 

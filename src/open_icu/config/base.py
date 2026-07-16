@@ -28,6 +28,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
         identifier_tuple: Tuple of (class_name, version, name)
         uuid: UUID generated from the identifier
     """
+
     __open_icu_config_type__: ClassVar[str] = "base"
 
     name: str = Field(..., description="Name of the configuration.")
@@ -172,6 +173,7 @@ class BaseDatasetConfig(BaseConfig):
     Inherits from BaseConfig and can be extended with dataset-specific
     attributes and methods in the future.
     """
+
     dataset: str = Field(..., description="Name of the dataset associated with this dataset configuration.")
 
     @classmethod

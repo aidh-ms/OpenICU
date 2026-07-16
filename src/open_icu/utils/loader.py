@@ -38,7 +38,6 @@ def auto_load_configs():
     concepts = load_configs(
         config_path / "concepts",
         config_type=ConceptConfig,
-
         dataset_paths=mapping_paths,
     )
     for concept in concepts:

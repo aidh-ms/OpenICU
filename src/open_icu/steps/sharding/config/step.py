@@ -1,39 +1,57 @@
-from pathlib import Path
+"""Configuration models for the sharding step."""
 
 from pydantic import BaseModel, Field
 
 from open_icu.steps.base.config import BaseStepConfig
 
 
-class DatasetConfig(BaseModel):
-    """Configuration for a source dataset.
-
-    Specifies the name and file path for to the sharding definition of a dataset.
-
-    Attributes:
-        name: Name identifier for the dataset
-        path: Filesystem path to the dataset directory
-    """
-    name: str = Field(..., description="Name of the dataset.")
-    path: Path = Field(..., description="Path to the dataset.")
-
-
 class CustomConfig(BaseModel):
-    """Custom configuration specific to the sharding step.
+    """Configuration specific to the sharding step.
+
+    The sharding step reads the output of a preceding concept step and writes
+    long-format Parquet shards grouped by subject. Empty dataset, concept, or
+    subject lists mean "include all".
 
     Attributes:
-        concept_step: Name of the concept step
+        concept_step: Name of the preceding concept step whose output should be
+            sharded.
+        datasets: Dataset names to include. An empty list includes all
+            available datasets.
+        concepts: Concept names or relative concept paths to include. An empty
+            list includes all available concepts.
+        subjects: Subject IDs to include. An empty list includes all available
+            subjects.
+        subjects_per_shard: Maximum number of subjects written to each shard
+            file.
     """
 
-    concept_step: str = Field(description="Name of the concept step.")
-    dataset_configs: list[DatasetConfig] = Field(
-        default_factory=list, description="List of dataset-specific sharding configuration paths."
+    concept_step: str = Field(
+        ...,
+        description="Name of the preceding concept step whose dataset should be sharded.",
+    )
+    datasets: list[str] = Field(
+        default_factory=list,
+        description="Dataset names to include, e.g. mimic-iv. Empty means all datasets.",
+    )
+    concepts: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Concept names or relative concept paths to include. "
+            "Examples: heart_rate, vital/heart_rate. Empty means all concepts."
+        ),
+    )
+    subjects: list[int] = Field(
+        default_factory=list,
+        description="Subject IDs to include. Empty means all subjects.",
+    )
+    subjects_per_shard: int = Field(
+        default=1000,
+        gt=0,
+        description="Number of subjects written per shard file.",
     )
 
-class ShardingStepConfig(BaseStepConfig[CustomConfig]):
-    """Complete configuration for the sharding step.
 
-    Combines base step configuration with sharding-specific settings.
-    """
+class ShardingStepConfig(BaseStepConfig[CustomConfig]):
+    """Complete configuration for the sharding step."""
 
     pass

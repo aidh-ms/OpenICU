@@ -63,7 +63,6 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                 cfg.version,
                 includes=cfg.includes,
                 excludes=cfg.excludes,
-
             ):
                 logger.info(
                     "Extracting table %s from dataset %s (version %s)",
@@ -144,13 +143,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
             # Add missing columns
             if event.columns.text_value is None:
-                event_lf = event_lf.with_columns(
-                    pl.lit(None, dtype=pl.String).alias("text_value")
-                )
+                event_lf = event_lf.with_columns(pl.lit(None, dtype=pl.String).alias("text_value"))
             if event.columns.numeric_value is None:
-                event_lf = event_lf.with_columns(
-                    pl.lit(None, dtype=pl.Float32).alias("numeric_value")
-                )
+                event_lf = event_lf.with_columns(pl.lit(None, dtype=pl.Float32).alias("numeric_value"))
 
             # Rename columns
             columns = event.columns.model_dump()
@@ -210,13 +205,16 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             )
 
             # Reorder columns
-            event_lf = event_lf.select([
-                pl.col("subject_id").cast(pl.Int64),
-                pl.col("time").cast(pl.Datetime(time_unit="us")),
-                pl.col("code").cast(pl.String),
-                pl.col("numeric_value").cast(pl.Float32, strict=False),
-                pl.col("text_value").cast(pl.String),
-            ] + [pl.col(col) for col in event.columns.extension.keys()])
+            event_lf = event_lf.select(
+                [
+                    pl.col("subject_id").cast(pl.Int64),
+                    pl.col("time").cast(pl.Datetime(time_unit="us")),
+                    pl.col("code").cast(pl.String),
+                    pl.col("numeric_value").cast(pl.Float32, strict=False),
+                    pl.col("text_value").cast(pl.String),
+                ]
+                + [pl.col(col) for col in event.columns.extension.keys()]
+            )
 
             event_lf = self._apply_filters(
                 event_lf,
@@ -305,11 +303,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             # Parquet carries its own schema, so cast the non-temporal columns to
             # the declared dtypes. Datetime columns ("datetime" maps to String)
             # are handled below to support both native timestamps and strings.
-            casts = [
-                pl.col(col.name).cast(col.dtype, strict=False)
-                for col in table.columns
-                if col.type != "datetime"
-            ]
+            casts = [pl.col(col.name).cast(col.dtype, strict=False) for col in table.columns if col.type != "datetime"]
             if casts:
                 lf = lf.with_columns(casts)
         else:
@@ -339,13 +333,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             schema = lf.collect_schema()
             for col in datetime_cols:
                 if schema.get(col.name) == pl.String:
-                    lf = lf.with_columns(
-                        pl.col(col.name).str.to_datetime(**col.params).alias(col.name)
-                    )
+                    lf = lf.with_columns(pl.col(col.name).str.to_datetime(**col.params).alias(col.name))
                 else:
-                    lf = lf.with_columns(
-                        pl.col(col.name).cast(pl.Datetime("us"), strict=False).alias(col.name)
-                    )
+                    lf = lf.with_columns(pl.col(col.name).cast(pl.Datetime("us"), strict=False).alias(col.name))
 
         lf = self._apply_callbacks(
             lf,
@@ -420,10 +410,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         result = parse_expr(lf, expr)
 
         if not isinstance(result, pl.Expr):
-            raise TypeError(
-                f"{callback_type} {expr!r} must return a Polars Expr, "
-                f"got {type(result).__name__}"
-            )
+            raise TypeError(f"{callback_type} {expr!r} must return a Polars Expr, got {type(result).__name__}")
 
         return result
 
@@ -474,10 +461,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             result = parse_expr(lf, expr)
 
             if not isinstance(result, LazyFrame):
-                raise TypeError(
-                    f"{callback_type} {expr!r} must return a LazyFrame, "
-                    f"got {type(result).__name__}"
-                )
+                raise TypeError(f"{callback_type} {expr!r} must return a LazyFrame, got {type(result).__name__}")
 
             lf = result
 

@@ -11,11 +11,8 @@ if TYPE_CHECKING:
 
 
 class ConceptTransformerProtocol(Protocol):
-
-    def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", **kwargs):
-        ...
-    def __call__(self, project: "OpenICUProject") -> None:
-        ...
+    def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", **kwargs): ...
+    def __call__(self, project: "OpenICUProject") -> None: ...
 
 
 class ComplexDatasetConceptConfig(BaseDatasetConfig):
@@ -23,30 +20,28 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
 
     Inherits from BaseDatasetConfig and adds attributes specific to complex concepts.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
     __open_icu_config_type__ = "concept"
 
-    type: Literal["complex"] = Field(
-        "complex", description="Type of concept: 'base', 'derived', or 'complex'."
+    type: Literal["complex"] = Field("complex", description="Type of concept: 'base', 'derived', or 'complex'.")
+    concept_transformer: str = Field(
+        ..., description="The name of the concept transformer function to apply to this concept (python dotted path)."
     )
-    concept_transformer: str = Field(..., description="The name of the concept transformer function to apply to this concept (python dotted path).")
-    kwargs: dict = Field(default_factory=dict, description="Additional keyword arguments to pass to the concept transformer function.")
-    concepts: list[str] = Field(default_factory=list, description="The list of concept identifiers that this complex concept depends on.")
+    kwargs: dict = Field(
+        default_factory=dict, description="Additional keyword arguments to pass to the concept transformer function."
+    )
+    concepts: list[str] = Field(
+        default_factory=list, description="The list of concept identifiers that this complex concept depends on."
+    )
 
     @computed_field
     @property
     def fn(self) -> ConceptTransformerProtocol:
         """Dynamically import and return the concept transformer function based on the provided dotted path."""
 
-        transformer = cast(
-            type[ConceptTransformerProtocol],
-            import_callable(self.concept_transformer)
-        )
-        return transformer(
-            self.__class__.__bases__[0],
-            self,
-            **self.kwargs
-        )
+        transformer = cast(type[ConceptTransformerProtocol], import_callable(self.concept_transformer))
+        return transformer(self.__class__.__bases__[0], self, **self.kwargs)
 
     @computed_field
     @property
@@ -58,8 +53,5 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
         """
         from open_icu.steps.concept.config.concept import ConceptConfig  # Avoid circular import
 
-        deps = {
-            ConceptConfig.ensure_prefix(concept)
-            for concept in self.concepts
-        }
+        deps = {ConceptConfig.ensure_prefix(concept) for concept in self.concepts}
         return deps

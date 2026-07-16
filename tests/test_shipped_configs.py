@@ -28,9 +28,7 @@ CONFIG_ROOT = REPO_ROOT / "configs"
 # or mappings/ subdirectory), so collect by version dir rather than globbing
 # for the subdirectories themselves.
 VERSION_DIRS = sorted(d for d in CONFIG_ROOT.glob("datasets/*/*") if d.is_dir())
-TABLE_CONFIG_DIRS = [
-    d / "tables" for d in VERSION_DIRS if (d / "tables").is_dir() or (d / "extends.yml").is_file()
-]
+TABLE_CONFIG_DIRS = [d / "tables" for d in VERSION_DIRS if (d / "tables").is_dir() or (d / "extends.yml").is_file()]
 CONCEPT_FILES = sorted(CONFIG_ROOT.glob("concepts/*/*.yml"))
 DATASET_CONCEPT_DIRS = [
     d / "mappings" for d in VERSION_DIRS if (d / "mappings").is_dir() or (d / "extends.yml").is_file()
@@ -126,9 +124,7 @@ def test_table_config_parses(subdir: Path, name: str) -> None:
         assert event.columns.subject_id is not None, (
             f"{relative_id(subdir)}/{name} event {event.name}: missing subject_id mapping"
         )
-        assert event.columns.time is not None, (
-            f"{relative_id(subdir)}/{name} event {event.name}: missing time mapping"
-        )
+        assert event.columns.time is not None, f"{relative_id(subdir)}/{name} event {event.name}: missing time mapping"
 
 
 @pytest.mark.parametrize(("subdir", "name"), effective_table_cases())
@@ -158,9 +154,7 @@ def test_concept_parses_with_all_dataset_mappings(concept_file: Path) -> None:
             assert dataset_concept.mappings, f"{source}: no mappings defined"
             for mapping in dataset_concept.mappings:
                 expressions = [
-                    value
-                    for value in (mapping.columns.numeric_value, mapping.columns.text_value)
-                    if value is not None
+                    value for value in (mapping.columns.numeric_value, mapping.columns.text_value) if value is not None
                 ]
                 assert_expressions_parse(expressions + mapping.filters, source)
                 assert_regex_compiles(mapping.pattern.code, source)

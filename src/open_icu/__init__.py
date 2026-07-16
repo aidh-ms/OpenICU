@@ -17,7 +17,7 @@ Main Modules:
 - callbacks: Data transformation callbacks for LazyFrames
 - config: Configuration management and registry system
 - storage: Project, dataset, and workspace management
-- steps: Processing steps (extraction, concept)
+- steps: Processing steps (extraction, concept, sharding)
 - utils: Utility functions and helpers
 
 Usage:
@@ -71,6 +71,7 @@ SOFTWARE.
 
 from open_icu.steps.concept.step import ConceptStep, concept_config_registry
 from open_icu.steps.extraction.step import ExtractionStep, dataset_config_registry
+from open_icu.steps.sharding.step import ShardingStep, sharding_config_registry
 from open_icu.storage.project import OpenICUProject
 from open_icu.utils.loader import auto_load_configs
 
@@ -80,7 +81,9 @@ __all__ = [
     "OpenICUProject",
     "ExtractionStep",
     "ConceptStep",
+    "ShardingStep",
     "auto_load_configs",
     "dataset_config_registry",
     "concept_config_registry",
+    "sharding_config_registry",
 ]

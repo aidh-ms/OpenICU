@@ -10,9 +10,7 @@ class BaseConceptTable(BaseModel):
     pre_callbacks: list[str] = Field(
         default_factory=list, description="The list of callback configurations for the table."
     )
-    callbacks: list[str] = Field(
-        default_factory=list, description="The list of callback configurations for the table."
-    )
+    callbacks: list[str] = Field(default_factory=list, description="The list of callback configurations for the table.")
     post_callbacks: list[str] = Field(
         default_factory=list, description="The list of callback configurations for the table."
     )
@@ -22,9 +20,7 @@ class BaseConceptTable(BaseModel):
 
 
 class JoinConceptTable(BaseConceptTable):
-    type: Literal["join"] = Field(
-        "join", description="Type of concept table: 'join' or 'aggregate'."
-    )
+    type: Literal["join"] = Field("join", description="Type of concept table: 'join' or 'aggregate'.")
     both_on: list[str] = Field(
         default_factory=lambda: ["subject_id", "time"],
         description="List of columns to be used for joining table on both sides.",
@@ -55,6 +51,7 @@ class JoinConceptTable(BaseConceptTable):
 
         return params
 
+
 class ConceptTable(BaseConceptTable):
     pass
 
@@ -74,11 +71,10 @@ class DerivedDatasetConceptConfig(BaseDatasetConfig):
 
     Inherits from BaseDatasetConfig and adds attributes specific to derived concepts.
     """
+
     __open_icu_config_type__ = "concept"
 
-    type: Literal["derived"] = Field(
-        "derived", description="Type of concept: 'base', 'derived', or 'complex'."
-    )
+    type: Literal["derived"] = Field("derived", description="Type of concept: 'base', 'derived', or 'complex'.")
     table: ConceptTable = Field(..., description="The configuration for the concept table to be derived.")
     join: list[JoinConceptTable] = Field(
         default_factory=list, description="The list of join configurations for the derived concept."
@@ -100,8 +96,7 @@ class DerivedDatasetConceptConfig(BaseDatasetConfig):
         """
         from open_icu.steps.concept.config.concept import ConceptConfig  # Avoid circular import
 
-        deps = {
-            ConceptConfig.ensure_prefix(join_table.concept)
-            for join_table in self.join
-        } | {ConceptConfig.ensure_prefix(self.table.concept)}
+        deps = {ConceptConfig.ensure_prefix(join_table.concept) for join_table in self.join} | {
+            ConceptConfig.ensure_prefix(self.table.concept)
+        }
         return deps

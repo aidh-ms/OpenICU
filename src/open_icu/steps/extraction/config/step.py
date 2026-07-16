@@ -24,16 +24,12 @@ class DatasetConfig(BaseModel):
         includes: Optional list of sections to include from the dataset config file.
         excludes: Optional list of sections to exclude from the dataset config file.
     """
+
     name: str = Field(..., description="Name of the dataset.")
     version: str = Field(..., description="Version of the dataset.")
     path: Path = Field(..., description="Path to the dataset.")
-    includes: list[str] | None = Field(
-        default=None, description="List of sections to include from the config file."
-    )
-    excludes: list[str] | None = Field(
-        default=None, description="List of sections to exclude from the config file."
-    )
-
+    includes: list[str] | None = Field(default=None, description="List of sections to include from the config file.")
+    excludes: list[str] | None = Field(default=None, description="List of sections to exclude from the config file.")
 
 
 class CustomConfig(BaseModel):
@@ -43,9 +39,7 @@ class CustomConfig(BaseModel):
         data: List of source datasets to process
     """
 
-    data: list[DatasetConfig] = Field(
-        default_factory=list, description="List of datasets to be extracted."
-    )
+    data: list[DatasetConfig] = Field(default_factory=list, description="List of datasets to be extracted.")
 
 
 class ExtractionStepConfig(BaseStepConfig[CustomConfig]):

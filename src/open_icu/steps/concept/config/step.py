@@ -18,8 +18,10 @@ class DatasetConfig(BaseModel):
         name: Name identifier for the dataset
         version: Version identifier for the dataset
     """
+
     name: str = Field(..., description="Name of the dataset.")
     version: str = Field(..., description="Version of the dataset.")
+
 
 class CustomConfig(BaseModel):
     """Custom configuration specific to the concept step.

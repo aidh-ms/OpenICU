@@ -7,6 +7,7 @@ from open_icu.utils.name import camel_to_snake
 
 class CallbackRegistry:
     """registry for callbacks."""
+
     def __init__(self) -> None:
         """Initialize the registry storage."""
         self._registry: dict[str, CallbackProtocol] = {}
@@ -99,4 +100,4 @@ def register_callback_cls[T: type[CallbackProtocol]](cls: T) -> T:
     def wrapper(*args: Any, **kwargs: Any) -> T:
         return cls(*args, **kwargs)
 
-    return wrapper # ty: ignore[invalid-return-type]
+    return wrapper  # ty: ignore[invalid-return-type]

@@ -58,13 +58,24 @@ class FirstNotNull(CallbackProtocol):
             return expr
         return expr.alias(self.output)
 
+
 @register_callback_cls
 class Max(CallbackProtocol):
-    """
+    """Create a column containing the maximum value across multiple columns.
+
+    This callback evaluates the specified source columns row-wise and returns
+    the maximum value for each row. Null values are ignored when at least one
+    non-null value is present. If all specified fields are null for a row, the
+    resulting value is null.
     """
 
     def __init__(self, *fields: AstValue, output: Optional[str]) -> None:
-        """
+        """Initialize the callback.
+
+        Args:
+            fields: Source column names whose row-wise maximum is selected.
+            output: Name of the output column. If `None`, the resulting
+                expression is returned without an alias.
         """
         if len(fields) == 1 and isinstance(fields[0], list):
             self.fields: Sequence[AstValue] = fields[0]  # ty: ignore[invalid-assignment]
@@ -74,7 +85,16 @@ class Max(CallbackProtocol):
         self.output = output
 
     def __call__(self, lf: LazyFrame) -> CallbackResult:
-        """
+        """Create an expression for the row-wise maximum.
+
+        Args:
+            lf: Input LazyFrame.
+
+        Returns:
+            An expression containing the maximum value across the specified
+            fields for each row, optionally aliased with the output column name.
+            If no fields are specified, an expression containing null values is
+            returned.
         """
         cols = [to_col_name(f) for f in self.fields]
 

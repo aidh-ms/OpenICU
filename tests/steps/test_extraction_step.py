@@ -1,4 +1,5 @@
 """End-to-end tests for the extraction step on synthetic fixture data."""
+
 from datetime import datetime
 from pathlib import Path
 
@@ -13,7 +14,7 @@ def run_extraction(tmp_path: Path, extraction_config: Path) -> OpenICUProject:
 
     load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
 
-    extraction_step =ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step = ExtractionStep.load(project, tmp_path / "extraction.yml")
     extraction_step.run()
 
     return project

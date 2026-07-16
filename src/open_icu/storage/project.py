@@ -14,6 +14,7 @@ from open_icu.storage.workspace import WorkspaceDir
 
 logger = get_logger(__name__)
 
+
 class OpenICUProject(FileStorage):
     """OpenICU project directory manager.
 
@@ -36,9 +37,9 @@ class OpenICUProject(FileStorage):
     """
 
     def __init__(
-            self,
-            path: Path,
-            overwrite: bool = False,
+        self,
+        path: Path,
+        overwrite: bool = False,
     ) -> None:
         """Initialize the OpenICU project.
 

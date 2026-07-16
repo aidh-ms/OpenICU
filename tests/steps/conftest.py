@@ -4,6 +4,7 @@ Builds a tiny synthetic ICU dataset ("testdb") with a vitals table and an item
 lookup table, plus the matching extraction and concept configurations, so the
 steps can be exercised end-to-end without any real data.
 """
+
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from open_icu.steps.concept.config.concept import ConceptConfig
 from open_icu.steps.concept.registry import concept_config_registry
 from open_icu.steps.extraction.config.table import TableConfig
 from open_icu.steps.extraction.registry import dataset_config_registry
+from open_icu.steps.sharding.registry import sharding_config_registry
 
 VITALS_CSV = """\
 subject_id,stay_id,charttime,itemid,valuenum,valueuom,value
@@ -119,9 +121,11 @@ def clean_registries() -> Iterator[None]:
     """Isolate tests from the global configuration registry singletons."""
     dataset_config_registry.clear()
     concept_config_registry.clear()
+    sharding_config_registry.clear()
     yield
     dataset_config_registry.clear()
     concept_config_registry.clear()
+    sharding_config_registry.clear()
 
 
 @pytest.fixture
