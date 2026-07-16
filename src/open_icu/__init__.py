@@ -71,6 +71,7 @@ SOFTWARE.
 
 from open_icu.steps.concept.step import ConceptStep, concept_config_registry
 from open_icu.steps.extraction.step import ExtractionStep, dataset_config_registry
+from open_icu.steps.persistence.step import PersistenceStep
 from open_icu.steps.sharding.step import ShardingStep, sharding_config_registry
 from open_icu.storage.project import OpenICUProject
 from open_icu.utils.loader import auto_load_configs
@@ -79,6 +80,7 @@ auto_load_configs()
 
 __all__ = [
     "OpenICUProject",
+    "PersistenceStep",
     "ExtractionStep",
     "ConceptStep",
     "ShardingStep",

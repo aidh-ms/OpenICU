@@ -230,7 +230,6 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 )
 
                 for col_name, pattern in mapping.pattern.extensions.items():
-                    print(lf.head(5).collect())
                     lf = lf.filter(
                         pl.col(col_name).str.contains(pattern)
                     )
