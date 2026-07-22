@@ -116,6 +116,9 @@ events:
     columns:
       time: col(starttime)
       numeric_value: col(isopenbag)
+      code:
+        - col(itemid)
+        - col(label)
   - name: continueinnextdept
     columns:
       time: col(endtime)

@@ -1,7 +1,7 @@
 path: hosp/patients.csv.gz
 
 columns:
-  # subject_id and extentions
+  # subject_id and extensions
   - name: subject_id
     type: int64
   # db fields - times
@@ -19,9 +19,29 @@ columns:
   - name: gender
     type: string
 
+join:
+  - path: hosp/admissions.csv.gz
+    columns:
+      # subject_id and extensions
+      - name: subject_id
+        type: int64
+
+      # db fields - times
+      - name: deathtime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+
+    filters:
+      - drop_na(deathtime)
+      - first_distinct(subject_id)
+
+    both_on:
+      - subject_id
 post_join_callbacks:
   - to_datetime(anchor_year, 1, 1, "00:00:00", -anchor_age, "years", output=dob)
   - set_time(dod, 23, 59, 59, output=dod_24)
+  - first_not_null(deathtime, dod_24, output=death_time)
 
 event_defaults:
   subject_id: col(subject_id)
@@ -47,8 +67,8 @@ events:
     columns:
       code:
         - const("MEDS_DEATH")
-      time: col(dod_24)
+      time: col(death_time)
       extension:
-        available_time: col(dod_24)
+        available_time: col(death_time)
     filters:
       - drop_na(time)

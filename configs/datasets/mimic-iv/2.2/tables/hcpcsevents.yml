@@ -18,8 +18,6 @@ columns:
     type: int64
   - name: short_description
     type: string
-post_join_callbacks:
-  - set_time(chartdate, 23, 59, 59, output=chartdate_24)
 join:
   - name: d_hcpcs
     path: hosp/d_hcpcs.csv.gz
@@ -51,6 +49,8 @@ join:
       # db fields - values
     both_on:
       - hadm_id
+post_join_callbacks:
+  - set_time(chartdate, 23, 59, 59, output=chartdate_24)
 
 event_defaults:
   subject_id: col(subject_id)
