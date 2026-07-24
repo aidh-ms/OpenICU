@@ -85,10 +85,6 @@ events:
         locationcategory: col(locationcategory)
         ordercategoryname: col(ordercategoryname)
         isopenbag: col(isopenbag)
-        value: col(value)
-        valueuom: col(valueuom)
-        originalamount: col(originalamount)
-        originalrate: col(originalrate)
 
   - name: PROCEDURE_END
     columns:
