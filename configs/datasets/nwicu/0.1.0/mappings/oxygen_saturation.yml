@@ -3,10 +3,11 @@ mappings:
   - pattern:
       table: chartevents
       event: CHART
-      code: (220277(//.*)?|226253(//.*)?|220227(//.*)?)
+      code: (320277(//.*)?)
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
+
   - pattern:
       table: labevents
       event: LAB
@@ -14,11 +15,3 @@ mappings:
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
-  # TODO: This is another concept but with the same definition-name, therefore we might need a solution if this should not be merged
-  # - pattern:
-  #     table: chartevents
-  #     event: CHART
-  #     code: (220277(//.*)?|226253(//.*)?)
-  #   columns:
-  #     numeric_value: col(numeric_value)
-  #     text_value: col(text_value)
