@@ -129,3 +129,5 @@ events:
       numeric_value: col(hospital_expire_flag)
       extension:
         available_time: col(dischtime)
+    filters:
+      - drop_na(time)
