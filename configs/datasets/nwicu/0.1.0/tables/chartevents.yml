@@ -1,14 +1,14 @@
 path: data/nw_icu/chartevents.csv.gz
 
 columns:
-
-  # subject_id and extentions
+  # subject_id and extensions
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: subject_id
-    type: int64
+
   # db fields - times
   - name: charttime
     type: datetime
@@ -18,6 +18,7 @@ columns:
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+
   # db fields - values
   - name: itemid
     type: int64
@@ -34,9 +35,6 @@ join:
   - name: d_items
     path: data/nw_icu/d_items.csv.gz
     columns:
-      # subject_id and extentions
-      # db fields - times
-      # db fields - values
       - name: itemid
         type: int64
       - name: label
@@ -51,19 +49,15 @@ event_defaults:
     stay_id: col(stay_id)
 
 events:
-  - name: chartevent
+  - name: CHART
     columns:
       time: col(charttime)
       code:
+        - col(itemid)
         - col(label)
         - col(valueuom)
       numeric_value: col(valuenum)
       text_value: col(value)
-  - name: warning
-    columns:
-      code:
-        - const("WARNING")
-      time: col(storetime)
-      numeric_value: col(warning)
-    filters:
-      - drop_na(numeric_value)
+      extension:
+        available_time: col(storetime)
+        warning: col(warning)

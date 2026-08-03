@@ -1,20 +1,30 @@
 path: data/nw_hosp/prescriptions.csv.gz
 
 columns:
-  # subject_id and extentions
-  - name: hadm_id # should be identical field in pharmacy
+  # subject_id and extensions
+  - name: subject_id
     type: int64
-  - name: subject_id  # should be identical field in pharmacy
+  - name: hadm_id
     type: int64
+  - name: pharmacy_id
+    type: int64
+  - name: poe_id
+    type: string
+  - name: poe_seq
+    type: int64
+  - name: order_provider_id
+    type: string
+
   # db fields - times
-  - name: starttime # identical field in pharmacy
+  - name: starttime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
-  - name: stoptime  # identical field in pharmacy
+  - name: stoptime
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+
   # db fields - values
   - name: doses_per_24_hrs
     type: float32
@@ -34,48 +44,38 @@ columns:
     type: string
   - name: formulary_drug_cd
     type: string
-  - name: gsn # Generic Sequence Number
+  - name: gsn
     type: string
-  - name: ndc # National Drug Code
+  - name: ndc
     type: string
-  - name: order_provider_id
-    type: string
-  - name: pharmacy_id # unique id in pharmacy table
-    type: int64
   - name: prod_strength
     type: string
-  - name: poe_id  # orders
-    type: string
-  - name: poe_seq
-    type: int64
-  - name: route # identical field in pharmacy
+  - name: route
     type: string
 
 event_defaults:
   subject_id: col(subject_id)
   extension:
     hadm_id: col(hadm_id)
-
+    poe_id: col(poe_id)
+    poe_seq: col(poe_seq)
+    pharmacy_id: col(pharmacy_id)
+    order_provider_id: col(order_provider_id)
 
 events:
-  - name: medication_start
+  - name: MEDICATION_ORDER
     columns:
       time: col(starttime)
       code:
-        - const("MEDICATION_START")
         - col(drug)
-        - col(drug_type)
-        - col(prod_strength)
-  - name: status
-    columns:
-      code:
-        - const("STATUS")
-      time: col(stoptime)
-      text_value: col(status)
-  - name: medication_stop
-    columns:
-      time: col(stoptime)
-      code:
-        - col(drug)
-        - col(drug_type)
-        - col(prod_strength)
+      text_value: col(prod_strength)
+      extension:
+        available_time: col(starttime)
+        prescribed_start: col(starttime)
+        prescribed_end: col(stoptime)
+        ndc: col(ndc)
+        drug_type: col(drug_type)
+        form: col(form_rx)
+        dose: col(dose_val_rx)
+        dose_uom: col(dose_unit_rx)
+        route: col(route)

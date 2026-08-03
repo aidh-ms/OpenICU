@@ -1,13 +1,14 @@
 path: data/nw_icu/icustays.csv.gz
 
 columns:
-  # subject_id and extentions
+  # subject_id and extensions
+  - name: subject_id
+    type: int64
   - name: hadm_id
     type: int64
   - name: stay_id
     type: int64
-  - name: subject_id
-    type: int64
+
   # db fields - times
   - name: intime
     type: datetime
@@ -17,6 +18,7 @@ columns:
     type: datetime
     params:
       format: "%Y-%m-%d %H:%M:%S"
+
   # db fields - values
   - name: first_careunit
     type: string
@@ -36,15 +38,29 @@ events:
     columns:
       time: col(intime)
       code:
-        - col(first_careunit)
+        - const("ICU_ADMISSION")
+      extension:
+        available_time: col(intime)
+        careunit: col(first_careunit)
+
   - name: icu_discharge
     columns:
       time: col(outtime)
       code:
-        - col(last_careunit)
+        - const("ICU_DISCHARGE")
+      extension:
+        available_time: col(outtime)
+        careunit: col(last_careunit)
+    filters:
+      - drop_na(time)
+
   - name: icu_length_of_stay
     columns:
       time: col(outtime)
       code:
-        - const("d")
+        - const("days")
       numeric_value: col(los)
+      extension:
+        available_time: col(outtime)
+    filters:
+      - drop_na(time)
