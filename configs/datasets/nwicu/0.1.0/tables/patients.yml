@@ -34,6 +34,7 @@ events:
       code:
         - const("MEDS_BIRTH")
       time: col(dob)
+      numeric_value: col(anchor_age)
       extension:
         available_time: col(dob)
 
@@ -42,6 +43,7 @@ events:
       time: col(dob)
       code:
         - col(gender)
+      text_value: col(gender)
       extension:
         available_time: col(dob)
 

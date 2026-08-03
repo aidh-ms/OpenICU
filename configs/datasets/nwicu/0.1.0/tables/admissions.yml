@@ -121,3 +121,11 @@ events:
         available_time: col(deathtime)
     filters:
       - drop_na(time)
+  - name: IN_HOSPITAL_MORTALITY
+    columns:
+      time: col(dischtime)
+      code:
+        - const("IN_HOSPITAL_MORTALITY")
+      numeric_value: col(hospital_expire_flag)
+      extension:
+        available_time: col(dischtime)

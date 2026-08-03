@@ -2,18 +2,8 @@ type: simple
 mappings:
   - pattern:
       table: patients
-      event: MEDS_BIRTH
-      code: gender
-    columns: &id001
+      event: GENDER
+      code: (M|F)
+    columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
-  - pattern:
-      table: patients
-      event: GENDER
-      code: gender
-    columns: *id001
-  - pattern:
-      table: patients
-      event: MEDS_DEATH
-      code: gender
-    columns: *id001
