@@ -46,6 +46,8 @@ events:
       time: col(outtime)
       extension:
         available_time: col(outtime)
+    filters:
+      - drop_na(time)
   - name: icu_length_of_stay
     columns:
       time: col(outtime)
@@ -54,3 +56,6 @@ events:
       numeric_value: col(los)
       extension:
         available_time: col(outtime)
+    filters:
+      - drop_na(time)
+      - drop_na(numeric_value)
