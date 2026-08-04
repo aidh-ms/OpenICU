@@ -20,6 +20,7 @@ columns:
     type: string
 
 post_join_callbacks:
+  - to_datetime(anchor_year, 1, 1, "00:00:00", output=anchor_time)
   - to_datetime(anchor_year, 1, 1, "00:00:00", -anchor_age, "years", output=dob)
   - set_time(dod, 23, 59, 59, output=dod_24)
 
@@ -27,6 +28,15 @@ event_defaults:
   subject_id: col(subject_id)
 
 events:
+  - name: PATIENT_AGE
+    columns:
+      time: col(anchor_time)
+      code:
+        - const("PATIENT_AGE")
+      numeric_value: col(anchor_age)
+      extension:
+        available_time: col(anchor_time)
+
   - name: MEDS_BIRTH
     columns:
       code:
