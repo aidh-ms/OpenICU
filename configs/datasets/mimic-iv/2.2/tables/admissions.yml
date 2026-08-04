@@ -82,6 +82,11 @@ events:
         - col(admission_type)
         - col(admission_location)
 
+  - name: ADMISSION_TYPE
+    columns:
+      code:
+        - col(admission_type)
+
   - name: INSURANCE
     columns:
       code:
