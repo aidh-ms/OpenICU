@@ -3,4 +3,3 @@ version: 1.0.0
 unit: score
 extension_columns:
   dataset: col("dataset")
-  table: col("table")
