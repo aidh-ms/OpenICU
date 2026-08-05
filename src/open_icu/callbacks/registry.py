@@ -10,7 +10,7 @@ class CallbackRegistry:
 
     def __init__(self) -> None:
         """Initialize the registry storage."""
-        self._registry: dict[str, CallbackProtocol] = {}
+        self._registry: dict[str, type[CallbackProtocol]] = {}
 
     def __len__(self) -> int:
         """Return the number of registered items."""
@@ -24,7 +24,7 @@ class CallbackRegistry:
         """Return string representation of the registry."""
         return f"{self.__class__.__name__}(entries={len(self._registry)})"
 
-    def register(self, key: str, value: CallbackProtocol, overwrite: bool = False) -> None:
+    def register(self, key: str, value: type[CallbackProtocol], overwrite: bool = False) -> None:
         """Register a callbacks object.
 
         Args:
@@ -49,7 +49,7 @@ class CallbackRegistry:
             return True
         return False
 
-    def get(self, key: str, default: CallbackProtocol | None = None) -> CallbackProtocol | None:
+    def get(self, key: str, default: type[CallbackProtocol] | None = None) -> type[CallbackProtocol] | None:
         """Retrieve a callbacks by its key.
 
         Args:
@@ -68,7 +68,7 @@ class CallbackRegistry:
         """
         return list(self._registry.keys())
 
-    def values(self) -> list[CallbackProtocol]:
+    def values(self) -> list[type[CallbackProtocol]]:
         """Get all registered callbacks objects.
 
         Returns:
@@ -76,7 +76,7 @@ class CallbackRegistry:
         """
         return list(self._registry.values())
 
-    def items(self) -> list[tuple[str, CallbackProtocol]]:
+    def items(self) -> list[tuple[str, type[CallbackProtocol]]]:
         """Get all key-callbacks pairs.
 
         Returns:
@@ -98,6 +98,6 @@ def register_callback_cls[T: type[CallbackProtocol]](cls: T) -> T:
 
     @wraps(cls)
     def wrapper(*args: Any, **kwargs: Any) -> T:
-        return cls(*args, **kwargs)
+        return cls(*args, **kwargs)  # ty: ignore[invalid-return-type]
 
     return wrapper  # ty: ignore[invalid-return-type]

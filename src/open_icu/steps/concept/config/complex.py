@@ -41,7 +41,7 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
         """Dynamically import and return the concept transformer function based on the provided dotted path."""
 
         transformer = cast(type[ConceptTransformerProtocol], import_callable(self.concept_transformer))
-        return transformer(self.__class__.__bases__[0], self, **self.kwargs)
+        return transformer(self.__class__.__bases__[0], self, **self.kwargs)  # ty: ignore[invalid-argument-type]
 
     @computed_field
     @property
