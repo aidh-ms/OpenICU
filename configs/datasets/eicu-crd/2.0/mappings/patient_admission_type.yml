@@ -1,9 +1,8 @@
 type: simple
 mappings:
-  - pattern:
-      table: admissiondx
-      event: DIAGNOSIS
-      code: admitdxpath
-    columns:
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
+- pattern:
+    table: admissiondx
+    event: DIAGNOSIS
+    code: ^admission diagnosis\|.*
+  columns:
+    text_value: col(code)
