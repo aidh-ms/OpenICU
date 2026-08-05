@@ -93,7 +93,7 @@ class TestComplexConcept:
             "openicu.config.concept.ventilation_end.1.0.0",
         }
 
-        config.fn("project-sentinel")  # ty: ignore[invalid-argument-type]
+        config.fn("project-sentinel", "test")  # ty: ignore[invalid-argument-type]
         import fake_transformers  # ty: ignore[unresolved-import]
 
         assert fake_transformers.Recorder.calls == [("project-sentinel", {"window": "1h"})]
