@@ -65,7 +65,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             for concept in self._registry.values():
                 dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
-                    logger.debug(
+                    logger.warning(
                         "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
                         concept.name,
                         dataset,
@@ -103,7 +103,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
                 dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
-                    logger.debug(
+                    logger.warning(
                         "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
                         concept.name,
                         dataset,
