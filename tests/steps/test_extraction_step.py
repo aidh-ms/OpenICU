@@ -43,10 +43,10 @@ class TestExtractionStep:
         )
 
         codes = set(df["code"].to_list())
-        assert "220045//Heart Rate//bpm" in codes
-        assert "220050//Systolic BP//mmHg" in codes
+        assert "CHART//220045//Heart Rate//bpm" in codes
+        assert "CHART//220050//Systolic BP//mmHg" in codes
         # unmatched join keys: the null label is skipped in the code, not rendered
-        assert "999999//units" in codes
+        assert "CHART//999999//units" in codes
 
     def test_join_and_values(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)
@@ -68,7 +68,7 @@ class TestExtractionStep:
 
         weight = pl.read_parquet(base / "WEIGHT.parquet")
         height = pl.read_parquet(base / "HEIGHT.parquet")
-        assert weight["code"].unique().to_list() == ["kg"]
+        assert weight["code"].unique().to_list() == ["WEIGHT//kg"]
         assert weight["numeric_value"].to_list() == [80.0, 60.0]
         assert height["numeric_value"].to_list() == [2.0, 1.5]
 
@@ -78,7 +78,7 @@ class TestExtractionStep:
 
         assert (metadata_path / "dataset.json").exists()
         codes = pl.read_parquet(metadata_path / "codes.parquet")
-        assert "220045//Heart Rate//bpm" in codes["code"].to_list()
+        assert "CHART//220045//Heart Rate//bpm" in codes["code"].to_list()
 
     def test_rerun_is_skipped_without_overwrite(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)

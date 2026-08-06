@@ -32,6 +32,18 @@ class DatasetConfig(BaseModel):
     excludes: list[str] | None = Field(default=None, description="List of sections to exclude from the config file.")
 
 
+class ExtractionSettings(BaseModel):
+    """Global settings controlling extraction output."""
+
+    include_event_name_in_code: bool = Field(
+        default=False,
+        description=(
+            "Whether event names are prepended to generated MEDS codes by "
+            "default. Individual table configs may override this setting."
+        ),
+    )
+
+
 class CustomConfig(BaseModel):
     """Custom configuration specific to the extraction step.
 
@@ -39,7 +51,14 @@ class CustomConfig(BaseModel):
         data: List of source datasets to process
     """
 
-    data: list[DatasetConfig] = Field(default_factory=list, description="List of datasets to be extracted.")
+    settings: ExtractionSettings = Field(
+        default_factory=ExtractionSettings,
+        description="Global extraction settings.",
+    )
+    data: list[DatasetConfig] = Field(
+        default_factory=list,
+        description="List of datasets to be extracted.",
+    )
 
 
 class ExtractionStepConfig(BaseStepConfig[CustomConfig]):

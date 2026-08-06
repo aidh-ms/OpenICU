@@ -156,3 +156,48 @@ class TestJoinTableConfig:
         )
         assert join.join_params == {"left_on": ["itemid"], "right_on": ["item_id"]}
         assert join.how == "inner"
+
+
+class TestEventNameCodeSettings:
+    def test_table_setting_is_unspecified_by_default(self) -> None:
+        table = make_table_config()
+
+        assert table.settings.include_event_name_in_code is None
+
+    def test_table_setting_can_disable_event_name(self) -> None:
+        table = make_table_config(
+            settings={
+                "include_event_name_in_code": False,
+            }
+        )
+
+        assert table.settings.include_event_name_in_code is False
+
+    def test_table_setting_can_enable_event_name(self) -> None:
+        table = make_table_config(
+            settings={
+                "include_event_name_in_code": True,
+            }
+        )
+
+        assert table.settings.include_event_name_in_code is True
+
+
+class TestGlobalEventNameCodeSettings:
+    def test_global_setting_defaults_to_true(self) -> None:
+        from open_icu.steps.extraction.config.step import CustomConfig
+
+        config = CustomConfig()
+
+        assert config.settings.include_event_name_in_code is True
+
+    def test_global_setting_can_be_disabled(self) -> None:
+        from open_icu.steps.extraction.config.step import CustomConfig
+
+        config = CustomConfig(
+            settings={
+                "include_event_name_in_code": False,
+            }
+        )
+
+        assert config.settings.include_event_name_in_code is False

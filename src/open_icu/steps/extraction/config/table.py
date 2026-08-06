@@ -175,6 +175,18 @@ class JoinTableConfig(BaseTableConfig):
         return params
 
 
+class ExtractionTableSettings(BaseModel):
+    """Optional extraction settings for an individual table."""
+
+    include_event_name_in_code: bool | None = Field(
+        default=None,
+        description=(
+            "Whether to prepend the event name to generated MEDS codes. "
+            "When omitted, the global extraction-step setting is used."
+        ),
+    )
+
+
 class TableConfig(BaseDatasetConfig, BaseTableConfig):
     """Complete configuration for extracting MEDS events from a table.
 
@@ -195,6 +207,10 @@ class TableConfig(BaseDatasetConfig, BaseTableConfig):
 
     __open_icu_config_type__: ClassVar[str] = "table"
 
+    settings: ExtractionTableSettings = Field(
+        default_factory=ExtractionTableSettings,
+        description="Optional extraction settings for this table.",
+    )
     join: list[JoinTableConfig] = Field(
         default_factory=list,
         description="List of join configurations for joining tables.",
