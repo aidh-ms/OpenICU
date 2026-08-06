@@ -361,8 +361,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
             [event_name //] code_prefix // columns.code // code_suffix
 
-        The event name is included by default. A table-specific setting may
-        override the global extraction-step setting.
+        Whether the event name is included is controlled by the global
+        extraction-step setting. A table-specific setting may override it.
         """
         code_parts: list[pl.Expr] = []
 
