@@ -107,6 +107,8 @@ events:
         available_time: first_not_null(storetime, storedate_plus1, output=available_time)
         isolate_num: col(isolate_num)
         comments: col(comments)
+    filters:
+      - drop_na(org_itemid) or drop_na(org_name)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_SUSCEPTIBILITY
