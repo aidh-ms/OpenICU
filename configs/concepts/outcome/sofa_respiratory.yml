@@ -1,6 +1,5 @@
-name: GCS_total
+name: sofa_respiratory
 version: 1.0.0
-unit: None
+unit: RESPIRATORY//SCORE
 extension_columns:
   dataset: col("dataset")
-  table: col("table")

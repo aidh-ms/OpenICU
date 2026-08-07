@@ -1,0 +1,6 @@
+type: complex
+concept_transformer: open_icu.transformer.sofa.renal.SOFARenalTransformer
+concepts:
+  - urine_output.1.0.0
+  - creatinine.1.0.0
+kwargs: {}

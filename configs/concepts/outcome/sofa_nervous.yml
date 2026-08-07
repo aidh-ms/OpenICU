@@ -1,6 +1,5 @@
-name: GCS_motor
+name: sofa_nervous
 version: 1.0.0
-unit: None
+unit: NERVOUS//SCORE
 extension_columns:
   dataset: col("dataset")
-  table: col("table")

@@ -1,6 +1,5 @@
-name: GCS_eye
+name: sofa
 version: 1.0.0
-unit: None
+unit: SCORE
 extension_columns:
   dataset: col("dataset")
-  table: col("table")

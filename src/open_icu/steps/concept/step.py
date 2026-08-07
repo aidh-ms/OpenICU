@@ -127,7 +127,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept.identifier,
                         dataset,
                     )
-                    dataset_concept.fn(self._project)
+                    dataset_concept.fn(self._project, self._step_name)
 
     @property
     def extraction_dataset(self):
@@ -366,6 +366,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         join_table,
                     ),
                     how=join_table.how,  # ty: ignore[invalid-argument-type]
+                    suffix=join_table.suffix,
                     **join_table.join_params,  # ty: ignore[invalid-argument-type]
                 )
                 post_callbacks.extend(join_table.post_callbacks)

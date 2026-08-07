@@ -1,0 +1,17 @@
+type: derived
+table:
+  concept: platelet_count.1.0.0
+  columns:
+    - subject_id
+    - time
+    - numeric_value
+    - dataset
+event:
+  subject_id: col(subject_id)
+  time: col(time)
+  code:
+    - const(SOFA//COAGULATION//SCORE)
+  numeric_value: col(numeric_value)
+  text_value: col(text_value)
+  extension:
+    dataset: col(dataset)
