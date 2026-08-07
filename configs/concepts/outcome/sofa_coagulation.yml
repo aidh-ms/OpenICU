@@ -1,6 +1,5 @@
-name: GCS_verbal
+name: sofa_coagulation
 version: 1.0.0
-unit: None
+unit: COAGULATION//SCORE
 extension_columns:
   dataset: col("dataset")
-  table: col("table")

@@ -1,0 +1,36 @@
+type: derived
+table:
+  concept: gcs_eye.1.0.0
+  columns:
+    - subject_id
+    - time
+    - numeric_value
+    - dataset
+join:
+  - concept: gcs_motor.1.0.0
+    columns:
+      - subject_id
+      - time
+      - numeric_value
+    both_on:
+      - subject_id
+      - time
+    suffix: "_motor"
+  - concept: gcs_verbal.1.0.0
+    columns:
+      - subject_id
+      - time
+      - numeric_value
+    both_on:
+      - subject_id
+      - time
+    suffix: "_verbal"
+event:
+  subject_id: col(subject_id)
+  time: col(time)
+  code:
+    - const(GCS_total//None)
+  numeric_value: col(numeric_value) + col(numeric_value_motor) + col(numeric_value_verbal)
+  text_value: col(numeric_value)
+  extension:
+    dataset: col(dataset)
