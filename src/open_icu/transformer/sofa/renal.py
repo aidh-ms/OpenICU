@@ -115,8 +115,9 @@ class SOFARenalTransformer(ConceptTransformerProtocol):
                 pl.max_horizontal("creatinine_score", "uo_score").alias("numeric_value")
             )
         )
+
         lf = lf.with_columns(pl.lit(self._complex_config.dataset).alias("dataset"))
-        lf = lf.with_columns(pl.lit("SOFA//RENAL//SCORE").alias("code"))
+        lf = lf.with_columns(pl.lit(self._concept.code.upper()).alias("code"))
         lf = lf.with_columns(pl.col("numeric_value").cast(pl.String).alias("text_value"))
         lf = lf.select([
             pl.col("subject_id").cast(pl.Int64),
