@@ -84,7 +84,8 @@ events:
         - col(spec_type_desc)
       extension:
         available_time: first_not_null(charttime, chartdate_plus1, output=available_time)
-    # TODO: deduplicate via a callback
+    filters:
+      - first_distinct(subject_id, micro_specimen_id)
 
   - name: MICROBIOLOGY_TEST
     columns:

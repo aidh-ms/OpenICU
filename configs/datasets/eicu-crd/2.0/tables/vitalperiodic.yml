@@ -42,8 +42,6 @@ columns:
     type: int64
   - name: temperature
     type: float32 # decimal(x,y)
-  - name: vitalperiodicid
-    type: int64
 
 
 post_join_callbacks:
