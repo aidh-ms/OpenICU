@@ -107,12 +107,10 @@ A pipeline is two small YAML files plus a few lines of Python.
 name: Extraction
 version: 1.0.0
 
-config_files:
-  - path: /path/to/OpenICU/configs/datasets/mimic-iv/3.1/tables/
-
 config:
   data:
     - name: mimic-iv
+      version: "3.1"
       path: /path/to/physionet.org/files/mimiciv/3.1
 ```
 
@@ -122,14 +120,11 @@ config:
 name: Concept
 version: 1.0.0
 
-config_files:
-  - path: /path/to/OpenICU/configs/concepts
-
 config:
   extraction_step: Extraction
-  dataset_configs:
+  mapping_configs:
     - name: mimic-iv
-      path: /path/to/OpenICU/configs/datasets/mimic-iv/3.1/mappings/
+      version: "3.1"
 ```
 
 **3. Run the pipeline:**

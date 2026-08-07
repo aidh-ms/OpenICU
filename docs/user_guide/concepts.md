@@ -15,15 +15,14 @@ The two are connected by file name: when a concept named `heart_rate` is loaded,
 name: Concept
 version: 1.0.0
 
-config_files:
-  - path: /path/to/configs/concepts       # the concept dictionary
-
 config:
   extraction_step: Extraction            # which step's output to read
-  dataset_configs:
+  mapping_configs:
     - name: mimic-iv                     # dataset name used during extraction
+      version: "3.1"
       path: /path/to/configs/datasets/mimic-iv/3.1/mappings/
     - name: eicu-crd
+      version: "2.0"
       path: /path/to/configs/datasets/eicu-crd/2.0/mappings/
 ```
 
