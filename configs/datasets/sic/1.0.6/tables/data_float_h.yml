@@ -54,7 +54,7 @@ join:
       - PatientID
   # (C) human-readable signal name + unit.
   - name: d_references
-    path: d_references.csv
+    path: d_references.csv.gz
     columns:
       - name: ReferenceGlobalID
         type: int64
