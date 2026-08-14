@@ -54,10 +54,12 @@ join:
       - PatientID
   # (C) human-readable signal name + unit.
   - name: d_references
-    path: d_references.csv
+    path: d_references.csv.gz
     columns:
       - name: ReferenceGlobalID
         type: int64
+      - name: ReferenceValue
+        type: str
       - name: ReferenceName
         type: str
       - name: ReferenceUnit
@@ -83,6 +85,7 @@ events:
       code:
         - col(DataID)
         - col(ReferenceName)
+        - col(ReferenceValue)
         - col(ReferenceUnit)
       numeric_value: col(Val)
     filters:
