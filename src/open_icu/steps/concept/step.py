@@ -98,7 +98,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     dataset,
                 )
                 concept = self._registry.get(concept_id)
-                assert concept is not None
+                assert concept is not None, f"concept {concept_id} not found in registry"
 
                 dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
