@@ -7,12 +7,12 @@ from open_icu.utils.importer import import_callable
 
 if TYPE_CHECKING:
     from open_icu.steps.concept.config.concept import ConceptConfig
-    from open_icu.storage.project import OpenICUProject
+    from open_icu.steps.concept.step import ConceptStep
 
 
 class ConceptTransformerProtocol(Protocol):
     def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", **kwargs): ...
-    def __call__(self, project: "OpenICUProject", step_name: str) -> None: ...
+    def __call__(self, step: "ConceptStep") -> None: ...
 
 
 class ComplexDatasetConceptConfig(BaseDatasetConfig):

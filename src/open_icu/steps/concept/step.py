@@ -128,7 +128,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept.identifier,
                         dataset,
                     )
-                    dataset_concept.fn(self._project, self._step_name)
+                    dataset_concept.fn(self)
 
     @property
     def extraction_dataset(self):

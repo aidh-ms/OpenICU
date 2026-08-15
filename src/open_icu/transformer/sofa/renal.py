@@ -7,7 +7,7 @@ from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig, C
 
 if TYPE_CHECKING:
     from open_icu.steps.concept.config.concept import ConceptConfig
-    from open_icu.storage.project import OpenICUProject
+    from open_icu.steps.concept.step import ConceptStep
 
 
 class SOFARenalTransformer(ConceptTransformerProtocol):
@@ -16,10 +16,10 @@ class SOFARenalTransformer(ConceptTransformerProtocol):
         self._complex_config = complex_config
         self._kwargs = kwargs
 
-    def __call__(self, project: "OpenICUProject", step_name: str) -> None:
+    def __call__(self, step: "ConceptStep") -> None:
         # Implement the transformation logic for SOFA renal here
         # This is a placeholder implementation; replace with actual logic.
-        concept_workspace = project.workspace.get(step_name)
+        concept_workspace = step._workspace_dir
         assert concept_workspace is not None
 
         creatinine_lf = (
