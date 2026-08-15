@@ -86,16 +86,22 @@ events:
     columns:
       code:
         - col(insurance)
+    filters:
+      - drop_na(insurance)
 
   - name: LANGUAGE
     columns:
       code:
         - col(language)
+    filters:
+      - drop_na(language)
 
   - name: MARITAL_STATUS
     columns:
       code:
         - col(marital_status)
+    filters:
+      - drop_na(marital_status)
 
   - name: ETHNICITY
     columns:

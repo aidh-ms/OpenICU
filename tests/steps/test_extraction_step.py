@@ -4,17 +4,35 @@ from datetime import datetime
 from pathlib import Path
 
 import polars as pl
+import pytest
 
 from open_icu import ExtractionStep, OpenICUProject
 from tests.steps.conftest import load_extracation_config
 
 
-def run_extraction(tmp_path: Path, extraction_config: Path) -> OpenICUProject:
+def run_extraction(
+    tmp_path: Path,
+    extraction_config: Path,
+    *,
+    include_event_name_in_code: bool | None = None,
+) -> OpenICUProject:
+    if include_event_name_in_code is not None:
+        text = extraction_config.read_text()
+        text = text.replace(
+            "config:\n",
+            f"config:\n  settings:\n    include_event_name_in_code: {str(include_event_name_in_code).lower()}\n",
+            1,
+        )
+        extraction_config.write_text(text)
+
     project = OpenICUProject(tmp_path / "project")
 
     load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
 
-    extraction_step = ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step = ExtractionStep.load(
+        project,
+        extraction_config,
+    )
     extraction_step.run()
 
     return project
@@ -36,17 +54,44 @@ class TestExtractionStep:
         assert df.schema["text_value"] == pl.String
         assert "stay_id" in df.columns  # extension column preserved
 
-    def test_code_encodes_provenance(self, tmp_path: Path, extraction_config: Path) -> None:
-        project = run_extraction(tmp_path, extraction_config)
+    @pytest.mark.parametrize(
+        ("include_event_name", "expected_codes"),
+        [
+            (
+                False,
+                {
+                    "220045//Heart Rate//bpm",
+                    "220050//Systolic BP//mmHg",
+                    "999999//units",
+                },
+            ),
+            (
+                True,
+                {
+                    "CHART//220045//Heart Rate//bpm",
+                    "CHART//220050//Systolic BP//mmHg",
+                    "CHART//999999//units",
+                },
+            ),
+        ],
+    )
+    def test_code_encodes_provenance(
+        self,
+        tmp_path: Path,
+        extraction_config: Path,
+        include_event_name: bool,
+        expected_codes: set[str],
+    ) -> None:
+        project = run_extraction(
+            tmp_path,
+            extraction_config,
+            include_event_name_in_code=include_event_name,
+        )
         df = pl.read_parquet(
             project.datasets_path / "extraction" / "data" / "testdb" / "1.0" / "vitals" / "CHART.parquet"
         )
 
-        codes = set(df["code"].to_list())
-        assert "220045//Heart Rate//bpm" in codes
-        assert "220050//Systolic BP//mmHg" in codes
-        # unmatched join keys: the null label is skipped in the code, not rendered
-        assert "999999//units" in codes
+        assert set(df["code"].to_list()) == expected_codes
 
     def test_join_and_values(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)
@@ -62,23 +107,61 @@ class TestExtractionStep:
             datetime(2024, 1, 1, 9, 0),
         ]
 
-    def test_multiple_events_per_table(self, tmp_path: Path, extraction_config: Path) -> None:
-        project = run_extraction(tmp_path, extraction_config)
+    @pytest.mark.parametrize(
+        ("include_event_name", "weight_code", "height_code"),
+        [
+            (False, "kg", "m"),
+            (True, "WEIGHT//kg", "HEIGHT//m"),
+        ],
+    )
+    def test_multiple_events_per_table(
+        self,
+        tmp_path: Path,
+        extraction_config: Path,
+        include_event_name: bool,
+        weight_code: str,
+        height_code: str,
+    ) -> None:
+        project = run_extraction(
+            tmp_path,
+            extraction_config,
+            include_event_name_in_code=include_event_name,
+        )
         base = project.datasets_path / "extraction" / "data" / "testdb" / "1.0" / "measurements"
 
         weight = pl.read_parquet(base / "WEIGHT.parquet")
         height = pl.read_parquet(base / "HEIGHT.parquet")
-        assert weight["code"].unique().to_list() == ["kg"]
+
+        assert weight["code"].unique().to_list() == [weight_code]
+        assert height["code"].unique().to_list() == [height_code]
         assert weight["numeric_value"].to_list() == [80.0, 60.0]
         assert height["numeric_value"].to_list() == [2.0, 1.5]
 
-    def test_metadata_written(self, tmp_path: Path, extraction_config: Path) -> None:
-        project = run_extraction(tmp_path, extraction_config)
+    @pytest.mark.parametrize(
+        ("include_event_name", "expected_code"),
+        [
+            (False, "220045//Heart Rate//bpm"),
+            (True, "CHART//220045//Heart Rate//bpm"),
+        ],
+    )
+    def test_metadata_written(
+        self,
+        tmp_path: Path,
+        extraction_config: Path,
+        include_event_name: bool,
+        expected_code: str,
+    ) -> None:
+        project = run_extraction(
+            tmp_path,
+            extraction_config,
+            include_event_name_in_code=include_event_name,
+        )
         metadata_path = project.datasets_path / "extraction" / "metadata"
 
         assert (metadata_path / "dataset.json").exists()
+
         codes = pl.read_parquet(metadata_path / "codes.parquet")
-        assert "220045//Heart Rate//bpm" in codes["code"].to_list()
+        assert expected_code in codes["code"].to_list()
 
     def test_rerun_is_skipped_without_overwrite(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)

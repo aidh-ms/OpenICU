@@ -57,3 +57,5 @@ events:
       extension:
         available_time: col(storetime)
         scheduletime: col(scheduletime)
+    filters:
+      - drop_na(medication)

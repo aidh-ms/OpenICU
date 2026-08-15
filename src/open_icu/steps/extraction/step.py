@@ -174,12 +174,11 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
             # Create code column.
             #
-            # Final code structure:
-            # db_name // table_name // code_prefix // columns.code // code_suffix
+            # Event-specific code structure:
+            # [event_name //] code_prefix // columns.code // code_suffix
             #
-            # db_name and table_name are automatic. code_prefix, columns.code,
-            # and code_suffix are configured. columns.code contains optional
-            # user-defined code parts such as unit, route, specimen, or method.
+            # The event name is included by default and can be disabled through
+            # the global extraction settings or a table-specific override.
             code_expr = self._build_code_expr(event_lf, table, event)
 
             # Add constructed MEDS code column
@@ -358,16 +357,20 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
     ) -> pl.Expr:
         """Build the MEDS code expression for an event.
 
-        The final code is built as:
+        The final event-specific code is built as:
 
-            db_name // table_name // code_prefix // columns.code // code_suffix
+            [event_name //] code_prefix // columns.code // code_suffix
 
-        The db_name and table_name parts are automatic. The configured code
-        prefix is inserted after db/table. Additional user-defined code parts,
-        such as event names, units, routes, specimens, or methods, are provided
-        through columns.code. The configured code suffix is appended last.
+        Whether the event name is included is controlled by the global
+        extraction-step setting. A table-specific setting may override it.
         """
         code_parts: list[pl.Expr] = []
+
+        include_event_name = (
+            table.settings.include_event_name_in_code
+            if table.settings.include_event_name_in_code is not None
+            else self._config.config.settings.include_event_name_in_code
+        )
 
         code_parts.extend(
             self._parse_expr(
@@ -395,6 +398,18 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             )
             for expr in event.code_suffix
         )
+
+        if include_event_name:
+            event_name = pl.lit(event.name, dtype=pl.String)
+
+            if code_parts:
+                first_code_part = code_parts[0].cast(pl.String)
+
+                event_name = (
+                    pl.when(first_code_part == event.name).then(pl.lit(None, dtype=pl.String)).otherwise(event_name)
+                )
+
+            code_parts.insert(0, event_name)
         if len(code_parts) == 1:
             return code_parts[0].cast(pl.String).alias("code")
 

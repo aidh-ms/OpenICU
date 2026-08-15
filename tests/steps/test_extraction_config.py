@@ -3,6 +3,7 @@
 import polars as pl
 import pytest
 
+from open_icu.steps.extraction.config.step import CustomConfig
 from open_icu.steps.extraction.config.table import JoinTableConfig, TableConfig, TableType
 
 
@@ -23,6 +24,30 @@ def make_table_config(**overrides) -> TableConfig:
 
 
 class TestTableConfig:
+    def test_global_event_name_setting_can_be_enabled(self) -> None:
+        config = CustomConfig.model_validate(
+            {
+                "settings": {
+                    "include_event_name_in_code": True,
+                },
+                "data": [],
+            }
+        )
+
+        assert config.settings.include_event_name_in_code is True
+
+    def test_global_event_name_setting_can_be_disabled(self) -> None:
+        config = CustomConfig.model_validate(
+            {
+                "settings": {
+                    "include_event_name_in_code": False,
+                },
+                "data": [],
+            }
+        )
+
+        assert config.settings.include_event_name_in_code is False
+
     def test_dtypes_computed_from_columns(self) -> None:
         table = make_table_config()
         assert table.dtypes == {
@@ -156,3 +181,48 @@ class TestJoinTableConfig:
         )
         assert join.join_params == {"left_on": ["itemid"], "right_on": ["item_id"]}
         assert join.how == "inner"
+
+
+class TestEventNameCodeSettings:
+    def test_table_setting_is_unspecified_by_default(self) -> None:
+        table = make_table_config()
+
+        assert table.settings.include_event_name_in_code is None
+
+    def test_table_setting_can_disable_event_name(self) -> None:
+        table = make_table_config(
+            settings={
+                "include_event_name_in_code": False,
+            }
+        )
+
+        assert table.settings.include_event_name_in_code is False
+
+    def test_table_setting_can_enable_event_name(self) -> None:
+        table = make_table_config(
+            settings={
+                "include_event_name_in_code": True,
+            }
+        )
+
+        assert table.settings.include_event_name_in_code is True
+
+
+class TestGlobalEventNameCodeSettings:
+    def test_global_setting_defaults_to_true(self) -> None:
+        from open_icu.steps.extraction.config.step import CustomConfig
+
+        config = CustomConfig()
+
+        assert config.settings.include_event_name_in_code is False
+
+    def test_global_setting_can_be_disabled(self) -> None:
+        from open_icu.steps.extraction.config.step import CustomConfig
+
+        config = CustomConfig(
+            settings={
+                "include_event_name_in_code": False,
+            }
+        )
+
+        assert config.settings.include_event_name_in_code is False
