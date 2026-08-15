@@ -1,17 +1,6 @@
-type: derived
-table:
-  concept: bilirubin_direct.1.0.0
-  columns:
-    - subject_id
-    - time
-    - numeric_value
-    - dataset
-event:
-  subject_id: col(subject_id)
-  time: col(time)
-  code:
-    - const(SOFA//LIVER//POINTS)
-  numeric_value: col(numeric_value)
-  text_value: col(text_value)
-  extension:
-    dataset: col(dataset)
+type: complex
+concept_transformer: open_icu.transformer.sofa.renal.SOFARenalTransformer
+concepts:
+  - urine_output.1.0.0
+  - creatinine.1.0.0
+kwargs: {}
