@@ -70,7 +70,7 @@ class TestComplexConcept:
         (tmp_path / "fake_transformers.py").write_text(
             "class Recorder:\n"
             "    calls = []\n"
-            "    def __init__(self, concept, config, **kwargs):\n"
+            "    def __init__(self, concept, config, step, **kwargs):\n"
             "        self.kwargs = kwargs\n"
             "    def __call__(self, step):\n"
             "        Recorder.calls.append((step, self.kwargs))\n"
