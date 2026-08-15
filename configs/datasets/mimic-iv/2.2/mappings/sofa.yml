@@ -1,5 +1,5 @@
 type: complex
-concept_transformer: open_icu.transformer.sofa.renal.SOFARenalTransformer
+concept_transformer: open_icu.steps.concept.transformer.sofa.SofaTransformer
 concepts:
   - sofa_respiratory.1.0.0
   - sofa_coagulation.1.0.0
@@ -7,4 +7,3 @@ concepts:
   - sofa_cardiovascular.1.0.0
   - sofa_cns.1.0.0
   - sofa_renal.1.0.0
-kwargs: {}

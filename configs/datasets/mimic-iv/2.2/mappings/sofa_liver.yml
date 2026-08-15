@@ -1,6 +1,4 @@
 type: complex
-concept_transformer: open_icu.transformer.sofa.renal.SOFARenalTransformer
+concept_transformer: open_icu.steps.concept.transformer.sofa.SofaLiverTransformer
 concepts:
-  - urine_output.1.0.0
-  - creatinine.1.0.0
-kwargs: {}
+  - total_bilirubin.1.0.0
