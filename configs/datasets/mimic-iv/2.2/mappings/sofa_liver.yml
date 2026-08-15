@@ -10,7 +10,7 @@ event:
   subject_id: col(subject_id)
   time: col(time)
   code:
-    - const(SOFA//LIVER//SCORE)
+    - const(SOFA//LIVER//POINTS)
   numeric_value: col(numeric_value)
   text_value: col(text_value)
   extension:

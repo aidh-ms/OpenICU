@@ -1,6 +1,6 @@
 type: derived
 table:
-  concept: GCS_total.1.0.0
+  concept: gcs_total.1.0.0
   columns:
     - subject_id
     - time
@@ -10,7 +10,7 @@ event:
   subject_id: col(subject_id)
   time: col(time)
   code:
-    - const(SOFA//NERVOUS//SCORE)
+    - const(SOFA//NERVOUS//POINTS)
   numeric_value: col(numeric_value)
   text_value: col(text_value)
   extension:

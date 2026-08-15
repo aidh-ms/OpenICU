@@ -31,6 +31,5 @@ event:
   code:
     - const(GCS_total//None)
   numeric_value: col(numeric_value) + col(numeric_value_motor) + col(numeric_value_verbal)
-  text_value: col(numeric_value)
   extension:
     dataset: col(dataset)

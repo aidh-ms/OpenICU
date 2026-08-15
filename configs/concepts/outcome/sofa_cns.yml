@@ -1,5 +1,5 @@
-name: sofa_nervous
+name: sofa_cns
 version: 1.0.0
-unit: NERVOUS//SCORE
+unit: points
 extension_columns:
   dataset: col("dataset")

@@ -1,5 +1,5 @@
 name: sofa_liver
 version: 1.0.0
-unit: LIVER//SCORE
+unit: points
 extension_columns:
   dataset: col("dataset")

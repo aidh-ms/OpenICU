@@ -1,5 +1,5 @@
 name: sofa_coagulation
 version: 1.0.0
-unit: COAGULATION//SCORE
+unit: points
 extension_columns:
   dataset: col("dataset")
