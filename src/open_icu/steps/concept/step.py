@@ -391,6 +391,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             if col_expr is not None
         }
 
+        if dataset_concept.event.text_value is None:
+            lf = lf.with_columns(pl.lit(None, dtype=pl.String).alias("text_value"))
+        if dataset_concept.event.numeric_value is None:
+            lf = lf.with_columns(pl.lit(None, dtype=pl.Float32).alias("numeric_value"))
+
         for col_expr, col_name in mapping.items():
             lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
 
