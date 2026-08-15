@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 
 
 class ConceptTransformerProtocol(Protocol):
-    def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", **kwargs): ...
-    def __call__(self, step: "ConceptStep") -> None: ...
+    def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", step: "ConceptStep", **kwargs): ...
+    def __call__(self) -> None: ...
 
 
 class ComplexDatasetConceptConfig(BaseDatasetConfig):
@@ -36,14 +36,11 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
     )
     _parent_concept: "ConceptConfig | None" = PrivateAttr(default=None)
 
-
-    @computed_field
-    @property
-    def fn(self) -> ConceptTransformerProtocol:
+    def build_transformer(self, step: "ConceptStep") -> ConceptTransformerProtocol:
         """Dynamically import and return the concept transformer function based on the provided dotted path."""
 
         transformer = cast(type[ConceptTransformerProtocol], import_callable(self.concept_transformer))
-        return transformer(self._parent_concept, self, **self.kwargs)  # ty: ignore[invalid-argument-type]
+        return transformer(self._parent_concept, self, step, **self.kwargs)  # ty: ignore[invalid-argument-type]
 
     @computed_field
     @property

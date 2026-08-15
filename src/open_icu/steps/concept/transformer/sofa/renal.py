@@ -1,39 +1,38 @@
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import polars as pl
 
-from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig, ConceptTransformerProtocol
+from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig
+from open_icu.steps.concept.transformer.base import BaseConceptTransformer
 
 if TYPE_CHECKING:
     from open_icu.steps.concept.config.concept import ConceptConfig
     from open_icu.steps.concept.step import ConceptStep
 
 
-class SOFARenalTransformer(ConceptTransformerProtocol):
-    def __init__(self, concept: "ConceptConfig", complex_config: ComplexDatasetConceptConfig, **kwargs):
+class SOFARenalTransformer(BaseConceptTransformer):
+    def __init__(
+        self,
+        concept: "ConceptConfig",
+        complex_config: ComplexDatasetConceptConfig,
+        step: "ConceptStep",
+        **kwargs
+    ):
         self._concept = concept
         self._complex_config = complex_config
+        self._step: "ConceptStep" = step
         self._kwargs = kwargs
 
-    def __call__(self, step: "ConceptStep") -> None:
-        # Implement the transformation logic for SOFA renal here
-        # This is a placeholder implementation; replace with actual logic.
-        concept_workspace = step._workspace_dir
-        assert concept_workspace is not None
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        creatinine_lf = dependencies.get("creatinine")
+        assert creatinine_lf is not None
+        creatinine_lf = creatinine_lf.select(["subject_id", "time", "numeric_value"]).sort("subject_id", "time")
 
-        creatinine_lf = (
-            pl.scan_parquet(concept_workspace.path / "creatinine" / "1.0.0" / f"{self._complex_config.dataset}.parquet")
-            .select(["subject_id", "time", "numeric_value"])
-            .sort("subject_id", "time")
-        )
+        urine_output_lf = dependencies.get("urine_output")
+        assert urine_output_lf is not None
 
         uo_gap_hours = self._kwargs.get("urine_output_gap_hours", 24)
-        urine_output_lf = (
-            pl.scan_parquet(concept_workspace.path / "urine_output" / "1.0.0" / f"{self._complex_config.dataset}.parquet")
-            .select(["subject_id", "time", "numeric_value"])
-            .sort("subject_id", "time")
-        ).with_columns(
+        urine_output_lf = urine_output_lf.select(["subject_id", "time", "numeric_value"]).sort("subject_id", "time").with_columns(
             (pl.col("time") - pl.col("time").shift(1).over("subject_id")
                 > pl.duration(hours=uo_gap_hours))
             .fill_null(True)  # first reading per subject always starts a segment
@@ -116,21 +115,4 @@ class SOFARenalTransformer(ConceptTransformerProtocol):
             )
         )
 
-        lf = lf.with_columns(pl.lit(self._complex_config.dataset).alias("dataset"))
-        lf = lf.with_columns(pl.lit(self._concept.code.upper()).alias("code"))
-        lf = lf.with_columns(pl.col("numeric_value").cast(pl.String).alias("text_value"))
-        lf = lf.select([
-            pl.col("subject_id").cast(pl.Int64),
-            pl.col("time").cast(pl.Datetime(time_unit="us")),
-            pl.col("code").cast(pl.String),
-            pl.col("numeric_value").cast(pl.Float32),
-            pl.col("text_value").cast(pl.String),
-            pl.col("dataset").cast(pl.String),
-        ])
-
-        output_path = Path(concept_workspace.path, *self._concept.identifier_tuple[1:])
-        output_path.mkdir(parents=True, exist_ok=True)
-
-        lf.sink_parquet(
-            output_path / f"{self._complex_config.dataset}.parquet",
-        )
+        return lf.select("subject_id", "time", "numeric_value")
