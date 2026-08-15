@@ -28,6 +28,8 @@ single expression, so multi-stage features (segmentation, completeness flags)
 are expressible; helper columns are namespaced ``__`` and dropped again.
 """
 
+from copy import copy
+from logging import ERROR, WARNING
 from typing import TYPE_CHECKING
 
 import polars as pl
@@ -67,7 +69,27 @@ class Aggregation:
     the windowed feature; it receives the grid (sorted by subject and time,
     with ``__present_<col>`` already computed) and must return it with ``col``
     replaced and any helper column removed again.
+
+    Attributes:
+        source: The dependency concept to read, when it differs from the name
+            the aligned column is given. Set through :meth:`of`.
     """
+
+    source: str | None = None
+
+    def of(self, concept: str) -> "Aggregation":
+        """Return a copy of this aggregation reading from ``concept``.
+
+        Lets one dependency be carried onto the grid several times under
+        different windows, each as its own column::
+
+            "creatinine": WindowedLocf("24h"),
+            "creatinine_baseline": RollingMin("7d").of("creatinine"),
+            "creatinine_48h_min": RollingMin("48h").of("creatinine"),
+        """
+        aliased = copy(self)
+        aliased.source = concept
+        return aliased
 
     def collapse(self, col: str) -> pl.Expr:
         return pl.col(col).drop_nulls().last()
@@ -361,9 +383,23 @@ class WindowedConceptTransformer(BaseConceptTransformer):
         if not names:
             raise ValueError(f"{type(self).__name__} declares no inputs")
 
+        sources = {name: self.inputs[name].source or name for name in names}
+        missing = sorted({source for source in sources.values() if source not in dependencies})
+        if missing:
+            logger.log(
+                ERROR if len(missing) == len(set(sources.values())) else WARNING,
+                "Concept %s (%s): declared input(s) %s absent from the resolved dependencies %s; "
+                "treating them as never measured. Each input name must match the `name` of a "
+                "concept declared under this mapping's dependencies.",
+                self._concept.identifier,
+                type(self).__name__,
+                missing,
+                sorted(dependencies),
+            )
+
         frames = []
         for name in names:
-            lf = dependencies.get(name)
+            lf = dependencies.get(sources[name])
             if lf is None:
                 frames.append(
                     pl.LazyFrame(
@@ -414,6 +450,56 @@ class WindowedConceptTransformer(BaseConceptTransformer):
         )
 
 
+class GradedConceptTransformer(WindowedConceptTransformer):
+    """A piecewise-constant grade over aligned inputs, e.g. a severity sub-score.
+
+    Subclasses implement :meth:`build_inputs` — rather than a class-level
+    ``inputs`` dict — so that the lookback stays configurable per mapping, and
+    :meth:`grade`. The grade is emitted only where :meth:`observed` holds, so a
+    concept with nothing current produces no event at all rather than a zero
+    that a downstream aggregate would mistake for a measurement.
+    """
+
+    default_window = "24h"
+
+    def __init__(
+        self,
+        concept: "ConceptConfig",
+        complex_config: ComplexDatasetConceptConfig,
+        step: "ConceptStep",
+        **kwargs,
+    ) -> None:
+        super().__init__(concept, complex_config, step, **kwargs)
+        if not self.inputs:
+            self.inputs = self.build_inputs()
+
+    @property
+    def window(self) -> str:
+        """How long an input's last value stays current; the mapping's ``window``."""
+        return self._kwargs.get("window", self.default_window)
+
+    def build_inputs(self) -> dict[str, Aggregation]:
+        """Return the aligned inputs, built against :attr:`window`."""
+        raise NotImplementedError
+
+    def grade(self) -> pl.Expr:
+        """Return the grade expression over the aligned input columns."""
+        raise NotImplementedError
+
+    def observed(self) -> pl.Expr:
+        """Where the grade is evaluable; elsewhere the concept emits nothing.
+
+        Defaults to "at least one input carries a value". Override wherever
+        that is too permissive: a boolean input from :class:`Exists` is never
+        null and so would make this always true, and a grade needing two inputs
+        together (a ratio, a rate) is not evaluable from either alone.
+        """
+        return pl.any_horizontal(*[pl.col(name).is_not_null() for name in self.inputs])
+
+    def compute(self) -> pl.Expr:
+        return pl.when(self.observed()).then(self.grade()).otherwise(None).cast(pl.Float32)
+
+
 class WindowedSumTransformer(WindowedConceptTransformer):
     """Sum of the most recent value of each input within a trailing window.
 
@@ -439,3 +525,19 @@ class WindowedSumTransformer(WindowedConceptTransformer):
 
     def compute(self) -> pl.Expr:
         return pl.sum_horizontal(*[pl.col(name).fill_null(0) for name in self.inputs]).cast(pl.Float32)
+
+
+class WindowedMaxTransformer(WindowedSumTransformer):
+    """Worst of the most recent value of each input within a trailing window.
+
+    The combining counterpart to :class:`WindowedSumTransformer`, for concepts
+    graded as the highest of several criteria rather than the total of several
+    components — the KDIGO AKI stage over its creatinine and urine-output
+    criteria, say. An input with no value inside the window contributes
+    *nothing* rather than 0, so a criterion that could not be assessed cannot
+    hold the combined grade down; where no input is current, no event is
+    emitted at all.
+    """
+
+    def compute(self) -> pl.Expr:
+        return pl.max_horizontal(*[pl.col(name) for name in self.inputs]).cast(pl.Float32)

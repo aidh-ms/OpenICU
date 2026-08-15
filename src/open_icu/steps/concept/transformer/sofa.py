@@ -23,26 +23,19 @@ within its own window, treating an unknown component as 0 — the usual
 convention, and the reason components must not emit spurious zeros.
 """
 
-from typing import TYPE_CHECKING
-
 import polars as pl
 
-from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig
 from open_icu.steps.concept.transformer.windowed import (
     Aggregation,
+    GradedConceptTransformer,
     Locf,
     SegmentedRollingSum,
-    WindowedConceptTransformer,
     WindowedLocf,
     WindowedSumTransformer,
 )
 
-if TYPE_CHECKING:
-    from open_icu.steps.concept.config.concept import ConceptConfig
-    from open_icu.steps.concept.step import ConceptStep
 
-
-class SofaComponent(WindowedConceptTransformer):
+class SofaComponent(GradedConceptTransformer):
     """A single SOFA organ sub-score (0-4).
 
     Subclasses implement ``build_inputs`` (so the lookback stays configurable)
@@ -50,36 +43,12 @@ class SofaComponent(WindowedConceptTransformer):
     to 24h.
     """
 
-    default_window = "24h"
-
-    def __init__(
-        self,
-        concept: "ConceptConfig",
-        complex_config: ComplexDatasetConceptConfig,
-        step: "ConceptStep",
-        **kwargs,
-    ) -> None:
-        super().__init__(concept, complex_config, step, **kwargs)
-        if not self.inputs:
-            self.inputs = self.build_inputs()
-
-    @property
-    def window(self) -> str:
-        return self._kwargs.get("window", self.default_window)
-
-    def build_inputs(self) -> dict[str, Aggregation]:
-        raise NotImplementedError
-
     def score(self) -> pl.Expr:
         """Return the 0-4 sub-score expression over the aligned input columns."""
         raise NotImplementedError
 
-    def observed(self) -> pl.Expr:
-        """Where the component is evaluable; elsewhere it emits nothing."""
-        return pl.any_horizontal(*[pl.col(name).is_not_null() for name in self.inputs])
-
-    def compute(self) -> pl.Expr:
-        return pl.when(self.observed()).then(self.score()).otherwise(None).cast(pl.Float32)
+    def grade(self) -> pl.Expr:
+        return self.score()
 
 
 class SofaRenalTransformer(SofaComponent):
@@ -169,10 +138,10 @@ class SofaCnsTransformer(SofaComponent):
     """Central-nervous-system sub-score from the Glasgow Coma Scale total (3-15)."""
 
     def build_inputs(self) -> dict[str, Aggregation]:
-        return {"gcs_total": WindowedLocf(self.window)}
+        return {"GCS_total": WindowedLocf(self.window)}
 
     def score(self) -> pl.Expr:
-        gcs = pl.col("gcs_total")
+        gcs = pl.col("GCS_total")
         return (
             pl.when(gcs < 6).then(4).when(gcs < 10).then(3).when(gcs < 13).then(2).when(gcs < 15).then(1).otherwise(0)
         )
