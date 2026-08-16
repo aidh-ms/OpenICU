@@ -1,0 +1,5 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformer.aki.AkiUrineOutputTransformer
+concepts:
+  - urine_output.1.0.0
+  - patient_weight.1.0.0
