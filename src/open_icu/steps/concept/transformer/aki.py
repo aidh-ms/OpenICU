@@ -75,6 +75,9 @@ class AkiCreatinineTransformer(AkiComponent):
     default_baseline_window = "7d"
     default_acute_window = "48h"
 
+    #: many datasets have no renal-replacement concept; the remaining criteria still grade
+    optional_inputs = {"renal_replacement_therapy"}
+
     def build_inputs(self) -> dict[str, Aggregation]:
         return {
             "creatinine": WindowedLocf(self.window),

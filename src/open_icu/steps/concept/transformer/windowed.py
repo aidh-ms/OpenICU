@@ -331,6 +331,8 @@ class WindowedConceptTransformer(BaseConceptTransformer):
     inputs: dict[str, Aggregation] = {}
     #: input names whose measurements define evaluation points; None = all inputs
     triggers: set[str] | None = None
+    #: inputs a concept can do without, exempt from the missing-input warning
+    optional_inputs: set[str] = set()
     #: default lookback for subclasses that build their inputs against one
     default_window = "24h"
 
@@ -426,16 +428,24 @@ class WindowedConceptTransformer(BaseConceptTransformer):
             raise ValueError(f"{type(self).__name__} declares no inputs")
 
         sources = {name: self.inputs[name].source or name for name in names}
+        optional = {sources[name] for name in self.optional_inputs if name in sources}
         missing = sorted({source for source in sources.values() if source not in dependencies})
-        if missing:
+        if absent_optional := [source for source in missing if source in optional]:
+            logger.info(
+                "Concept %s (%s): optional input(s) %s not available for this dataset.",
+                self._concept.identifier,
+                type(self).__name__,
+                absent_optional,
+            )
+        if required := [source for source in missing if source not in optional]:
             logger.log(
-                ERROR if len(missing) == len(set(sources.values())) else WARNING,
+                ERROR if len(required) == len(set(sources.values()) - optional) else WARNING,
                 "Concept %s (%s): declared input(s) %s absent from the resolved dependencies %s; "
                 "treating them as never measured. Each input name must match the `name` of a "
                 "concept declared under this mapping's dependencies.",
                 self._concept.identifier,
                 type(self).__name__,
-                missing,
+                required,
                 sorted(dependencies),
             )
 

@@ -82,29 +82,42 @@ class BaseConceptTransformer(ConceptTransformerProtocol, metaclass=ABCMeta):
 
         Dependencies are keyed by concept name rather than identifier, so that
         ``transform`` can refer to its inputs by the name used in the mapping
-        without pinning a version; a name collision between two resolved
-        dependencies is logged and the later one dropped. The transformed frame
-        is completed with the MEDS columns (``code``, ``numeric_value``,
-        ``text_value``) and any configured extension columns, then sunk to
+        without pinning a version. Two dependencies resolving to the same name
+        are therefore a configuration error and raise: the transform could only
+        ever address one of them, and picking one silently would make the
+        output depend on the order the mapping happens to store its concepts
+        in. They are resolved in identifier order so that a run is reproducible
+        whatever that order is. The transformed frame is completed with the
+        MEDS columns (``code``, ``numeric_value``, ``text_value``) and any
+        configured extension columns, then sunk to
         ``<concept output dir>/<dataset>.parquet``.
 
         Returns without writing when no dependency could be resolved, which
         under :attr:`strict_dependencies` = False means the concept is simply
         not computable for this dataset.
+
+        Raises:
+            ValueError: Two declared dependencies resolve to the same concept
+                name.
         """
         dependencies: dict[str, pl.LazyFrame] = {}
-        for concept_id in self._complex_config.dependencies:
+        for concept_id in sorted(self._complex_config.dependencies):
             resolved = self._read_concept(concept_id)
             if resolved is None:
                 continue
             name, lf = resolved
             if name in dependencies:
                 logger.error(
-                    "Concept %s: dependencies resolve to duplicate name %s; keeping the first.",
+                    "Concept %s: dependencies %s resolve to the same name %s.",
                     self._concept.identifier,
+                    sorted(self._complex_config.dependencies),
                     name,
                 )
-                continue
+                raise ValueError(
+                    f"Concept {self._concept.identifier} declares more than one dependency named "
+                    f"{name!r}; a transform addresses its inputs by name, so only one version of a "
+                    f"concept can be declared."
+                )
             dependencies[name] = lf
 
         if not dependencies:
