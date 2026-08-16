@@ -28,7 +28,6 @@ day. Two departures from the guideline text are worth stating:
 
 import polars as pl
 
-from open_icu.logging import get_logger
 from open_icu.steps.concept.transformer.windowed import (
     Aggregation,
     Exists,
@@ -39,8 +38,6 @@ from open_icu.steps.concept.transformer.windowed import (
     WindowedLocf,
     WindowedMaxTransformer,
 )
-
-logger = get_logger(__name__)
 
 
 class AkiComponent(GradedConceptTransformer):
@@ -164,16 +161,15 @@ class AkiUrineOutputTransformer(AkiComponent):
         return inputs
 
     def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
-        if self.weight_concept not in dependencies and self._kwargs.get("default_weight_kg") is None:
-            logger.error(
-                "Concept %s: urine-output staging is a rate in mL/kg/h and so needs body weight, "
-                "but concept '%s' is not among this mapping's resolved dependencies (%s). No stage "
-                "can be computed. Declare the weight concept under `concepts`, set "
-                "`kwargs.weight_concept` if it is named differently, or set `kwargs.default_weight_kg` "
-                "to stage against an assumed weight.",
-                self._concept.identifier,
+        if self._kwargs.get("default_weight_kg") is None:
+            self._require_dependencies(
+                dependencies,
                 self.weight_concept,
-                sorted(dependencies),
+                hint=(
+                    "Urine-output staging is a rate in mL/kg/h and so needs body weight. Declare the "
+                    "weight concept under `concepts`, set `kwargs.weight_concept` if it is named "
+                    "differently, or set `kwargs.default_weight_kg` to stage against an assumed weight."
+                ),
             )
         return super().transform(dependencies)
 

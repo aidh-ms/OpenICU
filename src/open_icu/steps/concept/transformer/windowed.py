@@ -331,6 +331,8 @@ class WindowedConceptTransformer(BaseConceptTransformer):
     inputs: dict[str, Aggregation] = {}
     #: input names whose measurements define evaluation points; None = all inputs
     triggers: set[str] | None = None
+    #: default lookback for subclasses that build their inputs against one
+    default_window = "24h"
 
     strict_dependencies = False
 
@@ -349,6 +351,46 @@ class WindowedConceptTransformer(BaseConceptTransformer):
             self.inputs = inputs
         if triggers is not None:
             self.triggers = set(triggers)
+        if not self.inputs:
+            self.inputs = self.build_inputs()
+
+    @property
+    def window(self) -> str:
+        """How long an input's last value stays current; the mapping's ``window``."""
+        return self._kwargs.get("window", self.default_window)
+
+    def build_inputs(self) -> dict[str, Aggregation]:
+        """Return the aligned inputs, built against the mapping's ``kwargs``.
+
+        The alternative to a class-level ``inputs`` dict, and the one to prefer
+        wherever a window should be configurable per mapping: it is evaluated
+        per instance, so it can read :attr:`window` and anything else from
+        ``kwargs``. Returning an empty mapping leaves ``inputs`` to be filled
+        in later, which is how the combining transformers derive their terms
+        from the resolved dependencies.
+        """
+        return {}
+
+    def _require_dependencies(self, dependencies: dict[str, pl.LazyFrame], *concepts: str, hint: str = "") -> bool:
+        """Log an error naming any of ``concepts`` that did not resolve.
+
+        For inputs without which a concept cannot emit anything at all, where
+        the generic missing-input warning would understate the problem: the
+        output is not degraded but empty. ``hint`` should say what to do about
+        it in terms of the mapping.
+        """
+        absent = [concept for concept in concepts if concept not in dependencies]
+        if absent:
+            logger.error(
+                "Concept %s (%s): required input concept(s) %s did not resolve; the mapping's "
+                "dependencies are %s. No output can be produced. %s",
+                self._concept.identifier,
+                type(self).__name__,
+                absent,
+                sorted(dependencies),
+                hint,
+            )
+        return not absent
 
     def compute(self) -> pl.Expr:
         """Return the ``numeric_value`` expression over the aligned input columns.
@@ -453,34 +495,11 @@ class WindowedConceptTransformer(BaseConceptTransformer):
 class GradedConceptTransformer(WindowedConceptTransformer):
     """A piecewise-constant grade over aligned inputs, e.g. a severity sub-score.
 
-    Subclasses implement :meth:`build_inputs` — rather than a class-level
-    ``inputs`` dict — so that the lookback stays configurable per mapping, and
-    :meth:`grade`. The grade is emitted only where :meth:`observed` holds, so a
-    concept with nothing current produces no event at all rather than a zero
-    that a downstream aggregate would mistake for a measurement.
+    Subclasses implement :meth:`build_inputs` and :meth:`grade`. The grade is
+    emitted only where :meth:`observed` holds, so a concept with nothing
+    current produces no event at all rather than a zero that a downstream
+    aggregate would mistake for a measurement.
     """
-
-    default_window = "24h"
-
-    def __init__(
-        self,
-        concept: "ConceptConfig",
-        complex_config: ComplexDatasetConceptConfig,
-        step: "ConceptStep",
-        **kwargs,
-    ) -> None:
-        super().__init__(concept, complex_config, step, **kwargs)
-        if not self.inputs:
-            self.inputs = self.build_inputs()
-
-    @property
-    def window(self) -> str:
-        """How long an input's last value stays current; the mapping's ``window``."""
-        return self._kwargs.get("window", self.default_window)
-
-    def build_inputs(self) -> dict[str, Aggregation]:
-        """Return the aligned inputs, built against :attr:`window`."""
-        raise NotImplementedError
 
     def grade(self) -> pl.Expr:
         """Return the grade expression over the aligned input columns."""
