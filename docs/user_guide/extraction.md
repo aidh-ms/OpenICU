@@ -96,10 +96,10 @@ Each event produces one output file. The `columns` block maps source columns (or
 - `code` — a list of code *parts*. The final code is assembled as
 
     ```
-    <dataset>//<table>//<code_prefix parts>//<code parts>//<code_suffix parts>
+    <dataset>//<table>//<code_prefix parts>//[event name//]<code parts>//<code_suffix parts>
     ```
 
-    The dataset and table prefixes are added automatically, so every event code is traceable to its source. Typical code parts are the item ID, its label, and the unit of measurement: `mimic-iv//labevents//50912//Creatinine//mg/dL`.
+    The dataset and table prefixes are added automatically. By default, the technical event name is also included after `code_prefix`; `include_event_name_in_code` can disable it globally or per table. Typical code parts are the item ID, its label, and the unit of measurement.
 
 - `extension` — a mapping of additional output columns, preserved alongside the MEDS standard columns (IDs like `hadm_id`/`stay_id`, data-availability timestamps, reference ranges, …).
 
