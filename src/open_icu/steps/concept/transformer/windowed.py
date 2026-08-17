@@ -458,7 +458,7 @@ class WindowedConceptTransformer(BaseConceptTransformer):
                         schema={
                             _SUBJECT: pl.Int64,
                             _TIME: pl.Datetime(time_unit="us"),
-                            name: pl.Float64,
+                            name: pl.Float32,
                             _event(name): pl.Int32,
                         }
                     )
@@ -468,7 +468,7 @@ class WindowedConceptTransformer(BaseConceptTransformer):
                 lf.select(
                     pl.col(_SUBJECT).cast(pl.Int64),
                     pl.col(_TIME).cast(pl.Datetime(time_unit="us")),
-                    pl.col("numeric_value").cast(pl.Float64).alias(name),
+                    pl.col("numeric_value").cast(pl.Float32).alias(name),
                     pl.lit(1, dtype=pl.Int32).alias(_event(name)),
                 )
             )
