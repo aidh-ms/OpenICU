@@ -78,7 +78,7 @@ event_defaults:
     available_time: col(event_timestamp)
 
   code_prefix:
-    - const(VITAL)
+    - const(VITALS_PERIODIC)
 
 events:
   - name: HEART_RATE
