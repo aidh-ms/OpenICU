@@ -1,0 +1,6 @@
+# AmsterdamUMCdb v1.5.0, converted to OMOP CDM 5.4 by the AMSTEL ETL
+# (https://github.com/AmsterdamUMC/AMSTEL). The schema is plain OMOP CDM 5.4,
+# so all table configs are inherited unchanged from the `omop` 5.4 reference;
+# only the per-dataset concept mappings (mappings/) are AUMCdb-specific.
+dataset: omop
+version: "5.4"
