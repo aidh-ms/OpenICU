@@ -225,10 +225,15 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 )
 
                 code = pl.col("code").cast(pl.String)
-                code_without_event_name = code.str.strip_prefix(f"{event_name}//")
+                code_without_event_name = (
+                    code.str.replace(f"//{event_name}//", "//", literal=True)
+                    .str.strip_prefix(f"{event_name}//")
+                    .str.strip_suffix(f"//{event_name}")
+                )
 
                 lf = pl.scan_parquet(data_path).filter(
-                    code.str.contains(mapping.pattern.code) | code_without_event_name.str.contains(mapping.pattern.code)
+                    code.str.contains(mapping.pattern.code)
+                    | code_without_event_name.str.contains(mapping.pattern.code)
                 )
 
                 for col_name, pattern in mapping.pattern.extensions.items():

@@ -214,7 +214,7 @@ class TestGlobalEventNameCodeSettings:
 
         config = CustomConfig()
 
-        assert config.settings.include_event_name_in_code is False
+        assert config.settings.include_event_name_in_code is True
 
     def test_global_setting_can_be_disabled(self) -> None:
         from open_icu.steps.extraction.config.step import CustomConfig

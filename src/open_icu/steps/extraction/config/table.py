@@ -181,7 +181,7 @@ class ExtractionTableSettings(BaseModel):
     include_event_name_in_code: bool | None = Field(
         default=None,
         description=(
-            "Whether to prepend the event name to generated MEDS codes. "
+            "Whether to include the event name in generated MEDS codes. "
             "When omitted, the global extraction-step setting is used."
         ),
     )

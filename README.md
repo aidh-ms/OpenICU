@@ -216,7 +216,7 @@ events:
       text_value: col(value)
 ```
 
-`name` is a technical event identifier used by the extraction step. It is not included in the generated MEDS `code`; the code is built from the automatic dataset/table prefix, optional `code_prefix`, configured `columns.code` components, and optional `code_suffix`.
+`name` is a technical event identifier used by the extraction step. By default it is included in the generated MEDS `code`; `include_event_name_in_code` can disable it globally, with an optional per-table override. The remaining code is built from the automatic dataset/table prefix, optional `code_prefix`, configured `columns.code` components, and optional `code_suffix`.
 
 **Concept configs** (`configs/concepts/<category>/*.yml`) define dataset-agnostic clinical concepts:
 
@@ -233,13 +233,13 @@ type: simple
 mappings:
   - pattern:
       table: chartevents
-      event: CHART  # technical extraction event identifier, not part of `code`
+      event: CHART  # technical extraction event identifier; part of `code` by default
       code: (220045//Heart Rate)
     columns:
       numeric_value: col(numeric_value)
 ```
 
-Here, `event` selects the technical extraction event stream; it is not matched as part of the MEDS `code`.
+Here, `event` selects the technical extraction event stream. It is part of the MEDS `code` by default, but can be omitted through `include_event_name_in_code`.
 
 Wherever values are computed, configs use a small **expression language** with composable callbacks — e.g. reconstructing absolute timestamps from eICU's relative offsets:
 
