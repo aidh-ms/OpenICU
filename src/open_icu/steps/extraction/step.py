@@ -177,7 +177,7 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             # Event-specific code structure:
             # [event_name //] code_prefix // columns.code // code_suffix
             #
-            # The event name is included by default and can be disabled through
+            # The event name is excluded by default and can be enabled through
             # the global extraction settings or a table-specific override.
             code_expr = self._build_code_expr(event_lf, table, event)
 

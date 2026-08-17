@@ -154,7 +154,7 @@ class EventConfig(BaseModel):
     Defines an event type to extract, including its technical name, optional
     code prefix/suffix parts, column mappings, and optional callbacks to apply
     before writing. The event name is used for output file naming and concept
-    mapping, but it is not included in generated MEDS codes.
+    mapping. By default it is not included in generated MEDS codes; the extraction settings can enable it globally or per table.
 
     Attributes:
         name: Technical event identifier used for output file naming and concept mapping
