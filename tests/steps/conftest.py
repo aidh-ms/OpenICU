@@ -104,6 +104,10 @@ event_defaults:
 
 events:
   - name: WEIGHT
+    code_prefix:
+      - const(PRE)
+    code_suffix:
+      - const(POST)
     columns:
       code:
         - const(kg)

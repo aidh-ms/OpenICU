@@ -2,8 +2,6 @@ name: Extraction
 version: 1.0.0
 
 config:
-  settings:
-    include_event_name_in_code: true
   data:
     - name: mimic-iv
       version: "3.1"

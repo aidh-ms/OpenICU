@@ -175,9 +175,9 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             # Create code column.
             #
             # Event-specific code structure:
-            # [event_name //] code_prefix // columns.code // code_suffix
+            # code_prefix // [event_name //] columns.code // code_suffix
             #
-            # The event name is excluded by default and can be enabled through
+            # The event name is included by default and can be disabled through
             # the global extraction settings or a table-specific override.
             code_expr = self._build_code_expr(event_lf, table, event)
 
@@ -359,57 +359,64 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
         The final event-specific code is built as:
 
-            [event_name //] code_prefix // columns.code // code_suffix
+            code_prefix // [event_name //] columns.code // code_suffix
 
         Whether the event name is included is controlled by the global
         extraction-step setting. A table-specific setting may override it.
         """
-        code_parts: list[pl.Expr] = []
-
         include_event_name = (
             table.settings.include_event_name_in_code
             if table.settings.include_event_name_in_code is not None
             else self._config.config.settings.include_event_name_in_code
         )
 
-        code_parts.extend(
+        prefix_parts = [
             self._parse_expr(
                 lf,
                 expr,
                 callback_type="Event code prefix",
             )
             for expr in event.code_prefix
-        )
+        ]
 
-        code_parts.extend(
+        event_code_parts = [
             self._parse_expr(
                 lf,
                 expr,
                 callback_type="Event code part",
             )
             for expr in event.columns.code
-        )
+        ]
 
-        code_parts.extend(
+        suffix_parts = [
             self._parse_expr(
                 lf,
                 expr,
                 callback_type="Event code suffix",
             )
             for expr in event.code_suffix
-        )
+        ]
+
+        code_parts = list(prefix_parts)
 
         if include_event_name:
             event_name = pl.lit(event.name, dtype=pl.String)
 
-            if code_parts:
-                first_code_part = code_parts[0].cast(pl.String)
-
+            # Avoid duplicating the event name when it is already the first
+            # configured code component. Prefix components are intentionally
+            # ignored here because they precede the event name.
+            if event_code_parts:
+                first_event_code_part = event_code_parts[0].cast(pl.String)
                 event_name = (
-                    pl.when(first_code_part == event.name).then(pl.lit(None, dtype=pl.String)).otherwise(event_name)
+                    pl.when(first_event_code_part == event.name)
+                    .then(pl.lit(None, dtype=pl.String))
+                    .otherwise(event_name)
                 )
 
-            code_parts.insert(0, event_name)
+            code_parts.append(event_name)
+
+        code_parts.extend(event_code_parts)
+        code_parts.extend(suffix_parts)
         if len(code_parts) == 1:
             return code_parts[0].cast(pl.String).alias("code")
 
