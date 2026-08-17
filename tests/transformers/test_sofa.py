@@ -10,7 +10,7 @@ Three layers:
   alignment as well as scoring;
 - two end-to-end tests through the real pipeline: the renal component over
   creatinine and urine, and the deepest dependency chain (GCS parts ->
-  GCS_total -> sofa_cns, platelets -> sofa_coagulation, both -> sofa).
+  gcs_total -> sofa_cns, platelets -> sofa_coagulation, both -> sofa).
 
 The general windowing machinery itself is covered in
 ``test_windowed_transformer.py``.
@@ -129,7 +129,7 @@ def test_liver(bilirubin: float, expected: float) -> None:
     [(15, 0.0), (14, 1.0), (13, 1.0), (12, 2.0), (10, 2.0), (9, 3.0), (6, 3.0), (5, 4.0), (3, 4.0)],
 )
 def test_cns(gcs: float, expected: float) -> None:
-    assert score(make(SofaCnsTransformer), GCS_total=gcs) == [expected]
+    assert score(make(SofaCnsTransformer), gcs_total=gcs) == [expected]
 
 
 def test_a_component_with_no_current_input_emits_nothing() -> None:
@@ -514,7 +514,7 @@ def test_end_to_end_sofa_renal_concept(tmp_path: Path) -> None:
 def test_end_to_end_total_sofa_chain(tmp_path: Path) -> None:
     """The deepest dependency chain: complex concepts depending on complex ones.
 
-    GCS parts -> GCS_total (sum) -> sofa_cns, platelets -> sofa_coagulation,
+    GCS parts -> gcs_total (sum) -> sofa_cns, platelets -> sofa_coagulation,
     and sofa (total) -> both components. Exercises ordering and cross-timestamp
     alignment through the real ConceptStep.
     """
@@ -530,7 +530,7 @@ def test_end_to_end_total_sofa_chain(tmp_path: Path) -> None:
             ("GCS_eye", "points"),
             ("GCS_motor", "points"),
             ("GCS_verbal", "points"),
-            ("GCS_total", "points"),
+            ("gcs_total", "points"),
             ("platelet_count", "K/uL"),
             ("sofa_cns", "points"),
             ("sofa_coagulation", "points"),
@@ -541,10 +541,10 @@ def test_end_to_end_total_sofa_chain(tmp_path: Path) -> None:
             "GCS_motor": _simple_mapping_yml("MOTOR"),
             "GCS_verbal": _simple_mapping_yml("VERBAL"),
             "platelet_count": _simple_mapping_yml("PLT"),
-            "GCS_total": _complex_mapping_yml(
+            "gcs_total": _complex_mapping_yml(
                 win_sum, ["GCS_eye", "GCS_motor", "GCS_verbal"], as_terms=True
             ),
-            "sofa_cns": _complex_mapping_yml(sofa_cns, ["GCS_total"]),
+            "sofa_cns": _complex_mapping_yml(sofa_cns, ["gcs_total"]),
             "sofa_coagulation": _complex_mapping_yml(sofa_coag, ["platelet_count"]),
             "sofa": _complex_mapping_yml(sofa_total, ["sofa_cns", "sofa_coagulation"], as_terms=True),
         },
