@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Annotated, Self
 
 import yaml
-from pydantic import BaseModel, Field, TypeAdapter, ValidationError, computed_field, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, ValidationError, computed_field, model_validator
 
 from open_icu.config.base import BaseConfig
 from open_icu.config.inheritance import has_extends, resolve_effective_configs
@@ -57,6 +57,21 @@ class ConceptConfig(BaseConfig):
         description="List of dataset-specific concepts that this concept depends on (for dependent concepts).",
     )
 
+    default: dict | None = Field(
+        None,
+        description=(
+            "Dataset-agnostic definition, applied to any dataset that provides no mapping of its own. "
+            "Only 'derived' and 'complex' concepts may declare one: a 'simple' mapping is a set of "
+            "source-code patterns and is irreducibly dataset-specific. A dataset opts out by shipping a "
+            "mapping containing 'deleted: true'."
+        ),
+    )
+
+    #: (dataset, version) pairs whose mapping is a `deleted: true` tombstone
+    _suppressed: set[tuple[str, str]] = PrivateAttr(default_factory=set)
+    #: per-(dataset, version) configs materialised from `default`
+    _materialised_defaults: dict[tuple[str, str], DatasetConceptConfigUnion] = PrivateAttr(default_factory=dict)
+
     @computed_field
     @property
     def code(self) -> str:
@@ -86,6 +101,7 @@ class ConceptConfig(BaseConfig):
 
         name = data.get("name")
         paths = dataset_paths or []
+        suppressed: set[tuple[str, str]] = set()
         adapter = TypeAdapter(DatasetConceptConfigUnion)
         for path in paths:
             if has_extends(path):
@@ -101,13 +117,21 @@ class ConceptConfig(BaseConfig):
                 with open(sub_file_path, "r") as f:
                     sub_data = yaml.safe_load(f)
 
+            dataset, version = path.parent.parent.name, path.parent.name
+
+            # A tombstone is not a mapping: it says this dataset should not have
+            # the concept at all, which also means no `default` may stand in.
+            if isinstance(sub_data, dict) and sub_data.get("deleted") is True:
+                suppressed.add((dataset, version))
+                continue
+
             try:
                 # Identity always comes from the dataset directory itself,
                 # never from where an inherited file physically lives.
                 sub_data.update(
                     {
-                        "dataset": path.parent.parent.name,
-                        "version": path.parent.name,
+                        "dataset": dataset,
+                        "version": version,
                         "name": name,
                     }
                 )
@@ -121,7 +145,9 @@ class ConceptConfig(BaseConfig):
             if k not in data:
                 data[k] = v
 
-        return cls(**data)
+        config = cls(**data)
+        config._suppressed = suppressed
+        return config
 
     def get_dataset_concept(self, dataset_name: str, version: str) -> DatasetConceptConfigUnion | None:
         """Get the dataset-specific concept configuration for a given dataset name.
@@ -135,11 +161,62 @@ class ConceptConfig(BaseConfig):
         for dataset_concept in self.dataset_concepts:
             if dataset_concept.dataset == dataset_name and dataset_concept.version == version:
                 return dataset_concept
-        return None
+        return self.default_for(dataset_name, version)
+
+    def has_dataset_mapping(self, dataset_name: str, version: str) -> bool:
+        """Whether this dataset defines the concept itself, rather than inheriting the default.
+        """
+        return any(dc.dataset == dataset_name and dc.version == version for dc in self.dataset_concepts)
+
+    def default_for(self, dataset_name: str, version: str) -> DatasetConceptConfigUnion | None:
+        """Materialise this concept's dataset-agnostic ``default`` for one dataset.
+
+        Returns ``None`` when the concept declares no default, or when the
+        dataset tombstoned the concept with ``deleted: true``. The result is
+        cached, so the identity a transformer sees is stable across calls.
+        """
+        if self.default is None or (dataset_name, version) in self._suppressed:
+            return None
+
+        key = (dataset_name, version)
+        if key not in self._materialised_defaults:
+            data = {**self.default, "dataset": dataset_name, "version": version, "name": self.name}
+            config = TypeAdapter(DatasetConceptConfigUnion).validate_python(data)
+            if isinstance(config, ComplexDatasetConceptConfig):
+                config._parent_concept = self
+            self._materialised_defaults[key] = config
+
+        return self._materialised_defaults[key]
 
     @model_validator(mode="after")
     def _link_complex_concepts_to_parent(self) -> "ConceptConfig":
         for dc in self.dataset_concepts:
             if isinstance(dc, ComplexDatasetConceptConfig):
                 dc._parent_concept = self
+        return self
+
+    @model_validator(mode="after")
+    def _validate_default(self) -> "ConceptConfig":
+        """Reject a malformed ``default`` here rather than at first use.
+
+        Validation needs a dataset and version, which a default by definition
+        lacks, so it is checked against placeholders and the result discarded.
+        """
+        if self.default is None:
+            return self
+
+        declared = self.default.get("type")
+        if declared not in ("derived", "complex"):
+            raise ValueError(
+                f"concept {self.name!r}: 'default' must be a 'derived' or 'complex' definition, got {declared!r}. "
+                "A 'simple' mapping matches dataset-specific source codes and cannot be shared across datasets."
+            )
+
+        try:
+            TypeAdapter(DatasetConceptConfigUnion).validate_python(
+                {**self.default, "dataset": "__default__", "version": self.version, "name": self.name}
+            )
+        except ValidationError as exc:
+            raise ValueError(f"concept {self.name!r}: invalid 'default' definition: {exc}") from exc
+
         return self

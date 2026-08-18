@@ -1,5 +1,0 @@
-type: complex
-concept_transformer: open_icu.steps.concept.transformer.aki.AkiTransformer
-concepts:
-  - aki_urine_output.1.0.0
-  - aki_creatinine.1.0.0

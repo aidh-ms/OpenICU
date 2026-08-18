@@ -110,6 +110,25 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     )
                     continue
 
+                # A default was applied on the dataset's behalf, so it only holds
+                # where the dataset can actually supply every input. Without this
+                # a partial score would gets published.
+                if isinstance(
+                    dataset_concept, (DerivedDatasetConceptConfig, ComplexDatasetConceptConfig)
+                ) and not concept.has_dataset_mapping(dataset, version):
+                    unresolved = self.unresolved_dependencies(dataset_concept, dataset)
+                    if unresolved:
+                        logger.info(
+                            "skipping concept %s for dataset %s (version %s): applied by default, but %s "
+                            "did not resolve. Add a dataset-specific mapping to compute it from whatever "
+                            "inputs are available.",
+                            concept.name,
+                            dataset,
+                            version,
+                            ", ".join(unresolved),
+                        )
+                        continue
+
                 if isinstance(dataset_concept, DerivedDatasetConceptConfig):
                     logger.debug(
                         "Extracting derived concept %s for dataset %s",
@@ -131,6 +150,27 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept,
                         dataset_concept,
                     )
+
+    def unresolved_dependencies(
+        self,
+        dataset_concept: DerivedDatasetConceptConfig | ComplexDatasetConceptConfig,
+        dataset: str,
+    ) -> list[str]:
+        """Dependencies of ``dataset_concept`` that produced no output for ``dataset``.
+
+        Called in topological order, so every dependency has already had its
+        turn.
+        """
+        unresolved = []
+        for dependency_id in sorted(dataset_concept.dependencies):
+            dependency = self._registry.get(dependency_id)
+            if dependency is None:
+                unresolved.append(dependency_id)
+                continue
+            if not (self.concept_output_dir(dependency) / f"{dataset}.parquet").exists():
+                unresolved.append(dependency.name)
+
+        return unresolved
 
     def concept_output_dir(self, concept: ConceptConfig) -> Path:
         """Return the workspace directory a concept's per-dataset parquet files are written to.
