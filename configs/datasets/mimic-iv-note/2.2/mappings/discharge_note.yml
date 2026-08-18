@@ -2,7 +2,7 @@ type: simple
 mappings:
   - pattern:
       table: discharge
-      event: DISCHARE_NOTE
-      code: (DISCHARE_NOTE(//.*)?)
+      event: DISCHARGE_NOTE
+      code: (DISCHARGE_NOTE(//.*)?)
     columns:
       text_value: col(text_value)
