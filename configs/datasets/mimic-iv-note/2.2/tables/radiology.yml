@@ -6,8 +6,6 @@ columns:
     type: int64
   - name: hadm_id
     type: int64
-  - name: note_id
-    type: int64
   # db fields - times
   - name: charttime
     type: datetime
@@ -15,7 +13,7 @@ columns:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: note_id
-    type: int64
+    type: string
   - name: note_type
     type: string
   - name: note_seq
@@ -35,4 +33,4 @@ events:
       text_value: col("text")
       extension:
         hadm_id: col(hadm_id)
-        sequence: col(not_seq)
+        sequence: col(note_seq)
