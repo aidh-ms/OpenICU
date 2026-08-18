@@ -6,8 +6,6 @@ columns:
     type: int64
   - name: hadm_id
     type: int64
-  - name: note_id
-    type: int64
   # db fields - times
   - name: charttime
     type: datetime
@@ -24,15 +22,15 @@ columns:
     type: string
 
 events:
-  - name: DISCHARE_NOTE
+  - name: DISCHARGE_NOTE
     columns:
       subject_id: col(subject_id)
       time: col(charttime)
       code:
-        - const("DISCHARE_NOTE")
+        - const("DISCHARGE_NOTE")
         - col("note_type")
         - col("note_id")
       text_value: col("text")
       extension:
         hadm_id: col(hadm_id)
-        sequence: col(not_seq)
+        sequence: col(note_seq)
