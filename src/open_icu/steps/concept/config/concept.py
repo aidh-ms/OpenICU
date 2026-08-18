@@ -163,6 +163,11 @@ class ConceptConfig(BaseConfig):
                 return dataset_concept
         return self.default_for(dataset_name, version)
 
+    def has_dataset_mapping(self, dataset_name: str, version: str) -> bool:
+        """Whether this dataset defines the concept itself, rather than inheriting the default.
+        """
+        return any(dc.dataset == dataset_name and dc.version == version for dc in self.dataset_concepts)
+
     def default_for(self, dataset_name: str, version: str) -> DatasetConceptConfigUnion | None:
         """Materialise this concept's dataset-agnostic ``default`` for one dataset.
 
