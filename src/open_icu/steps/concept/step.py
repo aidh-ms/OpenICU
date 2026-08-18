@@ -98,7 +98,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     dataset,
                 )
                 concept = self._registry.get(concept_id)
-                assert concept is not None
+                assert concept is not None, f"concept {concept_id} not found in registry"
 
                 dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
@@ -127,7 +127,20 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept.identifier,
                         dataset,
                     )
-                    dataset_concept.fn(self._project)
+                    self.extract_complex_concept(
+                        concept,
+                        dataset_concept,
+                    )
+
+    def concept_output_dir(self, concept: ConceptConfig) -> Path:
+        """Return the workspace directory a concept's per-dataset parquet files are written to.
+        Args:
+            concept: The concept configuration to resolve the output directory for
+        Returns:
+            Path of the form ``<workspace>/<step>/<concept name>/<version>``
+        """
+        assert self._workspace_dir is not None
+        return Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
 
     @property
     def extraction_dataset(self):
@@ -179,7 +192,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             dataset_concept.dataset,
         )
         assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path = self.concept_output_dir(concept)
         output_dataset_path = output_data_path / dataset_concept.dataset
         output_dataset_path.mkdir(parents=True, exist_ok=True)
 
@@ -371,6 +384,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         join_table,
                     ),
                     how=join_table.how,  # ty: ignore[invalid-argument-type]
+                    suffix=join_table.suffix,
                     **join_table.join_params,  # ty: ignore[invalid-argument-type]
                 )
                 post_callbacks.extend(join_table.post_callbacks)
@@ -389,6 +403,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             for col_name, col_expr in columns.items()
             if col_expr is not None and not isinstance(col_expr, list)
         } | {col_expr: col_name for col_name, col_expr in extension.items() if col_expr is not None}
+
+        if dataset_concept.event.text_value is None:
+            lf = lf.with_columns(pl.lit(None, dtype=pl.String).alias("text_value"))
+        if dataset_concept.event.numeric_value is None:
+            lf = lf.with_columns(pl.lit(None, dtype=pl.Float32).alias("numeric_value"))
 
         for col_expr, col_name in mapping.items():
             lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
@@ -414,7 +433,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         lf = self.apply_limits(concept, lf)
 
         assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path = self.concept_output_dir(concept)
         output_data_path.mkdir(parents=True, exist_ok=True)
 
         logger.info(
@@ -427,3 +446,26 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         del lf
         gc.collect()
+
+    def extract_complex_concept(
+        self,
+        concept: ConceptConfig,
+        dataset_concept: ComplexDatasetConceptConfig,
+    ) -> None:
+        """Extract a complex concept by delegating to its configured transformer.
+        The transformer class referenced by the mapping's ``concept_transformer``
+        dotted path is instantiated with the concept, the per-dataset mapping
+        config, and the mapping's ``kwargs``, then called with this step. It is
+        expected to write its per-dataset parquet output below
+        ``self.concept_output_dir(concept)`` so ``collect()`` picks it up.
+        Args:
+            concept: The concept configuration the transformer runs for
+            dataset_concept: The dataset-specific complex mapping configuration
+        """
+        logger.debug(
+            "Extracting complex concept %s for dataset %s",
+            concept.identifier,
+            dataset_concept.dataset,
+        )
+        transformer = dataset_concept.build_transformer(self)
+        transformer()

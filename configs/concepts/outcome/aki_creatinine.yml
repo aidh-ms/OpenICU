@@ -1,6 +1,5 @@
-name: GCS_verbal
+name: aki_creatinine
 version: 1.0.0
-unit: None
+unit: points
 extension_columns:
   dataset: col("dataset")
-  table: col("table")

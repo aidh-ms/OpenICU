@@ -70,10 +70,10 @@ class TestComplexConcept:
         (tmp_path / "fake_transformers.py").write_text(
             "class Recorder:\n"
             "    calls = []\n"
-            "    def __init__(self, concept, config, **kwargs):\n"
+            "    def __init__(self, concept, config, step, **kwargs):\n"
             "        self.kwargs = kwargs\n"
-            "    def __call__(self, project):\n"
-            "        Recorder.calls.append((project, self.kwargs))\n"
+            "    def __call__(self):\n"
+            "        Recorder.calls.append((self.kwargs))\n"
         )
         monkeypatch.syspath_prepend(str(tmp_path))
 
@@ -93,10 +93,10 @@ class TestComplexConcept:
             "openicu.config.concept.ventilation_end.1.0.0",
         }
 
-        config.fn("project-sentinel")  # ty: ignore[invalid-argument-type]
+        config.build_transformer("test_step")()  # ty: ignore[invalid-argument-type]
         import fake_transformers  # ty: ignore[unresolved-import]
 
-        assert fake_transformers.Recorder.calls == [("project-sentinel", {"window": "1h"})]
+        assert fake_transformers.Recorder.calls == [{"window": "1h"}]
 
 
 class TestDerivedConcept:
