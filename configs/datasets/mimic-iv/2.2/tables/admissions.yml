@@ -82,6 +82,11 @@ events:
         - col(admission_type)
         - col(admission_location)
 
+  - name: ADMISSION_TYPE
+    columns:
+      code:
+        - col(admission_type)
+
   - name: INSURANCE
     columns:
       code:
@@ -115,6 +120,18 @@ events:
         - col(discharge_location)
       extension:
         available_time: col(dischtime)
+
+  - name: IN_HOSPITAL_MORTALITY
+    columns:
+      time: col(dischtime)
+      code:
+        - const("IN_HOSPITAL_MORTALITY")
+      numeric_value: col(hospital_expire_flag)
+      extension:
+        available_time: col(dischtime)
+    filters:
+      - drop_na(time)
+      - drop_na(numeric_value)
 
   - name: MEDS_DEATH
     columns:

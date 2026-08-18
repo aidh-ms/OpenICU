@@ -110,8 +110,8 @@ class TestExtractionStep:
     @pytest.mark.parametrize(
         ("include_event_name", "weight_code", "height_code"),
         [
-            (False, "kg", "m"),
-            (True, "WEIGHT//kg", "HEIGHT//m"),
+            (False, "PRE//kg//POST", "m"),
+            (True, "PRE//WEIGHT//kg//POST", "HEIGHT//m"),
         ],
     )
     def test_multiple_events_per_table(

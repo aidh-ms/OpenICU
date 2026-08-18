@@ -36,9 +36,9 @@ class ExtractionSettings(BaseModel):
     """Global settings controlling extraction output."""
 
     include_event_name_in_code: bool = Field(
-        default=False,
+        default=True,
         description=(
-            "Whether event names are prepended to generated MEDS codes by "
+            "Whether event names are included in generated MEDS codes by "
             "default. Individual table configs may override this setting."
         ),
     )

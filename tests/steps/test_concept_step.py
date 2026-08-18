@@ -75,6 +75,56 @@ class TestDerivedConcepts:
 
 
 class TestConceptStepRobustness:
+    def test_mapping_ignores_event_name_after_code_prefix(
+        self, tmp_path: Path, extraction_config: Path, concept_config: Path
+    ) -> None:
+        mapping_dir = tmp_path / "config" / "testdb" / "1.0" / "mappings"
+        (mapping_dir / "heart_rate.yml").write_text(
+            """type: simple
+mappings:
+  - pattern:
+      table: vitals
+      event: CHART
+      code: ^PREFIX//220045//Heart Rate//bpm$
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
+"""
+        )
+
+        project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
+        load_concept_config(
+            tmp_path / "config" / "concepts",
+            [mapping_dir],
+        )
+
+        ExtractionStep.load(project, extraction_config).run()
+
+        event_path = (
+            project.datasets_path
+            / "extraction"
+            / "data"
+            / "testdb"
+            / "1.0"
+            / "vitals"
+            / "CHART.parquet"
+        )
+        df = pl.read_parquet(event_path).with_columns(
+            pl.concat_str(
+                pl.lit("PREFIX"),
+                pl.col("code"),
+                separator="//",
+            ).alias("code")
+        )
+        df.write_parquet(event_path)
+
+        ConceptStep.load(project, concept_config).run()
+
+        df = pl.read_parquet(concept_path(project, "heart_rate")).sort("time")
+        assert df.height == 2
+        assert df["numeric_value"].to_list() == [80.0, 82.0]
+
     def test_concept_without_dataset_mapping_is_skipped(
         self, tmp_path: Path, extraction_config: Path, concept_config: Path
     ) -> None:

@@ -54,6 +54,8 @@ event_defaults:
   extension:
     stay_id: col(patientunitstayid)
     respcare_id: col(respcareid)
+  code_prefix:
+    - const(RESPIRATORY_CARE)
 
 events:
   - name: VENTILATION_START
