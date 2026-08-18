@@ -1,0 +1,36 @@
+path: note/radiology.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  # db fields - times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: note_id
+    type: string
+  - name: note_type
+    type: string
+  - name: note_seq
+    type: string
+  - name: text
+    type: string
+
+events:
+  - name: RADIOLOGY_NOTE
+    columns:
+      subject_id: col(subject_id)
+      time: col(charttime)
+      code:
+        - const("RADIOLOGY_NOTE")
+        - col("note_type")
+        - col("note_id")
+      text_value: col("text")
+      extension:
+        hadm_id: col(hadm_id)
+        sequence: col(note_seq)
