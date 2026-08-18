@@ -3,3 +3,14 @@ version: 1.0.0
 unit: points
 extension_columns:
   dataset: col("dataset")
+
+# A sub-score is a fixed function of its inputs, so the definition is the same
+# for every dataset that can supply them. A dataset overrides this with its own
+# mapping, or opts out entirely with `deleted: true`.
+default:
+  type: complex
+  concept_transformer: open_icu.steps.concept.transformer.sofa.SofaRespiratoryTransformer
+  concepts:
+  - O2_partial_pressure.1.0.0
+  - fraction_of_inspired_oxygen.1.0.0
+  - mechanical_ventilation_windows.1.0.0
