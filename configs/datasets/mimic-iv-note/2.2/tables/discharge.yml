@@ -13,7 +13,7 @@ columns:
       format: "%Y-%m-%d %H:%M:%S"
   # db fields - values
   - name: note_id
-    type: int64
+    type: string
   - name: note_type
     type: string
   - name: note_seq
