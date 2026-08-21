@@ -1,15 +1,18 @@
-# MIMIC-IV-Note
+# MIMIC-IV
 
-Configurations for [MIMIC-IV](https://physionet.org/content/mimic-iv-note/), the
-critical care database from the Beth Israel Deaconess Medical Center
+Configurations for [MIMIC-CXR](https://physionet.org/content/mimic-cxr/), the
+critical care database from the Beth Israel Deaconess Medical Center containing
+Chest X-Rays
 (requires credentialed PhysioNet access).
 
 ## Versions
 
-- `2.2/` — **reference configuration**: 2 table configs (`tables/`,
+- `2.0/` — **reference configuration**: 2 table configs (`tables/`,
   covering notes) and the per-dataset concept
   mappings (`mappings/`) for the shared dictionary in `configs/concepts/`.
   This is the most complete dataset configuration in OpenICU.
+- `2.1/` — **extends `2.0`** (see `3.1/extends.yml`) with one table addition:
+  v2.1 add the provider table to the dataset
 
 ## Layout
 
