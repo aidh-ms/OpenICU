@@ -26,7 +26,7 @@ class FirstNotNull(CallbackProtocol):
             output: Name of the output column to be created.
         """
         if len(fields) == 1 and isinstance(fields[0], list):
-            self.fields: Sequence[AstValue] = fields[0]  # ty: ignore[invalid-assignment]
+            self.fields: Sequence[AstValue] = fields[0]
         else:
             self.fields = fields
 
@@ -78,7 +78,7 @@ class Max(CallbackProtocol):
                 expression is returned without an alias.
         """
         if len(fields) == 1 and isinstance(fields[0], list):
-            self.fields: Sequence[AstValue] = fields[0]  # ty: ignore[invalid-assignment]
+            self.fields: Sequence[AstValue] = fields[0]
         else:
             self.fields = fields
 
