@@ -1,0 +1,40 @@
+path: ed/edstays.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+  # db fields - times
+  - name: intime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: outtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(intime)
+  extension:
+    stay_id: col(stay_id)
+    hadm_id: col(hadm_id)
+
+events:
+  - name: ED_INTIME
+    columns:
+      code:
+        - const("ED_INTIME")
+
+  - name: ED_OUTTIME
+    columns:
+      time: col(outtime)
+      code:
+        - const("ED_OUTTIME")
