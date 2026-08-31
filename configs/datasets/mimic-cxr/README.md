@@ -1,4 +1,4 @@
-# MIMIC-IV
+# MIMIC-CXR
 
 Configurations for [MIMIC-CXR](https://physionet.org/content/mimic-cxr/), the
 critical care database from the Beth Israel Deaconess Medical Center containing
