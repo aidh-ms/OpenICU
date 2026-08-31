@@ -10,6 +10,8 @@ columns:
     type: string
   - name: study_id
     type: string
+  - name: dicom_id
+    type: string
 
 callbacks:
   - to_datetime("1970", "1", "1", "00:00:00", output=faketime)
