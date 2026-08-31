@@ -1,0 +1,52 @@
+path: ed/medrecon.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+  # db fields - times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: name
+    type: string
+  - name: gsn
+    type: int64
+  - name: ndc
+    type: int64
+  - name: etc_rn
+    type: int64
+  - type: etccode
+    name: int64
+  - name: etcdescription
+    type: string
+join:
+  - name: edstays
+    path: ed/edstays.csv.gz
+    columns:
+      - name: stay_id
+        type: int64
+      - name: hadm_id
+        type: int64
+    both_on:
+      - stay_id
+
+
+events:
+  - name: ED_MEDICATION
+    columns:
+      subject_id: col(subject_id)
+      time: col(charttime)
+      code:
+        - col("name")
+      text_value: col("etcdescription")
+      extension:
+        stay_id: col(stay_id)
+        hadm_id: col(hadm_id)
+        gsn: col(gsn)
+        ndc: col(ndc)
+        etc_rn: col(etc_rn)
