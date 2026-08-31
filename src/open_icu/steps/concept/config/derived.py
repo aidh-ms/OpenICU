@@ -37,6 +37,7 @@ class JoinConceptTable(BaseConceptTable):
         "full",
         description="Type of join to be performed (e.g. inner, left, right, outer).",
     )
+    suffix: str = Field("_right", description="Suffix to be added to overlapping column names during the join operation.")
 
     @computed_field
     @property

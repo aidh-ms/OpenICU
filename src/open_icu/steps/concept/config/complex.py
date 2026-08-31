@@ -1,18 +1,18 @@
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
-from pydantic import ConfigDict, Field, computed_field
+from pydantic import ConfigDict, Field, PrivateAttr, computed_field
 
 from open_icu.config.base import BaseDatasetConfig
 from open_icu.utils.importer import import_callable
 
 if TYPE_CHECKING:
     from open_icu.steps.concept.config.concept import ConceptConfig
-    from open_icu.storage.project import OpenICUProject
+    from open_icu.steps.concept.step import ConceptStep
 
 
 class ConceptTransformerProtocol(Protocol):
-    def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", **kwargs): ...
-    def __call__(self, project: "OpenICUProject") -> None: ...
+    def __init__(self, concept: "ConceptConfig", complex_config: "ComplexDatasetConceptConfig", step: "ConceptStep", **kwargs): ...
+    def __call__(self) -> None: ...
 
 
 class ComplexDatasetConceptConfig(BaseDatasetConfig):
@@ -34,14 +34,13 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
     concepts: list[str] = Field(
         default_factory=list, description="The list of concept identifiers that this complex concept depends on."
     )
+    _parent_concept: "ConceptConfig | None" = PrivateAttr(default=None)
 
-    @computed_field
-    @property
-    def fn(self) -> ConceptTransformerProtocol:
+    def build_transformer(self, step: "ConceptStep") -> ConceptTransformerProtocol:
         """Dynamically import and return the concept transformer function based on the provided dotted path."""
 
         transformer = cast(type[ConceptTransformerProtocol], import_callable(self.concept_transformer))
-        return transformer(self.__class__.__bases__[0], self, **self.kwargs)  # ty: ignore[invalid-argument-type]
+        return transformer(self._parent_concept, self, step, **self.kwargs)  # ty: ignore[invalid-argument-type]
 
     @computed_field
     @property

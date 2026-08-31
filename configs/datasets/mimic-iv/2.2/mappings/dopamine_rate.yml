@@ -1,12 +1,31 @@
 type: simple
 mappings:
+  # The ordered set-point, known as soon as the infusion is charted.
+  # `originalrate` is the rate a clinician set; `rate` is the realised average,
+  # back-computed from the amount delivered across the segment, and so is not
+  # knowable until the segment closes. Stamping the latter at `starttime` would
+  # import the whole segment's future, hence the set-point here.
+  - pattern:
+      table: inputevents
+      event: INFUSION_START
+      code: (221662(//.*)?)
+      extensions:
+        rateuom: mcg/kg/min
+    columns:
+      numeric_value: col(originalrate)
+      text_value: col(text_value)
+  # A genuine cessation is a rate of 0 — the components carry the last rate
+  # forward, so a stop has to be charted rather than merely implied. A dose
+  # change closes one segment and opens the next, so it is not a stop and must
+  # not be zeroed.
   - pattern:
       table: inputevents
       event: INFUSION_END
       code: (221662(//.*)?)
+      extensions:
+        rateuom: mcg/kg/min
     columns:
-      numeric_value: col(rate)
+      numeric_value: const(0)
       text_value: col(text_value)
     filters:
-      - rateuom == "mcg/kg/min"
-      - drop_na(numeric_value)
+      - drop_if(text_value == "ChangeDose/Rate")

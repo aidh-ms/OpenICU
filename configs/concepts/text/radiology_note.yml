@@ -1,6 +1,6 @@
-name: GCS_motor
+name: radiology_note
 version: 1.0.0
-unit: None
+unit: text
 extension_columns:
   dataset: col("dataset")
   table: col("table")
