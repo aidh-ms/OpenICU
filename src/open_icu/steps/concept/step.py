@@ -55,10 +55,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
     def extract(self) -> None:
         datasets = {
-            (dataset_config.name, dataset_config.version) for dataset_config in self._config.config.mapping_configs
+            (dataset_config.name, dataset_config.version): dataset_config
+            for dataset_config in self._config.config.mapping_configs
         }
 
-        for dataset, version in datasets:
+        for (dataset, version), dataset_config in datasets.items():
             logger.info("Processing concepts for dataset %s (version %s)", dataset, version)
             depend_concepts = dict()
 
@@ -97,6 +98,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept,
                         dataset_concept,
                         routed_sources=routed_sources,
+                        dataset_extension_columns=dataset_config.extension_columns,
                     )
 
                 if isinstance(dataset_concept, (DerivedDatasetConceptConfig, ComplexDatasetConceptConfig)):
@@ -148,6 +150,9 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         dataset_concept,
                     )
 
+            if routed_cache_dir.exists():
+                shutil.rmtree(routed_cache_dir)
+
     def concept_output_dir(self, concept: ConceptConfig) -> Path:
         """Return the workspace directory a concept's per-dataset parquet files are written to.
         Args:
@@ -157,9 +162,6 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         """
         assert self._workspace_dir is not None
         return Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
-
-            if routed_cache_dir.exists():
-                shutil.rmtree(routed_cache_dir)
 
     @property
     def extraction_dataset(self):
@@ -400,6 +402,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         concept: ConceptConfig,
         dataset_concept: SimpleDatasetConceptConfig,
         routed_sources: dict[tuple[Path, str], list[Path]] | None = None,
+        dataset_extension_columns: dict[str, str] | None = None,
     ) -> None:
         logger.debug(
             "Extracting simple concept %s for dataset %s",
@@ -490,7 +493,10 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 lf = lf.with_columns(pl.lit(version).alias("version"))
                 lf = lf.with_columns(pl.lit(table).alias("table"))
                 lf = lf.with_columns(pl.lit(event_name).alias("event"))
-                for col_name, col_expr in concept.extension_columns.items():
+
+                extension_columns = concept.extension_columns.copy()
+                extension_columns.update(dataset_extension_columns or {})
+                for col_name, col_expr in extension_columns.items():
                     lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
 
                 # value columns
@@ -520,7 +526,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         pl.col("numeric_value").cast(pl.Float32),
                         pl.col("text_value").cast(pl.String),
                     ]
-                    + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()]
+                    + [pl.col(col).cast(pl.String) for col in extension_columns]
                 )
 
                 lf = self.apply_limits(concept, lf)

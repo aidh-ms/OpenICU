@@ -1,12 +1,11 @@
-# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
-#   3025408 = Oxygen/Inspired gas Respiratory system by O2 Analyzer --on ventilator
-#   3020716 = Inhaled oxygen concentration
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps AUMC item 12279:
+#   O2 concentratie -> OMOP measurement_concept_id 3025408
 type: simple
 mappings:
   - pattern:
       table: measurement
       event: MEASUREMENT
-      code: "(3025408|3020716)(//.*)?$"
+      code: "3025408//O2 concentratie//Geen$"
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

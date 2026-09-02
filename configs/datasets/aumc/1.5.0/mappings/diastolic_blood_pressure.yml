@@ -1,12 +1,11 @@
-# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
-#   21490851 = Invasive Diastolic blood pressure
-#   21492240 = Diastolic blood pressure by Noninvasive
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps AUMC item 6643:
+#   ABP diastolisch -> OMOP measurement_concept_id 21490851
 type: simple
 mappings:
   - pattern:
       table: measurement
       event: MEASUREMENT
-      code: "(21490851|21492240)(//.*)?$"
+      code: "21490851//ABP diastolisch(//.*)?$"
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

@@ -1,12 +1,11 @@
-# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
-#   3014576 = Chloride [Moles/volume] in Serum or Plasma
-#   3018572 = Chloride [Moles/volume] in Blood
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps AUMC item 9930:
+#   Chloor (bloed) -> OMOP measurement_concept_id 3014576
 type: simple
 mappings:
   - pattern:
       table: measurement
       event: MEASUREMENT
-      code: "(3014576|3018572)(//.*)?$"
+      code: "3014576//Chloor \\(bloed\\)(//.*)?$"
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

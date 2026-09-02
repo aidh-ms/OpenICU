@@ -49,9 +49,10 @@ class TestSimpleConcepts:
         assert df.schema["text_value"] == pl.String
 
     def test_provenance_extension_columns(self, project: OpenICUProject) -> None:
-        df = pl.read_parquet(concept_path(project, "heart_rate"))
+        df = pl.read_parquet(concept_path(project, "heart_rate")).sort("time")
         assert df["dataset"].unique().to_list() == ["testdb"]
         assert df["table"].unique().to_list() == ["vitals"]
+        assert df["stay_id"].to_list() == ["100", "100"]
 
     def test_unit_concepts(self, project: OpenICUProject) -> None:
         weight = pl.read_parquet(concept_path(project, "patient_weight"))

@@ -5,7 +5,7 @@ mappings:
   - pattern:
       table: measurement
       event: MEASUREMENT
-      code: "3013466(//.*)?$"
+      code: "3013466//APTT \\(bloed\\)(//.*)?$"
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
