@@ -14,5 +14,11 @@
     "mypy-type-checker.args": [
         "--config-file=${workspaceFolder}/pyproject.toml"
     ],
-    "python-envs.pythonProjects": []
+    "workbench.editorAssociations": {
+        "*.copilotmd": "vscode.markdown.preview.editor",
+        "*.parquet": "duckdb.dataFileViewer",
+        "*.csv": "duckdb.dataFileViewer",
+        "*.tsv": "duckdb.dataFileViewer",
+        "*.xlsx": "duckdb.dataFileViewer"
+    }
 }
