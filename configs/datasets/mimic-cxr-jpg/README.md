@@ -1,17 +1,17 @@
 # MIMIC-CXR
 
-Configurations for [MIMIC-CXR](https://physionet.org/content/mimic-cxr/), the
+Configurations for [MIMIC-CXR-JPG](https://physionet.org/content/mimic-cxr-jpg/), the
 critical care database from the Beth Israel Deaconess Medical Center containing
 Chest X-Rays
 (requires credentialed PhysioNet access).
 
 ## Versions
 
-- `2.0/` — **reference configuration**: 2 table configs (`tables/`,
+- `2.0/` — **reference configuration**: 3 table configs (`tables/`,
   covering notes) and the per-dataset concept
   mappings (`mappings/`) for the shared dictionary in `configs/concepts/`.
   This is the most complete dataset configuration in OpenICU.
-- `2.1/` — **extends `2.0`**
+- `2.1/` — **extends `2.0`** (see `2.1/extends.yml`)
 
 ## Layout
 

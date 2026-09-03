@@ -1,0 +1,24 @@
+path: mimic-cxr-2.0.0-negbio.csv.gz
+
+# columns:
+#   # subject_id and extentions
+#   - name: subject_id
+#     type: int64
+#   # db fields - times
+#   # db fields - values
+#   - name: path
+#     type: string
+#   - name: study_id
+#     type: string
+
+# callbacks:
+#   - to_datetime("1970", "1", "1", "00:00:00", output=faketime)
+
+# events:
+#   - name: CXR_RECORD
+#     columns:
+#       subject_id: col(subject_id)
+#       time: col(faketime)
+#       code:
+#         - const("CXR_RECORD")
+#       text_value: col("path")

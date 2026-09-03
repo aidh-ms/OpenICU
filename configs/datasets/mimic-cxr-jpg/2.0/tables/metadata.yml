@@ -1,0 +1,57 @@
+path: mimic-cxr-2.0.0-metadata.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: study_id
+    type: int64
+  - name: dicom_id
+    type: string
+  # db fields - times
+  - name: StudyDate
+    type: string
+  - name: StudyTime
+    type: float64
+  # db fields - values
+  - name: ProcedureCodeSequence_CodeMeaning
+    type: string
+  - name: ViewCodeSequence_CodeMeaning
+    type: string
+
+callbacks:
+  - parse_date_time("StudyDate", zero_pad_int("StudyTime", width=6, round_ndigits=3), format="%Y%m%d%H%M%S%.f", output="charttime")
+  - >-
+    concat_str(
+    concat_str("p", slice_str(cast("subject_id", dtype="string"), offset=0, length=2)),
+    concat_str("p", cast("subject_id", dtype="string")),
+    concat_str("s", cast("study_id", dtype="string")),
+    concat_str("dicom_id", ".jpg"),
+    separator="/",
+    output="path"
+    )
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+  extension:
+    dicom_id: col("dicom_id")
+    study_id: col("study_id")
+
+events:
+  - name: CXR_PROCEDURE
+    columns:
+      code:
+        - col("ProcedureCodeSequence_CodeMeaning")
+
+  - name: CXR_POSITION
+    columns:
+      code:
+        - col("ViewCodeSequence_CodeMeaning")
+
+  - name: CXR_RECORD
+    columns:
+      code:
+        - const("CXR_RECORD")
+        - col("dicom_id")
+      text_value: col("path")
