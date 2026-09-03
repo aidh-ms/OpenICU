@@ -1,27 +1,182 @@
 path: mimic-cxr-2.0.0-chexpert.csv.gz
 
-# columns:
-#   # subject_id and extentions
-#   - name: subject_id
-#     type: int64
-#   # db fields - times
-#   # db fields - values
-#   - name: path
-#     type: string
-#   - name: study_id
-#     type: string
-#   - name: dicom_id
-#     type: string
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: study_id
+    type: int64
+  # db fields - times
+  # db fields - values
+  - name: Atelectasis
+    type: float32
+  - name: Cardiomegaly
+    type: float32
+  - name: Consolidation
+    type: float32
+  - name: Edema
+    type: float32
+  - name: Enlarged Cardiomediastinum
+    type: float32
+  - name: Fracture
+    type: float32
+  - name: Lung Lesion
+    type: float32
+  - name: Lung Opacity
+    type: float32
+  - name: No Finding
+    type: float32
+  - name: Pleural Effusion
+    type: float32
+  - name: Pleural Other
+    type: float32
+  - name: Pneumonia
+    type: float32
+  - name: Pneumothorax
+    type: float32
+  - name: Support Devices
+    type: float32
 
-# callbacks:
-#   - to_datetime("1970", "1", "1", "00:00:00", output=faketime)
+join:
+  - name: metadata
+    path: mimic-cxr-2.0.0-metadata.csv.gz
+    columns:
+      - name: subject_id
+        type: int64
+      - name: study_id
+        type: int64
+      - name: dicom_id
+        type: string
+      - name: StudyDate
+        type: string
+      - name: StudyTime
+        type: float64
+    both_on:
+      - subject_id
+      - study_id
+    pre_callbacks:
+      - parse_date_time("StudyDate", zero_pad_int("StudyTime", width=6, round_ndigits=3), format="%Y%m%d%H%M%S%.f", output="time")
+    pre_filters:
+      - first_distinct(subject_id, study_id)
 
-# events:
-#   - name: CXR_RECORD
-#     columns:
-#       subject_id: col(subject_id)
-#       time: col(faketime)
-#       code:
-#         - const("CXR_RECORD")
-#         - col("dicom_id")
-#       text_value: col("path")
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(time)
+  extension:
+    dicom_id: col("dicom_id")
+    study_id: col("study_id")
+  filters:
+    - drop_na(numeric_value)
+
+events:
+  - name: CXR_ATELECTASIS
+    columns:
+      code:
+        - const("CXR_ATELECTASIS")
+      numeric_value: col("Atelectasis")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_CARDIOMEGALY
+    columns:
+      code:
+        - const("CXR_CARDIOMEGALY")
+      numeric_value: col("Cardiomegaly")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_CONSOLIDATION
+    columns:
+      code:
+        - const("CXR_CONSOLIDATION")
+      numeric_value: col("Consolidation")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_EDEMA
+    columns:
+      code:
+        - const("CXR_EDEMA")
+      numeric_value: col("Edema")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_ENLARGED_CARDIOMEDIASTINUM
+    columns:
+      code:
+        - const("CXR_ENLARGED_CARDIOMEDIASTINUM")
+      numeric_value: col("Enlarged Cardiomediastinum")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_FRACTURE
+    columns:
+      code:
+        - const("CXR_FRACTURE")
+      numeric_value: col("Fracture")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_LUNG_LESION
+    columns:
+      code:
+        - const("CXR_LUNG_LESION")
+      numeric_value: col("Lung Lesion")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_LUNG_OPACITY
+    columns:
+      code:
+        - const("CXR_LUNG_OPACITY")
+      numeric_value: col("Lung Opacity")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_NO_FINDING
+    columns:
+      code:
+        - const("CXR_NO_FINDING")
+      numeric_value: col("No Finding")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_PLEURAL_EFFUSION
+    columns:
+      code:
+        - const("CXR_PLEURAL_EFFUSION")
+      numeric_value: col("Pleural Effusion")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_PLEURAL_OTHER
+    columns:
+      code:
+        - const("CXR_PLEURAL_OTHER")
+      numeric_value: col("Pleural Other")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_PNEUMONIA
+    columns:
+      code:
+        - const("CXR_PNEUMONIA")
+      numeric_value: col("Pneumonia")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_PNEUMOTHORAX
+    columns:
+      code:
+        - const("CXR_PNEUMOTHORAX")
+      numeric_value: col("Pneumothorax")
+    filters:
+    - drop_na(numeric_value)
+
+  - name: CXR_SUPPORT_DEVICES
+    columns:
+      code:
+        - const("CXR_SUPPORT_DEVICES")
+      numeric_value: col("Support Devices")
+    filters:
+    - drop_na(numeric_value)

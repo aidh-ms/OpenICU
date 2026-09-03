@@ -20,7 +20,7 @@ columns:
     type: string
 
 callbacks:
-  - parse_date_time("StudyDate", zero_pad_int("StudyTime", width=6, round_ndigits=3), format="%Y%m%d%H%M%S%.f", output="charttime")
+  - parse_date_time("StudyDate", zero_pad_int("StudyTime", width=6, round_ndigits=3), format="%Y%m%d%H%M%S%.f", output="time")
   - >-
     concat_str(
     concat_str("p", slice_str(cast("subject_id", dtype="string"), offset=0, length=2)),
@@ -33,7 +33,7 @@ callbacks:
 
 event_defaults:
   subject_id: col(subject_id)
-  time: col(charttime)
+  time: col(time)
   extension:
     dicom_id: col("dicom_id")
     study_id: col("study_id")
