@@ -1,11 +1,11 @@
-# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps OMOP measurement_concept_id:
-#   3043744 = Bilirubin.conjugated+indirect [Mass/volume] in Serum or Plasma
+# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps AUMC item 6812:
+#   Bilirubine geconjugeerd -> OMOP measurement_concept_id 3005772
 type: simple
 mappings:
   - pattern:
       table: measurement
       event: MEASUREMENT
-      code: "3043744(//.*)?$"
+      code: "3005772//Bilirubine geconjugeerd(//.*)?$"
     columns:
-      numeric_value: col(numeric_value)
+      numeric_value: col(numeric_value) * 0.058467
       text_value: col(text_value)

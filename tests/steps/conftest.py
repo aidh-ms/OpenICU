@@ -263,6 +263,8 @@ config:
   mapping_configs:
     - name: testdb
       version: "1.0"
+      extension_columns:
+        stay_id: col("stay_id")
 """
     )
     return config_file

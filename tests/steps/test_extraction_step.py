@@ -1,9 +1,13 @@
 """End-to-end tests for the extraction step on synthetic fixture data."""
 
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
+from textwrap import dedent
 
 import polars as pl
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 
 from open_icu import ExtractionStep, OpenICUProject
@@ -280,6 +284,84 @@ config:
         assert df["time"].to_list() == [datetime(2024, 1, 1, 8, 0), datetime(2024, 1, 2, 10, 0)]
         assert df["numeric_value"].to_list() == [80.0, 120.0]
         assert df["code"].to_list() == ["CHART", "CHART"]
+
+    def test_reads_parquet_source_with_decimal256(self, tmp_path: Path) -> None:
+        """Decimal256 source columns are read through the PyArrow fallback."""
+        data_dir = tmp_path / "data" / "decimaldb"
+        data_dir.mkdir(parents=True)
+
+        table = pa.table(
+            {
+                "subject_id": pa.array([1, 2], type=pa.int64()),
+                "charttime": pa.array(
+                    [datetime(2024, 1, 1, 8, 0), datetime(2024, 1, 2, 10, 0)],
+                    type=pa.timestamp("us"),
+                ),
+                "valuenum": pa.array(
+                    [Decimal("80.25"), Decimal("120.50")],
+                    type=pa.decimal256(76, 38),
+                ),
+            }
+        )
+        pq.write_table(table, data_dir / "vitals.parquet")
+
+        config_dir = tmp_path / "config" / "decimaldb" / "1.0" / "tables"
+        config_dir.mkdir(parents=True)
+        (config_dir / "vitals.yml").write_text(
+            dedent("""
+path: vitals.parquet
+columns:
+  - name: subject_id
+    type: int64
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: valuenum
+    type: float32
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+events:
+  - name: CHART
+    columns:
+      code:
+        - const("CHART")
+      numeric_value: col(valuenum)
+""")
+        )
+
+        config_file = tmp_path / "extraction.yml"
+        config_file.write_text(
+            dedent(f"""
+name: Extraction
+version: 1.0.0
+config:
+  data:
+    - name: decimaldb
+      version: "1.0"
+      path: {data_dir}
+""")
+        )
+
+        project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(config_dir)
+        ExtractionStep.load(project, config_file).run()
+
+        output = (
+            project.datasets_path
+            / "extraction"
+            / "data"
+            / "decimaldb"
+            / "1.0"
+            / "vitals"
+            / "CHART.parquet"
+        )
+        df = pl.read_parquet(output).sort("subject_id")
+
+        assert df.height == 2
+        assert df.schema["numeric_value"] == pl.Float32
+        assert df["numeric_value"].to_list() == pytest.approx([80.25, 120.5])
 
     def test_reads_glob_partitioned_parquet(self, tmp_path: Path) -> None:
         """A glob path reads many partitioned part files (e.g. HiRID's raw dumps)."""
