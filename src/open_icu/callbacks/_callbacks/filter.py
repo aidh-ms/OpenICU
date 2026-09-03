@@ -28,7 +28,7 @@ class FirstDistinct(CallbackProtocol):
         ``first_distinct(subject_id, time)``.
         """
         if len(columns) == 1 and isinstance(columns[0], list):
-            self.columns: Sequence[AstValue] = columns[0]  # ty: ignore[invalid-assignment]
+            self.columns: Sequence[AstValue] = columns[0]
         else:
             self.columns = columns
 

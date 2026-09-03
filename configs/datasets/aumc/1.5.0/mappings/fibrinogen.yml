@@ -7,5 +7,5 @@ mappings:
       event: MEASUREMENT
       code: "3016407(//.*)?$"
     columns:
-      numeric_value: col(numeric_value)
+      numeric_value: col(numeric_value) * 100
       text_value: col(text_value)

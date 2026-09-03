@@ -9,6 +9,8 @@ import gc
 from pathlib import Path
 
 import polars as pl
+import pyarrow as pa
+import pyarrow.dataset as ds
 from polars import LazyFrame
 
 from open_icu.callbacks.interpreter import parse_expr
@@ -21,6 +23,15 @@ from open_icu.steps.extraction.registry import dataset_config_registry
 from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
+
+
+class _ArrowScannerAdapter:
+    def __init__(self, scanner: ds.Scanner):
+        self._scanner = scanner
+        self.schema = scanner.projected_schema
+
+    def to_batches(self, **kwargs):
+        return self._scanner.to_batches()
 
 
 class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
@@ -297,12 +308,47 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         source = self._resolve_source(table, path)
 
         if table.type == TableType.PARQUET:
-            lf = pl.scan_parquet(source)
-            lf = lf.select(table.dtypes.keys())
+            sources = [source] if isinstance(source, Path) else source
+            arrow_dataset = ds.dataset(sources, format="parquet")
+
+            required_columns = list(table.dtypes.keys())
+
+            decimal256_columns = {
+                field.name
+                for field in arrow_dataset.schema
+                if field.name in required_columns
+                and pa.types.is_decimal256(field.type)
+            }
+
+            if decimal256_columns:
+                logger.info(
+                    "Reading Parquet with PyArrow fallback for Decimal256 columns: %s",
+                    sorted(decimal256_columns),
+                )
+
+                columns = {
+                    name: (
+                        ds.field(name).cast(pa.float64())
+                        if name in decimal256_columns
+                        else ds.field(name)
+                    )
+                    for name in required_columns
+                }
+
+                scanner = arrow_dataset.scanner(columns=columns)
+                lf = pl.scan_pyarrow_dataset(_ArrowScannerAdapter(scanner))
+            else:
+                lf = pl.scan_parquet(source)
+                lf = lf.select(required_columns)
+
             # Parquet carries its own schema, so cast the non-temporal columns to
             # the declared dtypes. Datetime columns ("datetime" maps to String)
             # are handled below to support both native timestamps and strings.
-            casts = [pl.col(col.name).cast(col.dtype, strict=False) for col in table.columns if col.type != "datetime"]
+            casts = [
+                pl.col(col.name).cast(col.dtype, strict=False)
+                for col in table.columns
+                if col.type != "datetime"
+            ]
             if casts:
                 lf = lf.with_columns(casts)
         else:
