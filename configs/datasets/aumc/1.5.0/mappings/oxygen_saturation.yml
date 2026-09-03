@@ -1,13 +1,14 @@
-# AUMCdb (OMOP CDM 5.4 via AMSTEL) -- maps RICU-equivalent AUMC sources:
-#   6709  Saturatie (Monitor)    -> 40762499
-#   8903  SO2                   -> 42869608
-#   12311 O2-Saturatie (bloed)  -> 42869608, stored as fraction and converted to %
+# AUMCdb (OMOP CDM 5.4 via AMSTEL):
+#   40762499 / Saturatie (Monitor) is stored directly in %.
+#   42869608 includes SO2 and SO2 (Hb) (bloed), also stored directly in %.
+#   42869608 / O2-Saturatie (bloed) is predominantly stored as a 0-1 fraction;
+#   fractional values are converted to %, while already percentage-scaled values are preserved.
 type: simple
 mappings:
   - pattern:
       table: measurement
       event: MEASUREMENT
-      code: "(40762499//Saturatie \\(Monitor\\)//None|42869608//SO2//.*)$"
+      code: "(40762499//Saturatie \\(Monitor\\)//None|42869608//SO2//.*|42869608//SO2 \\(Hb\\) \\(bloed\\)//.*)$"
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)
@@ -16,5 +17,5 @@ mappings:
       event: MEASUREMENT
       code: "42869608//O2-Saturatie \\(bloed\\)//.*$"
     columns:
-      numeric_value: col(numeric_value) * 100
+      numeric_value: replace(numeric_value <= 1.5, numeric_value * 100, numeric_value)
       text_value: col(text_value)
