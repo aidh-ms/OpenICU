@@ -45,8 +45,6 @@ join:
         type: int64
       - name: study_id
         type: int64
-      - name: dicom_id
-        type: string
       - name: StudyDate
         type: string
       - name: StudyTime
@@ -63,7 +61,6 @@ event_defaults:
   subject_id: col(subject_id)
   time: col(time)
   extension:
-    dicom_id: col("dicom_id")
     study_id: col("study_id")
   filters:
     - drop_na(numeric_value)

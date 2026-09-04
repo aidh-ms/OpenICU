@@ -21,6 +21,6 @@ Chest X-Rays
 └── mappings/<name>.yml  # how shared concepts map onto this dataset's codes
 ```
 
-New MIMIC-IV versions should extend the closest existing version via an
+New MIMIC-CXR-JPG versions should extend the closest existing version via an
 `extends.yml` marker and state only their differences — see
 `docs/user_guide/versioning.md`.
