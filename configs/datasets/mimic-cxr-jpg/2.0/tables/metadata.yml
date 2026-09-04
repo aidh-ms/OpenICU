@@ -42,11 +42,13 @@ events:
   - name: CXR_PROCEDURE
     columns:
       code:
+        - const("CXR_PROCEDURE")
         - col("ProcedureCodeSequence_CodeMeaning")
 
   - name: CXR_POSITION
     columns:
       code:
+        - const("CXR_POSITION")
         - col("ViewCodeSequence_CodeMeaning")
 
   - name: CXR_RECORD
