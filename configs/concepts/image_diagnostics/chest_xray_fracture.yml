@@ -1,0 +1,6 @@
+name: chest_xray_fracture
+version: 1.0.0
+unit: None
+extension_columns:
+  table: col("table")
+  dataset: col("dataset")

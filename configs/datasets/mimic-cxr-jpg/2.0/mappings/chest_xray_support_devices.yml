@@ -1,0 +1,14 @@
+type: simple
+mappings:
+  - pattern:
+      table: chexpert
+      event: CXR_SUPPORT_DEVICES
+      code: (CXR_SUPPORT_DEVICES(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)
+  - pattern:
+      table: negbio
+      event: CXR_SUPPORT_DEVICES
+      code: (CXR_SUPPORT_DEVICES(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)

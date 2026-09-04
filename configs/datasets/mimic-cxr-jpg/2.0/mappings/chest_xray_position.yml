@@ -1,0 +1,7 @@
+type: simple
+mappings:
+  - pattern:
+      table: metadata
+      event: CXR_POSITION
+      code: (CXR_POSITION(//.*)?)
+    columns: {}

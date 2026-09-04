@@ -1,0 +1,14 @@
+type: simple
+mappings:
+  - pattern:
+      table: chexpert
+      event: CXR_ENLARGED_CARDIOMEDIASTINUM
+      code: (CXR_ENLARGED_CARDIOMEDIASTINUM(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)
+  - pattern:
+      table: negbio
+      event: CXR_ENLARGED_CARDIOMEDIASTINUM
+      code: (CXR_ENLARGED_CARDIOMEDIASTINUM(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)

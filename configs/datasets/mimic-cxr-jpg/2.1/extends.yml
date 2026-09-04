@@ -1,0 +1,3 @@
+# MIMIC-CXR-JPG v2.1 only extended the data relative to v2.0 without schema changes.
+dataset: mimic-cxr-jpg
+version: "2.0"

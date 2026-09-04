@@ -128,3 +128,41 @@ class SetTime(CallbackProtocol):
         if self.output is None:
             return expr
         return expr.alias(self.output)
+
+
+@register_callback_cls
+class ParseDateTime(CallbackProtocol):
+    """Concatenate one or more columns/literals into a datetime string and parse it.
+
+    Attributes:
+        parts: Values to concatenate, in order, each cast to string as-is.
+            Use ZeroPadInt upstream for any part needing zero-padding.
+        format: strptime format string matching the concatenated result.
+            Use "%.f" to consume an optional fractional-seconds suffix.
+        output: Output column name. If None, the expression is
+            returned unaliased.
+        strict: Passed through to str.strptime; False turns unparseable
+            values into null instead of raising.
+    """
+
+    def __init__(
+        self,
+        *parts: AstValue,
+        format: str,
+        output: Optional[str] = None,
+        strict: bool = False,
+    ) -> None:
+        self.parts = parts
+        self.format = format
+        self.output = output
+        self.strict = strict
+
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        expr = pl.concat_str(
+            [to_expr(lf, part).cast(pl.Utf8) for part in self.parts],
+            separator="",
+        ).str.strptime(pl.Datetime, format=self.format, strict=self.strict)
+
+        if self.output is None:
+            return expr
+        return expr.alias(self.output)
