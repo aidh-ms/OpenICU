@@ -69,6 +69,8 @@ event_defaults:
     stay_id: col(patientunitstayid)
     vitalaperiodic_id: col(vitalaperiodicid)
     available_time: col(event_timestamp)
+  code_prefix:
+    - const(VITALS_APERIODIC)
 
 events:
   - name: NON_INVASIVE_SYSTOLIC_BLOOD_PRESSURE

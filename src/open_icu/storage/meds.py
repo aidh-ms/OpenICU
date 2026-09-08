@@ -115,7 +115,7 @@ class MEDSDataset(FileStorage):
             {
                 "code": pl.Series([], dtype=pl.Utf8),
                 "description": pl.Series([], dtype=pl.Utf8),
-                "code_type": pl.Series([], dtype=pl.Utf8),
+                "parent_codes": pl.Series([], dtype=pl.Utf8),
             }
         )
         if dfs:

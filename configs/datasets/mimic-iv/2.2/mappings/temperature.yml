@@ -1,16 +1,18 @@
 type: simple
 mappings:
-  - pattern:
-      table: chartevents
-      event: CHART
-      code: (223762(//.*)?)
-    columns:
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
-  - pattern:
-      table: chartevents
-      event: CHART
-      code: (223761(//.*)?|224027(//.*)?)
-    columns:
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
+
+- pattern:
+    table: chartevents
+    event: CHART
+    code: (223762(//.*)?)
+  columns:
+    numeric_value: col(numeric_value)
+    text_value: col(text_value)
+
+- pattern:
+    table: chartevents
+    event: CHART
+    code: (223761(//.*)?)
+  columns:
+    numeric_value: (col(numeric_value) - 32) * 5 / 9
+    text_value: col(text_value)

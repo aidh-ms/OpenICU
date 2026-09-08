@@ -94,4 +94,6 @@ events:
         dose: col(dose_val_rx)
         dose_uom: col(dose_unit_rx)
         route: col(route)
+    filters:
+      - drop_na(time)
         # NOTE: some columns are omitted for now. Maybe revisited later if they are required downstream

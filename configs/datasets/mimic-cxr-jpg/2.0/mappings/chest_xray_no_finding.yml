@@ -1,0 +1,14 @@
+type: simple
+mappings:
+  - pattern:
+      table: chexpert
+      event: CXR_NO_FINDING
+      code: (CXR_NO_FINDING(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)
+  - pattern:
+      table: negbio
+      event: CXR_NO_FINDING
+      code: (CXR_NO_FINDING(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)

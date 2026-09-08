@@ -65,6 +65,7 @@ events:
       time: col(event_timestamp)
       code:
         - col(drugname)
+      numeric_value: cast(col(drugrate), "float32")
       extension:
         drugrate: col(drugrate)
         infusionrate: col(infusionrate)

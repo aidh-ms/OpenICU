@@ -68,7 +68,9 @@ post_join_callbacks:
   - add_offset(hospital_admission_timestamp, hospitaladmitoffset * -1, output=admission_timestamp)
   - add_offset(admission_timestamp, hospitaldischargeoffset, output=hospital_discharge_timestamp)
   - add_offset(admission_timestamp, unitdischargeoffset, output=discharge_timestamp)
-  - add_offset(admission_timestamp, cast(replace(age == "> 89", "90", age), "int16") * 365.25, offset_unit="days", output=birth_timestamp)
+  - replace(age == "> 89", "90", age, output=age_normalized)
+  - cast(age_normalized, "float32", output=age_numeric)
+  - add_offset(admission_timestamp, age_numeric * -365.25, offset_unit="days", output=birth_timestamp)
   - replace((gender == "") or (gender == None), "Unknown", gender, output=gender_1)
 
 event_defaults:
@@ -79,7 +81,7 @@ event_defaults:
 events:
   - name: GENDER
     columns:
-      time: col(birth_timestamp)
+      time: col(admission_timestamp)
       code:
         - col(gender_1)
 
@@ -110,6 +112,18 @@ events:
     filters:
       - drop_na(time)
       - first_distinct(subject_id, time)
+
+  - name: PATIENT_AGE
+    columns:
+      time: col(admission_timestamp)
+      code:
+        - const("PATIENT_AGE")
+      numeric_value: col(age_numeric)
+      extension:
+        available_time: col(admission_timestamp)
+    filters:
+      - drop_na(time)
+      - drop_na(numeric_value)
 
   - name: ETHNICITY
     columns:
@@ -157,7 +171,7 @@ events:
       - drop_na(time)
       - first_distinct(subject_id, time)
 
-  - name: SUBJECT_WEIGHT
+  - name: SUBJECT_DISCHARGE_WEIGHT
     columns:
       time: col(discharge_timestamp)
       code:

@@ -21,6 +21,10 @@ class DatasetConfig(BaseModel):
 
     name: str = Field(..., description="Name of the dataset.")
     version: str = Field(..., description="Version of the dataset.")
+    extension_columns: dict[str, str] = Field(
+        default_factory=dict,
+        description="Dataset-wide extraction columns to preserve in concept outputs.",
+    )
 
 
 class CustomConfig(BaseModel):

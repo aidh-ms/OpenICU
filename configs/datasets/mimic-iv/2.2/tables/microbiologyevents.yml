@@ -84,7 +84,8 @@ events:
         - col(spec_type_desc)
       extension:
         available_time: first_not_null(charttime, chartdate_plus1, output=available_time)
-    # TODO: deduplicate via a callback
+    filters:
+      - first_distinct(subject_id, micro_specimen_id)
 
   - name: MICROBIOLOGY_TEST
     columns:
@@ -107,6 +108,8 @@ events:
         available_time: first_not_null(storetime, storedate_plus1, output=available_time)
         isolate_num: col(isolate_num)
         comments: col(comments)
+    filters:
+      - drop_na(org_itemid) or drop_na(org_name)
     # TODO: deduplicate via a callback
 
   - name: MICROBIOLOGY_SUSCEPTIBILITY

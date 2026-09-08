@@ -1,20 +1,42 @@
 """End-to-end tests for the extraction step on synthetic fixture data."""
 
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
+from textwrap import dedent
 
 import polars as pl
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pytest
 
 from open_icu import ExtractionStep, OpenICUProject
 from tests.steps.conftest import load_extracation_config
 
 
-def run_extraction(tmp_path: Path, extraction_config: Path) -> OpenICUProject:
+def run_extraction(
+    tmp_path: Path,
+    extraction_config: Path,
+    *,
+    include_event_name_in_code: bool | None = None,
+) -> OpenICUProject:
+    if include_event_name_in_code is not None:
+        text = extraction_config.read_text()
+        text = text.replace(
+            "config:\n",
+            f"config:\n  settings:\n    include_event_name_in_code: {str(include_event_name_in_code).lower()}\n",
+            1,
+        )
+        extraction_config.write_text(text)
+
     project = OpenICUProject(tmp_path / "project")
 
     load_extracation_config(tmp_path / "config" / "testdb" / "1.0" / "tables")
 
-    extraction_step = ExtractionStep.load(project, tmp_path / "extraction.yml")
+    extraction_step = ExtractionStep.load(
+        project,
+        extraction_config,
+    )
     extraction_step.run()
 
     return project
@@ -36,17 +58,44 @@ class TestExtractionStep:
         assert df.schema["text_value"] == pl.String
         assert "stay_id" in df.columns  # extension column preserved
 
-    def test_code_encodes_provenance(self, tmp_path: Path, extraction_config: Path) -> None:
-        project = run_extraction(tmp_path, extraction_config)
+    @pytest.mark.parametrize(
+        ("include_event_name", "expected_codes"),
+        [
+            (
+                False,
+                {
+                    "220045//Heart Rate//bpm",
+                    "220050//Systolic BP//mmHg",
+                    "999999//units",
+                },
+            ),
+            (
+                True,
+                {
+                    "CHART//220045//Heart Rate//bpm",
+                    "CHART//220050//Systolic BP//mmHg",
+                    "CHART//999999//units",
+                },
+            ),
+        ],
+    )
+    def test_code_encodes_provenance(
+        self,
+        tmp_path: Path,
+        extraction_config: Path,
+        include_event_name: bool,
+        expected_codes: set[str],
+    ) -> None:
+        project = run_extraction(
+            tmp_path,
+            extraction_config,
+            include_event_name_in_code=include_event_name,
+        )
         df = pl.read_parquet(
             project.datasets_path / "extraction" / "data" / "testdb" / "1.0" / "vitals" / "CHART.parquet"
         )
 
-        codes = set(df["code"].to_list())
-        assert "220045//Heart Rate//bpm" in codes
-        assert "220050//Systolic BP//mmHg" in codes
-        # unmatched join keys: the null label is skipped in the code, not rendered
-        assert "999999//units" in codes
+        assert set(df["code"].to_list()) == expected_codes
 
     def test_join_and_values(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)
@@ -62,23 +111,61 @@ class TestExtractionStep:
             datetime(2024, 1, 1, 9, 0),
         ]
 
-    def test_multiple_events_per_table(self, tmp_path: Path, extraction_config: Path) -> None:
-        project = run_extraction(tmp_path, extraction_config)
+    @pytest.mark.parametrize(
+        ("include_event_name", "weight_code", "height_code"),
+        [
+            (False, "PRE//kg//POST", "m"),
+            (True, "PRE//WEIGHT//kg//POST", "HEIGHT//m"),
+        ],
+    )
+    def test_multiple_events_per_table(
+        self,
+        tmp_path: Path,
+        extraction_config: Path,
+        include_event_name: bool,
+        weight_code: str,
+        height_code: str,
+    ) -> None:
+        project = run_extraction(
+            tmp_path,
+            extraction_config,
+            include_event_name_in_code=include_event_name,
+        )
         base = project.datasets_path / "extraction" / "data" / "testdb" / "1.0" / "measurements"
 
         weight = pl.read_parquet(base / "WEIGHT.parquet")
         height = pl.read_parquet(base / "HEIGHT.parquet")
-        assert weight["code"].unique().to_list() == ["kg"]
+
+        assert weight["code"].unique().to_list() == [weight_code]
+        assert height["code"].unique().to_list() == [height_code]
         assert weight["numeric_value"].to_list() == [80.0, 60.0]
         assert height["numeric_value"].to_list() == [2.0, 1.5]
 
-    def test_metadata_written(self, tmp_path: Path, extraction_config: Path) -> None:
-        project = run_extraction(tmp_path, extraction_config)
+    @pytest.mark.parametrize(
+        ("include_event_name", "expected_code"),
+        [
+            (False, "220045//Heart Rate//bpm"),
+            (True, "CHART//220045//Heart Rate//bpm"),
+        ],
+    )
+    def test_metadata_written(
+        self,
+        tmp_path: Path,
+        extraction_config: Path,
+        include_event_name: bool,
+        expected_code: str,
+    ) -> None:
+        project = run_extraction(
+            tmp_path,
+            extraction_config,
+            include_event_name_in_code=include_event_name,
+        )
         metadata_path = project.datasets_path / "extraction" / "metadata"
 
         assert (metadata_path / "dataset.json").exists()
+
         codes = pl.read_parquet(metadata_path / "codes.parquet")
-        assert "220045//Heart Rate//bpm" in codes["code"].to_list()
+        assert expected_code in codes["code"].to_list()
 
     def test_rerun_is_skipped_without_overwrite(self, tmp_path: Path, extraction_config: Path) -> None:
         project = run_extraction(tmp_path, extraction_config)
@@ -197,6 +284,84 @@ config:
         assert df["time"].to_list() == [datetime(2024, 1, 1, 8, 0), datetime(2024, 1, 2, 10, 0)]
         assert df["numeric_value"].to_list() == [80.0, 120.0]
         assert df["code"].to_list() == ["CHART", "CHART"]
+
+    def test_reads_parquet_source_with_decimal256(self, tmp_path: Path) -> None:
+        """Decimal256 source columns are read through the PyArrow fallback."""
+        data_dir = tmp_path / "data" / "decimaldb"
+        data_dir.mkdir(parents=True)
+
+        table = pa.table(
+            {
+                "subject_id": pa.array([1, 2], type=pa.int64()),
+                "charttime": pa.array(
+                    [datetime(2024, 1, 1, 8, 0), datetime(2024, 1, 2, 10, 0)],
+                    type=pa.timestamp("us"),
+                ),
+                "valuenum": pa.array(
+                    [Decimal("80.25"), Decimal("120.50")],
+                    type=pa.decimal256(76, 38),
+                ),
+            }
+        )
+        pq.write_table(table, data_dir / "vitals.parquet")
+
+        config_dir = tmp_path / "config" / "decimaldb" / "1.0" / "tables"
+        config_dir.mkdir(parents=True)
+        (config_dir / "vitals.yml").write_text(
+            dedent("""
+path: vitals.parquet
+columns:
+  - name: subject_id
+    type: int64
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: valuenum
+    type: float32
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+events:
+  - name: CHART
+    columns:
+      code:
+        - const("CHART")
+      numeric_value: col(valuenum)
+""")
+        )
+
+        config_file = tmp_path / "extraction.yml"
+        config_file.write_text(
+            dedent(f"""
+name: Extraction
+version: 1.0.0
+config:
+  data:
+    - name: decimaldb
+      version: "1.0"
+      path: {data_dir}
+""")
+        )
+
+        project = OpenICUProject(tmp_path / "project")
+        load_extracation_config(config_dir)
+        ExtractionStep.load(project, config_file).run()
+
+        output = (
+            project.datasets_path
+            / "extraction"
+            / "data"
+            / "decimaldb"
+            / "1.0"
+            / "vitals"
+            / "CHART.parquet"
+        )
+        df = pl.read_parquet(output).sort("subject_id")
+
+        assert df.height == 2
+        assert df.schema["numeric_value"] == pl.Float32
+        assert df["numeric_value"].to_list() == pytest.approx([80.25, 120.5])
 
     def test_reads_glob_partitioned_parquet(self, tmp_path: Path) -> None:
         """A glob path reads many partitioned part files (e.g. HiRID's raw dumps)."""

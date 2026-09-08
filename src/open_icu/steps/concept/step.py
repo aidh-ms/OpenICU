@@ -6,6 +6,7 @@ code patterns, and outputs MEDS-compliant Parquet files.
 """
 
 import gc
+import shutil
 from functools import cached_property
 from graphlib import TopologicalSorter
 from pathlib import Path
@@ -54,18 +55,32 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
     def extract(self) -> None:
         datasets = {
-            (dataset_config.name, dataset_config.version)
+            (dataset_config.name, dataset_config.version): dataset_config
             for dataset_config in self._config.config.mapping_configs
         }
 
-        for dataset, version in datasets:
+        for (dataset, version), dataset_config in datasets.items():
             logger.info("Processing concepts for dataset %s (version %s)", dataset, version)
             depend_concepts = dict()
+
+            assert self._workspace_dir is not None
+            routed_cache_dir = (
+                Path(self._workspace_dir.path).parent
+                / "_concept_routed_sources"
+            )
+            if routed_cache_dir.exists():
+                shutil.rmtree(routed_cache_dir)
+
+            routed_sources = self._prepare_routed_sources(
+                dataset,
+                version,
+                routed_cache_dir,
+            )
 
             for concept in self._registry.values():
                 dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
-                    logger.debug(
+                    logger.warning(
                         "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
                         concept.name,
                         dataset,
@@ -82,6 +97,8 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     self.extract_simple_concept(
                         concept,
                         dataset_concept,
+                        routed_sources=routed_sources,
+                        dataset_extension_columns=dataset_config.extension_columns,
                     )
 
                 if isinstance(dataset_concept, (DerivedDatasetConceptConfig, ComplexDatasetConceptConfig)):
@@ -99,11 +116,11 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     dataset,
                 )
                 concept = self._registry.get(concept_id)
-                assert concept is not None
+                assert concept is not None, f"concept {concept_id} not found in registry"
 
                 dataset_concept = concept.get_dataset_concept(dataset, version)
                 if dataset_concept is None:
-                    logger.debug(
+                    logger.warning(
                         "skipping concept %s for dataset %s (version %s): no dataset-specific config found",
                         concept.name,
                         dataset,
@@ -128,7 +145,23 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         concept.identifier,
                         dataset,
                     )
-                    dataset_concept.fn(self._project)
+                    self.extract_complex_concept(
+                        concept,
+                        dataset_concept,
+                    )
+
+            if routed_cache_dir.exists():
+                shutil.rmtree(routed_cache_dir)
+
+    def concept_output_dir(self, concept: ConceptConfig) -> Path:
+        """Return the workspace directory a concept's per-dataset parquet files are written to.
+        Args:
+            concept: The concept configuration to resolve the output directory for
+        Returns:
+            Path of the form ``<workspace>/<step>/<concept name>/<version>``
+        """
+        assert self._workspace_dir is not None
+        return Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
 
     @property
     def extraction_dataset(self):
@@ -169,10 +202,207 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         return lf
 
+    def _matching_codes_for_patterns(
+        self,
+        event_name: str,
+        patterns: list[str],
+    ) -> list[str]:
+        code = pl.col("code").cast(pl.String)
+        code_without_event_name = (
+            code.str.replace(f"//{event_name}//", "//", literal=True)
+            .str.strip_prefix(f"{event_name}//")
+            .str.strip_suffix(f"//{event_name}")
+        )
+
+        expr = None
+        for pattern in patterns:
+            current = code.str.contains(pattern) | code_without_event_name.str.contains(pattern)
+            expr = current if expr is None else expr | current
+
+        if expr is None:
+            return []
+
+        return (
+            self.codes_df.lazy()
+            .filter(expr)
+            .select("code")
+            .collect()
+            .get_column("code")
+            .to_list()
+        )
+
+    def _build_code_concept_routes(
+        self,
+        dataset: str,
+        version: str,
+        data_path: Path,
+    ) -> pl.DataFrame:
+        event_name = data_path.stem
+        rows: list[dict[str, str]] = []
+
+        for concept in self._registry.values():
+            dataset_concept = concept.get_dataset_concept(dataset, version)
+
+            if not isinstance(dataset_concept, SimpleDatasetConceptConfig):
+                continue
+
+            for mapping in dataset_concept.mappings:
+                if mapping.pattern.extensions or mapping.filters:
+                    continue
+
+                table = mapping.pattern.table
+                event = mapping.pattern.event
+
+                table_path = (
+                    self.extraction_dataset.data_path
+                    / dataset
+                    / version
+                    / table
+                )
+
+                if event is None:
+                    mapping_paths = sorted(table_path.glob("*.parquet"))
+                else:
+                    mapping_paths = [table_path / f"{event}.parquet"]
+
+                if data_path not in mapping_paths:
+                    continue
+
+                for code in self._matching_codes_for_patterns(
+                    event_name,
+                    [mapping.pattern.code],
+                ):
+                    rows.append(
+                        {
+                            "source_code": code,
+                            "concept_identifier": concept.identifier,
+                        }
+                    )
+
+        if not rows:
+            return pl.DataFrame(
+                schema={
+                    "source_code": pl.String,
+                    "concept_identifier": pl.String,
+                }
+            )
+
+        return pl.DataFrame(rows).unique()
+
+    def _prepare_routed_sources(
+        self,
+        dataset: str,
+        version: str,
+        cache_dir: Path,
+    ) -> dict[tuple[Path, str], list[Path]]:
+        extraction_dataset = self.extraction_dataset
+        if extraction_dataset is None:
+            return {}
+
+        source_paths: set[Path] = set()
+
+        for concept in self._registry.values():
+            dataset_concept = concept.get_dataset_concept(dataset, version)
+
+            if not isinstance(dataset_concept, SimpleDatasetConceptConfig):
+                continue
+
+            for mapping in dataset_concept.mappings:
+                if mapping.pattern.extensions or mapping.filters:
+                    continue
+
+                table = mapping.pattern.table
+                event = mapping.pattern.event
+
+                table_path = (
+                    extraction_dataset.data_path
+                    / dataset
+                    / version
+                    / table
+                )
+
+                if event is None:
+                    data_paths = sorted(table_path.glob("*.parquet"))
+                else:
+                    data_paths = [table_path / f"{event}.parquet"]
+
+                source_paths.update(
+                    data_path
+                    for data_path in data_paths
+                    if data_path.exists()
+                )
+
+        routed_sources: dict[tuple[Path, str], list[Path]] = {}
+
+        for data_path in sorted(source_paths):
+            routes = self._build_code_concept_routes(
+                dataset,
+                version,
+                data_path,
+            )
+
+            if routes.is_empty():
+                continue
+
+            # Routing only pays off when multiple concepts share a source.
+            if routes["concept_identifier"].n_unique() < 2:
+                continue
+
+            relative_path = data_path.relative_to(
+                extraction_dataset.data_path
+            )
+            output_dir = cache_dir / relative_path.parent / data_path.stem
+
+            logger.debug(
+                "Routing shared source %s with %d codes to %d concepts",
+                data_path,
+                routes["source_code"].n_unique(),
+                routes["concept_identifier"].n_unique(),
+            )
+
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            (
+                pl.scan_parquet(data_path)
+                .join(
+                    routes.lazy(),
+                    left_on="code",
+                    right_on="source_code",
+                    how="inner",
+                )
+                .sink_parquet(
+                    pl.PartitionBy(
+                        output_dir,
+                        key="concept_identifier",
+                        include_key=False,
+                    ),
+                    mkdir=True,
+                )
+            )
+
+            for concept_identifier in routes[
+                "concept_identifier"
+            ].unique():
+                concept_dir = (
+                    output_dir
+                    / f"concept_identifier={concept_identifier}"
+                )
+
+                files = sorted(concept_dir.glob("*.parquet"))
+
+                if files:
+                    routed_sources[
+                        (data_path, concept_identifier)
+                    ] = files
+
+        return routed_sources
+
     def extract_simple_concept(
         self,
         concept: ConceptConfig,
         dataset_concept: SimpleDatasetConceptConfig,
+        routed_sources: dict[tuple[Path, str], list[Path]] | None = None,
+        dataset_extension_columns: dict[str, str] | None = None,
     ) -> None:
         logger.debug(
             "Extracting simple concept %s for dataset %s",
@@ -180,7 +410,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             dataset_concept.dataset,
         )
         assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path = self.concept_output_dir(concept)
         output_dataset_path = output_data_path / dataset_concept.dataset
         output_dataset_path.mkdir(parents=True, exist_ok=True)
 
@@ -225,39 +455,62 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     concept.identifier,
                 )
 
-                lf = pl.scan_parquet(data_path).filter(
-                    pl.col("code").str.contains(mapping.pattern.code)
+                code = pl.col("code").cast(pl.String)
+                code_without_event_name = (
+                    code.str.replace(f"//{event_name}//", "//", literal=True)
+                    .str.strip_prefix(f"{event_name}//")
+                    .str.strip_suffix(f"//{event_name}")
+                )
+
+                source_path: Path | list[Path] = data_path
+
+                if (
+                    routed_sources
+                    and not mapping.pattern.extensions
+                    and not mapping.filters
+                ):
+                    routed = routed_sources.get(
+                        (data_path, concept.identifier)
+                    )
+                    if routed:
+                        source_path = routed
+                        logger.debug(
+                            "Using routed source for concept %s: %s",
+                            concept.identifier,
+                            routed,
+                        )
+
+                lf = pl.scan_parquet(source_path).filter(
+                    code.str.contains(mapping.pattern.code)
+                    | code_without_event_name.str.contains(mapping.pattern.code)
                 )
 
                 for col_name, pattern in mapping.pattern.extensions.items():
-                    lf = lf.filter(
-                        pl.col(col_name).str.contains(pattern)
-                    )
+                    lf = lf.filter(pl.col(col_name).str.contains(pattern))
 
                 # extension columns
                 lf = lf.with_columns(pl.lit(dataset).alias("dataset"))
                 lf = lf.with_columns(pl.lit(version).alias("version"))
                 lf = lf.with_columns(pl.lit(table).alias("table"))
                 lf = lf.with_columns(pl.lit(event_name).alias("event"))
-                for col_name, col_expr in concept.extension_columns.items():
+
+                extension_columns = concept.extension_columns.copy()
+                extension_columns.update(dataset_extension_columns or {})
+                for col_name, col_expr in extension_columns.items():
                     lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
 
                 # value columns
                 if mapping.columns.text_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("text_value"))
                 else:
-                    lf = lf.with_columns(
-                        parse_expr(lf, mapping.columns.text_value).alias("text_value")
-                    )
+                    lf = lf.with_columns(parse_expr(lf, mapping.columns.text_value).alias("text_value"))
 
                 if mapping.columns.numeric_value is None:
                     lf = lf.with_columns(pl.lit(None).alias("numeric_value"))
                 else:
                     expr = parse_expr(lf, mapping.columns.numeric_value)
 
-                    lf = lf.with_columns(
-                        expr.cast(pl.Float64, strict=False).alias("numeric_value")
-                    )
+                    lf = lf.with_columns(expr.cast(pl.Float64, strict=False).alias("numeric_value"))
 
                 # code column
                 lf = lf.with_columns(pl.lit(concept.code).alias("code"))
@@ -265,13 +518,16 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 for expr in mapping.filters:
                     lf = lf.filter(parse_expr(lf, expr))
 
-                lf = lf.select([
-                    pl.col("subject_id").cast(pl.Int64),
-                    pl.col("time").cast(pl.Datetime(time_unit="us")),
-                    pl.col("code").cast(pl.String),
-                    pl.col("numeric_value").cast(pl.Float32),
-                    pl.col("text_value").cast(pl.String),
-                ] + [pl.col(col).cast(pl.String) for col in concept.extension_columns.keys()])
+                lf = lf.select(
+                    [
+                        pl.col("subject_id").cast(pl.Int64),
+                        pl.col("time").cast(pl.Datetime(time_unit="us")),
+                        pl.col("code").cast(pl.String),
+                        pl.col("numeric_value").cast(pl.Float32),
+                        pl.col("text_value").cast(pl.String),
+                    ]
+                    + [pl.col(col).cast(pl.String) for col in extension_columns]
+                )
 
                 lf = self.apply_limits(concept, lf)
 
@@ -367,6 +623,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                         join_table,
                     ),
                     how=join_table.how,  # ty: ignore[invalid-argument-type]
+                    suffix=join_table.suffix,
                     **join_table.join_params,  # ty: ignore[invalid-argument-type]
                 )
                 post_callbacks.extend(join_table.post_callbacks)
@@ -384,11 +641,12 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             col_expr: col_name
             for col_name, col_expr in columns.items()
             if col_expr is not None and not isinstance(col_expr, list)
-        } | {
-            col_expr: col_name
-            for col_name, col_expr in extension.items()
-            if col_expr is not None
-        }
+        } | {col_expr: col_name for col_name, col_expr in extension.items() if col_expr is not None}
+
+        if dataset_concept.event.text_value is None:
+            lf = lf.with_columns(pl.lit(None, dtype=pl.String).alias("text_value"))
+        if dataset_concept.event.numeric_value is None:
+            lf = lf.with_columns(pl.lit(None, dtype=pl.Float32).alias("numeric_value"))
 
         for col_expr, col_name in mapping.items():
             lf = lf.with_columns(parse_expr(lf, col_expr).alias(col_name))
@@ -400,18 +658,21 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             lf = lf.filter(parse_expr(lf, expr))
 
         # Reorder columns
-        lf = lf.select([
-            pl.col("subject_id").cast(pl.Int64),
-            pl.col("time").cast(pl.Datetime(time_unit="us")),
-            pl.col("code").cast(pl.String),
-            pl.col("numeric_value").cast(pl.Float32),
-            pl.col("text_value").cast(pl.String),
-        ] + [pl.col(col).cast(pl.String) for col in extension.keys()])
+        lf = lf.select(
+            [
+                pl.col("subject_id").cast(pl.Int64),
+                pl.col("time").cast(pl.Datetime(time_unit="us")),
+                pl.col("code").cast(pl.String),
+                pl.col("numeric_value").cast(pl.Float32),
+                pl.col("text_value").cast(pl.String),
+            ]
+            + [pl.col(col).cast(pl.String) for col in extension.keys()]
+        )
 
         lf = self.apply_limits(concept, lf)
 
         assert self._workspace_dir is not None
-        output_data_path = Path(self._workspace_dir.path, *concept.identifier_tuple[1:])
+        output_data_path = self.concept_output_dir(concept)
         output_data_path.mkdir(parents=True, exist_ok=True)
 
         logger.info(
@@ -424,3 +685,26 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
 
         del lf
         gc.collect()
+
+    def extract_complex_concept(
+        self,
+        concept: ConceptConfig,
+        dataset_concept: ComplexDatasetConceptConfig,
+    ) -> None:
+        """Extract a complex concept by delegating to its configured transformer.
+        The transformer class referenced by the mapping's ``concept_transformer``
+        dotted path is instantiated with the concept, the per-dataset mapping
+        config, and the mapping's ``kwargs``, then called with this step. It is
+        expected to write its per-dataset parquet output below
+        ``self.concept_output_dir(concept)`` so ``collect()`` picks it up.
+        Args:
+            concept: The concept configuration the transformer runs for
+            dataset_concept: The dataset-specific complex mapping configuration
+        """
+        logger.debug(
+            "Extracting complex concept %s for dataset %s",
+            concept.identifier,
+            dataset_concept.dataset,
+        )
+        transformer = dataset_concept.build_transformer(self)
+        transformer()

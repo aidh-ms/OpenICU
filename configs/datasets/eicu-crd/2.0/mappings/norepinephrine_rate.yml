@@ -1,9 +1,11 @@
 type: simple
 mappings:
-  - pattern:
-      table: infusiondrug
-      event: INFUSION
-      code: (^norepi.*\(.+\)$)
-    columns:
-      numeric_value: col(numeric_value)
-      text_value: col(text_value)
+- pattern:
+    table: infusiondrug
+    event: INFUSION
+    code: (?i)^norepinephrine.*\(mcg/kg/min\)$
+  columns:
+    numeric_value: col(numeric_value)
+    text_value: col(text_value)
+  filters:
+  - drop_na(numeric_value)

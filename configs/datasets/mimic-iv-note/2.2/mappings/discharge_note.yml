@@ -1,0 +1,8 @@
+type: simple
+mappings:
+  - pattern:
+      table: discharge
+      event: DISCHARGE_NOTE
+      code: (DISCHARGE_NOTE(//.*)?)
+    columns:
+      text_value: col(text_value)

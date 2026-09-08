@@ -1,0 +1,6 @@
+name: discharge_note
+version: 1.0.0
+unit: text
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

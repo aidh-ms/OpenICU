@@ -9,6 +9,8 @@ import gc
 from pathlib import Path
 
 import polars as pl
+import pyarrow as pa
+import pyarrow.dataset as ds
 from polars import LazyFrame
 
 from open_icu.callbacks.interpreter import parse_expr
@@ -21,6 +23,15 @@ from open_icu.steps.extraction.registry import dataset_config_registry
 from open_icu.storage.project import OpenICUProject
 
 logger = get_logger(__name__)
+
+
+class _ArrowScannerAdapter:
+    def __init__(self, scanner: ds.Scanner):
+        self._scanner = scanner
+        self.schema = scanner.projected_schema
+
+    def to_batches(self, **kwargs):
+        return self._scanner.to_batches()
 
 
 class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
@@ -174,12 +185,11 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
 
             # Create code column.
             #
-            # Final code structure:
-            # db_name // table_name // code_prefix // columns.code // code_suffix
+            # Event-specific code structure:
+            # code_prefix // [event_name //] columns.code // code_suffix
             #
-            # db_name and table_name are automatic. code_prefix, columns.code,
-            # and code_suffix are configured. columns.code contains optional
-            # user-defined code parts such as unit, route, specimen, or method.
+            # The event name is included by default and can be disabled through
+            # the global extraction settings or a table-specific override.
             code_expr = self._build_code_expr(event_lf, table, event)
 
             # Add constructed MEDS code column
@@ -298,12 +308,47 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
         source = self._resolve_source(table, path)
 
         if table.type == TableType.PARQUET:
-            lf = pl.scan_parquet(source)
-            lf = lf.select(table.dtypes.keys())
+            sources = [source] if isinstance(source, Path) else source
+            arrow_dataset = ds.dataset(sources, format="parquet")
+
+            required_columns = list(table.dtypes.keys())
+
+            decimal256_columns = {
+                field.name
+                for field in arrow_dataset.schema
+                if field.name in required_columns
+                and pa.types.is_decimal256(field.type)
+            }
+
+            if decimal256_columns:
+                logger.info(
+                    "Reading Parquet with PyArrow fallback for Decimal256 columns: %s",
+                    sorted(decimal256_columns),
+                )
+
+                columns = {
+                    name: (
+                        ds.field(name).cast(pa.float64())
+                        if name in decimal256_columns
+                        else ds.field(name)
+                    )
+                    for name in required_columns
+                }
+
+                scanner = arrow_dataset.scanner(columns=columns)
+                lf = pl.scan_pyarrow_dataset(_ArrowScannerAdapter(scanner))
+            else:
+                lf = pl.scan_parquet(source)
+                lf = lf.select(required_columns)
+
             # Parquet carries its own schema, so cast the non-temporal columns to
             # the declared dtypes. Datetime columns ("datetime" maps to String)
             # are handled below to support both native timestamps and strings.
-            casts = [pl.col(col.name).cast(col.dtype, strict=False) for col in table.columns if col.type != "datetime"]
+            casts = [
+                pl.col(col.name).cast(col.dtype, strict=False)
+                for col in table.columns
+                if col.type != "datetime"
+            ]
             if casts:
                 lf = lf.with_columns(casts)
         else:
@@ -358,43 +403,66 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
     ) -> pl.Expr:
         """Build the MEDS code expression for an event.
 
-        The final code is built as:
+        The final event-specific code is built as:
 
-            db_name // table_name // code_prefix // columns.code // code_suffix
+            code_prefix // [event_name //] columns.code // code_suffix
 
-        The db_name and table_name parts are automatic. The configured code
-        prefix is inserted after db/table. Additional user-defined code parts,
-        such as event names, units, routes, specimens, or methods, are provided
-        through columns.code. The configured code suffix is appended last.
+        Whether the event name is included is controlled by the global
+        extraction-step setting. A table-specific setting may override it.
         """
-        code_parts: list[pl.Expr] = []
+        include_event_name = (
+            table.settings.include_event_name_in_code
+            if table.settings.include_event_name_in_code is not None
+            else self._config.config.settings.include_event_name_in_code
+        )
 
-        code_parts.extend(
+        prefix_parts = [
             self._parse_expr(
                 lf,
                 expr,
                 callback_type="Event code prefix",
             )
             for expr in event.code_prefix
-        )
+        ]
 
-        code_parts.extend(
+        event_code_parts = [
             self._parse_expr(
                 lf,
                 expr,
                 callback_type="Event code part",
             )
             for expr in event.columns.code
-        )
+        ]
 
-        code_parts.extend(
+        suffix_parts = [
             self._parse_expr(
                 lf,
                 expr,
                 callback_type="Event code suffix",
             )
             for expr in event.code_suffix
-        )
+        ]
+
+        code_parts = list(prefix_parts)
+
+        if include_event_name:
+            event_name = pl.lit(event.name, dtype=pl.String)
+
+            # Avoid duplicating the event name when it is already the first
+            # configured code component. Prefix components are intentionally
+            # ignored here because they precede the event name.
+            if event_code_parts:
+                first_event_code_part = event_code_parts[0].cast(pl.String)
+                event_name = (
+                    pl.when(first_event_code_part == event.name)
+                    .then(pl.lit(None, dtype=pl.String))
+                    .otherwise(event_name)
+                )
+
+            code_parts.append(event_name)
+
+        code_parts.extend(event_code_parts)
+        code_parts.extend(suffix_parts)
         if len(code_parts) == 1:
             return code_parts[0].cast(pl.String).alias("code")
 

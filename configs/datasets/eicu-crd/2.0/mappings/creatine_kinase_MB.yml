@@ -3,7 +3,7 @@ mappings:
   - pattern:
       table: lab
       event: LAB
-      code: (CPK\-MB(//.*)?)
+      code: ^CPK-MB//.*$
     columns:
       numeric_value: col(numeric_value)
       text_value: col(text_value)

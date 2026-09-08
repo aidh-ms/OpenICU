@@ -1,0 +1,6 @@
+name: chest_xray_letter
+version: 1.0.0
+unit: path
+extension_columns:
+  dataset: col("dataset")
+  table: col("table")

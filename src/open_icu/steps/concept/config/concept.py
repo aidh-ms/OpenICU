@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Annotated, Self
 
 import yaml
-from pydantic import BaseModel, Field, TypeAdapter, ValidationError, computed_field
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError, computed_field, model_validator
 
 from open_icu.config.base import BaseConfig
 from open_icu.config.inheritance import has_extends, resolve_effective_configs
@@ -136,3 +136,10 @@ class ConceptConfig(BaseConfig):
             if dataset_concept.dataset == dataset_name and dataset_concept.version == version:
                 return dataset_concept
         return None
+
+    @model_validator(mode="after")
+    def _link_complex_concepts_to_parent(self) -> "ConceptConfig":
+        for dc in self.dataset_concepts:
+            if isinstance(dc, ComplexDatasetConceptConfig):
+                dc._parent_concept = self
+        return self

@@ -119,6 +119,7 @@ class BaseConfig(BaseModel, metaclass=ABCMeta):
             The identifier string with the correct prefix
         """
         prefix = cls.prefix()
+        identifier = identifier.lower()
         if not identifier.startswith(prefix):
             return f"{prefix}.{identifier}"
         return identifier

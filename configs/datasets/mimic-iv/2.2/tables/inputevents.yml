@@ -122,6 +122,7 @@ events:
         amount: col(amount)
         amountuom: col(amountuom)
         continueinnextdept: col(continueinnextdept)
+        duration_minutes: cast(endtime - starttime, "int64") / 60000000
 
   - name: SUBJECT_WEIGHT_AT_INFUSION
     columns:

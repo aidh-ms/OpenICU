@@ -14,6 +14,8 @@ columns:
     type: str
   - name: labmeasurenamesystem
     type: str
+  - name: labmeasurenameinterface
+    type: str
   - name: labresult
     type: float32
   - name: labresulttext
@@ -59,3 +61,5 @@ events:
         - col(labmeasurenamesystem)
       numeric_value: col(labresult)
       text_value: col(labresulttext)
+      extension:
+        labmeasurenameinterface: col(labmeasurenameinterface)

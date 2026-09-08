@@ -18,14 +18,15 @@ from open_icu.callbacks._callbacks.comparison import (
     LessThan,
     NotEqual,
 )
-from open_icu.callbacks._callbacks.filter import DropNa, FirstDistinct, DropIf
-from open_icu.callbacks._callbacks.logical import And, Not, Or
-from open_icu.callbacks._callbacks.shortcuts import Col, Const
-from open_icu.callbacks._callbacks.time import AddOffset, SetTime, ToDatetime
-from open_icu.callbacks._callbacks.selector import FirstNotNull, Max
 from open_icu.callbacks._callbacks.conditional import Replace
-from open_icu.callbacks._callbacks.type import Cast
+from open_icu.callbacks._callbacks.filter import DropIf, DropNa, FirstDistinct
+from open_icu.callbacks._callbacks.logical import And, Not, Or
 from open_icu.callbacks._callbacks.reshape import SplitExplode
+from open_icu.callbacks._callbacks.selector import FirstNotNull, Max
+from open_icu.callbacks._callbacks.shortcuts import Col, Const
+from open_icu.callbacks._callbacks.string import ConcatStr, SliceStr, ZeroPadInt
+from open_icu.callbacks._callbacks.time import AddOffset, ParseDateTime, SetTime, ToDatetime
+from open_icu.callbacks._callbacks.type import Cast
 from open_icu.callbacks.proto import CallbackProtocol
 from open_icu.callbacks.registry import register_callback_cls, registry
 
@@ -36,6 +37,7 @@ __all__ = [
     "DropNa",
     "FirstDistinct",
     "DropIf",
+    "ParseDateTime",
     "ToDatetime",
     "AddOffset",
     "SetTime",
@@ -65,4 +67,7 @@ __all__ = [
     "Replace",
     "Cast",
     "SplitExplode",
+    "ZeroPadInt",
+    "SliceStr",
+    "ConcatStr",
 ]

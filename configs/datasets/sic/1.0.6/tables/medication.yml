@@ -56,6 +56,8 @@ join:
     columns:
       - name: ReferenceGlobalID
         type: int64
+      - name: ReferenceValue
+        type: str
       - name: ReferenceName
         type: str
       - name: ReferenceUnit
@@ -81,6 +83,7 @@ events:
       code:
         - col(DrugID)
         - col(ReferenceName)
+        - col(ReferenceValue)
         - col(ReferenceUnit)
       numeric_value: col(Amount)
     filters:
