@@ -1,5 +1,8 @@
 """Configuration models for the sharding step."""
 
+from pathlib import Path
+from typing import Self
+
 from pydantic import BaseModel, Field
 
 from open_icu.steps.base.config import BaseStepConfig
@@ -23,6 +26,8 @@ class CustomConfig(BaseModel):
             subjects.
         subjects_per_shard: Maximum number of subjects written to each shard
             file.
+        event_order_config: Optional path to a custom global event-order
+            configuration. If omitted, OpenICU uses its built-in default.
     """
 
     concept_step: str = Field(
@@ -49,9 +54,28 @@ class CustomConfig(BaseModel):
         gt=0,
         description="Number of subjects written per shard file.",
     )
+    event_order_config: Path | None = Field(
+        default=None,
+        description=(
+            "Optional path to a custom event-order configuration. "
+            "Relative paths are resolved relative to this sharding configuration file. "
+            "If omitted, OpenICU uses the built-in default event order."
+        ),
+    )
 
 
 class ShardingStepConfig(BaseStepConfig[CustomConfig]):
     """Complete configuration for the sharding step."""
 
-    pass
+    @classmethod
+    def load(cls, file_path: Path, **kwargs) -> Self:
+        """Load the sharding configuration and resolve relative file paths."""
+        config = super().load(file_path, **kwargs)
+
+        event_order_path = config.config.event_order_config
+        if event_order_path is not None and not event_order_path.is_absolute():
+            config.config.event_order_config = (
+                file_path.parent / event_order_path
+            ).resolve()
+
+        return config

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import polars as pl
 
+from open_icu.config.event_order import EventOrderConfig
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.sharding.config.sharding import ShardingConfig
@@ -53,6 +54,13 @@ class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
 
         logger.info("Sharding %d concept file(s)", len(concept_files))
 
+        event_order = EventOrderConfig.load(self._config.config.event_order_config)
+        self._handle_unassigned_event_order(
+            event_order,
+            concept_files,
+            concept_dataset.data_path,
+        )
+
         subject_ids = self._subject_ids(concept_files)
         if not subject_ids:
             logger.warning("Skipping sharding step: no subjects found in selected concept files")
@@ -69,11 +77,81 @@ class ShardingStep(ConfigurableBaseStep[ShardingStepConfig, ShardingConfig]):
             )
 
             lf = self._scan_core_columns(concept_files).filter(pl.col("subject_id").is_in(shard_subjects))
-            lf = lf.sort(["subject_id", "time", "code"])
+            lf = self._apply_event_order(lf, event_order)
+            lf = lf.sort(["subject_id", "time", "_event_order", "code"]).drop("_event_order")
             lf.sink_parquet(output_file)
             written_files += 1
 
         logger.info("Finished sharding step: wrote %d shard file(s)", written_files)
+
+    @staticmethod
+    def _concept_names(
+        concept_files: list[Path],
+        concept_data_path: Path,
+    ) -> set[str]:
+        """Return concept names represented by the selected concept files."""
+        names: set[str] = set()
+
+        for file_path in concept_files:
+            relative_file_path = file_path.relative_to(concept_data_path)
+            relative_parts = relative_file_path.parts
+
+            if len(relative_parts) >= 3:
+                names.add(relative_parts[-3])
+
+        return names
+
+    @classmethod
+    def _handle_unassigned_event_order(
+        cls,
+        event_order: EventOrderConfig,
+        concept_files: list[Path],
+        concept_data_path: Path,
+    ) -> None:
+        """Handle selected concepts that use the default event order."""
+        configured_concepts = set(event_order.concept_orders())
+        selected_concepts = cls._concept_names(concept_files, concept_data_path)
+        unassigned = sorted(selected_concepts - configured_concepts)
+
+        if not unassigned or event_order.unassigned == "ignore":
+            return
+
+        message = (
+            f"{len(unassigned)} concept(s) use default event order "
+            f"{event_order.default_order}: {', '.join(unassigned)}"
+        )
+
+        if event_order.unassigned == "error":
+            raise ValueError(message)
+
+        logger.warning(message)
+
+    @staticmethod
+    def _apply_event_order(
+        lf: pl.LazyFrame,
+        event_order: EventOrderConfig,
+    ) -> pl.LazyFrame:
+        """Add a temporary semantic event-order column."""
+        concept = (
+            pl.col("code")
+            .str.split_exact("//", 1)
+            .struct.field("field_0")
+        )
+
+        order_expression = pl.lit(event_order.default_order)
+
+        for concept_name, order in reversed(
+            list(event_order.concept_orders().items())
+        ):
+            order_expression = (
+                pl.when(concept == concept_name)
+                .then(pl.lit(order))
+                .otherwise(order_expression)
+            )
+
+        return lf.with_columns(
+            order_expression.cast(pl.Int64).alias("_event_order")
+        )
 
     def _selected_concept_files(self, concept_data_path: Path) -> list[Path]:
         """Find concept Parquet files matching the configured dataset/concept filters."""

@@ -1,8 +1,13 @@
 """Global event-order configuration."""
 
-from typing import Literal
+from pathlib import Path
+from typing import Literal, Self
 
+import yaml
 from pydantic import BaseModel, Field, model_validator
+
+
+DEFAULT_EVENT_ORDER_CONFIG = Path(__file__).with_name("default_event_order.yml")
 
 
 class EventOrderGroup(BaseModel):
@@ -34,6 +39,20 @@ class EventOrderConfig(BaseModel):
         description="Named semantic event-order groups.",
     )
 
+    @classmethod
+    def load(cls, path: Path | None = None) -> Self:
+        """Load an event-order configuration.
+
+        If no path is provided, the built-in OpenICU default configuration
+        is loaded.
+        """
+        config_path = path or DEFAULT_EVENT_ORDER_CONFIG
+
+        with config_path.open("r") as f:
+            data = yaml.safe_load(f)
+
+        return cls(**data)
+
     @model_validator(mode="after")
     def validate_unique_concepts(self) -> "EventOrderConfig":
         """Ensure each concept is assigned to at most one group."""
@@ -64,3 +83,7 @@ class EventOrderConfig(BaseModel):
             for group in self.groups.values()
             for concept in group.concepts
         }
+
+    def order_for(self, concept: str) -> int:
+        """Return the configured order for a concept or the default order."""
+        return self.concept_orders().get(concept, self.default_order)
