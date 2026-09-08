@@ -133,12 +133,3 @@ events:
       - drop_na(time)
       - drop_na(numeric_value)
 
-  - name: MEDS_DEATH
-    columns:
-      code:
-        - const("MEDS_DEATH")
-      time: col(deathtime)
-      extension:
-        available_time: col(deathtime)
-    filters:
-      - drop_na(time)
