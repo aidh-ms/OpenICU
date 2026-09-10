@@ -15,6 +15,7 @@ from uuid import uuid4
 import polars as pl
 
 from open_icu.callbacks.interpreter import parse_expr
+from open_icu.config.event_order import EventOrderConfig
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.concept.config.concept import (
@@ -27,6 +28,7 @@ from open_icu.steps.concept.config.derived import BaseConceptTable
 from open_icu.steps.concept.config.step import ConceptStepConfig
 from open_icu.steps.concept.registry import concept_config_registry
 from open_icu.storage.project import OpenICUProject
+from open_icu.utils.event_order import sort_events
 
 logger = get_logger(__name__)
 
@@ -551,7 +553,13 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                 concept.identifier,
                 output_data_path / f"{dataset_concept.dataset}.parquet",
             )
-            pl.scan_parquet(files).sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
+            lf = sort_events(
+                pl.scan_parquet(files),
+                EventOrderConfig.load(),
+            )
+            lf.sink_parquet(
+                output_data_path / f"{dataset_concept.dataset}.parquet"
+            )
 
         logger.debug(
             "Cleaning up temporary concept files for %s in %s",
@@ -681,7 +689,13 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             output_data_path / f"{dataset_concept.dataset}.parquet",
         )
 
-        lf.sink_parquet(output_data_path / f"{dataset_concept.dataset}.parquet")
+        lf = sort_events(
+            lf,
+            EventOrderConfig.load(),
+        )
+        lf.sink_parquet(
+            output_data_path / f"{dataset_concept.dataset}.parquet"
+        )
 
         del lf
         gc.collect()
