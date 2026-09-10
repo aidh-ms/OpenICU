@@ -1,0 +1,126 @@
+path: triage.csv.gz
+
+columns:
+  # identifiers
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+
+  # values
+  - name: temperature
+    type: float32
+  - name: heartrate
+    type: float32
+  - name: resprate
+    type: float32
+  - name: o2sat
+    type: float32
+  - name: sbp
+    type: float32
+  - name: dbp
+    type: float32
+  - name: pain
+    type: string
+  - name: acuity
+    type: float32
+  - name: chiefcomplaint
+    type: string
+
+join:
+  - name: edstays
+    path: edstays.csv.gz
+
+    columns:
+      - name: stay_id
+        type: int64
+      - name: intime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+
+    both_on:
+      - stay_id
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(intime)
+  extension:
+    stay_id: col(stay_id)
+    available_time: col(intime)
+
+  code_prefix:
+    - const(ED_TRIAGE)
+
+events:
+  - name: HEART_RATE
+    columns:
+      code:
+        - const(BPM)
+      numeric_value: col(heartrate)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: TEMPERATURE
+    columns:
+      code:
+        - const(F)
+      numeric_value: col(temperature)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: RESPIRATORY_RATE
+    columns:
+      code:
+        - const(bpm)
+      numeric_value: col(resprate)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: O2_SATURATION_PULSE_OXIMETRY
+    columns:
+      code:
+        - const("%")
+      numeric_value: col(o2sat)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: SYSTOLIC_BLOOD_PRESSURE
+    columns:
+      code:
+        - const(mmHg)
+      numeric_value: col(sbp)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: DIASTOLIC_BLOOD_PRESSURE
+    columns:
+      code:
+        - const(mmHg)
+      numeric_value: col(dbp)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: PAIN
+    columns:
+      code:
+        - const(PAIN)
+      text_value: col(pain)
+    filters:
+      - drop_na(text_value)
+
+  - name: ACUITY
+    columns:
+      code:
+        - const(ACUITY)
+      numeric_value: col(acuity)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: CHIEF_COMPLAINT
+    columns:
+      code:
+        - const(CHIEF_COMPLAINT)
+      text_value: col(chiefcomplaint)
+    filters:
+      - drop_na(text_value)
