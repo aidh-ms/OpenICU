@@ -1,0 +1,48 @@
+path: ed/diagnosis.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+  # db fields - times
+  # db fields - values
+  - name: seq_num
+    type: int64
+  - name: icd_code
+    type: string
+  - name: icd_version
+    type: int64
+  - name: icd_title
+    type: string
+join:
+  - name: edstays
+    path: ed/edstays.csv.gz
+    columns:
+      - name: stay_id
+        type: int64
+      - name: outtime
+        type: datetime
+        params:
+          format: "%Y-%m-%d %H:%M:%S"
+      - name: hadm_id
+        type: int64
+    both_on:
+      - stay_id
+
+
+events:
+  - name: ED_DIAGNOSIS
+    columns:
+      subject_id: col(subject_id)
+      time: col(outtime)
+      code:
+        - const("ICD")
+        - col("icd_version")
+        - col("icd_code")
+      text_value: col("icd_title")
+      extension:
+        stay_id: col(stay_id)
+        hadm_id: col(hadm_id)
+        sequence: col(seq_num)

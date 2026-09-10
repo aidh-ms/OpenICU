@@ -1,0 +1,96 @@
+path: ed/vitalsign.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+  # db fields - times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: temperature
+    type: float32
+  - name: heartrate
+    type: float32
+  - name: resprate
+    type: float32
+  - name: o2sat
+    type: float32
+  - name: sbp
+    type: float32
+  - name: dbp
+    type: float32
+  - name: rhythm
+    type: string
+  - name: pain
+    type: string
+join:
+  - name: edstays
+    path: ed/edstays.csv.gz
+    columns:
+      - name: stay_id
+        type: int64
+      - name: hadm_id
+        type: int64
+    both_on:
+      - stay_id
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+  extension:
+    stay_id: col(stay_id)
+    hadm_id: col(hadm_id)
+
+events:
+  - name: ED_TEMPERATURE
+    columns:
+      code:
+        - const("ED_TEMPERATURE")
+      numeric_value: col(temperature)
+
+  - name: ED_HEARTRATE
+    columns:
+      code:
+        - const("ED_HEARTRATE")
+      numeric_value: col(heartrate)
+
+  - name: ED_RESPRATE
+    columns:
+      code:
+        - const("ED_RESPRATE")
+      numeric_value: col(resprate)
+
+  - name: ED_O2SAT
+    columns:
+      code:
+        - const("ED_O2SAT")
+      numeric_value: col(o2sat)
+
+  - name: ED_SBP
+    columns:
+      code:
+        - const("ED_SBP")
+      numeric_value: col(sbp)
+
+  - name: ED_DBP
+    columns:
+      code:
+        - const("ED_DBP")
+      numeric_value: col(dbp)
+
+  - name: ED_RYTHM
+    columns:
+      code:
+        - const("ED_RYTHM")
+      text_value: col(rhythm)
+
+  - name: ED_PAIN
+    columns:
+      code:
+        - const("ED_PAIN")
+      text_value: col(pain)
