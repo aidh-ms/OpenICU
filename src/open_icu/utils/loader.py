@@ -1,8 +1,6 @@
 import sys
-from importlib.resources import files
-from pathlib import Path
-
 from open_icu.config.registry import load_configs
+from open_icu.config.root import get_config_root
 from open_icu.steps.concept.config.concept import ConceptConfig
 from open_icu.steps.concept.registry import concept_config_registry
 from open_icu.steps.extraction.registry import dataset_config_registry
@@ -18,15 +16,9 @@ def auto_load_configs():
     if "pytest" in sys.modules:
         return
 
-    module_path = Path(str(files("open_icu")))
-    config_path = module_path / "configs"
-    dev_path = module_path.parent.parent / "configs"
-
-    if not (config_path.exists() and config_path.is_dir()):
-        if dev_path.exists() and dev_path.is_dir():
-            config_path = dev_path
-        else:
-            return
+    config_path = get_config_root()
+    if config_path is None:
+        return
 
     mapping_paths = []
     for dataset_path in (config_path / "datasets").iterdir():

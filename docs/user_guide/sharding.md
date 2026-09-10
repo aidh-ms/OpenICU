@@ -26,100 +26,49 @@ The available options are:
 - `concepts`: Optional list of concepts to include. An empty list includes all available concepts.
 - `subjects`: Optional list of subjects to include. An empty list includes all available subjects.
 - `subjects_per_shard`: Maximum number of subjects written to each shard.
-- `event_order_config`: Optional path to a custom event-order configuration. If omitted, OpenICU uses its built-in default event order.
-
-Relative `event_order_config` paths are resolved relative to the sharding
-configuration file.
 
 ## Event ordering
 
-Events are sorted within each shard by:
+OpenICU uses the global event-order configuration in
+`configs/event_order/default.yml`. Extraction, concept processing, and sharding
+therefore use the same ordering rules.
 
-1. subject
-2. timestamp
-3. semantic event order
-4. code
+Events are sorted by subject, timestamp, semantic group order, explicit
+within-group order, and finally `code`.
 
-The semantic event order only affects events belonging to the same subject and
-having the same timestamp. It does not change timestamps or move events across
-different points in time.
-
-This allows source measurements to appear before derived concepts when several
-events occur at the same timestamp. For example:
-
-```text
-gcs_eye
-gcs_motor
-gcs_verbal
-gcs_total
-sofa_cns
-sofa
-```
-
-The event-order value is used only as a temporary sorting key and is not written
-to the output Parquet files.
-
-## Custom event order
-
-A custom event-order configuration can be provided as YAML:
+Groups are matched with regular expressions against the first component of the
+MEDS code (before `//`). Lower `order` values come first. Within a group,
+entries listed in `explicit_order` come first in the configured order; remaining
+events are ordered alphabetically by `code`.
 
 ```yaml
-default_order: 30
+default_group_order: 50
 unassigned: warn
 
 groups:
-  demographics:
-    order: 20
-    concepts:
-      - patient_age
-      - patient_sex
-      - patient_height
-      - patient_weight
+  labs:
+    order: 30
+    patterns:
+      - '^LAB$'
+      - '^(albumin|creatinine|glucose|sodium)$'
 
-  derived_first_level:
-    order: 40
-    concepts:
-      - gcs_total
-
-  derived_components:
-    order: 50
-    concepts:
-      - sofa_cns
-
-  derived_aggregates:
+  derived:
     order: 60
-    concepts:
+    patterns:
+      - '^(gcs_|sofa($|_))'
+    explicit_order:
+      - gcs_eye
+      - gcs_motor
+      - gcs_verbal
+      - gcs_total
+      - sofa_cns
       - sofa
 ```
 
-Lower order values are written before higher order values when the subject and
-timestamp are identical.
-
-Concepts that are not assigned to a group receive `default_order`.
-
-The `unassigned` setting controls how OpenICU handles concepts that use the
-default order:
-
-- `ignore`: do not report unassigned concepts.
-- `warn`: log a warning and continue.
-- `error`: raise an error and stop the sharding step.
-
-A concept can only be assigned to one event-order group.
-
-To use the custom configuration, reference it from the sharding configuration:
-
-```yaml
-name: Sharding
-version: 1.0.0
-
-config:
-  concept_step: Concept
-  subjects_per_shard: 1000
-  event_order_config: event_order.yml
-```
-
-If `event_order_config` is omitted, the built-in OpenICU default configuration
-is used.
+Events that do not match a group use `default_group_order`. During sharding,
+`unassigned` controls whether unmatched selected concepts are ignored, warned
+about, or treated as an error. Temporary ordering columns are removed before
+Parquet output is written.
 
 ## Output
 

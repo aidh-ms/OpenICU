@@ -1,89 +1,122 @@
 """Global event-order configuration."""
 
+import re
 from pathlib import Path
 from typing import Literal, Self
 
 import yaml
 from pydantic import BaseModel, Field, model_validator
 
-
-DEFAULT_EVENT_ORDER_CONFIG = Path(__file__).with_name("default_event_order.yml")
+from open_icu.config.root import get_config_root
 
 
 class EventOrderGroup(BaseModel):
-    """A group of concepts sharing the same event-order priority."""
+    """A semantic event group with optional explicit internal ordering."""
 
     order: int = Field(
         ...,
-        description="Sort priority for concepts in this group. Lower values come first.",
+        description="Sort priority of this group. Lower values come first.",
     )
-    concepts: list[str] = Field(
+    patterns: list[str] = Field(
         default_factory=list,
-        description="Concept names assigned to this event-order group.",
+        description="Regular expressions used to assign event codes to this group.",
+    )
+    explicit_order: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Optional explicit ordering for selected concepts within this group. "
+            "Other matching events are ordered alphabetically."
+        ),
     )
 
 
 class EventOrderConfig(BaseModel):
-    """Global configuration defining semantic ordering of simultaneous events."""
+    """Global configuration defining canonical ordering of simultaneous events."""
 
-    default_order: int = Field(
+    default_group_order: int = Field(
         default=50,
-        description="Order used for concepts that are not assigned to any group.",
+        description="Group order used for events that do not match any configured group.",
     )
     unassigned: Literal["ignore", "warn", "error"] = Field(
         default="warn",
-        description="How to handle concepts that use the default event order.",
+        description="How to handle events that do not match any configured group.",
     )
     groups: dict[str, EventOrderGroup] = Field(
         default_factory=dict,
-        description="Named semantic event-order groups.",
+        description="Named semantic event groups.",
     )
 
     @classmethod
     def load(cls, path: Path | None = None) -> Self:
-        """Load an event-order configuration.
+        """Load the global event-order configuration.
 
-        If no path is provided, the built-in OpenICU default configuration
-        is loaded.
+        If no path is provided, OpenICU's shipped default configuration is used.
         """
-        config_path = path or DEFAULT_EVENT_ORDER_CONFIG
+        if path is None:
+            config_root = get_config_root()
+            if config_root is None:
+                raise FileNotFoundError(
+                    "Could not locate OpenICU's shipped configuration directory."
+                )
 
-        with config_path.open("r") as f:
-            data = yaml.safe_load(f)
+            path = config_root / "event_order" / "default.yml"
+
+        with path.open("r") as f:
+            data = yaml.safe_load(f) or {}
 
         return cls(**data)
 
     @model_validator(mode="after")
-    def validate_unique_concepts(self) -> "EventOrderConfig":
-        """Ensure each concept is assigned to at most one group."""
-        seen: dict[str, str] = {}
+    def validate_configuration(self) -> "EventOrderConfig":
+        """Validate regular expressions and explicit event assignments."""
+        explicitly_ordered: dict[str, str] = {}
 
         for group_name, group in self.groups.items():
-            for concept in group.concepts:
-                if "//" in concept:
+            for pattern in group.patterns:
+                try:
+                    re.compile(pattern)
+                except re.error as exc:
                     raise ValueError(
-                        f"Event-order concept '{concept}' must be a concept name, "
-                        "not a full code."
+                        f"Invalid event-order regex in group '{group_name}': "
+                        f"{pattern!r}: {exc}"
+                    ) from exc
+
+            for event in group.explicit_order:
+                if event in explicitly_ordered:
+                    raise ValueError(
+                        f"Event '{event}' has an explicit order in multiple groups: "
+                        f"'{explicitly_ordered[event]}' and '{group_name}'."
                     )
 
-                if concept in seen:
-                    raise ValueError(
-                        f"Concept '{concept}' is assigned to multiple event-order "
-                        f"groups: '{seen[concept]}' and '{group_name}'."
-                    )
-
-                seen[concept] = group_name
+                explicitly_ordered[event] = group_name
 
         return self
 
-    def concept_orders(self) -> dict[str, int]:
-        """Return a mapping from concept name to semantic sort order."""
-        return {
-            concept: group.order
-            for group in self.groups.values()
-            for concept in group.concepts
-        }
+    def group_for(self, code: str) -> tuple[str | None, EventOrderGroup | None]:
+        """Return the first configured group matching an event code."""
+        event_code = code.split("//", 1)[0]
 
-    def order_for(self, concept: str) -> int:
-        """Return the configured order for a concept or the default order."""
-        return self.concept_orders().get(concept, self.default_order)
+        for group_name, group in self.groups.items():
+            if any(re.search(pattern, event_code) for pattern in group.patterns):
+                return group_name, group
+
+        return None, None
+
+    def group_order_for(self, code: str) -> int:
+        """Return the semantic group order for an event code."""
+        _, group = self.group_for(code)
+        if group is None:
+            return self.default_group_order
+
+        return group.order
+
+    def explicit_order_for(self, code: str) -> int | None:
+        """Return explicit internal order for an event code, if configured."""
+        _, group = self.group_for(code)
+        if group is None:
+            return None
+
+        try:
+            return group.explicit_order.index(code)
+        except ValueError:
+            return None
