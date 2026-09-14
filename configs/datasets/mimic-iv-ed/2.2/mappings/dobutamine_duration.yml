@@ -1,0 +1,12 @@
+type: simple
+mappings:
+  - pattern:
+      table: inputevents
+      event: INFUSION_END
+      code: (221653(//.*)?)
+    columns:
+      numeric_value: col(duration_minutes)
+      text_value: col(text_value)
+    filters:
+      - drop_na(numeric_value)
+      - numeric_value > 0
