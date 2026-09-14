@@ -43,10 +43,14 @@ join:
   - name: hirid_variable_reference
     path: reference_data/hirid_variable_reference.csv
     columns:
+      - name: Source Table
+        type: str
       - name: ID
         type: int64
       - name: Variable Name
         type: str
+    filters:
+      - col("Source Table") == "Pharma"
     left_on:
       - pharmaid
     right_on:
