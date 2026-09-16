@@ -1,0 +1,108 @@
+default_group_order: 50
+unassigned: warn
+groups:
+  admission:
+    order: 10
+    patterns:
+    - ^(HOSPITAL_ADMISSION|icu_admission|ED_REGISTRATION)$
+    - ^(ICU_ADMISSION|VISIT_START)$
+  demographics:
+    order: 20
+    patterns:
+    - ^(ADMISSION_TYPE|ETHNICITY|GENDER|INSURANCE|LANGUAGE|MARITAL_STATUS|PATIENT_AGE)$
+    - ^patient_(admission_type|age|height|sex|weight)$
+    - ^MEDS_BIRTH$
+    - ^(AGE|SEX|RACE|HEIGHT|WEIGHT)$
+    - ^SUBJECT_(HEIGHT|WEIGHT|DISCHARGE_WEIGHT)$
+  labs:
+    order: 30
+    patterns:
+    - ^LAB$
+    - ^(base_excess|calcium_ionized|carboxyhemoglobin|CO2_partial_pressure|fraction_of_inspired_oxygen|lactate|methemoglobin|O2_partial_pressure|pH_of_blood|totcal_CO2)$
+    - ^(alanine_aminotransferase|albumin|alkaline_phosphatase|aspartate_aminotransferase|bicarbonate|bilirubin_direct|blood_urea_nitrogen|calcium|chloride|C_reactive_protein|creatine_kinase|creatine_kinase_MB|creatinine|glucose|magnesium|phosphate|potassium|sodium|total_bilirubin|troponin_I|troponin_t)$
+    - ^(band_form_neutrophils|basophils|eosinophils|erythrocyte_distribution_width|erythrocyte_sedimentation_rate|fibrinogen|hematocrit|hemoglobin|Hemoglobin_A1C|lymphocytes|mean_corpuscular_hemoglobin|mean_corpuscular_hemoglobin_concentration|mean_corpuscular_volume|neutrophils|partial_thromboplastin_time|platelet_count|prothrombine_time|prothrombin_time_international_normalized_ratio|red_blood_cell_count|white_blood_cell_count)$
+  vitals:
+    order: 31
+    patterns:
+    - ^CHART$
+    - ^(diastolic_blood_pressure|endtidal_CO2|heart_rate|mean_arterial_pressure|systolic_blood_pressure|temperature)$
+    - ^(arterial_oxygen_saturation|oxygen_saturation|respiratory_rate)$
+    - ^(VITALS_PERIODIC|VITALS_APERIODIC|NURSE_CHART|RESPIRATORY_CHART|RESPIRATORY_CARE)$
+  medications:
+    order: 40
+    patterns:
+    - ^MEDICATION_(ORDER|ADMINISTRATION)$
+    - ^SUBJECT_WEIGHT_AT_INFUSION$
+    - ^(antibiotics|corticosteroids|dextrose_as_D10|insulin)$
+    - ^(dobutamine|dopamine|epinephrine|norepinephrine|phenylephrine|vasopressin)_(rate|duration)$
+    - ^INFUSION_(START|END)$
+    - ^(MEDICATION|INFUSION|PHARMA)$
+    - ^DRUG_(START|END)$
+  microbiology:
+    order: 41
+    patterns:
+    - ^MICROBIOLOGY_
+    - ^body_fluid_sampling$
+  procedures:
+    order: 42
+    patterns:
+    - ^PROCEDURE($|_)
+    - ^SUBJECT_WEIGHT_AT_PROCEDURE$
+    - ^(mechanical_ventilation_windows|tracheostomy|ventilation_start|ventilation_end)$
+  outputs:
+    order: 32
+    patterns:
+    - ^FLUID_OUTPUT$
+    - ^urine_output$
+    - ^INTAKE_OUTPUT$
+  administrative:
+    order: 45
+    patterns:
+    - ^(ED_OUT|SERVICE|TRANSFER_TO|TIMESTAMP_OF|OMR)$
+  clinical_codes:
+    order: 46
+    patterns:
+    - ^(DIAGNOSIS|DRG|HCPCS)$
+    - ^CONDITION$
+  derived:
+    order: 60
+    patterns:
+    - ^(gcs_|aki($|_)|sofa($|_))
+    - ^Richmond_agitation_sedation_scale$
+    explicit_order:
+    - gcs_eye
+    - gcs_motor
+    - gcs_verbal
+    - gcs_total
+    - aki_creatinine
+    - aki_urine_output
+    - aki
+    - sofa_cardiovascular
+    - sofa_cns
+    - sofa_coagulation
+    - sofa_liver
+    - sofa_renal
+    - sofa_respiratory
+    - sofa
+  outcomes:
+    order: 70
+    patterns:
+    - ^(IN_HOSPITAL_MORTALITY|in_hospital_mortality|icu_length_of_stay)$
+    - ^MORTALITY$
+    - ^(ICU_length_of_stay|hospital_length_of_stay)$
+  discharge:
+    order: 90
+    patterns:
+    - ^(HOSPITAL_DISCHARGE|icu_discharge)$
+    - ^MEDS_DEATH$
+    - ^(ICU_DISCHARGE|VISIT_END)$
+  imaging:
+    order: 43
+    patterns:
+    - ^CXR_
+    - ^chest_xray_
+  text:
+    order: 44
+    patterns:
+    - ^(DISCHARGE_NOTE|RADIOLOGY_NOTE)$
+    - ^(discharge_note|radiology_note)$

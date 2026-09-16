@@ -166,3 +166,46 @@ config:
     shard = pl.read_parquet(output_file)
 
     assert shard["code"].unique().to_list() == ["heart_rate//bpm"]
+
+
+def test_sharding_orders_same_time_events_semantically(tmp_path: Path) -> None:
+    project_path = tmp_path / "project"
+    config_file = tmp_path / "sharding.yml"
+    config_file.write_text(
+        """\
+name: Sharding
+version: 1.0.0
+overwrite: true
+
+config:
+  concept_step: Concept
+  subjects_per_shard: 100
+"""
+    )
+
+    with OpenICUProject(project_path) as project:
+        concept_dataset = project.add_dataset("concept")
+
+        for concept, code in [
+            ("sofa", "sofa//points"),
+            ("gcs_total", "gcs_total//points"),
+            ("sofa_cns", "sofa_cns//points"),
+            ("gcs_eye", "gcs_eye//points"),
+        ]:
+            write_concept_file(
+                concept_dataset.data_path / concept / "1.0.0" / "testdb.parquet",
+                [1],
+                code,
+            )
+
+        ShardingStep.load(project, config_file).run()
+
+    output_file = project_path / "datasets" / "sharding" / "data" / "shard_00000.parquet"
+    shard = pl.read_parquet(output_file)
+
+    assert shard["code"].to_list() == [
+        "gcs_eye//points",
+        "gcs_total//points",
+        "sofa_cns//points",
+        "sofa//points",
+    ]

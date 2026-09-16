@@ -12,6 +12,7 @@ nav:
       - Extraction Configuration: "user_guide/extraction.md"
       - Dataset Versions and Variants: "user_guide/versioning.md"
       - Concept Configuration: "user_guide/concepts.md"
+      - Sharding: "user_guide/sharding.md"
       - Expression Language: "user_guide/expressions.md"
   - Architecture:
       - Introduction and Goals: "arc/introduction.md"
