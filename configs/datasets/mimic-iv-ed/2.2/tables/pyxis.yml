@@ -1,0 +1,44 @@
+path: pyxis.csv.gz
+
+columns:
+  # identifiers
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+
+  # times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+
+  # values
+  - name: med_rn
+    type: int64
+  - name: name
+    type: string
+  - name: gsn_rn
+    type: int64
+  - name: gsn
+    type: string
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+  extension:
+    stay_id: col(stay_id)
+    available_time: col(charttime)
+
+events:
+  - name: PYXIS_MEDICATION
+    columns:
+      code:
+        - const("PYXIS_MEDICATION")
+        - col(name)
+      extension:
+        med_rn: col(med_rn)
+        gsn_rn: col(gsn_rn)
+        gsn: col(gsn)
+    filters:
+      - drop_na(name)

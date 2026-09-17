@@ -23,7 +23,9 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from open_icu.callbacks.interpreter import parse_expr
+from open_icu.config.event_order import EventOrderConfig
 from open_icu.logging import get_logger
+from open_icu.utils.event_order import sort_events
 from open_icu.steps.concept.config.complex import ComplexDatasetConceptConfig, ConceptTransformerProtocol
 
 if TYPE_CHECKING:
@@ -157,6 +159,10 @@ class BaseConceptTransformer(ConceptTransformerProtocol, metaclass=ABCMeta):
         output_dir.mkdir(parents=True, exist_ok=True)
         output_file = output_dir / f"{self._complex_config.dataset}.parquet"
         logger.info("Writing complex concept %s to %s", self._concept.identifier, output_file)
+        lf = sort_events(
+            lf,
+            EventOrderConfig.load(),
+        )
         lf.sink_parquet(output_file)
 
     def _read_concept(self, concept_id: str) -> tuple[str, pl.LazyFrame] | None:

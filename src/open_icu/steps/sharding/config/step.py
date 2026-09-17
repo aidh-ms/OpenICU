@@ -51,6 +51,7 @@ class CustomConfig(BaseModel):
     )
 
 
+
 class ShardingStepConfig(BaseStepConfig[CustomConfig]):
     """Complete configuration for the sharding step."""
 

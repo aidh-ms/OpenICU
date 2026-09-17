@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: patients
+      event: PATIENT_AGE
+      code: PATIENT_AGE
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)
