@@ -27,6 +27,7 @@ from open_icu.callbacks._callbacks.shortcuts import Col, Const
 from open_icu.callbacks._callbacks.string import ConcatStr, SliceStr, ZeroPadInt
 from open_icu.callbacks._callbacks.time import AddOffset, ParseDateTime, SetTime, ToDatetime
 from open_icu.callbacks._callbacks.type import Cast
+from open_icu.callbacks._callbacks.ukm import DatetimeDiffDays, DenseRankEncode
 from open_icu.callbacks.proto import CallbackProtocol
 from open_icu.callbacks.registry import register_callback_cls, registry
 
@@ -70,4 +71,6 @@ __all__ = [
     "ZeroPadInt",
     "SliceStr",
     "ConcatStr",
+    "DenseRankEncode",
+    "DatetimeDiffDays",
 ]
