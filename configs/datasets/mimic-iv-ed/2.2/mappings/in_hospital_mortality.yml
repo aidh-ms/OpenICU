@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: admissions
+      event: IN_HOSPITAL_MORTALITY
+      code: IN_HOSPITAL_MORTALITY
+    columns:
+      numeric_value: col(numeric_value)
+      text_value: col(text_value)

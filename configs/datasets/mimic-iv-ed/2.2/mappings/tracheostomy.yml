@@ -1,0 +1,19 @@
+type: simple
+mappings:
+  - pattern:
+      table: chartevents
+      event: CHART
+      code: (224829|224830|224831)(//.*)?
+    columns:
+      numeric_value: col(subject_id) * 0 + 1
+      text_value:
+
+  - pattern:
+      table: chartevents
+      event: CHART
+      code: (227130(//.*)?)
+    columns:
+      numeric_value: col(numeric_value)
+      text_value:
+    filters:
+      - col(numeric_value) == 1

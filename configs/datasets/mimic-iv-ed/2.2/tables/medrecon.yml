@@ -1,0 +1,50 @@
+path: medrecon.csv.gz
+
+columns:
+  # identifiers
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+
+  # times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+
+  # values
+  - name: name
+    type: string
+  - name: gsn
+    type: string
+  - name: ndc
+    type: string
+  - name: etc_rn
+    type: int64
+  - name: etccode
+    type: string
+  - name: etcdescription
+    type: string
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+  extension:
+    stay_id: col(stay_id)
+    available_time: col(charttime)
+
+events:
+  - name: MEDICATION_RECONCILIATION
+    columns:
+      code:
+        - const("MEDICATION_RECONCILIATION")
+        - col(name)
+      extension:
+        gsn: col(gsn)
+        ndc: col(ndc)
+        etc_rn: col(etc_rn)
+        etc_code: col(etccode)
+        etc_description: col(etcdescription)
+    filters:
+      - drop_na(name)
