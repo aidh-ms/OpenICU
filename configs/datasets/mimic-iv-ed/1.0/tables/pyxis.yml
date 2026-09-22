@@ -1,0 +1,47 @@
+path: ed/pyxis.csv.gz
+
+columns:
+  # subject_id and extentions
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+  # db fields - times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  # db fields - values
+  - name: med_rn
+    type: int64
+  - name: name
+    type: string
+  - name: gsn_rn
+    type: int64
+  - name: gsn
+    type: int
+join:
+  - name: edstays
+    path: ed/edstays.csv.gz
+    columns:
+      - name: stay_id
+        type: int64
+      - name: hadm_id
+        type: int64
+    both_on:
+      - stay_id
+
+
+events:
+  - name: ED_MEDICATION
+    columns:
+      subject_id: col(subject_id)
+      time: col(charttime)
+      code:
+        - col("name")
+      extension:
+        stay_id: col(stay_id)
+        hadm_id: col(hadm_id)
+        med_rn: col(med_rn)
+        gsn_rn: col(gsn_rn)
+        gsn: col(gsn)
