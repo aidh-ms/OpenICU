@@ -10,8 +10,6 @@ fi
 
 export PATH="$HOME/.local/bin:$PATH"
 
-# Keep global npm packages inside the container user's home.
-npm config set prefix "$HOME/.local"
 
 # Claude Code
 npm install -g @anthropic-ai/claude-code

@@ -27,4 +27,7 @@ services:
       # Neither the official nor AI devcontainer configuration can be modified.
       - ../../.devcontainer:/workspaces/OpenICU/.devcontainer:ro
 
+      # Claude project rules are readable but cannot be modified by Claude.
+      - ../../.claude:/workspaces/OpenICU/.claude:ro
+
     command: sleep infinity
