@@ -1,0 +1,20 @@
+services:
+  openicu-ai:
+    container_name: openicu-ai
+
+    init: true
+
+    build:
+      context: ../..
+      dockerfile: .devcontainer/ai/Dockerfile
+
+    environment:
+      UV_CACHE_DIR: /home/vscode/.cache/uv
+      RUFF_CACHE_DIR: /home/vscode/.cache/ruff
+      MYPY_CACHE_DIR: /home/vscode/.cache/mypy
+      PRE_COMMIT_HOME: /home/vscode/.cache/pre-commit
+
+    volumes:
+      - ../..:/workspaces/OpenICU:cached
+
+    command: sleep infinity
