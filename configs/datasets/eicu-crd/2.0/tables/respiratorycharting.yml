@@ -55,7 +55,7 @@ events:
       code:
         - col(respcharttypecat)
         - col(respchartvaluelabel)
-      numeric_value: col(respchartvalue)
+      numeric_value: cast(str_replace(respchartvalue, "%", ""), dtype="float64")
       text_value: col(respchartvalue)
       extension:
-        available_time: col(enter_timestamp)
+        available_time: col(entered_timestamp)

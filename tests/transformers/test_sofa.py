@@ -81,6 +81,24 @@ def frame(*rows: tuple[int, datetime, float | None]) -> pl.LazyFrame:
     )
 
 
+def stay_frame(*rows: tuple[int, str, datetime, float | None]) -> pl.LazyFrame:
+    """A concept frame carrying an ICU-stay identifier."""
+    return pl.LazyFrame(
+        {
+            "subject_id": [r[0] for r in rows],
+            "stay_id": [r[1] for r in rows],
+            "time": [r[2] for r in rows],
+            "numeric_value": [r[3] for r in rows],
+        },
+        schema={
+            "subject_id": pl.Int64,
+            "stay_id": pl.String,
+            "time": pl.Datetime(time_unit="us"),
+            "numeric_value": pl.Float32,
+        },
+    )
+
+
 def covered_urine(*rows: tuple[float, float]) -> pl.LazyFrame:
     """Urine records opening a segment at T0, so windows from T0+24h are covered.
 
@@ -208,6 +226,90 @@ class TestRespiration:
     def test_one_gas_alone_yields_no_event(self) -> None:
         assert score(make(SofaRespiratoryTransformer), fraction_of_inspired_oxygen=50.0) == []
 
+    def test_missing_fio2_defaults_to_room_air(self) -> None:
+        transformer = make(SofaRespiratoryTransformer)
+        assert score(transformer, O2_partial_pressure=60.0) == [2.0]
+
+    def test_fio2_older_than_two_hours_is_not_reused(self) -> None:
+        transformer = make(SofaRespiratoryTransformer)
+        out = scores(
+            transformer,
+            {
+                "fraction_of_inspired_oxygen": frame((1, T0, 100.0)),
+                "O2_partial_pressure": frame((1, at(3), 60.0)),
+            },
+        )
+        assert out == [2.0]
+
+    def test_ventilation_event_without_pafi_scores_zero(self) -> None:
+        transformer = make(SofaRespiratoryTransformer)
+        out = scores(
+            transformer,
+            {
+                "O2_partial_pressure": frame((1, T0, 60.0)),
+                "fraction_of_inspired_oxygen": frame((1, T0, 100.0)),
+                "mechanical_ventilation_windows": frame((1, at(1), 1.0)),
+            },
+        )
+        assert out == [2.0, 0.0]
+
+    def test_hourly_ventilation_applies_within_same_hour(self) -> None:
+        transformer = make(
+            SofaRespiratoryTransformer,
+            ventilation_same_hour=True,
+        )
+        out = scores(
+            transformer,
+            {
+                "mechanical_ventilation_windows": frame((1, T0, 1.0)),
+                "O2_partial_pressure": frame((1, at(0.5), 60.0)),
+                "fraction_of_inspired_oxygen": frame((1, at(0.5), 100.0)),
+            },
+        )
+        assert out == [0.0, 4.0]
+
+    def test_windowing_is_partitioned_by_stay_id(self) -> None:
+        transformer = make(
+            SofaRespiratoryTransformer,
+            ventilation_same_hour=True,
+        )
+
+        out = (
+            transformer.transform(
+                {
+                    "mechanical_ventilation_windows": stay_frame(
+                        (1, "100", T0, 1.0),
+                    ),
+                    "O2_partial_pressure": stay_frame(
+                        (1, "200", at(0.5), 60.0),
+                    ),
+                    "fraction_of_inspired_oxygen": stay_frame(
+                        (1, "200", at(0.5), 100.0),
+                    ),
+                }
+            )
+            .collect()
+            .sort("stay_id", "time")
+        )
+
+        assert out["stay_id"].to_list() == ["100", "200"]
+        assert out["numeric_value"].to_list() == [0.0, 2.0]
+
+    def test_hourly_ventilation_expires_at_next_hour(self) -> None:
+        transformer = make(
+            SofaRespiratoryTransformer,
+            ventilation_same_hour=True,
+        )
+        out = scores(
+            transformer,
+            {
+                "mechanical_ventilation_windows": frame((1, T0, 1.0)),
+                "O2_partial_pressure": frame((1, at(1), 60.0)),
+                "fraction_of_inspired_oxygen": frame((1, at(1), 100.0)),
+            },
+        )
+        assert out == [0.0, 2.0]
+
     def _late_gases(self, **kwargs) -> list:
         transformer = make(SofaRespiratoryTransformer, window="24h", **kwargs)
         return scores(
@@ -221,12 +323,61 @@ class TestRespiration:
 
     def test_ventilation_persists_without_re_charting(self) -> None:
         # ventilation is a state, carried forward past the measurement window
-        assert self._late_gases() == [4.0]
+        assert self._late_gases() == [0.0, 4.0]
 
     def test_ventilation_can_be_made_to_expire(self) -> None:
         # ...unless the mapping asks for it to expire, which degrades the score
         # to the ventilation-independent tiers
-        assert self._late_gases(ventilation_window="24h") == [2.0]
+        assert self._late_gases(ventilation_window="24h") == [0.0, 2.0]
+
+    def test_ricu_hourly_pafi_uses_min_pao2(self) -> None:
+        transformer = make(
+            SofaRespiratoryTransformer,
+            ricu_hourly_pafi=True,
+        )
+
+        out = scores(
+            transformer,
+            {
+                "icu_admission": stay_frame(
+                    (1, "100", T0, None),
+                ),
+                "O2_partial_pressure": stay_frame(
+                    (1, "100", at(0.1), 350.0),
+                    (1, "100", at(0.8), 150.0),
+                ),
+                "fraction_of_inspired_oxygen": stay_frame(
+                    (1, "100", at(0.2), 100.0),
+                ),
+            },
+        )
+
+        assert out == [2.0]
+
+
+    def test_ricu_hourly_pafi_uses_max_fio2(self) -> None:
+        transformer = make(
+            SofaRespiratoryTransformer,
+            ricu_hourly_pafi=True,
+        )
+
+        out = scores(
+            transformer,
+            {
+                "icu_admission": stay_frame(
+                    (1, "100", T0, None),
+                ),
+                "O2_partial_pressure": stay_frame(
+                    (1, "100", at(0.2), 150.0),
+                ),
+                "fraction_of_inspired_oxygen": stay_frame(
+                    (1, "100", at(0.1), 30.0),
+                    (1, "100", at(0.8), 100.0),
+                ),
+            },
+        )
+
+        assert out == [2.0]
 
 
 # --- renal: scoring and continuous-time semantics -----------------------------
@@ -570,3 +721,33 @@ def test_end_to_end_total_sofa_chain(tmp_path: Path) -> None:
     # trailing 24h window is still 3, so the total remains 7.
     assert sofa["code"].to_list() == ["sofa//points", "sofa//points"]
     assert sofa["numeric_value"].to_list() == [7.0, 7.0]
+
+
+def test_ricu_pafi_is_not_reused_at_later_ventilation_hour() -> None:
+    transformer = make(
+        SofaRespiratoryTransformer,
+        ricu_hourly_pafi=True,
+        ventilation_same_hour=True,
+    )
+
+    out = scores(
+        transformer,
+        {
+            "icu_admission": stay_frame(
+                (1, "100", T0, None),
+            ),
+            "O2_partial_pressure": stay_frame(
+                (1, "100", T0, 60.0),
+            ),
+            "fraction_of_inspired_oxygen": stay_frame(
+                (1, "100", T0, 100.0),
+            ),
+            "mechanical_ventilation_windows": stay_frame(
+                (1, "100", at(1), 1.0),
+            ),
+        },
+    )
+
+    # Hour 0 has P/F=60 but no ventilation -> score 2.
+    # Hour 1 is ventilation-only. RICU has no P/F event there -> score 0.
+    assert out == [2.0, 0.0]

@@ -36,11 +36,24 @@ class ComplexDatasetConceptConfig(BaseDatasetConfig):
     )
     _parent_concept: "ConceptConfig | None" = PrivateAttr(default=None)
 
-    def build_transformer(self, step: "ConceptStep") -> ConceptTransformerProtocol:
-        """Dynamically import and return the concept transformer function based on the provided dotted path."""
+    def build_transformer(
+        self,
+        step: "ConceptStep",
+        dataset_extension_columns: dict[str, str] | None = None,
+    ) -> ConceptTransformerProtocol:
+        """Dynamically import and return the configured concept transformer."""
+
+        if self._parent_concept is None:
+            raise RuntimeError("Complex concept is not attached to a parent concept")
 
         transformer = cast(type[ConceptTransformerProtocol], import_callable(self.concept_transformer))
-        return transformer(self._parent_concept, self, step, **self.kwargs)  # ty: ignore[invalid-argument-type]
+        return transformer(
+            self._parent_concept,
+            self,
+            step,
+            dataset_extension_columns=dataset_extension_columns,
+            **self.kwargs,
+        )
 
     @computed_field
     @property

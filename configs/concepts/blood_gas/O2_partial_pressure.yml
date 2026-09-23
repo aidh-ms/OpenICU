@@ -4,3 +4,6 @@ unit: mmHg
 extension_columns:
   dataset: col("dataset")
   table: col("table")
+limits:
+  min: 40
+  max: 600

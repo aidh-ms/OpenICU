@@ -1,9 +1,6 @@
-name: fraction_of_inspired_oxygen
+name: icu_admission
 version: 1.0.0
-unit: '%'
+unit: boolean
 extension_columns:
   dataset: col("dataset")
   table: col("table")
-limits:
-  min: 21
-  max: 100
