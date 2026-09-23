@@ -14,14 +14,17 @@ services:
       MYPY_CACHE_DIR: /home/vscode/.cache/mypy
       PRE_COMMIT_HOME: /home/vscode/.cache/pre-commit
 
+      # Allow read-only git operations without optional index writes.
+      GIT_OPTIONAL_LOCKS: "0"
+
     volumes:
-      # Only the isolated OpenICU-ai clone.
+      # Claude may modify the isolated OpenICU-ai working tree.
       - ../..:/workspaces/OpenICU:cached
 
-      # Claude may inspect the AI configuration, but may not modify it.
-      - .:/workspaces/OpenICU/.devcontainer/ai:ro
+      # Git metadata is readable, but Claude cannot alter hooks/config/index.
+      - ../../.git:/workspaces/OpenICU/.git:ro
 
-      # Hide the normal OpenICU dev.env from the AI container.
-      - /dev/null:/workspaces/OpenICU/.devcontainer/dev.env:ro
+      # Neither the official nor AI devcontainer configuration can be modified.
+      - ../../.devcontainer:/workspaces/OpenICU/.devcontainer:ro
 
     command: sleep infinity
