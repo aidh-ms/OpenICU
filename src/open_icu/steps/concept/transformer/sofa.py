@@ -97,6 +97,57 @@ class SofaRenalTransformer(SofaComponent):
 class SofaCoagulationTransformer(SofaComponent):
     """Coagulation sub-score from platelet count (10^3/uL)."""
 
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self._kwargs.get("ricu_hourly_platelets", False):
+            return super().transform(dependencies)
+
+        platelets = dependencies.get("platelet_count")
+        admission = dependencies.get("icu_admission")
+        if platelets is None or admission is None:
+            raise ValueError(
+                "ricu_hourly_platelets requires platelet_count and icu_admission"
+            )
+
+        admission_time = (
+            admission
+            .select(
+                "subject_id",
+                "stay_id",
+                pl.col("time").alias("__admission_time"),
+            )
+            .group_by("subject_id", "stay_id")
+            .agg(pl.col("__admission_time").min())
+        )
+
+        hourly_platelets = (
+            platelets
+            .filter(
+                pl.col("numeric_value").is_not_null()
+                & pl.col("numeric_value").is_between(5, 1200)
+            )
+            .join(admission_time, on=["subject_id", "stay_id"], how="inner")
+            .with_columns(
+                (
+                    (pl.col("time") - pl.col("__admission_time"))
+                    .dt.total_minutes()
+                    .floordiv(60)
+                    .cast(pl.Int64)
+                ).alias("__hour")
+            )
+            .with_columns(
+                (
+                    pl.col("__admission_time")
+                    + pl.duration(hours=pl.col("__hour"))
+                ).alias("time")
+            )
+            .group_by("subject_id", "stay_id", "time")
+            .agg(pl.col("numeric_value").min().alias("numeric_value"))
+        )
+
+        dependencies = dict(dependencies)
+        dependencies["platelet_count"] = hourly_platelets
+        return super().transform(dependencies)
+
     def build_inputs(self) -> dict[str, Aggregation]:
         return {"platelet_count": WindowedLocf(self.window)}
 

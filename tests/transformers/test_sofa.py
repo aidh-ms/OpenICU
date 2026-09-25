@@ -751,3 +751,83 @@ def test_ricu_pafi_is_not_reused_at_later_ventilation_hour() -> None:
     # Hour 0 has P/F=60 but no ventilation -> score 2.
     # Hour 1 is ventilation-only. RICU has no P/F event there -> score 0.
     assert out == [2.0, 0.0]
+
+def test_coagulation_ricu_hourly_platelets_uses_hourly_minimum() -> None:
+    """RICU eICU semantics aggregate platelets by hourly minimum before scoring."""
+    transformer = make(
+        SofaCoagulationTransformer,
+        window="24h",
+        ricu_hourly_platelets=True,
+    )
+
+    admission_time = datetime(2024, 1, 1, 0, 17)
+
+    platelets = pl.LazyFrame(
+        {
+            "subject_id": [1, 1],
+            "stay_id": ["10", "10"],
+            "time": [
+                admission_time + timedelta(minutes=10),
+                admission_time + timedelta(minutes=40),
+            ],
+            "numeric_value": [30.0, 200.0],
+        }
+    )
+
+    admission = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time],
+            "numeric_value": [None],
+        }
+    )
+
+    out = transformer.transform(
+        {
+            "platelet_count": platelets,
+            "icu_admission": admission,
+        }
+    ).collect()
+
+    assert out["time"].to_list() == [admission_time]
+    assert out["numeric_value"].to_list() == [3.0]
+
+@pytest.mark.parametrize("platelet", [4.0, 1201.0, None])
+def test_coagulation_ricu_hourly_platelets_filters_invalid_values(
+    platelet: float | None,
+) -> None:
+    transformer = make(
+        SofaCoagulationTransformer,
+        window="24h",
+        ricu_hourly_platelets=True,
+    )
+
+    admission_time = datetime(2024, 1, 1, 0, 17)
+
+    platelets = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time + timedelta(minutes=10)],
+            "numeric_value": [platelet],
+        }
+    )
+
+    admission = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time],
+            "numeric_value": [None],
+        }
+    )
+
+    out = transformer.transform(
+        {
+            "platelet_count": platelets,
+            "icu_admission": admission,
+        }
+    ).collect()
+
+    assert out.height == 0
