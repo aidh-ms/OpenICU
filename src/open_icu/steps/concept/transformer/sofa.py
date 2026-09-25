@@ -29,6 +29,8 @@ from open_icu.steps.concept.transformer.windowed import (
     Aggregation,
     GradedConceptTransformer,
     Locf,
+    RollingMax,
+    SameHourLocf,
     SegmentedRollingSum,
     WindowedLocf,
     WindowedSumTransformer,
@@ -95,6 +97,57 @@ class SofaRenalTransformer(SofaComponent):
 class SofaCoagulationTransformer(SofaComponent):
     """Coagulation sub-score from platelet count (10^3/uL)."""
 
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self._kwargs.get("ricu_hourly_platelets", False):
+            return super().transform(dependencies)
+
+        platelets = dependencies.get("platelet_count")
+        admission = dependencies.get("icu_admission")
+        if platelets is None or admission is None:
+            raise ValueError(
+                "ricu_hourly_platelets requires platelet_count and icu_admission"
+            )
+
+        admission_time = (
+            admission
+            .select(
+                "subject_id",
+                "stay_id",
+                pl.col("time").alias("__admission_time"),
+            )
+            .group_by("subject_id", "stay_id")
+            .agg(pl.col("__admission_time").min())
+        )
+
+        hourly_platelets = (
+            platelets
+            .filter(
+                pl.col("numeric_value").is_not_null()
+                & pl.col("numeric_value").is_between(5, 1200)
+            )
+            .join(admission_time, on=["subject_id", "stay_id"], how="inner")
+            .with_columns(
+                (
+                    (pl.col("time") - pl.col("__admission_time"))
+                    .dt.total_minutes()
+                    .floordiv(60)
+                    .cast(pl.Int64)
+                ).alias("__hour")
+            )
+            .with_columns(
+                (
+                    pl.col("__admission_time")
+                    + pl.duration(hours=pl.col("__hour"))
+                ).alias("time")
+            )
+            .group_by("subject_id", "stay_id", "time")
+            .agg(pl.col("numeric_value").min().alias("numeric_value"))
+        )
+
+        dependencies = dict(dependencies)
+        dependencies["platelet_count"] = hourly_platelets
+        return super().transform(dependencies)
+
     def build_inputs(self) -> dict[str, Aggregation]:
         return {"platelet_count": WindowedLocf(self.window)}
 
@@ -115,6 +168,57 @@ class SofaCoagulationTransformer(SofaComponent):
 
 class SofaLiverTransformer(SofaComponent):
     """Liver sub-score from total bilirubin (mg/dL)."""
+
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self._kwargs.get("ricu_hourly_bilirubin", False):
+            return super().transform(dependencies)
+
+        bilirubin = dependencies.get("total_bilirubin")
+        admission = dependencies.get("icu_admission")
+        if bilirubin is None or admission is None:
+            raise ValueError(
+                "ricu_hourly_bilirubin requires total_bilirubin and icu_admission"
+            )
+
+        admission_time = (
+            admission
+            .select(
+                "subject_id",
+                "stay_id",
+                pl.col("time").alias("__admission_time"),
+            )
+            .group_by("subject_id", "stay_id")
+            .agg(pl.col("__admission_time").min())
+        )
+
+        hourly_bilirubin = (
+            bilirubin
+            .filter(
+                pl.col("numeric_value").is_not_null()
+                & pl.col("numeric_value").is_between(0, 100)
+            )
+            .join(admission_time, on=["subject_id", "stay_id"], how="inner")
+            .with_columns(
+                (
+                    (pl.col("time") - pl.col("__admission_time"))
+                    .dt.total_minutes()
+                    .floordiv(60)
+                    .cast(pl.Int64)
+                ).alias("__hour")
+            )
+            .with_columns(
+                (
+                    pl.col("__admission_time")
+                    + pl.duration(hours=pl.col("__hour"))
+                ).alias("time")
+            )
+            .group_by("subject_id", "stay_id", "time")
+            .agg(pl.col("numeric_value").max().alias("numeric_value"))
+        )
+
+        dependencies = dict(dependencies)
+        dependencies["total_bilirubin"] = hourly_bilirubin
+        return super().transform(dependencies)
 
     def build_inputs(self) -> dict[str, Aggregation]:
         return {"total_bilirubin": WindowedLocf(self.window)}
@@ -156,6 +260,57 @@ class SofaCardiovascularTransformer(SofaComponent):
     A null comparison counts as "not met" (ricu's ``is_true``), so a tier is
     taken only where one of its conditions is genuinely satisfied.
     """
+
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self._kwargs.get("ricu_hourly_map", False):
+            return super().transform(dependencies)
+
+        mean_pressure = dependencies.get("mean_arterial_pressure")
+        admission = dependencies.get("icu_admission")
+        if mean_pressure is None or admission is None:
+            raise ValueError(
+                "ricu_hourly_map requires mean_arterial_pressure and icu_admission"
+            )
+
+        admission_time = (
+            admission
+            .select(
+                "subject_id",
+                "stay_id",
+                pl.col("time").alias("__admission_time"),
+            )
+            .group_by("subject_id", "stay_id")
+            .agg(pl.col("__admission_time").min())
+        )
+
+        hourly_map = (
+            mean_pressure
+            .filter(
+                pl.col("numeric_value").is_not_null()
+                & pl.col("numeric_value").is_between(0, 250)
+            )
+            .join(admission_time, on=["subject_id", "stay_id"], how="inner")
+            .with_columns(
+                (
+                    (pl.col("time") - pl.col("__admission_time"))
+                    .dt.total_minutes()
+                    .floordiv(60)
+                    .cast(pl.Int64)
+                ).alias("__hour")
+            )
+            .with_columns(
+                (
+                    pl.col("__admission_time")
+                    + pl.duration(hours=pl.col("__hour"))
+                ).alias("time")
+            )
+            .group_by("subject_id", "stay_id", "time")
+            .agg(pl.col("numeric_value").min().alias("numeric_value"))
+        )
+
+        dependencies = dict(dependencies)
+        dependencies["mean_arterial_pressure"] = hourly_map
+        return super().transform(dependencies)
 
     def build_inputs(self) -> dict[str, Aggregation]:
         return {
@@ -200,28 +355,220 @@ class SofaRespiratoryTransformer(SofaComponent):
     matching ricu's ``is_true(pafi < x & vent)`` with a missing ``vent``. FiO2
     is a percentage, so PaO2/FiO2 * 100 yields the ratio in mmHg.
 
+    PaO2 and FiO2 are matched over a 2h window by default, matching ricu's
+    ``pafi`` callback. Missing FiO2 is treated as room air (21%).
+
     Ventilation is a state rather than a measurement — it is carried forward
     without expiry, since a patient ventilated for days may generate no new
     ventilation record. Set ``ventilation_window`` to expire it instead.
     """
 
+    triggers = {
+        "O2_partial_pressure",
+        "fraction_of_inspired_oxygen",
+        "mechanical_ventilation_windows",
+    }
+
+    @staticmethod
+    def _hourly_gas(
+        lf: pl.LazyFrame,
+        admission: pl.LazyFrame,
+        aggregation: str,
+    ) -> pl.LazyFrame:
+        """Aggregate a gas measurement to ICU-admission-relative hourly bins."""
+        value = pl.col("numeric_value")
+
+        if aggregation == "min":
+            aggregate_value = value.min()
+        elif aggregation == "max":
+            aggregate_value = value.max()
+        else:
+            raise ValueError(f"unsupported hourly aggregation: {aggregation}")
+
+        return (
+            lf.filter(pl.col("numeric_value").is_not_null())
+            .select(
+                pl.col("subject_id").cast(pl.Int64),
+                pl.col("stay_id").cast(pl.String),
+                pl.col("time").cast(pl.Datetime(time_unit="us")),
+                value.cast(pl.Float32),
+            )
+            .join(
+                admission,
+                on=["subject_id", "stay_id"],
+                how="inner",
+            )
+            .with_columns(
+                (
+                    (
+                        (pl.col("time") - pl.col("__icu_admission"))
+                        .dt.total_minutes()
+                        .floordiv(60)
+                    )
+                    * 60
+                ).alias("__relative_minutes")
+            )
+            .with_columns(
+                (
+                    pl.col("__icu_admission")
+                    + pl.duration(minutes=pl.col("__relative_minutes"))
+                ).alias("time")
+            )
+            .group_by("subject_id", "stay_id", "time")
+            .agg(aggregate_value.alias("numeric_value"))
+            .sort("subject_id", "stay_id", "time")
+        )
+
+    def transform(
+        self,
+        dependencies: dict[str, pl.LazyFrame],
+    ) -> pl.LazyFrame:
+        if not self._kwargs.get("ricu_hourly_pafi", False):
+            return super().transform(dependencies)
+
+        required = {
+            "O2_partial_pressure",
+            "fraction_of_inspired_oxygen",
+            "icu_admission",
+        }
+        if not required.issubset(dependencies):
+            return super().transform(dependencies)
+
+        admission = dependencies["icu_admission"].select(
+            pl.col("subject_id").cast(pl.Int64),
+            pl.col("stay_id").cast(pl.String),
+            pl.col("time")
+            .cast(pl.Datetime(time_unit="us"))
+            .alias("__icu_admission"),
+        )
+
+        dependencies = dict(dependencies)
+
+        dependencies["O2_partial_pressure"] = self._hourly_gas(
+            dependencies["O2_partial_pressure"],
+            admission,
+            "min",
+        )
+
+        dependencies["fraction_of_inspired_oxygen"] = self._hourly_gas(
+            dependencies["fraction_of_inspired_oxygen"],
+            admission,
+            "max",
+        )
+
+        pao2 = dependencies["O2_partial_pressure"].rename(
+            {"numeric_value": "__pao2"}
+        )
+        fio2 = dependencies["fraction_of_inspired_oxygen"].rename(
+            {"numeric_value": "__fio2"}
+        )
+
+        pafi_window = self._kwargs.get("pafi_window", "2h")
+        keys = ["subject_id", "stay_id"]
+
+        # RICU match_vals():
+        # 1. FiO2 timestamps anchored with the latest preceding PaO2 <= 2h.
+        # 2. PaO2 timestamps anchored with the latest preceding FiO2 <= 2h.
+        # 3. Union both directions; missing FiO2 defaults to room air (21%).
+        fio2_anchored = (
+            fio2.sort(*keys, "time")
+            .join_asof(
+                pao2.sort(*keys, "time"),
+                on="time",
+                by=keys,
+                strategy="backward",
+                tolerance=pafi_window,
+            )
+            .filter(pl.col("__pao2").is_not_null())
+            .select(*keys, "time", "__pao2", "__fio2")
+        )
+
+        pao2_anchored = (
+            pao2.sort(*keys, "time")
+            .join_asof(
+                fio2.sort(*keys, "time"),
+                on="time",
+                by=keys,
+                strategy="backward",
+                tolerance=pafi_window,
+            )
+            .with_columns(pl.col("__fio2").fill_null(21.0))
+            .select(*keys, "time", "__pao2", "__fio2")
+        )
+
+        dependencies["__ricu_pafi"] = (
+            pl.concat([fio2_anchored, pao2_anchored])
+            .unique()
+            .filter(
+                pl.col("__pao2").is_not_null()
+                & pl.col("__fio2").is_not_null()
+                & (pl.col("__fio2") > 0)
+            )
+            .with_columns(
+                (pl.col("__pao2") / pl.col("__fio2") * 100)
+                .cast(pl.Float32)
+                .alias("numeric_value")
+            )
+            .select(*keys, "time", "numeric_value")
+            .sort(*keys, "time")
+        )
+
+        # Admission and the raw gas concepts were only needed to construct
+        # RICU-compatible P/F events.
+        dependencies.pop("icu_admission", None)
+        dependencies.pop("O2_partial_pressure", None)
+        dependencies.pop("fraction_of_inspired_oxygen", None)
+
+        self.triggers = {
+            "__ricu_pafi",
+            "mechanical_ventilation_windows",
+        }
+
+        return super().transform(dependencies)
+
     def build_inputs(self) -> dict[str, Aggregation]:
         ventilation_window = self._kwargs.get("ventilation_window")
+        pafi_window = self._kwargs.get("pafi_window", "2h")
+        if self._kwargs.get("ventilation_same_hour", False):
+            ventilation = SameHourLocf()
+        elif ventilation_window:
+            ventilation = WindowedLocf(ventilation_window)
+        else:
+            ventilation = Locf()
+
+        if self._kwargs.get("ricu_hourly_pafi", False):
+            return {
+                "__ricu_pafi": SameHourLocf(),
+                "mechanical_ventilation_windows": ventilation,
+            }
+
         return {
-            "O2_partial_pressure": WindowedLocf(self.window),
-            "fraction_of_inspired_oxygen": WindowedLocf(self.window),
-            "mechanical_ventilation_windows": (
-                WindowedLocf(ventilation_window) if ventilation_window else Locf()
-            ),
+            "O2_partial_pressure": WindowedLocf(pafi_window),
+            "fraction_of_inspired_oxygen": WindowedLocf(pafi_window),
+            "mechanical_ventilation_windows": ventilation,
         }
 
     def _pafi(self) -> pl.Expr:
-        fio2 = pl.col("fraction_of_inspired_oxygen")
-        return pl.when(fio2 > 0).then(pl.col("O2_partial_pressure") / fio2 * 100).otherwise(None)
+        if self._kwargs.get("ricu_hourly_pafi", False):
+            return pl.col("__ricu_pafi")
+
+        pao2 = pl.col("O2_partial_pressure")
+        fio2 = pl.col("fraction_of_inspired_oxygen").fill_null(21.0)
+        gas_measured = (
+            self.measured("O2_partial_pressure")
+            | self.measured("fraction_of_inspired_oxygen")
+        )
+        return (
+            pl.when(gas_measured & pao2.is_not_null() & (fio2 > 0))
+            .then(pao2 / fio2 * 100)
+            .otherwise(None)
+        )
 
     def observed(self) -> pl.Expr:
-        # ventilation alone grades nothing; both gas values are required
-        return self._pafi().is_not_null()
+        return (
+            self._pafi().is_not_null()
+            | pl.col("mechanical_ventilation_windows").is_not_null()
+        )
 
     def score(self) -> pl.Expr:
         pafi = self._pafi()
@@ -240,10 +587,15 @@ class SofaRespiratoryTransformer(SofaComponent):
 
 
 class SofaTransformer(WindowedSumTransformer):
-    """Total SOFA: the most recent value of each sub-score within ``window``.
+    """Total SOFA: the worst value of each sub-score within ``window``.
 
-    Purely declarative — list the six sub-score concepts as the mapping's
-    dependencies (or under ``kwargs.terms``) and set ``window`` to control how
-    long a sub-score stays current. Re-evaluated whenever any sub-score is
-    updated; a sub-score with no value in the window contributes 0.
+    For each component, the maximum score within the trailing window is used
+    before the six component scores are summed. ``window`` defaults to 24h.
+    A component with no value in the window contributes 0.
     """
+
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self.inputs:
+            terms = self._kwargs.get("terms") or list(dependencies)
+            self.inputs = {name: RollingMax(self.window) for name in terms}
+        return super().transform(dependencies)

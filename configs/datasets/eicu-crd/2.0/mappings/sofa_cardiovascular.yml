@@ -6,3 +6,6 @@ concepts:
   - dobutamine_rate.1.0.0
   - epinephrine_rate.1.0.0
   - norepinephrine_rate.1.0.0
+  - icu_admission.1.0.0
+kwargs:
+  ricu_hourly_map: true
