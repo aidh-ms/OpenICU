@@ -169,6 +169,57 @@ class SofaCoagulationTransformer(SofaComponent):
 class SofaLiverTransformer(SofaComponent):
     """Liver sub-score from total bilirubin (mg/dL)."""
 
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self._kwargs.get("ricu_hourly_bilirubin", False):
+            return super().transform(dependencies)
+
+        bilirubin = dependencies.get("total_bilirubin")
+        admission = dependencies.get("icu_admission")
+        if bilirubin is None or admission is None:
+            raise ValueError(
+                "ricu_hourly_bilirubin requires total_bilirubin and icu_admission"
+            )
+
+        admission_time = (
+            admission
+            .select(
+                "subject_id",
+                "stay_id",
+                pl.col("time").alias("__admission_time"),
+            )
+            .group_by("subject_id", "stay_id")
+            .agg(pl.col("__admission_time").min())
+        )
+
+        hourly_bilirubin = (
+            bilirubin
+            .filter(
+                pl.col("numeric_value").is_not_null()
+                & pl.col("numeric_value").is_between(0, 100)
+            )
+            .join(admission_time, on=["subject_id", "stay_id"], how="inner")
+            .with_columns(
+                (
+                    (pl.col("time") - pl.col("__admission_time"))
+                    .dt.total_minutes()
+                    .floordiv(60)
+                    .cast(pl.Int64)
+                ).alias("__hour")
+            )
+            .with_columns(
+                (
+                    pl.col("__admission_time")
+                    + pl.duration(hours=pl.col("__hour"))
+                ).alias("time")
+            )
+            .group_by("subject_id", "stay_id", "time")
+            .agg(pl.col("numeric_value").max().alias("numeric_value"))
+        )
+
+        dependencies = dict(dependencies)
+        dependencies["total_bilirubin"] = hourly_bilirubin
+        return super().transform(dependencies)
+
     def build_inputs(self) -> dict[str, Aggregation]:
         return {"total_bilirubin": WindowedLocf(self.window)}
 

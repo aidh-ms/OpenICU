@@ -2,3 +2,6 @@ type: complex
 concept_transformer: open_icu.steps.concept.transformer.sofa.SofaLiverTransformer
 concepts:
   - total_bilirubin.1.0.0
+  - icu_admission.1.0.0
+kwargs:
+  ricu_hourly_bilirubin: true

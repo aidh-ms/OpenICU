@@ -831,3 +831,83 @@ def test_coagulation_ricu_hourly_platelets_filters_invalid_values(
     ).collect()
 
     assert out.height == 0
+
+def test_liver_ricu_hourly_bilirubin_uses_hourly_maximum() -> None:
+    transformer = make(
+        SofaLiverTransformer,
+        window="24h",
+        ricu_hourly_bilirubin=True,
+    )
+
+    admission_time = datetime(2024, 1, 1, 0, 17)
+
+    bilirubin = pl.LazyFrame(
+        {
+            "subject_id": [1, 1],
+            "stay_id": ["10", "10"],
+            "time": [
+                admission_time + timedelta(minutes=10),
+                admission_time + timedelta(minutes=40),
+            ],
+            "numeric_value": [1.0, 7.0],
+        }
+    )
+
+    admission = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time],
+            "numeric_value": [None],
+        }
+    )
+
+    out = transformer.transform(
+        {
+            "total_bilirubin": bilirubin,
+            "icu_admission": admission,
+        }
+    ).collect()
+
+    assert out["time"].to_list() == [admission_time]
+    assert out["numeric_value"].to_list() == [3.0]
+
+
+@pytest.mark.parametrize("bilirubin", [-0.1, 100.1, None])
+def test_liver_ricu_hourly_bilirubin_filters_invalid_values(
+    bilirubin: float | None,
+) -> None:
+    transformer = make(
+        SofaLiverTransformer,
+        window="24h",
+        ricu_hourly_bilirubin=True,
+    )
+
+    admission_time = datetime(2024, 1, 1, 0, 17)
+
+    values = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time + timedelta(minutes=10)],
+            "numeric_value": [bilirubin],
+        }
+    )
+
+    admission = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time],
+            "numeric_value": [None],
+        }
+    )
+
+    out = transformer.transform(
+        {
+            "total_bilirubin": values,
+            "icu_admission": admission,
+        }
+    ).collect()
+
+    assert out.height == 0
