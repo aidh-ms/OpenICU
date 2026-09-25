@@ -752,6 +752,109 @@ def test_ricu_pafi_is_not_reused_at_later_ventilation_hour() -> None:
     # Hour 1 is ventilation-only. RICU has no P/F event there -> score 0.
     assert out == [2.0, 0.0]
 
+def test_cardiovascular_ricu_hourly_map_uses_hourly_minimum() -> None:
+    transformer = make(
+        SofaCardiovascularTransformer,
+        window="24h",
+        ricu_hourly_map=True,
+    )
+
+    admission_time = datetime(2024, 1, 1, 0, 17)
+
+    mean_pressure = pl.LazyFrame(
+        {
+            "subject_id": [1, 1],
+            "stay_id": ["10", "10"],
+            "time": [
+                admission_time + timedelta(minutes=10),
+                admission_time + timedelta(minutes=40),
+            ],
+            "numeric_value": [80.0, 60.0],
+        }
+    )
+
+    admission = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time],
+            "numeric_value": [None],
+        }
+    )
+
+    out = transformer.transform(
+        {
+            "mean_arterial_pressure": mean_pressure,
+            "icu_admission": admission,
+        }
+    ).collect()
+
+    assert out["time"].to_list() == [admission_time]
+    assert out["numeric_value"].to_list() == [1.0]
+
+
+@pytest.mark.parametrize("mean_pressure", [-0.1, 250.1, None])
+def test_cardiovascular_ricu_hourly_map_filters_invalid_values(
+    mean_pressure: float | None,
+) -> None:
+    transformer = make(
+        SofaCardiovascularTransformer,
+        window="24h",
+        ricu_hourly_map=True,
+    )
+
+    admission_time = datetime(2024, 1, 1, 0, 17)
+
+    values = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time + timedelta(minutes=10)],
+            "numeric_value": [mean_pressure],
+        }
+    )
+
+    admission = pl.LazyFrame(
+        {
+            "subject_id": [1],
+            "stay_id": ["10"],
+            "time": [admission_time],
+            "numeric_value": [None],
+        }
+    )
+
+    out = transformer.transform(
+        {
+            "mean_arterial_pressure": values,
+            "icu_admission": admission,
+        }
+    ).collect()
+
+    assert out.height == 0
+
+
+def test_cardiovascular_ricu_hourly_map_requires_admission() -> None:
+    transformer = make(
+        SofaCardiovascularTransformer,
+        window="24h",
+        ricu_hourly_map=True,
+    )
+
+    mean_pressure = stay_frame(
+        (1, "10", T0, 60.0),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="ricu_hourly_map requires mean_arterial_pressure and icu_admission",
+    ):
+        transformer.transform(
+            {
+                "mean_arterial_pressure": mean_pressure,
+            }
+        )
+
+
 def test_coagulation_ricu_hourly_platelets_uses_hourly_minimum() -> None:
     """RICU eICU semantics aggregate platelets by hourly minimum before scoring."""
     transformer = make(

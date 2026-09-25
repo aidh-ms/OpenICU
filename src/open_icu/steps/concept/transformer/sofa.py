@@ -261,6 +261,57 @@ class SofaCardiovascularTransformer(SofaComponent):
     taken only where one of its conditions is genuinely satisfied.
     """
 
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self._kwargs.get("ricu_hourly_map", False):
+            return super().transform(dependencies)
+
+        mean_pressure = dependencies.get("mean_arterial_pressure")
+        admission = dependencies.get("icu_admission")
+        if mean_pressure is None or admission is None:
+            raise ValueError(
+                "ricu_hourly_map requires mean_arterial_pressure and icu_admission"
+            )
+
+        admission_time = (
+            admission
+            .select(
+                "subject_id",
+                "stay_id",
+                pl.col("time").alias("__admission_time"),
+            )
+            .group_by("subject_id", "stay_id")
+            .agg(pl.col("__admission_time").min())
+        )
+
+        hourly_map = (
+            mean_pressure
+            .filter(
+                pl.col("numeric_value").is_not_null()
+                & pl.col("numeric_value").is_between(0, 250)
+            )
+            .join(admission_time, on=["subject_id", "stay_id"], how="inner")
+            .with_columns(
+                (
+                    (pl.col("time") - pl.col("__admission_time"))
+                    .dt.total_minutes()
+                    .floordiv(60)
+                    .cast(pl.Int64)
+                ).alias("__hour")
+            )
+            .with_columns(
+                (
+                    pl.col("__admission_time")
+                    + pl.duration(hours=pl.col("__hour"))
+                ).alias("time")
+            )
+            .group_by("subject_id", "stay_id", "time")
+            .agg(pl.col("numeric_value").min().alias("numeric_value"))
+        )
+
+        dependencies = dict(dependencies)
+        dependencies["mean_arterial_pressure"] = hourly_map
+        return super().transform(dependencies)
+
     def build_inputs(self) -> dict[str, Aggregation]:
         return {
             name: WindowedLocf(self.window)
