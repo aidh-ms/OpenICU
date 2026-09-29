@@ -1,0 +1,9 @@
+type: complex
+concept_transformer: open_icu.steps.concept.transformer.ventilation.MechanicalVentilationWindowsTransformer
+concepts:
+  - ventilation_start.1.0.0
+  - ventilation_end.1.0.0
+  - icu_admission.1.0.0
+kwargs:
+  match_window: 6h
+  min_length_minutes: 30

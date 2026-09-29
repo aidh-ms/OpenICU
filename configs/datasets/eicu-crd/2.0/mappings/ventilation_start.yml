@@ -1,10 +1,22 @@
 type: simple
 mappings:
   - pattern:
+      table: respiratorycare
+      event: VENTILATION_START
+      code: .*
+    columns:
+      numeric_value: const(1)
+
+  - pattern:
+      table: respiratorycare
+      event: PRIOR_VENTILATION_START
+      code: .*
+    columns:
+      numeric_value: const(1)
+
+  - pattern:
       table: respiratorycharting
       event: RESPIRATORY_CHART
-      code: ^respFlowCareData//RT Vent On/Off$
+      code: ^(Start|Continued|respFlowPtVentData)//.*$
     columns:
-      text_value: col(text_value)
-    filters:
-      - text_value == "Start"
+      numeric_value: const(1)

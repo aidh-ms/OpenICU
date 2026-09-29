@@ -1,0 +1,8 @@
+type: simple
+mappings:
+  - pattern:
+      table: patient
+      event: ICU_ADMISSION
+      code: .*
+    columns:
+      numeric_value: const(1)

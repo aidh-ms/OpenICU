@@ -123,3 +123,28 @@ class SliceStr(CallbackProtocol):
     def __call__(self, lf: LazyFrame) -> CallbackResult:
         expr = to_expr(lf, self.value).cast(pl.Utf8).str.slice(self.offset, self.length)
         return expr if self.output is None else expr.alias(self.output)
+
+
+@register_callback_cls
+class StrReplace(CallbackProtocol):
+    """Replace the first occurrence of a pattern in a string value."""
+
+    def __init__(
+        self,
+        value: AstValue,
+        pattern: str,
+        replacement: str,
+        output: Optional[str] = None,
+    ) -> None:
+        self.value = value
+        self.pattern = pattern
+        self.replacement = replacement
+        self.output = output
+
+    def __call__(self, lf: LazyFrame) -> CallbackResult:
+        expr = (
+            to_expr(lf, self.value)
+            .cast(pl.Utf8)
+            .str.replace(self.pattern, self.replacement)
+        )
+        return expr if self.output is None else expr.alias(self.output)

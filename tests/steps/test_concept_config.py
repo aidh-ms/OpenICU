@@ -93,10 +93,28 @@ class TestComplexConcept:
             "openicu.config.concept.ventilation_end.1.0.0",
         }
 
-        config.build_transformer("test_step")()  # ty: ignore[invalid-argument-type]
+        concept = ConceptConfig(
+            name="windows",
+            version="1.0.0",
+            unit="boolean",
+            dataset_concepts=[config],
+        )
+        linked_config = concept.dataset_concepts[0]
+        assert isinstance(linked_config, ComplexDatasetConceptConfig)
+
+        linked_config.build_transformer(
+            "test_step",  # ty: ignore[invalid-argument-type]
+            dataset_extension_columns={"stay_id": 'col("stay_id")'},
+        )()
+
         import fake_transformers  # ty: ignore[unresolved-import]
 
-        assert fake_transformers.Recorder.calls == [{"window": "1h"}]
+        assert fake_transformers.Recorder.calls == [
+            {
+                "dataset_extension_columns": {"stay_id": 'col("stay_id")'},
+                "window": "1h",
+            }
+        ]
 
 
 class TestDerivedConcept:

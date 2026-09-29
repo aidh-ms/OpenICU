@@ -148,6 +148,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
                     self.extract_complex_concept(
                         concept,
                         dataset_concept,
+                        dataset_extension_columns=dataset_config.extension_columns,
                     )
 
             if routed_cache_dir.exists():
@@ -690,6 +691,7 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
         self,
         concept: ConceptConfig,
         dataset_concept: ComplexDatasetConceptConfig,
+        dataset_extension_columns: dict[str, str] | None = None,
     ) -> None:
         """Extract a complex concept by delegating to its configured transformer.
         The transformer class referenced by the mapping's ``concept_transformer``
@@ -706,5 +708,8 @@ class ConceptStep(ConfigurableBaseStep[ConceptStepConfig, ConceptConfig]):
             concept.identifier,
             dataset_concept.dataset,
         )
-        transformer = dataset_concept.build_transformer(self)
+        transformer = dataset_concept.build_transformer(
+            self,
+            dataset_extension_columns=dataset_extension_columns,
+        )
         transformer()
