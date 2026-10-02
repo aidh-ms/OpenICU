@@ -1,6 +1,0 @@
-name: antibiotics
-version: 1.0.0
-unit: boolean
-extension_columns:
-  dataset: col("dataset")
-  table: col("table")

@@ -22,12 +22,7 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "meds>=0.4.0",
-    "polars>=1.41.2",
-    "pyarrow>=24.0.0",
-    "pydantic>=2.13.4",
-    "pyyaml>=6.0.2",
-    "types-pyyaml>=6.0.12.20260518",
+    "weavehr>=0.0.1",
 ]
 
 [project.urls]
@@ -41,18 +36,6 @@ documentation = "https://github.com/aidh-ms/OpenICU/wiki"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/open_icu"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"configs" = "open_icu/configs"
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "src/open_icu",
-    "configs",
-]
-
 [dependency-groups]
 dev = [
     "jupyterlab>=4.5.8",
@@ -61,18 +44,10 @@ dev = [
     "ruff>=0.15.17",
     "ty>=0.0.49",
 ]
-docs = [
-    "mkdocs>=1.6.1",
-    "mkdocs-gen-files>=0.6.1",
-    "mkdocs-literate-nav>=0.6.3",
-    "mkdocs-macros-plugin>=1.5.0",
-    "mkdocs-material>=9.7.6",
-    "mkdocs-section-index>=0.3.12",
-    "mkdocstrings[python]>=1.0.4",
-]
 
 [tool.uv]
-exclude-newer = "P7D"
+exclude-newer = "P1D"
+exclude-newer-package = {weavehr = false}
 
 [tool.pytest.ini_options]
 python_files = ["test_*.py", "*_test.py"]

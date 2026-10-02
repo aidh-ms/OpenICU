@@ -1,8 +1,0 @@
-type: simple
-mappings:
-  - pattern:
-      table: radiology
-      event: RADIOLOGY_NOTE
-      code: (RADIOLOGY_NOTE(//.*)?)
-    columns:
-      text_value: col(text_value)
