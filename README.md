@@ -252,7 +252,7 @@ Arithmetic, comparisons, and boolean logic work as ordinary expressions (`col(we
 - [Package overview](docs/getting_started/overview.md)
 - [Installation](docs/getting_started/installation.md)
 - [Basic usage](docs/getting_started/basic_usage.md)
-- User guide: [pipeline & projects](docs/user_guide/pipeline.md) · [extraction configs](docs/user_guide/extraction.md) · [dataset versions & variants](docs/user_guide/versioning.md) · [concept configs](docs/user_guide/concepts.md) · [expression language](docs/user_guide/expressions.md)
+- User guide: [pipeline & projects](docs/user_guide/pipeline.md) · [extraction configs](docs/user_guide/extraction.md) · [dataset versions & variants](docs/user_guide/versioning.md) · [concept configs](docs/user_guide/concepts.md) · [sharding](docs/user_guide/sharding.md) · [expression language](docs/user_guide/expressions.md)
 - [Contributing](docs/getting_started/contributing.md)
 - Architecture documentation following [arc42](https://docs.arc42.org/home/) in [`docs/arc/`](docs/arc/)
 

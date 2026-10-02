@@ -1,0 +1,23 @@
+type: simple
+mappings:
+  - pattern:
+      table: inputevents
+      event: INFUSION_END
+      code: (220950(//.*)?)
+    columns:
+      numeric_value: col(rate)
+      text_value: col(text_value)
+    filters:
+      - rateuom == "mL/hour"
+      - drop_na(numeric_value)
+
+  - pattern:
+      table: inputevents
+      event: INFUSION_END
+      code: (228140(//.*)?)
+    columns:
+      numeric_value: rate * 2
+      text_value: col(text_value)
+    filters:
+      - rateuom == "mL/hour"
+      - drop_na(numeric_value)

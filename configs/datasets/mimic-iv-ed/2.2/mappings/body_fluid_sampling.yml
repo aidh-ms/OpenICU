@@ -1,0 +1,9 @@
+type: simple
+mappings:
+  - pattern:
+      table: microbiologyevents
+      event: MICROBIOLOGY_SPECIMEN
+      code: .+
+    columns:
+      numeric_value: col(subject_id) * 0 + 1
+      text_value:
