@@ -1,8 +1,0 @@
-type: simple
-mappings:
-  - pattern:
-      table: metadata
-      event: CXR_RECORD
-      code: (CXR_RECORD(//.*)?)
-    columns:
-      text_value: col(text_value)

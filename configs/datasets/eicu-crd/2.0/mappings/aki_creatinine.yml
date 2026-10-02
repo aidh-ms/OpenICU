@@ -1,4 +1,0 @@
-type: complex
-concept_transformer: open_icu.steps.concept.transformer.aki.AkiCreatinineTransformer
-concepts:
-  - creatinine.1.0.0

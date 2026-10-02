@@ -1,9 +1,0 @@
-type: simple
-mappings:
-  - pattern:
-      table: lab
-      event: LAB
-      code: ^CRP//.*$
-    columns:
-      numeric_value: replace((labmeasurenameinterface == "mg/dL") or (labmeasurenameinterface == "mg/dl") or (labmeasurenameinterface == "MG/DL"), numeric_value * 10, numeric_value)
-      text_value: col(text_value)

@@ -1,7 +1,0 @@
-type: simple
-mappings:
-  - pattern:
-      table: metadata
-      event: CXR_PROCEDURE
-      code: (CXR_PROCEDURE(//.*)?)
-    columns: {}

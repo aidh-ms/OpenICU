@@ -1,8 +1,0 @@
-type: simple
-mappings:
-- pattern:
-    table: patient
-    event: HOSPITAL_DISCHARGE
-    code: .*
-  columns:
-    text_value: col(text_value)
