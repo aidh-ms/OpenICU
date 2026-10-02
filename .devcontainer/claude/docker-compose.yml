@@ -1,0 +1,21 @@
+services:
+  openicu-claude:
+
+    init: true
+
+    build:
+      context: ../..
+      dockerfile: .devcontainer/claude/Dockerfile
+
+    environment:
+      - no_proxy=127.0.0.1,localhost
+      - NO_PROXY=127.0.0.1,localhost
+
+    env_file:
+      - dev.env
+
+    volumes:
+      - ../..:/workspaces:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity

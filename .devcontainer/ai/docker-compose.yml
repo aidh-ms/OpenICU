@@ -1,0 +1,33 @@
+services:
+  openicu-ai:
+    container_name: openicu-ai
+
+    init: true
+
+    build:
+      context: ../..
+      dockerfile: .devcontainer/ai/Dockerfile
+
+    environment:
+      UV_CACHE_DIR: /home/vscode/.cache/uv
+      RUFF_CACHE_DIR: /home/vscode/.cache/ruff
+      MYPY_CACHE_DIR: /home/vscode/.cache/mypy
+      PRE_COMMIT_HOME: /home/vscode/.cache/pre-commit
+
+      # Allow read-only git operations without optional index writes.
+      GIT_OPTIONAL_LOCKS: "0"
+
+    volumes:
+      # Claude may modify the isolated OpenICU-ai working tree.
+      - ../..:/workspaces/OpenICU:cached
+
+      # Git metadata is readable, but Claude cannot alter hooks/config/index.
+      - ../../.git:/workspaces/OpenICU/.git:ro
+
+      # Neither the official nor AI devcontainer configuration can be modified.
+      - ../../.devcontainer:/workspaces/OpenICU/.devcontainer:ro
+
+      # Claude project rules are readable but cannot be modified by Claude.
+      - ../../.claude:/workspaces/OpenICU/.claude:ro
+
+    command: sleep infinity

@@ -1,0 +1,42 @@
+{
+    "name": "OpenICU AI - Isolated",
+    "service": "openicu-ai",
+    "remoteUser": "vscode",
+    "workspaceFolder": "/workspaces/OpenICU",
+    "dockerComposeFile": "docker-compose.yml",
+
+    "postCreateCommand": "bash .devcontainer/ai/scripts/post-create.sh",
+    "postStartCommand": "bash .devcontainer/ai/scripts/post-start.sh",
+
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": "true",
+            "username": "vscode",
+            "userUid": "1000",
+            "userGid": "1000",
+            "upgradePackages": "true"
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22"
+        }
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.mypy-type-checker",
+                "ms-python.debugpy",
+                "ms-toolsai.jupyter",
+                "charliermarsh.ruff",
+                "astral-sh.ty",
+                "tamasfe.even-better-toml",
+                "redhat.vscode-yaml",
+                "esbenp.prettier-vscode",
+                "eamodio.gitlens",
+                "GitHub.vscode-pull-request-github",
+                "github.vscode-github-actions"
+            ]
+        }
+    }
+}
