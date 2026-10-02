@@ -1,0 +1,107 @@
+path: vitalsign.csv.gz
+
+columns:
+  # identifiers
+  - name: subject_id
+    type: int64
+  - name: stay_id
+    type: int64
+
+  # times
+  - name: charttime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+
+  # values
+  - name: temperature
+    type: float32
+  - name: heartrate
+    type: float32
+  - name: resprate
+    type: float32
+  - name: o2sat
+    type: float32
+  - name: sbp
+    type: float32
+  - name: dbp
+    type: float32
+  - name: rhythm
+    type: string
+  - name: pain
+    type: string
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(charttime)
+  extension:
+    stay_id: col(stay_id)
+    available_time: col(charttime)
+
+  code_prefix:
+    - const(ED_VITALS)
+
+events:
+  - name: HEART_RATE
+    columns:
+      code:
+        - const(BPM)
+      numeric_value: col(heartrate)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: TEMPERATURE
+    columns:
+      code:
+        - const(F)
+      numeric_value: col(temperature)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: RESPIRATORY_RATE
+    columns:
+      code:
+        - const(bpm)
+      numeric_value: col(resprate)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: O2_SATURATION_PULSE_OXIMETRY
+    columns:
+      code:
+        - const("%")
+      numeric_value: col(o2sat)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: SYSTOLIC_BLOOD_PRESSURE
+    columns:
+      code:
+        - const(mmHg)
+      numeric_value: col(sbp)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: DIASTOLIC_BLOOD_PRESSURE
+    columns:
+      code:
+        - const(mmHg)
+      numeric_value: col(dbp)
+    filters:
+      - drop_na(numeric_value)
+
+  - name: RHYTHM
+    columns:
+      code:
+        - const(RHYTHM)
+      text_value: col(rhythm)
+    filters:
+      - drop_na(text_value)
+
+  - name: PAIN
+    columns:
+      code:
+        - const(PAIN)
+      text_value: col(pain)
+    filters:
+      - drop_na(text_value)

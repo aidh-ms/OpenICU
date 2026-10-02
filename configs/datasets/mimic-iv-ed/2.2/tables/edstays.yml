@@ -1,0 +1,75 @@
+path: edstays.csv.gz
+
+columns:
+  # identifiers
+  - name: subject_id
+    type: int64
+  - name: hadm_id
+    type: int64
+  - name: stay_id
+    type: int64
+
+  # times
+  - name: intime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+  - name: outtime
+    type: datetime
+    params:
+      format: "%Y-%m-%d %H:%M:%S"
+
+  # values
+  - name: gender
+    type: string
+  - name: race
+    type: string
+  - name: arrival_transport
+    type: string
+  - name: disposition
+    type: string
+
+event_defaults:
+  subject_id: col(subject_id)
+  time: col(intime)
+  extension:
+    stay_id: col(stay_id)
+    hadm_id: col(hadm_id)
+    available_time: col(intime)
+
+events:
+  - name: ED_REGISTRATION
+    columns:
+      code:
+        - const("ED_REGISTRATION")
+
+  - name: GENDER
+    columns:
+      code:
+        - col(gender)
+    filters:
+      - drop_na(gender)
+
+  - name: ETHNICITY
+    columns:
+      code:
+        - col(race)
+    filters:
+      - drop_na(race)
+
+  - name: ARRIVAL_TRANSPORT
+    columns:
+      code:
+        - col(arrival_transport)
+    filters:
+      - drop_na(arrival_transport)
+
+  - name: ED_OUT
+    columns:
+      time: col(outtime)
+      code:
+        - col(disposition)
+      extension:
+        available_time: col(outtime)
+    filters:
+      - drop_na(time)

@@ -1,0 +1,18 @@
+type: simple
+mappings:
+  - pattern:
+      table: inputevents
+      event: INFUSION_END
+      code: 222315(//.*)?
+      extensions:
+        rateuom: units/hour
+    columns:
+      numeric_value: col(rate) / 60
+  - pattern:
+      table: inputevents
+      event: INFUSION_END
+      code: 222315(//.*)?
+      extensions:
+        rateuom: units/min
+    columns:
+      numeric_value: col(rate)
