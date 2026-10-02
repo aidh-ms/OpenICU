@@ -354,6 +354,19 @@ class TestTotal:
     def test_terms_default_to_the_declared_dependencies(self) -> None:
         assert scores(make(SofaTransformer), {"sofa_liver": frame((1, T0, 3.0))}) == [3.0]
 
+    def test_total_uses_worst_component_value_within_window(self) -> None:
+        total = make(SofaTransformer, terms=["sofa_renal"], window="24h")
+        out = scores(
+            total,
+            {
+                "sofa_renal": frame(
+                    (1, T0, 4.0),
+                    (1, at(1), 1.0),
+                )
+            },
+        )
+        assert out == [4.0, 4.0]
+
 
 # --- end-to-end ---------------------------------------------------------------
 
@@ -553,6 +566,7 @@ def test_end_to_end_total_sofa_chain(tmp_path: Path) -> None:
     sofa = _concept_output(project, "sofa")
 
     # GCS 1+1+1=3 -> CNS 4; PLT 30 -> coag 3; total 7 at 00:00.
-    # At 01:00 PLT 200 -> coag 0, CNS 4 carried forward -> total 4.
+    # At 01:00 PLT 200 -> coag 0, but the worst coag score within the
+    # trailing 24h window is still 3, so the total remains 7.
     assert sofa["code"].to_list() == ["sofa//points", "sofa//points"]
-    assert sofa["numeric_value"].to_list() == [7.0, 4.0]
+    assert sofa["numeric_value"].to_list() == [7.0, 7.0]

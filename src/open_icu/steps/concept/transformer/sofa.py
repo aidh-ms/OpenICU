@@ -29,6 +29,7 @@ from open_icu.steps.concept.transformer.windowed import (
     Aggregation,
     GradedConceptTransformer,
     Locf,
+    RollingMax,
     SegmentedRollingSum,
     WindowedLocf,
     WindowedSumTransformer,
@@ -240,10 +241,15 @@ class SofaRespiratoryTransformer(SofaComponent):
 
 
 class SofaTransformer(WindowedSumTransformer):
-    """Total SOFA: the most recent value of each sub-score within ``window``.
+    """Total SOFA: the worst value of each sub-score within ``window``.
 
-    Purely declarative — list the six sub-score concepts as the mapping's
-    dependencies (or under ``kwargs.terms``) and set ``window`` to control how
-    long a sub-score stays current. Re-evaluated whenever any sub-score is
-    updated; a sub-score with no value in the window contributes 0.
+    For each component, the maximum score within the trailing window is used
+    before the six component scores are summed. ``window`` defaults to 24h.
+    A component with no value in the window contributes 0.
     """
+
+    def transform(self, dependencies: dict[str, pl.LazyFrame]) -> pl.LazyFrame:
+        if not self.inputs:
+            terms = self._kwargs.get("terms") or list(dependencies)
+            self.inputs = {name: RollingMax(self.window) for name in terms}
+        return super().transform(dependencies)
