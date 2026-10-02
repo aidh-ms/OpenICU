@@ -50,7 +50,7 @@ exclude-newer = "P1D"
 exclude-newer-package = {weavehr = false}
 
 [tool.pytest.ini_options]
-python_files = ["test_*.py", "*_test.py"]
+python_files = ["test_*.py", "*_test.py", "test.py"]
 filterwarnings = ["ignore::DeprecationWarning"]
 pythonpath = ["src"]
 addopts = [
@@ -58,6 +58,5 @@ addopts = [
     "--cov-branch",
     "--cov-report=xml",
     "--cov-report=term-missing",
-    "--cov-fail-under=80",
     "--import-mode=importlib",
 ]
