@@ -14,6 +14,7 @@ import pyarrow.dataset as ds
 from polars import LazyFrame
 
 from open_icu.callbacks.interpreter import parse_expr
+from open_icu.config.event_order import EventOrderConfig
 from open_icu.logging import get_logger
 from open_icu.steps.base.step import ConfigurableBaseStep
 from open_icu.steps.extraction.config.event import EventConfig
@@ -21,6 +22,7 @@ from open_icu.steps.extraction.config.step import ExtractionStepConfig
 from open_icu.steps.extraction.config.table import BaseTableConfig, TableConfig, TableType
 from open_icu.steps.extraction.registry import dataset_config_registry
 from open_icu.storage.project import OpenICUProject
+from open_icu.utils.event_order import sort_events
 
 logger = get_logger(__name__)
 
@@ -135,6 +137,8 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
             table.transformations,
             callback_type="Table transformation",
         )
+
+        event_order = EventOrderConfig.load()
 
         for event in table.events:
             logger.debug(
@@ -258,11 +262,19 @@ class ExtractionStep(ConfigurableBaseStep[ExtractionStepConfig, TableConfig]):
                     [existing_lf, event_lf],
                     how="vertical",
                 )
+                event_lf = sort_events(
+                    event_lf,
+                    event_order,
+                )
                 tmp_output_file = output_data_path / f"{event.name}.tmp.parquet"
 
                 event_lf.sink_parquet(tmp_output_file)
                 tmp_output_file.replace(output_file)
             else:
+                event_lf = sort_events(
+                    event_lf,
+                    event_order,
+                )
                 event_lf.sink_parquet(output_file)
 
             del event_lf
